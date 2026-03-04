@@ -26,27 +26,27 @@ e2e-tests/
 │
 ├── tests/
 │ ├── purchase/
-│ │ purchase.spec.ts
+│ │ └── purchase.spec.ts
 │ ├── server/
-│ │ lifecycle.spec.ts
+│ │ └── lifecycle.spec.ts
 │ ├── scheduler/
-│ │ scheduler.spec.ts
+│ │ └── scheduler.spec.ts
 │ └── file-manager/
-│ upload.spec.ts
+│ └── upload.spec.ts
 │
 ├── fixtures/
-│ auth.fixture.ts
-│ server.fixture.ts
+│ ├── auth.fixture.ts
+│ └── server.fixture.ts
 │
 ├── pages/ # Page Object Model
-│ login.page.ts
-│ dashboard.page.ts
-│ server.page.ts
+│ ├── login.page.ts
+│ ├── dashboard.page.ts
+│ └── server.page.ts
 │
 ├── utils/
-│ api-client.ts
-│ test-data.ts
-│ helpers.ts
+│ ├── api-client.ts
+│ ├── test-data.ts
+│ └── helpers.ts
 │
 ├── playwright.config.ts
 ├── package.json
