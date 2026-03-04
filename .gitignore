@@ -36,6 +36,9 @@ Thumbs.db
 .vscode/
 .idea/
 
+# IDE history
+.history/
+
 # coverage
 coverage/
 
