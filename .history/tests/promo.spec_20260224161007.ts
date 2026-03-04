@@ -1,0 +1,91 @@
+import { test, expect, Locator, Page } from '@playwright/test';
+
+const BASE_URL = 'https://godlike.host';
+const EMAIL = 'test@testmail.com';
+const PASSWORD = 'test@testmail.com';
+
+const gamesToTest = ['Hytale', 'Minecraft', 'Minecraft Bedrock', 'Rust'];
+
+test.describe.serial('Promocode validation - stable TS final', () => {
+
+  // Вспомогательная функция для логина
+  async function login(page: Page) {
+    await page.goto(`${BASE_URL}/clientarea/login`, { waitUntil: 'domcontentloaded' });
+    await page.fill('#inputEmail', EMAIL);
+    await page.fill('#inputPassword', PASSWORD);
+    await Promise.all([
+      page.waitForURL('**/clientarea**', { timeout: 30000 }),
+      page.click('#login')
+    ]);
+    console.log('[INFO] Login successful');
+  }
+
+  for (const gameName of gamesToTest) {
+
+    test(`Validate promocodes for ${gameName}`, async ({ page }) => {
+      console.log(`\n===== START TEST FOR GAME: ${gameName} =====`);
+
+      // LOGIN
+      await login(page);
+
+      // OPEN GAMES PAGE
+      await page.goto(`${BASE_URL}/game-servers-en/`, { waitUntil: 'domcontentloaded' });
+
+      // SELECT GAME LINK
+      let gameLink: Locator;
+      if (gameName === 'Minecraft') {
+        gameLink = page.locator('a.game__title[href="/minecraft-java-servers-hosting/"]').first();
+      } else if (gameName === 'Minecraft Bedrock') {
+        gameLink = page.locator('a.game__title[href="/minecraft-bedrock-servers-hosting/"]').first();
+      } else {
+        gameLink = page.getByRole('link', { name: gameName, exact: true }).first();
+      }
+
+      await expect(gameLink).toBeVisible({ timeout: 20000 });
+      await gameLink.click();
+
+      // WAIT FOR TARIFFS
+      const tariffSelector = 'a.button.storefront__tariff-action__cart';
+      await page.waitForSelector(tariffSelector, { timeout: 30000 });
+      const tariffs = page.locator(tariffSelector);
+      const tariffCount = await tariffs.count();
+      console.log(`[INFO] Tariffs found: ${tariffCount}`);
+
+      // RESULTS
+      const results: Array<{ tariff: number; promocode: string }> = [];
+
+      for (let i = 0; i < tariffCount; i++) {
+        const currentTariff = tariffs.nth(i);
+        console.log(`\n[TARIFF] Game: ${gameName} | Tariff #${i + 1}`);
+
+        // Ждём, пока тариф виден и доступен
+        await currentTariff.waitFor({ state: 'visible', timeout: 20000 });
+        await currentTariff.scrollIntoViewIfNeeded();
+        await currentTariff.click({ force: true });
+
+        // Ждём промокод или проверяем отсутствие
+        const promoLabel = page.locator('.promocode__label-success');
+        let promoText = 'Invalid or missing';
+        if (await promoLabel.isVisible({ timeout: 5000 }).catch(() => false)) {
+          promoText = (await promoLabel.textContent())?.trim() || '';
+          console.log(`[PROMO] Activated -> ${promoText}`);
+        } else {
+          console.log('[PROMO] Invalid or missing promocode');
+        }
+
+        results.push({ tariff: i + 1, promocode: promoText });
+
+        // Возврат к списку тарифов
+        await page.goBack();
+        await page.waitForSelector(tariffSelector, { timeout: 20000 });
+      }
+
+      // Печать результатов
+      console.log('\nRESULTS TABLE:');
+      console.table(results.map(r => ({ 'Tariff #': r.tariff, Promocode: r.promocode })));
+
+      console.log(`\n===== END TEST FOR GAME: ${gameName} =====`);
+    });
+  }
+
+});
