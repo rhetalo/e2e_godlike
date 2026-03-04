@@ -1,4 +1,4 @@
-# e2e# Автотесты Playwright - Godlike Host
+# Автотесты Playwright - Godlike Host
 
 ## Описание проекта
 
