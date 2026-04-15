@@ -5,8 +5,8 @@ import gamesData from "../fixtures/games.json";
 const gamesToTest: string[] = gamesData.games;
 
 const BASE_URL = "https://ultra.panel.godlike.host";
-const EMAIL = "test2@testmail.com";
-const PASSWORD = "test2@testmail.com";
+const EMAIL = "test@testmail.com";
+const PASSWORD = "test@testmail.com";
 const storageStatePath = "storageState.json";
 
 
@@ -20,8 +20,8 @@ test('Login in incognito', async ({ browser }) => {
   await page.click('button.login-button:has-text("Through login/password")');
 
   // Вводим логин и пароль
-  await page.fill('input[placeholder="Username or Email"]', 'test2@testmail.com');
-  await page.fill('input[placeholder="Password"]', 'test2@testmail.com');
+  await page.fill('input[placeholder="Username or Email"]', 'test@testmail.com');
+  await page.fill('input[placeholder="Password"]', 'test@testmail.com');
 
   // Нажимаем кнопку "Login"
   await page.click('button:has-text("Login")');
