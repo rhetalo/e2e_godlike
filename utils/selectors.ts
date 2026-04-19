@@ -149,6 +149,31 @@ export const FAQ = {
   item: '[class*="faq__item"], [class*="faq-item"]',
 } as const;
 
+/* ===== VPS Hosting (/vps-hosting/ → /cart-vps/) ===== */
+// Confirmed via debug spec 17-Apr-2026.
+export const VPS = {
+  // Landing page — different BEM from game server storefronts
+  planCard: ".vps-vds-dedi__plans-item",
+  deployButton: "a.deploy-btn", // <a> link, not <button>
+  deployButtonFull: "a.deploy-btn.vps-vds-dedi__plans-item__button",
+
+  // Cart URL pattern (Vue SPA, different from /cart/)
+  cartUrlPattern: /\/cart-vps/,
+
+  // Billing step — same BEM as game servers (/cart-vps/)
+  // Use .period__price-primary_amount for discounted price (not .period__price)
+  periodPriceAmount: ".period__price-primary_amount",
+  periodPriceFull: ".period__price-secondary",
+  periodDiscount: ".period__discount",
+  orderPricingPrice: ".order__pricing-price",
+
+  // Configure step — /cart-vps?...&step=3
+  // Only 2 datacenters: USA, Europe — no continent dropdown
+  locationContainer: ".configure-server__locations",
+  locationItem: ".configure-server__location",
+  locationItemActive: ".configure-server__location-active",
+} as const;
+
 /* ===== Mobile Cart (Vue SPA at /mobile-cart/) ===== */
 export const MOBILE_CART = {
   /** Root Vue app container */

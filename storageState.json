@@ -1,88 +1,68 @@
 {
   "cookies": [
     {
-      "name": "_hjSessionUser_5014749",
-      "value": "eyJpZCI6Ijg4NzdhZmJkLTUzZDctNTA1MC05OWY4LTgzMWY2MGI3YTVhOCIsImNyZWF0ZWQiOjE3NzYyNDg1Njc4NTMsImV4aXN0aW5nIjp0cnVlfQ==",
-      "domain": ".godlike.host",
-      "path": "/",
-      "expires": 1807784571,
-      "httpOnly": false,
-      "secure": true,
-      "sameSite": "None"
-    },
-    {
       "name": "_hjSession_5014749",
-      "value": "eyJpZCI6IjdiMjc1YmQ2LTU3OTYtNDhlMC04NWJhLTg5YmU2YTNlMDkwMSIsImMiOjE3NzYyNDg1Njc4NTUsInMiOjEsInIiOjEsInNiIjowLCJzciI6MCwic2UiOjAsImZzIjoxLCJzcCI6MH0=",
+      "value": "eyJpZCI6ImM3NTdkZjYwLWRjZWMtNDI2NC1iNDlhLTgwZDY4MjdhOGVmYyIsImMiOjE3NzY0MTYwMzg0MjAsInMiOjAsInIiOjAsInNiIjowLCJzciI6MCwic2UiOjAsImZzIjoxLCJzcCI6MH0=",
       "domain": ".godlike.host",
       "path": "/",
-      "expires": 1776250367,
+      "expires": 1776417838,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "_ga",
-      "value": "GA1.1.893078260.1776248568",
+      "value": "GA1.1.1560340552.1776416039",
       "domain": ".godlike.host",
       "path": "/",
-      "expires": 1810808570.98177,
+      "expires": 1810976042.540558,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
     },
     {
       "name": "rtkclickid-store",
-      "value": "69df662f976f0a61792b904b",
+      "value": "69e1f48db1b05fc12e6295a4",
       "domain": ".godlike.host",
       "path": "/",
-      "expires": 1778840568,
+      "expires": 1779008038,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
     },
     {
       "name": "FPGSID",
-      "value": "1.1776248568.1776248568.G-12HGQ4M4L9.wPfDaRwA_ak9UdszodXzIw",
+      "value": "1.1776416039.1776416039.G-12HGQ4M4L9.P00OC9AfX0DVQKxTsC3-Kw",
       "domain": ".godlike.host",
       "path": "/",
-      "expires": 1776250368.450756,
+      "expires": 1776417839.003022,
       "httpOnly": false,
       "secure": true,
       "sameSite": "Strict"
     },
     {
       "name": "CLID",
-      "value": "cea73f7cb7864786a8235fd856226a13.20260415.20270415",
+      "value": "e4cbda87bd2245f291ab475a3eaab6ba.20260417.20270417",
       "domain": "www.clarity.ms",
       "path": "/",
-      "expires": 1807784568.80431,
+      "expires": 1807952039.886373,
       "httpOnly": true,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "_rdt_uuid",
-      "value": "1776248568842.fafffad0-d827-4817-b9f8-9e7e06292978",
+      "value": "1776416039919.1e6625ce-4811-4081-b57a-57a9f752919a",
       "domain": ".godlike.host",
       "path": "/",
-      "expires": 1784024568,
+      "expires": 1784192039,
       "httpOnly": false,
       "secure": true,
       "sameSite": "Strict"
     },
     {
-      "name": "_fbp",
-      "value": "fb.1.1776248569066.228673136221818778",
-      "domain": ".godlike.host",
-      "path": "/",
-      "expires": 1784024569,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Lax"
-    },
-    {
       "name": "WHMCScMPkJhDxgE9n",
-      "value": "poqkvb63bqieeen0lg47reji7c",
+      "value": "1i58be6jcaia84qktptj349hks",
       "domain": "godlike.host",
       "path": "/",
       "expires": -1,
@@ -91,48 +71,28 @@
       "sameSite": "Lax"
     },
     {
-      "name": "_clck",
-      "value": "yplqpl%5E2%5Eg58%5E0%5E2296",
+      "name": "AMP_a1f9818075",
+      "value": "JTdCJTIyZGV2aWNlSWQlMjIlM0ElMjI0ZGZlN2VjYi0zNGRkLTQ4OTMtYjUxNC0xMzY3MTFmNTA1NWMlMjIlMkMlMjJvcHRPdXQlMjIlM0FmYWxzZSU3RA==",
       "domain": ".godlike.host",
       "path": "/",
-      "expires": 1807784569,
+      "expires": 1807952040,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
     },
     {
-      "name": "MUID",
-      "value": "3B6011E0421C6A8F160D06DC43346B75",
-      "domain": ".bing.com",
+      "name": "_fbp",
+      "value": "fb.1.1776416040306.152029076316264128",
+      "domain": ".godlike.host",
       "path": "/",
-      "expires": 1809944570.432287,
+      "expires": 1784192040,
       "httpOnly": false,
-      "secure": true,
-      "sameSite": "None"
-    },
-    {
-      "name": "MR",
-      "value": "0",
-      "domain": ".c.bing.com",
-      "path": "/",
-      "expires": 1776853370.432438,
-      "httpOnly": false,
-      "secure": true,
-      "sameSite": "None"
-    },
-    {
-      "name": "SRM_B",
-      "value": "3B6011E0421C6A8F160D06DC43346B75",
-      "domain": ".c.bing.com",
-      "path": "/",
-      "expires": 1809944570.432511,
-      "httpOnly": false,
-      "secure": true,
-      "sameSite": "None"
+      "secure": false,
+      "sameSite": "Lax"
     },
     {
       "name": "SM",
-      "value": "C",
+      "value": "T",
       "domain": ".c.clarity.ms",
       "path": "/",
       "expires": -1,
@@ -142,10 +102,30 @@
     },
     {
       "name": "MUID",
-      "value": "3B6011E0421C6A8F160D06DC43346B75",
+      "value": "101882BA539369563F099584579367E6",
       "domain": ".clarity.ms",
       "path": "/",
-      "expires": 1809944569.497048,
+      "expires": 1810112040.510621,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "_clck",
+      "value": "1ryc00l%5E2%5Eg5a%5E0%5E2298",
+      "domain": ".godlike.host",
+      "path": "/",
+      "expires": 1807952040,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "MUID",
+      "value": "03C0DCB953F5671232C3CB8752D466D7",
+      "domain": ".bing.com",
+      "path": "/",
+      "expires": 1810112040.942618,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
@@ -153,72 +133,52 @@
     {
       "name": "MR",
       "value": "0",
-      "domain": ".c.clarity.ms",
+      "domain": ".c.bing.com",
       "path": "/",
-      "expires": 1776853369.497324,
+      "expires": 1777020840.942888,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
     },
     {
-      "name": "ANONCHK",
-      "value": "0",
-      "domain": ".c.clarity.ms",
+      "name": "SRM_B",
+      "value": "03C0DCB953F5671232C3CB8752D466D7",
+      "domain": ".c.bing.com",
       "path": "/",
-      "expires": 1776249169.497423,
+      "expires": 1810112040.94302,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
-    },
-    {
-      "name": "_clsk",
-      "value": "1gdgvnm%5E1776248569865%5E1%5E1%5Eq.clarity.ms%2Fcollect",
-      "domain": ".godlike.host",
-      "path": "/",
-      "expires": 1776334969,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Lax"
-    },
-    {
-      "name": "AMP_MKTG_a1f9818075",
-      "value": "JTdCJTdE",
-      "domain": ".godlike.host",
-      "path": "/",
-      "expires": 1807784570,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Lax"
-    },
-    {
-      "name": "AMP_a1f9818075",
-      "value": "JTdCJTIyZGV2aWNlSWQlMjIlM0ElMjJkOGRjYjc0YS1jZThkLTQxOWItYjc2NC02NmFlOGJlNDdlNTglMjIlMkMlMjJzZXNzaW9uSWQlMjIlM0ExNzc2MjQ4NTcwMzAyJTJDJTIyb3B0T3V0JTIyJTNBZmFsc2UlMkMlMjJsYXN0RXZlbnRUaW1lJTIyJTNBMTc3NjI0ODU3MDMxNSUyQyUyMmxhc3RFdmVudElkJTIyJTNBMCUyQyUyMnBhZ2VDb3VudGVyJTIyJTNBMCU3RA==",
-      "domain": ".godlike.host",
-      "path": "/",
-      "expires": 1807784570,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Lax"
     },
     {
       "name": "buid",
       "value": "491344",
       "domain": "godlike.host",
       "path": "/",
-      "expires": 1807784570.682486,
+      "expires": 1807952041.93011,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
     },
     {
       "name": "_ga_12HGQ4M4L9",
-      "value": "GS2.1.s1776248568$o1$g1$t1776248570$j58$l0$h1930202748",
+      "value": "GS2.1.s1776416038$o1$g1$t1776416042$j56$l0$h1794286642",
       "domain": ".godlike.host",
       "path": "/",
-      "expires": 1810808570.981282,
+      "expires": 1810976042.539052,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
+    },
+    {
+      "name": "_hjSessionUser_5014749",
+      "value": "eyJpZCI6ImVlNDBiN2U5LTllNTUtNTIwOS1hODkwLTM4YzVjNGUzODVjOCIsImNyZWF0ZWQiOjE3NzY0MTYwMzg0MTgsImV4aXN0aW5nIjp0cnVlfQ==",
+      "domain": ".godlike.host",
+      "path": "/",
+      "expires": 1807952042,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
     }
   ],
   "origins": [
@@ -226,24 +186,16 @@
       "origin": "https://godlike.host",
       "localStorage": [
         {
-          "name": "AMP_unsent_a1f9818075",
-          "value": "[{\"device_id\":\"d8dcb74a-ce8d-419b-b764-66ae8be47e58\",\"session_id\":1776248570302,\"time\":1776248570315,\"platform\":\"Web\",\"language\":\"en-US\",\"ip\":\"$remote\",\"insert_id\":\"873acce9-17ee-45e9-9cfa-7401f95b4ee8\",\"event_type\":\"$identify\",\"user_properties\":{\"$setOnce\":{\"initial_utm_campaign\":\"EMPTY\",\"initial_utm_content\":\"EMPTY\",\"initial_utm_id\":\"EMPTY\",\"initial_utm_medium\":\"EMPTY\",\"initial_utm_source\":\"EMPTY\",\"initial_utm_term\":\"EMPTY\",\"initial_referrer\":\"EMPTY\",\"initial_referring_domain\":\"EMPTY\",\"initial_dclid\":\"EMPTY\",\"initial_gbraid\":\"EMPTY\",\"initial_gclid\":\"EMPTY\",\"initial_fbclid\":\"EMPTY\",\"initial_ko_click_id\":\"EMPTY\",\"initial_li_fat_id\":\"EMPTY\",\"initial_msclkid\":\"EMPTY\",\"initial_rtd_cid\":\"EMPTY\",\"initial_ttclid\":\"EMPTY\",\"initial_twclid\":\"EMPTY\",\"initial_wbraid\":\"EMPTY\"},\"$unset\":{\"utm_campaign\":\"-\",\"utm_content\":\"-\",\"utm_id\":\"-\",\"utm_medium\":\"-\",\"utm_source\":\"-\",\"utm_term\":\"-\",\"referrer\":\"-\",\"referring_domain\":\"-\",\"dclid\":\"-\",\"gbraid\":\"-\",\"gclid\":\"-\",\"fbclid\":\"-\",\"ko_click_id\":\"-\",\"li_fat_id\":\"-\",\"msclkid\":\"-\",\"rtd_cid\":\"-\",\"ttclid\":\"-\",\"twclid\":\"-\",\"wbraid\":\"-\"}},\"event_id\":0,\"library\":\"amplitude-ts-gtm/3.15.0\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.7632.6 Safari/537.36\",\"event_properties\":{}}]"
-        },
-        {
           "name": "lastExternalReferrer",
           "value": "empty"
         },
         {
           "name": "lastExternalReferrerTime",
-          "value": "1776248569034"
+          "value": "1776416040272"
         },
         {
           "name": "amplitude.engagement.ENGAGEMENT_a1f9818075_DEFAULT_USER_PROVIDER",
-          "value": "{\"first_seen\":\"1776248570.073\"}"
-        },
-        {
-          "name": "amplitude.engagement.eus.a1f981.device_id:d8dcb74a-ce8d-419b-b764-66ae8be47e58",
-          "value": "{\"nudgeInteractions\":{}}"
+          "value": "{\"first_seen\":\"1776416041.553\"}"
         }
       ]
     }

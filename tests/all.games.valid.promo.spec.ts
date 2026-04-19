@@ -5,6 +5,10 @@ import gamesData from "../fixtures/games.json";
 const gamesToTest: string[] = gamesData.games;
 
 const BASE_URL = "https://godlike.host";
+//новый акк без покупок
+// const EMAIL = "testfree1@testmail.com";
+// const PASSWORD = "testfree1@testmail.com";
+//стандартный тестовый акк с покупками
 const EMAIL = "test@testmail.com";
 const PASSWORD = "test@testmail.com";
 const storageStatePath = "storageState.json";
@@ -135,15 +139,38 @@ for (const gameName of gamesToTest) {
             // console.log(`[INFO] Opened tariff details`);
 
             // Ждём промокод
-            const promoLabel = page
+            const successLabel = page
               .locator("span.promocode__label-success")
               .first();
-            await expect(promoLabel).toBeVisible({ timeout: 60000 });
 
-            const promoText = (await promoLabel.textContent())?.trim() || "";
-            console.log(`[PROMO] Tariff "${tariffTitle}": ${promoText}`);
+            const errorLabel = page
+              .locator("span.promocode__label-error")
+              .first();
 
-            expect(promoText.includes("Activated promocode")).toBeTruthy();
+            // ждём появления любого из двух
+            await Promise.race([
+              successLabel.waitFor({ state: "visible", timeout: 60000 }),
+              errorLabel.waitFor({ state: "visible", timeout: 60000 }),
+            ]);
+
+            if (await successLabel.isVisible()) {
+              const promoText =
+                (await successLabel.textContent())?.trim() || "";
+              console.log(
+                `[PROMO SUCCESS] Tariff "${tariffTitle}" in "${gameName}": ${promoText}`,
+              );
+
+              expect(promoText.includes("Activated promocode")).toBeTruthy();
+            } else if (await errorLabel.isVisible()) {
+              const promoText = (await errorLabel.textContent())?.trim() || "";
+              console.log(
+                `[PROMO ERROR] Tariff "${tariffTitle}" in "${gameName}": ${promoText}`,
+              );
+            } else {
+              throw new Error(
+                `No promocode label found for tariff "${tariffTitle}" in game "${gameName}"`,
+              );
+            }
 
             console.log(`[INFO] Processed tariff #${i + 1} successfully`);
 

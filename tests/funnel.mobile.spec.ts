@@ -185,9 +185,9 @@ test.describe("Mobile Cart Funnel", () => {
     console.log(`[INFO] Base plan price: ${basePrice}`);
 
     // Переходим на более дорогой план
-    await cart.selectPlan("Quadra");
+    await cart.selectPlan("Godlike");
     const upgradedPrice = await cart.getTotalPrice();
-    console.log(`[INFO] Quadra plan price: ${upgradedPrice}`);
+    console.log(`[INFO] Godlike plan price: ${upgradedPrice}`);
 
     const baseVal = parsePrice(basePrice);
     const upgradedVal = parsePrice(upgradedPrice);
