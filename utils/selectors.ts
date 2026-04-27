@@ -244,3 +244,108 @@ export const MOBILE_CART = {
   /* --- Close (WordPress mobile nav, not Vue) --- */
   wpCloseButton: ".mobile-navigation-close.js-mnav-close",
 } as const;
+
+/**
+ * VPS Panel Selector Strategy Map
+ * =================================
+ * Target: https://vf-panel.godlike.host  (VirtFusion v4.x)
+ *
+ * ALL strings sourced from live :vlang props on the actual server detail page
+ * and vlang JS chunks from /servers list.
+ * Extracted from: GET /server/9c49ed96-56f4-41c8-bc5f-a8d44c21a486
+ */
+
+/* ===== Login Page (G01 chunk — confirmed) ===== */
+export const LOGIN = {
+  emailInput: 'input[type="email"]',
+  passwordInput: 'input[type="password"]',
+  loginButton: 'button:has-text("Login")',
+  errorText: ':has-text("Please enter valid credentials. All attempts are logged.")',
+} as const;
+
+/* ===== Navigation Bar ===== */
+export const NAV = {
+  serversLink: 'a:has-text("Servers")',
+  dashboardLink: 'a:has-text("Dashboard")',
+  logoutLink: 'a:has-text("Logout")',
+} as const;
+
+/* ===== Servers List (/servers) ===== */
+export const SERVER_LIST = {
+  manageButton: 'button:has-text("Manage"), a:has-text("Manage")',
+  deleteButton: 'button:has-text("Delete"), a:has-text("Delete")',
+} as const;
+
+/* ===== Delete Server Modal (from /servers list) ===== */
+export const DELETE_MODAL = {
+  // Confirmed from vlang in /servers page JS chunk:
+  title: ':has-text("Delete Server")',
+  body: ':has-text("Are you sure you want to delete this server?")',
+  cancelButton: 'button:has-text("Cancel")',
+  confirmButton: '[class*="modal"] button:has-text("Delete"), [role="dialog"] button:has-text("Delete")',
+  successToast: ':has-text("Server deleted successfully")',
+  errorToast: ':has-text("Server could not be deleted")',
+} as const;
+
+/* ===== Server Detail Page — Tab Names (/server/{UUID}) ===== */
+// ALL confirmed from :vlang attribute on <client-server-manage> (vlang keys 71–77):
+export const TABS = {
+  overview: 'button:has-text("Overview"), a:has-text("Overview")',
+  media: 'button:has-text("Media"), a:has-text("Media")',
+  options: 'button:has-text("Options"), a:has-text("Options")',
+  network: 'button:has-text("Network"), a:has-text("Network")',
+  storage: 'button:has-text("Storage"), a:has-text("Storage")',
+  backups: 'button:has-text("Backups"), a:has-text("Backups")',
+  sharing: 'button:has-text("Sharing"), a:has-text("Sharing")',
+} as const;
+
+/* ===== Server States ===== */
+// Confirmed: vlang 78–80
+export const SERVER_STATE = {
+  stopped: '"Stopped"',   // vlang[78]
+  running: '"Running"',   // vlang[79]
+  paused: '"Paused"',     // vlang[80]
+} as const;
+
+/* ===== Media Tab — Build / Install ===== */
+// All strings confirmed from :vlang on real server page:
+export const MEDIA = {
+  // The main action button on the Media tab:
+  //   "Rebuild" (vlang[196]) — when server already has OS
+  //   "Install" (vlang[173]) — fresh install (also "Install with" vlang[172])
+  actionButton: 'button:has-text("Rebuild"), button:has-text("Install")',
+
+  // Rebuild confirmation modal (vlang[118] + vlang[119]):
+  rebuildConfirmText: 'Are you sure you want to rebuild this server?',
+  rebuildConfirmButton: 'button:has-text("Continue")',  // vlang[119]
+
+  // Install confirmation modal (vlang[128] + vlang[130]):
+  installConfirmButton: 'button:has-text("Install Now")',  // vlang[130]
+
+  // "Cancel" button in both modals (vlang[3] / vlang[140])
+  cancelButton: 'button:has-text("Cancel"), button:has-text("Cancel Rebuild")',
+
+  // OS template section:
+  operatingSystemLabel: ':has-text("Operating System")',  // vlang[149]
+  templateOption: '[class*="template-option"], [class*="os-option"], [data-template-id], [class*="media-item"]',
+
+  // Status during build (vlang[136, 181]):
+  buildingText: ':has-text("Server Setup"), :has-text("being built")',
+} as const;
+
+/* ===== Power Controls ===== */
+// Confirmed action names from live dash-app.js:
+export const POWER = {
+  boot: 'button[data-action="boot_server"], button:has-text("Boot")',
+  shutdown: 'button[data-action="shutdown_server"], button:has-text("Shutdown")',  // vlang[123]
+  powerOff: 'button[data-action="poweroff_server"], button:has-text("Power Off")', // vlang[120]
+  restart: 'button[data-action="restart_server"], button:has-text("Restart")',     // vlang[94]
+} as const;
+
+/* ===== Notifications ===== */
+export const ALERTS = {
+  // vlang[276]: "Server created successfully."
+  success: '[class*="alert-success"], [class*="toast-success"]',
+  error: '[class*="alert-danger"], [class*="alert-error"], [class*="toast-error"]',
+  anyAlert: '[class*="alert"], [class*="toast"], [role="alert"]',
+} as const;

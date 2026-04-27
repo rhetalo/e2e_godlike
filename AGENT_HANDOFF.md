@@ -414,3 +414,133 @@ Email:    test@testmail.com
 Password: test@testmail.com
 Login URL: https://godlike.host/clientarea/login
 ```
+Playwright E2E — VPS Management Panel | Agent Handoff
+Цель
+Автотесты Playwright (TypeScript) для панели управления VPS: https://vf-panel.godlike.host — VirtFusion control panel.
+
+3 сценария:
+
+Install — установка VPS (Media tab → Rebuild/Install → Continue/Install Now)
+Build — сборка окружения (Rebuild с выбором OS)
+Delete — удаление сервера (из списка /servers)
+Тестовый аккаунт
+Параметр	Значение
+Email	test@testmail.com
+Password	Password_123
+Server name	srv-430464
+Server UUID	9c49ed96-56f4-41c8-bc5f-a8d44c21a486
+Server URL	https://vf-panel.godlike.host/server/9c49ed96-56f4-41c8-bc5f-a8d44c21a486
+Структура
+tests/VPS/
+  tests/
+    vps.panel.debug.spec.ts   — DOM-диагностика (запускать первым)
+    vps.install.spec.ts       — Сценарий 1: Install
+    vps.build.spec.ts         — Сценарий 2: Build
+    vps.delete.spec.ts        — Сценарий 3: Delete
+  pages/
+    ServersListPage.ts        — /servers (список серверов)
+    ServerDetailPage.ts       — /server/{UUID} (управление сервером)
+  utils/
+    auth.ts                   — логин, константы, TEST_SERVER_UUID
+    selectors.ts              — все CSS-селекторы
+  playwright.config.ts
+  package.json
+  storageState.panel.json     — (генерируется автоматически)
+
+Подтверждённые данные (извлечены из живого сайта)
+Навигация
+Факт	Источник
+После логина → /dashboard	Живой AJAX-ответ {"url":"/dashboard"}
+URL деталей сервера	/server/9c49ed96-56f4-41c8-bc5f-a8d44c21a486 — работает в браузере
+После "Manage" клика	URL меняется на /server/{UUID}
+Список серверов	/servers (Vue component <client-servers>)
+Вкладки (vlang 71–77 из :vlang пропа на live странице)
+"Overview"  "Media"  "Options"  "Network"  "Storage"  "Backups"  "Sharing"
+
+Media tab — кнопки и тексты
+vlang #	Текст	Использование
+196	"Rebuild"	Кнопка на Media tab (при установленной OS)
+173	"Install"	Кнопка (fresh install)
+118	"Are you sure you want to rebuild this server?"	Заголовок модала
+119	"Continue"	Кнопка подтверждения rebuild
+128–129	"Are you sure you want to install X on this server?"	Install confirm
+130	"Install Now"	Кнопка подтверждения install
+140	"Cancel Rebuild"	Кнопка отмены
+136	"Server Setup..."	Статус во время сборки
+149	"Operating System"	Заголовок секции шаблонов
+Состояния сервера (vlang 78–80)
+"Stopped"  "Running"  "Paused"
+
+Delete modal (из /servers list)
+Текст	Источник
+"Delete Server"	vlang в /servers JS chunk
+"Are you sure you want to delete this server?"	vlang в /servers JS chunk
+"Cancel"	vlang в /servers JS chunk
+"Server deleted successfully."	vlang в /servers JS chunk
+"Server could not be deleted."	vlang в /servers JS chunk
+Delete location — ВАЖНО
+НЕВЕРНО: кнопка в Options вкладке сервера
+ВЕРНО:   кнопка "Delete" на строке в СПИСКЕ серверов (/servers)
+
+Запуск
+cd tests/VPS
+npm install
+npx playwright install chromium
+# 1. Диагностика DOM (скриншоты + реальные классы)
+npx playwright test tests/vps.panel.debug.spec.ts --project=chromium --headed
+# 2. Install тесты
+npx playwright test tests/vps.install.spec.ts --project=chromium --headed
+# 3. Build тесты
+npx playwright test tests/vps.build.spec.ts --project=chromium --headed
+# 4. Delete тесты (без реального удаления)
+npx playwright test tests/vps.delete.spec.ts --project=chromium --headed
+# 5. Реальное удаление (ДЕСТРУКТИВНО!)
+ENABLE_DELETE_TEST=true npx playwright test tests/vps.delete.spec.ts --project=chromium
+# Все тесты сразу
+npx playwright test --project=chromium
+
+Архитектура
+Авторизация — storageState pattern
+test.beforeAll(async ({ browser }) => {
+  await loginAndSaveSession(browser); // логин один раз
+});
+test("тест", async ({ browser }) => {
+  const context = await browser.newContext({ storageState: STORAGE_STATE_PATH });
+  // ...
+  await context.close();
+});
+
+Text-based selectors (стабильны к хешированным CSS классам)
+// Всегда так — тексты из vlang не меняются между деплоями
+'button:has-text("Rebuild")'
+'button:has-text("Continue")'
+':has-text("Are you sure you want to rebuild this server?")'
+
+Прямая URL навигация на сервер
+// Работает в Playwright с сессионными куки
+await page.goto('https://vf-panel.godlike.host/server/9c49ed96-56f4-41c8-bc5f-a8d44c21a486');
+// (Моя ранняя ошибка: проверял через Node.js HTTPS без куки — получал редирект)
+
+Guard для деструктивного теста
+ENABLE_DELETE_TEST=true npx playwright test tests/vps.delete.spec.ts
+
+Покрытие (Acceptance Criteria)
+ID	Тест	Сценарий
+T1.1	Список серверов содержит srv-430464	Install
+T1.2	Страница /server/{UUID} открывается напрямую	Install
+T1.3	"Manage" ведёт на /server/{UUID}	Install
+T1.4	Media tab содержит OS шаблоны	Install
+T1.5	"Rebuild"/"Install" кнопка видна	Install
+T1.6	OS → Rebuild → Continue → сборка	Install
+T2.1	Список серверов после логина	Build
+T2.2	Все 6 вкладок: Overview, Media, Options…	Build
+T2.3	OS шаблоны непустые	Build
+T2.4	Шаблоны кликабельны	Build
+T2.5	Rebuild → модал с "Continue"	Build
+T2.6	OS → Rebuild → Continue → Building	Build
+T3.1	"Delete" на строке в /servers	Delete
+T3.2	Модал с заголовком "Delete Server"	Delete
+T3.3	"Are you sure you want to delete this server?"	Delete
+T3.4	"Cancel" закрывает модал без удаления	Delete
+T3.5	Кнопка подтверждения в модале	Delete
+T3.6	Confirm → "Server deleted successfully."	Delet
