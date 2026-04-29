@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import gamesData from "../fixtures/games.json";
 
 // Список игр для проверки в Json файле
-const gamesToTest: string[] = gamesData.games;
+const gamesToTest = gamesData.games;
 
 const BASE_URL = "https://godlike.host";
 //новый акк без покупок
@@ -43,9 +43,11 @@ test.beforeAll(async ({ browser }) => {
   }
 });
 
-for (const gameName of gamesToTest) {
-  test(`Validate promocode for: ${gameName}`, async ({ browser }) => {
+for (const game of gamesToTest) {
+  test(`Validate promocode for: ${game.name}`, async ({ browser }) => {
     test.setTimeout(60000);
+    const gameName = game.name;
+    
     console.log(`\n===== START TEST FOR: ${gameName} =====`);
 
     const context = await browser.newContext({

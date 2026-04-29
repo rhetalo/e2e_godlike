@@ -1,0 +1,255 @@
+{
+  "cookies": [
+    {
+      "name": "_hjSessionUser_5014749",
+      "value": "eyJpZCI6ImMxYTljMzBiLWMwNmMtNWJmOC1iMDRkLWUzNTNhMDA1ZjViNiIsImNyZWF0ZWQiOjE3Nzc0NTYwOTkzMTIsImV4aXN0aW5nIjp0cnVlfQ==",
+      "domain": ".godlike.host",
+      "path": "/",
+      "expires": 1808992106,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "_hjSession_5014749",
+      "value": "eyJpZCI6IjczMTIxODI5LWYyMWMtNDlhMS05ODVmLWE5M2E4OGRjMjU2YiIsImMiOjE3Nzc0NTYwOTkzMTQsInMiOjEsInIiOjEsInNiIjowLCJzciI6MCwic2UiOjAsImZzIjoxLCJzcCI6MH0=",
+      "domain": ".godlike.host",
+      "path": "/",
+      "expires": 1777457899,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "_ga",
+      "value": "GA1.1.922787629.1777456100",
+      "domain": ".godlike.host",
+      "path": "/",
+      "expires": 1812016106.294285,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "rtkclickid-store",
+      "value": "69f1d00da233a40d8cfc0c14",
+      "domain": ".godlike.host",
+      "path": "/",
+      "expires": 1780048099,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "FPGSID",
+      "value": "1.1777456098.1777456098.G-12HGQ4M4L9.eHpHWpzk1p55vCCOck56jg",
+      "domain": ".godlike.host",
+      "path": "/",
+      "expires": 1777457899.949584,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Strict"
+    },
+    {
+      "name": "CLID",
+      "value": "a641da800d2f417e88282bf949509e65.20260429.20270429",
+      "domain": "www.clarity.ms",
+      "path": "/",
+      "expires": 1808992100.154648,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "_rdt_uuid",
+      "value": "1777456100248.12de9846-8fa8-4c34-80ea-06f0d646e1ea",
+      "domain": ".godlike.host",
+      "path": "/",
+      "expires": 1785232100,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Strict"
+    },
+    {
+      "name": "_fbp",
+      "value": "fb.1.1777456100451.284698490816187655",
+      "domain": ".godlike.host",
+      "path": "/",
+      "expires": 1785232100,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_clck",
+      "value": "gwlbkc%5E2%5Eg5m%5E0%5E2310",
+      "domain": ".godlike.host",
+      "path": "/",
+      "expires": 1808992100,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "WHMCScMPkJhDxgE9n",
+      "value": "otdtpu30elunug7ckamrrn7f9d",
+      "domain": "godlike.host",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "MUID",
+      "value": "1702F8BC9A3564EE1E85EFF69B1D65E7",
+      "domain": ".bing.com",
+      "path": "/",
+      "expires": 1811152100.796547,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "MR",
+      "value": "0",
+      "domain": ".c.bing.com",
+      "path": "/",
+      "expires": 1778060900.796783,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "SRM_B",
+      "value": "1702F8BC9A3564EE1E85EFF69B1D65E7",
+      "domain": ".c.bing.com",
+      "path": "/",
+      "expires": 1811152100.796943,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "SM",
+      "value": "C",
+      "domain": ".c.clarity.ms",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "MUID",
+      "value": "1702F8BC9A3564EE1E85EFF69B1D65E7",
+      "domain": ".clarity.ms",
+      "path": "/",
+      "expires": 1811152100.936827,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "MR",
+      "value": "0",
+      "domain": ".c.clarity.ms",
+      "path": "/",
+      "expires": 1778060900.936946,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "ANONCHK",
+      "value": "0",
+      "domain": ".c.clarity.ms",
+      "path": "/",
+      "expires": 1777456700.937008,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "_clsk",
+      "value": "d5up0t%5E1777456101387%5E1%5E1%5Eb.clarity.ms%2Fcollect",
+      "domain": ".godlike.host",
+      "path": "/",
+      "expires": 1777542501,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "AMP_MKTG_a1f9818075",
+      "value": "JTdCJTdE",
+      "domain": ".godlike.host",
+      "path": "/",
+      "expires": 1808992101,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "AMP_a1f9818075",
+      "value": "JTdCJTIyZGV2aWNlSWQlMjIlM0ElMjJjZjhkZWZjMi05ZDkxLTQ2OTMtOWI0My1lNzhlMGRkNGU0NDclMjIlMkMlMjJzZXNzaW9uSWQlMjIlM0ExNzc3NDU2MTAxODI4JTJDJTIyb3B0T3V0JTIyJTNBZmFsc2UlMkMlMjJsYXN0RXZlbnRUaW1lJTIyJTNBMTc3NzQ1NjEwMTg0OCUyQyUyMmxhc3RFdmVudElkJTIyJTNBMyUyQyUyMnBhZ2VDb3VudGVyJTIyJTNBMSU3RA==",
+      "domain": ".godlike.host",
+      "path": "/",
+      "expires": 1808992101,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "buid",
+      "value": "527514",
+      "domain": "godlike.host",
+      "path": "/",
+      "expires": 1808992105.865293,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_ga_12HGQ4M4L9",
+      "value": "GS2.1.s1777456099$o1$g1$t1777456106$j53$l0$h616591249",
+      "domain": ".godlike.host",
+      "path": "/",
+      "expires": 1812016106.293706,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": [
+    {
+      "origin": "https://godlike.host",
+      "localStorage": [
+        {
+          "name": "lastExternalReferrerTime",
+          "value": "1777456100430"
+        },
+        {
+          "name": "AMP_unsent_a1f9818075",
+          "value": "[]"
+        },
+        {
+          "name": "lastExternalReferrer",
+          "value": "empty"
+        },
+        {
+          "name": "amplitude.engagement.eus.a1f981.device_id:cf8defc2-9d91-4693-9b43-e78e0dd4e447",
+          "value": "{\"ampIdToken\":\"Wj7328b2WPhaPvfB0X-PMx0Bs17Md8wR\",\"nudgeInteractions\":{}}"
+        },
+        {
+          "name": "amplitude.engagement.ENGAGEMENT_a1f9818075_DEFAULT_USER_PROVIDER",
+          "value": "{\"first_seen\":\"1777456101.594\"}"
+        },
+        {
+          "name": "amplitude.engagement.a1f9818075fd8e054151a2838e67ec6d-resourceCenter",
+          "value": "{\"visible\":false,\"minimized\":false,\"scrollPosition\":0,\"query\":null,\"isAdditionalResourcesExpanded\":true}"
+        }
+      ]
+    }
+  ]
+}

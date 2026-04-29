@@ -1,38 +1,133 @@
-import { Locator, Page, expect } from '@playwright/test';
+/**
+ * CartPage — Vue cart at /cart and /cart-modded-new/.
+ *
+ * Verified live URL shape:
+ *   https://godlike.host/cart?productId=346&billingCycle=monthly&currency=1
+ *     &modpackId=curseforge-925200&promo=COMMUNITY40&location=725
+ *
+ * The cart has 3 visible steps (driven by `?step=` in the URL):
+ *
+ *   step 1 (default, no `step` param)  →  product summary on the left,
+ *                                         `.auth-block` on the right with
+ *                                         tabs "Register" (active) / "Login"
+ *                                         (skipped automatically when the
+ *                                         user already has a valid session
+ *                                         cookie from /clientarea/login)
+ *   step 2 (?step=2)                   →  "Select Billing Cycle" + promo
+ *                                         input + .order__button-order
+ *                                         "Next step"
+ *   step 3                             →  redirects to the WHMCS Lagom page
+ *                                         /clientarea/cart.php?a=checkout
+ *                                         (handled by CheckoutPage)
+ *
+ * The auth-block exposes its login form only after clicking the "Login" tab.
+ * `.cart__input` and `.login__form-bottom__button` are stable once shown.
+ */
+import type { Locator } from "@playwright/test";
+import { BasePage } from "./BasePage";
+import { Credentials, VueCartStep2Pattern } from "../fixtures/test-data";
 
-export class CartPage {
-  readonly page: Page;
-  readonly root: Locator;
-  readonly summary: Locator;
-  readonly totalPrice: Locator;
-  readonly checkoutButton: Locator;
-  readonly emailInput: Locator;
-  readonly promoCodeInput: Locator;
-  readonly applyPromoButton: Locator;
-  readonly errorMessage: Locator;
+export class CartPage extends BasePage {
+  // ─── step 1 (auth-block) ──────────────────────────────────────────────────
 
-  constructor(page: Page) {
-    this.page = page;
-    this.root = page.locator('main, [class*="cart"]').first();
-    this.summary = page.locator('[class*="summary"], [class*="order"]').first();
-    this.totalPrice = page.locator('[class*="total"]').first();
-    this.checkoutButton = page.getByRole('button', { name: /Checkout|Pay|Continue|Place Order/i }).first();
-    this.emailInput = page.locator('input[type="email"], input[name*="mail" i]').first();
-    this.promoCodeInput = page.locator('input[name*="promo" i], input[placeholder*="promo" i]').first();
-    this.applyPromoButton = page.getByRole('button', { name: /Apply/i }).first();
-    this.errorMessage = page.locator('[class*="error"], [role="alert"]').first();
+  authTab(name: "Register" | "Login"): Locator {
+    return this.page
+      .locator(".auth-block__header-inner", { hasText: name })
+      .first();
   }
 
-  async assertOnCart(): Promise<void> {
-    await expect(this.page).toHaveURL(/\/cart/);
+  isAuthBlockVisible(): Promise<boolean> {
+    return this.page
+      .locator(".auth-block")
+      .first()
+      .isVisible()
+      .catch(() => false);
   }
 
-  async fillEmail(email: string): Promise<void> {
-    await this.emailInput.fill(email);
+  /** Switch to the Login tab if it isn't active yet. */
+  async switchToLoginTab(): Promise<void> {
+    const activeLogin = this.page.locator(
+      ".auth-block__header-inner__active",
+      { hasText: "Login" },
+    );
+    if (await activeLogin.count()) return;
+    await this.authTab("Login").click();
+    await this.loginEmail().waitFor({ state: "visible", timeout: 10_000 });
   }
 
-  async applyPromo(code: string): Promise<void> {
-    await this.promoCodeInput.fill(code);
-    await this.applyPromoButton.click();
+  loginEmail(): Locator {
+    return this.page.locator('.auth-block input[type="email"]').first();
+  }
+
+  loginPassword(): Locator {
+    return this.page.locator('.auth-block input[type="password"]').first();
+  }
+
+  loginSubmit(): Locator {
+    return this.page.locator(".login__form-bottom__button").first();
+  }
+
+  loginErrorMessage(): Locator {
+    return this.page
+      .locator(
+        '.auth-block .error, .auth-block [class*="error" i], .login__form-error, .v-snackbar',
+      )
+      .first();
+  }
+
+  /**
+   * Fill the embedded login form with credentials and submit.
+   * Does NOT assert success — the caller decides what success looks like.
+   */
+  async loginViaCart(
+    email: string = Credentials.email,
+    password: string = Credentials.password,
+  ): Promise<void> {
+    await this.switchToLoginTab();
+    await this.loginEmail().fill(email);
+    await this.loginPassword().fill(password);
+    await this.loginSubmit().click();
+  }
+
+  /**
+   * Convenience: log in via the cart's auth-block and wait for the cart to
+   * advance to step 2. Returns true on success, false on timeout (caller
+   * decides what to assert).
+   */
+  async loginAndAwaitStep2(
+    email: string = Credentials.email,
+    password: string = Credentials.password,
+    timeoutMs = 30_000,
+  ): Promise<boolean> {
+    await this.loginViaCart(email, password);
+    try {
+      await this.page.waitForURL(VueCartStep2Pattern, { timeout: timeoutMs });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  // ─── step 2 (billing cycle) ───────────────────────────────────────────────
+
+  promoInput(): Locator {
+    return this.page.locator("#promocode").first();
+  }
+
+  promoApplyButton(): Locator {
+    return this.page.locator(".promocode__button").first();
+  }
+
+  /** "Next step" button — advances from step 2 to the WHMCS payment page. */
+  nextStepButton(): Locator {
+    return this.page
+      .locator(".order__button-order, button:has-text('Next step')")
+      .first();
+  }
+
+  async clickNextStep(): Promise<void> {
+    const btn = this.nextStepButton();
+    await btn.scrollIntoViewIfNeeded();
+    await btn.click({ force: true });
   }
 }

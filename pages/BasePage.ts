@@ -1,30 +1,57 @@
-import { Page, expect } from '@playwright/test';
-import { Header } from '../components/Header';
-import { Footer } from '../components/Footer';
-import { PromoModal } from '../components/PromoModal';
+/**
+ * BasePage — common navigation, waiting and shared helpers.
+ *
+ * All concrete Page Objects extend this class so the `page` is implicit and
+ * the cookie banner / promo modal dismissals are handled in one place.
+ */
+import type { Locator, Page, Response } from "@playwright/test";
+import { CookieBanner } from "../components/CookieBanner";
 
 export abstract class BasePage {
   readonly page: Page;
-  readonly header: Header;
-  readonly footer: Footer;
-  readonly promoModal: PromoModal;
-
-  protected abstract path: string;
+  readonly cookieBanner: CookieBanner;
 
   constructor(page: Page) {
     this.page = page;
-    this.header = new Header(page);
-    this.footer = new Footer(page);
-    this.promoModal = new PromoModal(page);
+    this.cookieBanner = new CookieBanner(page);
   }
 
-  async open(): Promise<void> {
-    await this.page.goto(this.path, { waitUntil: 'domcontentloaded' });
-    await this.promoModal.dismissIfVisible();
+  /** Navigate to a path relative to baseURL, then dismiss obstructive overlays. */
+  async goto(path: string): Promise<Response | null> {
+    const response = await this.page.goto(path, {
+      waitUntil: "domcontentloaded",
+      timeout: 60_000,
+    });
+    await this.cookieBanner.dismissIfPresent();
+    return response;
   }
 
-  async assertLoaded(titleRegex: RegExp): Promise<void> {
-    await expect(this.page).toHaveTitle(titleRegex);
-    await this.header.assertVisible();
+  async waitForNetworkIdle(): Promise<void> {
+    await this.page.waitForLoadState("networkidle").catch(() => {
+      /* networkidle can flake on noisy 3rd-party scripts; that's fine */
+    });
+  }
+
+  url(): string {
+    return this.page.url();
+  }
+
+  async waitForUrl(regex: RegExp, timeoutMs = 30_000): Promise<void> {
+    await this.page.waitForURL(regex, { timeout: timeoutMs });
+  }
+
+  /** Site-wide header order button (visible on most pages). */
+  headerOrderButton(): Locator {
+    return this.page.locator(
+      [
+        ".site-header__order-button",
+        ".navigation-right__button",
+        'a[href*="/cart"]',
+      ].join(", "),
+    );
+  }
+
+  pageHeading(): Locator {
+    return this.page.locator("h1").first();
   }
 }
