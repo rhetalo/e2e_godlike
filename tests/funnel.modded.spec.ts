@@ -24,7 +24,7 @@
 import { test, expect, type Browser, type Page } from "@playwright/test";
 import { ModdedHostingPage } from "../pages/ModdedHostingPage";
 import { CartPage } from "../pages/CartPage";
-import { CheckoutPage } from "../pages/CheckoutPage";
+import { CheckoutPage } from "../pages/Checkout2Page";
 import {
   BASE_URL,
   Credentials,
@@ -132,7 +132,13 @@ test.describe("Modded purchase funnel (stops at payment page)", () => {
 
       // ─── Step 4: click "Next step" → WHMCS payment page ──────────────
       await expect(cartPage.nextStepButton()).toBeVisible({ timeout: 15_000 });
-      console.log("[STEP 4] Next step button visible — clicking");
+      console.log("[STEP 3] Next step button visible — clicking");
+
+      await Promise.all([
+      page.waitForURL(/cart\?/),
+      page.getByRole('button', { name: 'Next step' }).click(),
+        ]);
+      console.log("[STEP 3.1] Next step button visible — clicking");
 
       await Promise.all([
         page.waitForURL(

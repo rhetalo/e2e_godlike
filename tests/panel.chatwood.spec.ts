@@ -1,8 +1,5 @@
 import { test, expect } from "@playwright/test";
-import gamesData from "../fixtures/games.json";
 
-// Список игр для проверки в Json файле
-const gamesToTest: string[] = gamesData.games;
 
 const BASE_URL = "https://ultra.panel.godlike.host";
 const EMAIL = "test@testmail.com";

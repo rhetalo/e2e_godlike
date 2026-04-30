@@ -5,6 +5,7 @@ test.describe("Main page links validation", () => {
     "all visible links on https://godlike.host/ are valid",
     { tag: "@links" },
     async ({ page }) => {
+      await page.setViewportSize({ width: 1920, height: 1080 });
       const baseUrl = "https://godlike.host/";
 
       await page.goto(baseUrl);
@@ -22,9 +23,13 @@ test.describe("Main page links validation", () => {
         ),
       );
 
+      console.log(`🔍 Найдено href: ${hrefs.length}`);
+
       const urlsToCheck: string[] = [];
 
       for (const href of hrefs) {
+        console.log(`Обработка href: ${href}`);
+
         // Пропускаем технические/нестандартные ссылки
         if (
           href.startsWith("mailto:") ||
@@ -32,6 +37,7 @@ test.describe("Main page links validation", () => {
           href.startsWith("javascript:") ||
           href.startsWith("#")
         ) {
+          console.log(`Пропущен: ${href}`);
           continue;
         }
 
@@ -48,18 +54,21 @@ test.describe("Main page links validation", () => {
             fullUrl = new URL(href, baseUrl).toString();
           }
         } catch {
-          // Невалидный URL-формат
+          console.log(`❌ Невалидный href: ${href}`);
           throw new Error(`Невалидный href обнаружен: "${href}"`);
         }
 
+        console.log(`Преобразован в: ${fullUrl}`);
         urlsToCheck.push(fullUrl);
       }
+
+      console.log(`📦 Всего URL для проверки: ${urlsToCheck.length}`);
 
       const brokenLinks: { url: string; status: number }[] = [];
 
       const checkViaRequest = async (url: string) => {
-        // Используем API-контекст, привязанный к browser context страницы:
-        // он наследует cookie/прокси/часть настроек и обычно меньше ловит антибот.
+        console.log(`🌐 [REQUEST] Проверка: ${url}`);
+
         const response = await page.request.get(url, {
           maxRedirects: 5,
           headers: {
@@ -71,40 +80,60 @@ test.describe("Main page links validation", () => {
           },
         });
 
-        return response.status();
+        const status = response.status();
+        console.log(`✅ [REQUEST] ${url} -> ${status}`);
+
+        return status;
       };
 
       const checkViaNavigation = async (url: string) => {
-        // Если запросы режутся антиботом (403/400), проверяем ссылку “как пользователь”
-        // через реальную навигацию в новом табе.
+        console.log(`🧭 [NAVIGATION] fallback для: ${url}`);
+
         const p = await page.context().newPage();
         try {
           const resp = await p.goto(url, {
             waitUntil: "domcontentloaded",
             timeout: 45000,
           });
-          return resp?.status() ?? 0;
+
+          const status = resp?.status() ?? 0;
+          console.log(`✅ [NAVIGATION] ${url} -> ${status}`);
+
+          return status;
         } finally {
           await p.close();
         }
       };
 
       for (const url of urlsToCheck) {
+        console.log(`\nНачало проверки: ${url}`);
+
         let status = await checkViaRequest(url);
 
-        // Часто встречается: “открывается в браузере, но 403/400 для API-клиента”.
-        // В таком случае делаем fallback-навигацию.
+        // fallback если антибот
         if (status === 400 || status === 403) {
+          console.log(`⚠️${url} вернул ${status}, пробуем NAVIGATION`);
           const navStatus = await checkViaNavigation(url);
           if (navStatus > 0) status = navStatus;
         }
 
+        console.log(`Итог: ${url} -> ${status}`);
+
         if (status >= 400) {
+          console.log(`❌ Битая ссылка: ${url} (${status})`);
           brokenLinks.push({ url, status });
         }
       }
 
-      // Если есть битые ссылки — падаем с понятным сообщением
+      if (brokenLinks.length) {
+        console.log("\n❌ Найдены битые ссылки:");
+        brokenLinks.forEach((l) =>
+          console.log(`${l.url} -> ${l.status}`),
+        );
+      } else {
+        console.log("\nВсе ссылки валидны");
+      }
+
       expect(
         brokenLinks,
         brokenLinks.length

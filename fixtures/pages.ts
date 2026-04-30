@@ -1,9 +1,9 @@
 import { test as base } from '@playwright/test';
-import { ModdedHostingPage } from '../pages/ModdedHostingPage';
+import { ModdedHostingPage } from '../pages/ModdedHostingPage1';
 import { SeedDetailPage } from '../pages/SeedDetailPage';
 import { SeedsListPage } from '../pages/SeedsListPage';
 import { CartPage } from '../pages/CartPage';
-import { LoginPage } from '../pages/LoginPage';
+import { LoginPage } from '../pages/LoginPage1';
 
 type Pages = {
   moddedHostingPage: ModdedHostingPage;

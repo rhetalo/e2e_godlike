@@ -15,7 +15,7 @@ import { ModdedHostingPage } from "../pages/ModdedHostingPage";
 import { SeedPage } from "../pages/SeedPage";
 import { CartPage } from "../pages/CartPage";
 import { CheckoutPage } from "../pages/CheckoutPage";
-import { CookieBanner } from "../pages/components/CookieBanner";
+import { CookieBanner } from "../components/CookieBanner";
 
 type Fixtures = {
   moddedPage: ModdedHostingPage;
