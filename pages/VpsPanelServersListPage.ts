@@ -2,7 +2,7 @@ import { type Page, type Locator } from "@playwright/test";
 import { PANEL_URL } from "../utils/auth";
 
 /**
- * ServersListPage — /servers
+ * VpsPanelServersListPage — /servers
  *
  * Vue component: <client-servers>
  *
@@ -15,7 +15,7 @@ import { PANEL_URL } from "../utils/auth";
  *      success toast: "Server deleted successfully."
  *  - Direct URL /server/{id} redirects to /dashboard — must use "Manage" click
  */
-export class ServersListPage {
+export class VpsPanelServersListPage {
   static readonly url = `${PANEL_URL}/servers`;
 
   constructor(private readonly page: Page) {}
@@ -105,7 +105,7 @@ export class ServersListPage {
   // ── Actions ─────────────────────────────────────────────────────────────
 
   async goto(): Promise<void> {
-    await this.page.goto(ServersListPage.url, {
+    await this.page.goto(VpsPanelServersListPage.url, {
       waitUntil: "domcontentloaded",
       timeout: 30_000,
     });

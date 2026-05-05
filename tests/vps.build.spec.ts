@@ -17,8 +17,8 @@
 
 import { test, expect, type Browser } from "@playwright/test";
 import { loginAndSaveSession, STORAGE_STATE_PATH, TEST_SERVER_NAME } from "../utils/auth";
-import { ServersListPage } from "../pages/ServersListPage";
-import { ServerDetailPage } from "../pages/ServerDetailPage";
+import { VpsPanelServersListPage } from "../pages/VpsPanelServersListPage";
+import { ServerDetailPage } from "../pages/VpsPanelServerDetailPage";
 
 test.use({ viewport: { width: 1440, height: 900 } });
 
@@ -33,7 +33,7 @@ test.describe("VPS Build Environment", () => {
   test("T2.1 — список серверов доступен после логина", async ({ browser }) => {
     const context = await browser.newContext({ storageState: STORAGE_STATE_PATH });
     const page = await context.newPage();
-    const serversList = new ServersListPage(page);
+    const serversList = new VpsPanelServersListPage(page);
 
     await serversList.goto();
     await expect(page).toHaveURL(/servers/, { timeout: 15_000 });
