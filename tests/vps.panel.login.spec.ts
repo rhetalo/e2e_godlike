@@ -93,15 +93,15 @@ test.describe("VPS Panel — Login Page Structure", () => {
     await page.close();
   });
 
-  test("кнопка Login видна и активна", async ({ browser }) => {
+  test("кнопка Login видна и неактивна", async ({ browser }) => {
     const page = await browser.newPage();
     const loginPage = new VpsPanelLoginPage(page);
 
     await loginPage.goto();
 
     await expect(loginPage.loginButton).toBeVisible({ timeout: 10_000 });
-    await expect(loginPage.loginButton).toBeEnabled();
-    console.log("[INFO] Login button enabled ✓");
+    await expect(loginPage.loginButton).toBeDisabled();
+    console.log("[INFO] Login button disabled ✓");
 
     await page.close();
   });
@@ -205,12 +205,13 @@ test.describe("VPS Panel — Invalid Credentials", () => {
     await page.close();
   });
 
-  test("пустые поля — кнопка Login не отправляет форму", async ({ browser }) => {
+  test("пустые поля — кнопка Login неактивна", async ({ browser }) => {
     const page = await browser.newPage();
     const loginPage = new VpsPanelLoginPage(page);
 
     await loginPage.goto();
-    await loginPage.loginButton.click();
+    await expect(loginPage.loginButton).toBeDisabled();
+    // await loginPage.loginButton.click();
     await page.waitForTimeout(1_000);
 
     // Should stay on /login

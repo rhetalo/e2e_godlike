@@ -19,7 +19,7 @@
 import { test, expect, type Browser, type Page } from "@playwright/test";
 import { SeedPage } from "../pages/SeedPage";
 import { CartPage } from "../pages/CartPage";
-import { CheckoutPage } from "../pages/Checkout2Page";
+import { CheckoutPage } from "../pages/CheckoutPage";
 import {
   BASE_URL,
   Credentials,

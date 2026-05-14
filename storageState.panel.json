@@ -2,20 +2,20 @@
   "cookies": [
     {
       "name": "XSRF-TOKEN",
-      "value": "eyJpdiI6ImlRU1VwQ0ExbDFxbmRQNzhnSmx6TEE9PSIsInZhbHVlIjoiOVh1TzQyVWMxL0NKQVdhWmNYOExnNGg0eFoxWGNpVEtBYjlBaExqdFhOVkZBWVF2bStxVWl1bVJ0dHViOTNoYTZzQk85elhxYkgrSlR5OVFlVGpCeHp1QzUyN05wajNLZlpTSkZWODNoR2xlREcyVTZkVW9iZGFudnZEUTRJOFciLCJtYWMiOiI1MjZjYzU5N2Y5YTQ5NWJkZWRlMzZkNmY1ZDZjNTYwMDYyNmE4ZDA0OWJlYTYxYjg4Y2Y5ZTY0NWIxMGRkZDY3IiwidGFnIjoiIn0%3D",
+      "value": "eyJpdiI6IlZBZnA1TlJQMVQwMGZjN1ZlbHBsRVE9PSIsInZhbHVlIjoiRWlJdVlrL2taZ29iWHdneWhLTitDMlF5b1RPL21EQkVsOEVEdm5sc25qMTlEYmRKTldyUVBEUnFiakloZlJ6RTVVTERVaEQvS2ZDN2p2QTJNdG1ldlJxZ1pKVHlMYnpGcSt6c0FUdk9rakNYVDFnVGhtRmQ3d0x6M3pUY20xU1kiLCJtYWMiOiIxNDMyMTgwZWEzNWE5MGZjMzMwOGEyMmRhYzZjMmRlMGQ4OWIxMzg3NzIwYTY2OTg1YWFmNzQxYzI3ZDkyNmJmIiwidGFnIjoiIn0%3D",
       "domain": "vf-panel.godlike.host",
       "path": "/",
-      "expires": 1777980307.371499,
+      "expires": 1778766827.20346,
       "httpOnly": false,
       "secure": true,
       "sameSite": "Lax"
     },
     {
       "name": "virtfusion_session",
-      "value": "eyJpdiI6IllzU29saTd2YmJxeHNBMVlUVTk5dkE9PSIsInZhbHVlIjoidnhqVkxlY1FjZ3psaXQrSzJvNnhiNFcyYzJ6Sm9oaGtGa0VJanlKYmtTMG5OanNwT2hMNXZMbTZhYUgvSURjR0JobVVyaUhCRDdtUlZ5UkhMMDVkbVFWRFdsV3BiWEk2a29MQ21kelhNT0ZtbEkxdlBSRzVVYWtodjVkd3JOemMiLCJtYWMiOiIyZTk1NjEzYThiZjliNmIwNjJhMTViYTc1ZTZiNzQ0YmQ1MjI0ZTgxZjg3MjAwNjk3MzA0MTExODYwNzYyNzM0IiwidGFnIjoiIn0%3D",
+      "value": "eyJpdiI6IldsTlFJYVE1UzZ6UVNPajB0dGtsSnc9PSIsInZhbHVlIjoiM2pLbFBTd1c5TzJwUUZJb2JtVDFYY2o2MUtqemYwVlZRMHdQRWhLM1BVejhMZEQ0bFVKZStCQ1RUbi9TZ2hLejBpTlFkdzlzVDJvcWpmQWc3dmk5b1dQMXduRk5NaGJpZ29mamM5TjFnYTY4TWRJMG0ybUlPanpnYU9XZ2s3T2IiLCJtYWMiOiI5MWJmYTExMjNkMzhkYmQ4NDA5YTg4MTg4OGEwNWFmYzAwYzExMjQxZDVkZGFjNjlhZTJkNWY5NWU1NzM2MGMyIiwidGFnIjoiIn0%3D",
       "domain": "vf-panel.godlike.host",
       "path": "/",
-      "expires": 1777980307.371751,
+      "expires": 1778766827.203844,
       "httpOnly": true,
       "secure": true,
       "sameSite": "Lax"

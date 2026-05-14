@@ -88,7 +88,7 @@ test.describe("Modded modpack configuration", () => {
     expect(count).toBeGreaterThan(0);
 
     // Sample the first 6 (or fewer) so the test stays fast.
-    const sample = Math.min(count, 6);
+    const sample = Math.min(count, 50);
     for (let i = 0; i < sample; i++) {
       const meta = await modded.readInstallMeta(buttons.nth(i));
       console.log(`[INFO] install[${i}]: productId=${meta.productId} modpackId=${meta.modpackId} promo=${meta.promo}`);
