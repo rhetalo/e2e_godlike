@@ -78,18 +78,27 @@ export class VpsPanelServerPage {
       .first();
   }
 
-  /** Returns trimmed status text: "Running", "Stopped", etc. */
+  /**
+   * Returns normalized status text: "Running", "Stopped", "Paused", "Building".
+   * VirtFusion may return "RUNNING" or "Running" depending on version — we normalize.
+   */
   async getStatusText(): Promise<string> {
     const raw = await this.statusBadge.innerText({ timeout: 10_000 }).catch(() => "");
-    return raw.trim();
+    const trimmed = raw.trim();
+    if (/running/i.test(trimmed)) return "Running";
+    if (/stopped/i.test(trimmed)) return "Stopped";
+    if (/paused/i.test(trimmed)) return "Paused";
+    if (/building/i.test(trimmed)) return "Building";
+    if (/starting/i.test(trimmed)) return "Starting";
+    return trimmed;
   }
 
   async isRunning(): Promise<boolean> {
-    return (await this.getStatusText()).includes("Running");
+    return (await this.getStatusText()) === "Running";
   }
 
   async isStopped(): Promise<boolean> {
-    return (await this.getStatusText()).includes("Stopped");
+    return (await this.getStatusText()) === "Stopped";
   }
 
   // ── Power Controls ────────────────────────────────────────────────────────
