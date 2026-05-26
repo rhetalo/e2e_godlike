@@ -1,183 +1,434 @@
-import { type Page, type Locator } from "@playwright/test";
+import { type Page, type Locator, expect } from "@playwright/test";
 import { PANEL_URL, TEST_SERVER_UUID } from "../utils/auth";
+import { CookieBanner } from "../components/CookieBanner";
+import { setupBannerHandlers } from "../utils/bannerHandlers";
 
 /**
  * VpsPanelServerPage — https://vf-panel.godlike.host/server/{UUID}
  * VirtFusion v4.x server detail management page.
  *
- * Structure:
- *   - Server name + status badge
- *   - Power action buttons: Boot, Shutdown, Power Off, Restart
- *   - Tab navigation: Overview | Media | Options | Network | Storage | Backups | Sharing
- *   - Tab content (changes per active tab)
+ * ── CONFIRMED SELECTORS (from live DevTools, May 2026) ──────────────────────
  *
- * ALL tab names confirmed from :vlang attribute on <client-server-manage> (vlang keys 71–77).
- * ALL power button data-actions confirmed from live dash-app.js.
+ * STATUS BADGE (both states, &nbsp; resolves to space in innerText):
+ *   <div class="p-3">&nbsp;&nbsp;Running</div>
+ *   <div class="p-3">&nbsp;&nbsp;Stopped</div>
+ *
+ * POWER BUTTONS:
+ *   button[data-action="boot_server"]     — Boot (NO modal — direct action + loader)
+ *   button[data-action="shutdown_server"] — Shutdown (opens modal)
+ *   button[data-action="poweroff_server"] — Power Off (opens modal)
+ *   button[data-action="restart_server"]  — Restart (opens modal)
+ *
+ * BOOTSTRAP MODALS (.modal.show when open):
+ *   Shutdown  title: "Shutdown Server"
+ *             body:  "Are you sure you want to shutdown this server?"
+ *             confirm: button.btn.btn-primary.w-100[data-bs-dismiss="modal"]:has-text("Shutdown")
+ *
+ *   Restart   title: "Restart Server"
+ *             body:  "Are you sure you want to restart this server?"
+ *             confirm: button.btn.btn-primary.w-100[data-bs-dismiss="modal"]:has-text("Restart")
+ *
+ *   Power Off title: "Power Off Server"
+ *             body:  "Are you sure you want to power off this server?"
+ *             confirm: button.btn.btn-primary.w-100[data-bs-dismiss="modal"]:has-text("Power Off")
+ *
+ *   Rebuild   body:  "Are you sure you want to rebuild this server?"
+ *             confirm: button#server-install-button.btn.btn-danger.w-100[data-bs-dismiss="modal"]
+ *
+ *   Cancel (ALL modals): button.btn.btn-light.w-100[data-bs-dismiss="modal"]
+ *   NOTE: data-bs-dismiss auto-closes modal on click — no extra wait needed.
+ *
+ * ACTIVITY TABLE:
+ *   table.table.table-normal — columns: Task | Requested | Duration | Progress
+ *   span.badge.badge-active  — "Complete" status badge per row
+ *   Debug rows have id="debugNNNN" — excluded from row counts.
  */
 export class VpsPanelServerPage {
   readonly url: string;
 
-  constructor(private page: Page, uuid: string = TEST_SERVER_UUID) {
+  constructor(readonly page: Page, uuid: string = TEST_SERVER_UUID) {
     this.url = `${PANEL_URL}/server/${uuid}`;
   }
 
   async goto(): Promise<void> {
-    await this.page.goto(this.url, {
-      waitUntil: "domcontentloaded",
-      timeout: 30_000,
-    });
+    // Регистрируем автоматические обработчики баннеров ДО навигации.
+    // addLocatorHandler следит за баннером в фоне: если он появится в любой
+    // момент теста (даже посреди клика), Playwright закроет его автоматически.
+    await setupBannerHandlers(this.page);
+
+    await this.page.goto(this.url, { waitUntil: "domcontentloaded", timeout: 30_000 });
     await this.page.waitForLoadState("networkidle").catch(() => null);
+
+    // Проактивное закрытие — на случай если баннер уже был на странице
+    // до того, как addLocatorHandler успел зарегистрироваться.
+    await new CookieBanner(this.page).dismissAll();
   }
 
   // ── Server Identity ───────────────────────────────────────────────────────
 
-  /** Server name heading */
-  get serverName(): Locator {
-    return this.page.locator("h1, h2, h3, [class*='server-name'], [class*='vm-name']").first();
-  }
-
-  /** Status badge (Running / Stopped / Paused) */
+  /**
+   * Status badge.
+   * Confirmed HTML: <div class="p-3">&nbsp;&nbsp;Running</div>
+   * Filter by text because div.p-3 may appear for other layout blocks too.
+   */
   get statusBadge(): Locator {
-    return this.page.locator(
-      '[class*="status"], [class*="badge"], [class*="state"], [class*="label"]'
-    ).first();
+    return this.page
+      .locator("div.p-3")
+      .filter({ hasText: /Running|Stopped|Paused|Building/i })
+      .first();
   }
 
-  /** Check if status text contains the expected state */
+  /** Returns trimmed status text: "Running", "Stopped", etc. */
   async getStatusText(): Promise<string> {
-    return (await this.statusBadge.innerText().catch(() => "")).trim();
+    const raw = await this.statusBadge.innerText({ timeout: 10_000 }).catch(() => "");
+    return raw.trim();
+  }
+
+  async isRunning(): Promise<boolean> {
+    return (await this.getStatusText()).includes("Running");
+  }
+
+  async isStopped(): Promise<boolean> {
+    return (await this.getStatusText()).includes("Stopped");
   }
 
   // ── Power Controls ────────────────────────────────────────────────────────
 
-  /**
-   * Boot / Start button
-   * Confirmed: data-action="boot_server" or text "Boot"
-   */
+  /** Boot — NO modal, direct action; loader appears, status → Running */
   get bootButton(): Locator {
-    return this.page.locator(
-      'button[data-action="boot_server"], button:has-text("Boot")'
-    ).first();
+    return this.page
+      .locator('button[data-action="boot_server"]')
+      .first();
   }
 
-  /**
-   * Shutdown button (graceful shutdown)
-   * Confirmed: data-action="shutdown_server" or text "Shutdown" (vlang[123])
-   */
+  /** Shutdown — opens Bootstrap modal "Shutdown Server" */
   get shutdownButton(): Locator {
-    return this.page.locator(
-      'button[data-action="shutdown_server"], button:has-text("Shutdown")'
-    ).first();
+    return this.page
+      .locator('button[data-action="shutdown_server"]')
+      .first();
   }
 
-  /**
-   * Power Off button (hard power off)
-   * Confirmed: data-action="poweroff_server" or text "Power Off" (vlang[120])
-   */
+  /** Power Off — opens Bootstrap modal "Power Off Server" */
   get powerOffButton(): Locator {
-    return this.page.locator(
-      'button[data-action="poweroff_server"], button:has-text("Power Off")'
-    ).first();
+    return this.page
+      .locator('button[data-action="poweroff_server"]')
+      .first();
   }
 
-  /**
-   * Restart button
-   * Confirmed: data-action="restart_server" or text "Restart" (vlang[94])
-   */
+  /** Restart — opens Bootstrap modal "Restart Server" */
   get restartButton(): Locator {
-    return this.page.locator(
-      'button[data-action="restart_server"], button:has-text("Restart")'
-    ).first();
+    return this.page
+      .locator('button[data-action="restart_server"]')
+      .first();
   }
 
-  /** All power action buttons as a group */
   get allPowerButtons(): Locator {
     return this.page.locator(
-      'button[data-action="boot_server"], button[data-action="shutdown_server"], button[data-action="poweroff_server"], button[data-action="restart_server"]'
+      'button[data-action="boot_server"], button[data-action="shutdown_server"], button[data-action="poweroff_server"], button[data-action="restart_server"]',
     );
+  }
+
+  // ── Bootstrap Power Action Modals ─────────────────────────────────────────
+  //
+  // Bootstrap adds .show when modal is open.
+  // All cancel buttons are identical:  button.btn.btn-light.w-100[data-bs-dismiss="modal"]
+  // data-bs-dismiss means the click itself closes the modal — we just wait ~300ms for animation.
+
+  /** Active Bootstrap modal (.modal.show) */
+  get activeModal(): Locator {
+    return this.page.locator(".modal.show").first();
+  }
+
+  /** Cancel — confirmed identical HTML across ALL power modals */
+  get modalCancelButton(): Locator {
+    return this.page.locator(
+      'button.btn.btn-light.w-100[data-bs-dismiss="modal"]',
+    ).first();
+  }
+
+  /** Shutdown confirm — "Shutdown" inside btn-primary */
+  get shutdownConfirmButton(): Locator {
+    return this.page.locator(
+      'button.btn.btn-primary.w-100[data-bs-dismiss="modal"]:has-text("Shutdown")',
+    ).first();
+  }
+
+  /** Restart confirm — "Restart" inside btn-primary */
+  get restartConfirmButton(): Locator {
+    return this.page.locator(
+      'button.btn.btn-primary.w-100[data-bs-dismiss="modal"]:has-text("Restart")',
+    ).first();
+  }
+
+  /** Power Off confirm — "Power Off" inside btn-primary */
+  get powerOffConfirmButton(): Locator {
+    return this.page.locator(
+      'button.btn.btn-primary.w-100[data-bs-dismiss="modal"]:has-text("Power Off")',
+    ).first();
+  }
+
+  /** Rebuild confirm — btn-danger, id="server-install-button" (confirmed from HTML) */
+  get rebuildConfirmButton(): Locator {
+    return this.page.locator("button#server-install-button").first();
+  }
+
+  /**
+   * Click power button → wait for Bootstrap modal (.modal.show) →
+   * assert title fragment is present → click Cancel → wait for animation.
+   *
+   * Returns { appeared, modalText }.
+   * Safe — NEVER confirms the action.
+   */
+  async clickPowerAndCancel(
+    button: Locator,
+    expectedTitleFragment: string,
+  ): Promise<{ appeared: boolean; modalText: string }> {
+    await button.click();
+
+    const modal = this.activeModal;
+    const appeared = await modal
+      .waitFor({ state: "visible", timeout: 8_000 })
+      .then(() => true)
+      .catch(() => false);
+
+    if (!appeared) {
+      return { appeared: false, modalText: "" };
+    }
+
+    const modalText = await modal.innerText().catch(() => "");
+
+    if (!modalText.toLowerCase().includes(expectedTitleFragment.toLowerCase())) {
+      console.log(
+        `[WARN] Modal did not contain "${expectedTitleFragment}". Got: "${modalText.trim().slice(0, 150)}"`,
+      );
+    }
+
+    await this.modalCancelButton.click();
+    await this.page.waitForTimeout(400);
+
+    return { appeared: true, modalText: modalText.trim() };
   }
 
   // ── Tab Navigation ────────────────────────────────────────────────────────
 
-  /** Tab by label text — confirmed from vlang props */
-  tab(label: "Overview" | "Media" | "Options" | "Network" | "Storage" | "Backups" | "Sharing"): Locator {
+  tab(
+    label: "Overview" | "Media" | "Options" | "Network" | "Storage" | "Backups" | "Sharing",
+  ): Locator {
     return this.page
-      .locator(`button:has-text("${label}"), a:has-text("${label}"), [role="tab"]:has-text("${label}")`)
+      .locator(
+        `button:has-text("${label}"), a:has-text("${label}"), [role="tab"]:has-text("${label}")`,
+      )
       .first();
   }
 
-  /** Currently active tab indicator */
   get activeTab(): Locator {
-    return this.page.locator(
-      '[class*="active"][class*="tab"], [class*="tab"][class*="active"], [class*="nav-link"][class*="active"], [aria-selected="true"]'
-    ).first();
+    return this.page
+      .locator(
+        '[class*="active"][class*="tab"], [class*="nav-link"][class*="active"], [aria-selected="true"]',
+      )
+      .first();
   }
 
-  /** Click a tab by label and wait for content to settle */
-  async clickTab(label: "Overview" | "Media" | "Options" | "Network" | "Storage" | "Backups" | "Sharing"): Promise<void> {
+  async clickTab(
+    label: "Overview" | "Media" | "Options" | "Network" | "Storage" | "Backups" | "Sharing",
+  ): Promise<void> {
     await this.tab(label).click();
     await this.page.waitForTimeout(800);
     await this.page.waitForLoadState("networkidle").catch(() => null);
   }
 
-  // ── Overview tab content ──────────────────────────────────────────────────
+  // ── Activity Table ────────────────────────────────────────────────────────
+  //
+  // Confirmed HTML structure (from attached DevTools snapshot):
+  //   <table class="table table-normal mb-0">
+  //     <thead><tr><th>Task</th><th>Requested</th><th>Duration</th><th>Progress</th></tr></thead>
+  //     <tbody>
+  //       <tr><td>Poweroff</td>...<span class="badge badge-active w-100">Complete</span></tr>
+  //       <tr><td>Boot</td>...</tr>
+  //       <tr id="debugNNNN" style="display:none">...</tr>  ← hidden debug rows
+  //     </tbody>
+  //   </table>
 
-  /** IP address display on Overview */
-  get ipAddress(): Locator {
-    return this.page.locator('[class*="ip"], [class*="network"]').first();
+  get activityTable(): Locator {
+    return this.page.locator("table.table.table-normal").first();
   }
 
-  /** OS info shown on Overview */
-  get osInfo(): Locator {
-    return this.page.locator('[class*="os"], [class*="template"]').first();
+  /** Visible activity rows — excludes hidden debug rows (id="debugNNNN") */
+  get activityRows(): Locator {
+    return this.page.locator("table.table.table-normal tbody tr:not([id^='debug'])");
   }
 
-  /** Server specs block (CPU, RAM, disk info) */
-  get serverSpecs(): Locator {
-    return this.page.locator('[class*="spec"], [class*="resource"], [class*="info"]').first();
+  get completeBadges(): Locator {
+    return this.page.locator("span.badge.badge-active");
   }
 
-  // ── Confirmation Modal (shared across power actions) ──────────────────────
+  /** Returns task name strings from first column of activity table */
+  async getActivityTaskNames(): Promise<string[]> {
+    const count = await this.activityRows.count();
+    const names: string[] = [];
+    for (let i = 0; i < count; i++) {
+      const text = (
+        await this.activityRows.nth(i).locator("td").first().innerText().catch(() => "")
+      ).trim();
+      if (text) names.push(text);
+    }
+    return names;
+  }
+
+  // ── State Transition Helpers ──────────────────────────────────────────────
+  //
+  // VirtFusion polls state.json every ~2s:
+  //   GET /server/534/resource/state.json → { data: { state: { state: "running" | "stopped" } } }
+  //
+  // While a task is in progress the debug row (id="debugNNNN") shows:
+  //   <div class="v-loader v-loader-queue"></div>
+  //
+  // Task completion: <span class="badge badge-active w-100">Complete</span>
+  //
+  // Timeouts from real activity history:
+  //   Boot:     3–5 sec   → allow 30s
+  //   Poweroff: 4–5 sec   → allow 30s
+  //   Shutdown: 6–43 sec  → allow 90s
+  //   Restart:  ~10 sec   → allow 90s
 
   /**
-   * Confirmation modal/dialog — appears after clicking power buttons
-   * that require confirmation.
+   * Loader that appears on a power button while VirtFusion applies the action.
+   * Selector: any spinner/loader on the power buttons area.
    */
-  get confirmModal(): Locator {
-    return this.page.locator('[class*="modal"], [role="dialog"]').first();
+  get buttonLoader(): Locator {
+    return this.page.locator(
+      'button[data-action] .v-loader, button[data-action] .spinner, button[data-action] [class*="loader"]',
+    ).first();
   }
 
-  get confirmCancelButton(): Locator {
-    return this.page.locator('button:has-text("Cancel")').first();
+  /**
+   * Active task loader in the activity table debug row.
+   * Confirmed HTML: <div class="v-loader v-loader-queue"></div>
+   * Appears while a task is queued/in-progress.
+   */
+  get activityTaskLoader(): Locator {
+    return this.page.locator("div.v-loader.v-loader-queue").first();
   }
 
-  get confirmProceedButton(): Locator {
-    return this.page.locator('button:has-text("Continue"), button:has-text("Confirm"), button:has-text("Yes")').first();
+  /**
+   * Progress bar inside the FIRST (most recent) activity row.
+   * aria-valuenow goes 0→100 during task execution.
+   */
+  get latestTaskProgressBar(): Locator {
+    return this.activityRows.first().locator(".progress-bar");
   }
 
-  /** Wait for and then close a confirmation modal via Cancel */
-  async cancelConfirmModal(timeoutMs = 5_000): Promise<boolean> {
-    try {
-      await this.confirmModal.waitFor({ state: "visible", timeout: timeoutMs });
-      await this.confirmCancelButton.click();
-      await this.confirmModal.waitFor({ state: "hidden", timeout: 5_000 }).catch(() => null);
-      return true;
-    } catch {
-      return false;
+  /**
+   * Complete badge of the FIRST (most recent) activity row.
+   */
+  get latestTaskCompleteBadge(): Locator {
+    return this.activityRows.first().locator("span.badge.badge-active");
+  }
+
+  /**
+   * Task name from the first (most recent) row in the activity table.
+   */
+  async getLatestTaskName(): Promise<string> {
+    return (
+      await this.activityRows.first().locator("td").first().innerText().catch(() => "")
+    ).trim();
+  }
+
+  /**
+   * Row count snapshot — used to detect when a NEW task row appears.
+   */
+  async getActivityRowCount(): Promise<number> {
+    return this.activityRows.count();
+  }
+
+  /**
+   * Wait until a new activity row appears (compared to rowCountBefore).
+   * Polls every 500ms for up to 15s.
+   */
+  async waitForNewActivityRow(rowCountBefore: number, timeoutMs = 15_000): Promise<void> {
+    const deadline = Date.now() + timeoutMs;
+    while (Date.now() < deadline) {
+      const current = await this.activityRows.count().catch(() => rowCountBefore);
+      if (current > rowCountBefore) return;
+      await this.page.waitForTimeout(500);
     }
+    throw new Error(`No new activity row appeared within ${timeoutMs}ms`);
   }
 
-  // ── Alert / Toast ─────────────────────────────────────────────────────────
+  /**
+   * Wait until the most recent task shows Complete badge (progress = 100%).
+   * Times out after `timeoutMs` ms.
+   */
+  async waitForLatestTaskComplete(timeoutMs = 90_000): Promise<void> {
+    await expect(this.latestTaskCompleteBadge).toBeVisible({ timeout: timeoutMs });
+  }
+
+  /**
+   * Wait until the status badge shows the expected state.
+   * Polls the live DOM — VirtFusion updates div.p-3 via its ~2s poller.
+   */
+  async waitForStatus(
+    expected: "Running" | "Stopped",
+    timeoutMs = 90_000,
+  ): Promise<void> {
+    await expect(
+      this.page
+        .locator("div.p-3")
+        .filter({ hasText: new RegExp(expected, "i") })
+        .first(),
+    ).toBeVisible({ timeout: timeoutMs });
+  }
+
+  /**
+   * Ensure server is Running. If Stopped → boot it and wait for Running.
+   * Used in beforeEach to normalise state before a test.
+   */
+  async ensureRunning(timeoutMs = 60_000): Promise<void> {
+    const status = await this.getStatusText();
+    if (status.includes("Running")) return;
+
+    console.log(`[SETUP] Server is "${status}" — booting before test...`);
+    await expect(this.bootButton).toBeVisible({ timeout: 10_000 });
+    await expect(this.bootButton).toBeEnabled({ timeout: 10_000 });
+    await this.bootButton.click();
+    await this.waitForStatus("Running", timeoutMs);
+    console.log("[SETUP] Server is Running ✓");
+  }
+
+  /**
+   * Ensure server is Stopped. If Running → power off and wait for Stopped.
+   * Used in beforeEach to normalise state before a test.
+   */
+  async ensureStopped(timeoutMs = 60_000): Promise<void> {
+    const status = await this.getStatusText();
+    if (status.includes("Stopped")) return;
+
+    console.log(`[SETUP] Server is "${status}" — powering off before test...`);
+    await this.powerOffButton.click();
+    const modal = this.activeModal;
+    const appeared = await modal
+      .waitFor({ state: "visible", timeout: 8_000 })
+      .then(() => true)
+      .catch(() => false);
+    if (appeared) {
+      await this.page
+        .locator('button.btn.btn-primary.w-100[data-bs-dismiss="modal"]:has-text("Power Off")')
+        .first()
+        .click();
+    }
+    await this.waitForStatus("Stopped", timeoutMs);
+    console.log("[SETUP] Server is Stopped ✓");
+  }
+
+  // ── Alerts ────────────────────────────────────────────────────────────────
 
   get successAlert(): Locator {
     return this.page.locator('[class*="alert-success"], [class*="toast-success"]').first();
   }
 
   get errorAlert(): Locator {
-    return this.page.locator('[class*="alert-danger"], [class*="alert-error"], [class*="toast-error"]').first();
-  }
-
-  get anyAlert(): Locator {
-    return this.page.locator('[class*="alert"], [class*="toast"], [role="alert"]').first();
+    return this.page
+      .locator('[class*="alert-danger"], [class*="alert-error"], [class*="toast-error"]')
+      .first();
   }
 }

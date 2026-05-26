@@ -1,9 +1,18 @@
 {
   "name": "godlike-test-2",
   "version": "1.0.0",
-  "description": "npx playwright test",
+  "description": "Playwright E2E tests for godlike.host",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "test": "npx playwright test",
+    "test:panel": "npx playwright test tests/vps.panel.*.spec.ts --project=chromium",
+    "test:funnel": "npx playwright test tests/funnel*.spec.ts --project=chromium",
+    "test:smoke": "npx playwright test --grep @smoke --project=chromium",
+    "test:critical": "npx playwright test --grep @critical --project=chromium",
+    "test:regression": "npx playwright test --grep @regression --project=chromium",
+    "test:headed": "npx playwright test --headed --project=chromium",
+    "report": "npx playwright show-report"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

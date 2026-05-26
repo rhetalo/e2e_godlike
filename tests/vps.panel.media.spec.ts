@@ -1,33 +1,25 @@
 /**
  * vps.panel.media.spec.ts
  * ────────────────────────
- * Тесты вкладки Media (смена ОС / rebuild / CD-DVD / Rescue) на странице сервера VirtFusion.
+ * Тесты вкладки Media на странице сервера VirtFusion.
  * URL: https://vf-panel.godlike.host/server/9c49ed96-56f4-41c8-bc5f-a8d44c21a486
  *
- * Покрытие:
- *   1. Вкладка Media открывается
- *   2. "Operating System" секция (vlang[149]) видна
- *   3. Список ОС-шаблонов виден
- *   4. Кнопка "Rebuild" (vlang[196]) или "Install" (vlang[173]) присутствует
- *   5. Rebuild → модал с текстом vlang[118] → Cancel (rebuild не запускается)
- *   6. "Cancel Rebuild" кнопка (vlang[140]) закрывает модал
- *   7. CD/DVD кнопка (vlang[182])
- *   8. Rescue кнопка (vlang[376])
+ * ── ЧТО РЕАЛЬНО ЕСТЬ НА ВКЛАДКЕ MEDIA (подтверждено May 2026) ──────────────
+ *   1. Кнопки управления питанием (те же Boot/Shutdown/PowerOff/Restart)
+ *   2. Таблица активности — история действий с сервером (Poweroff, Boot, …)
+ *   3. Секция Boot Order — переключение между HDD и CD/DVD (первичное устройство загрузки)
  *
- * vlang-ссылки для подтверждения строк:
- *   vlang[118] = "Are you sure you want to rebuild this server?"  ← точный текст модала
- *   vlang[119] = "Continue"          ← confirm кнопка (НЕ нажимать в тестах!)
- *   vlang[137] = "Rebuilding will delete all existing data..."
- *   vlang[140] = "Cancel Rebuild"    ← safe cancel
- *   vlang[149] = "Operating System"
- *   vlang[153] = "Install with Template"
- *   vlang[173] = "Install"
- *   vlang[182] = "CD/DVD"
- *   vlang[196] = "Rebuild"           ← основная кнопка действия
- *   vlang[376] = "Rescue"
- *   vlang[371] = "Create Rescue Session"
+ * ВАЖНО: OS templates / Rebuild / Rescue на этой вкладке НЕТ.
  *
- * ⚠️  Реальный rebuild НЕ запускается — тест всегда отменяет через Cancel/Cancel Rebuild.
+ * ── ПОДТВЕРЖДЁННЫЕ СЕЛЕКТОРЫ ────────────────────────────────────────────────
+ *   Boot Order heading:  h2.mb-4  text="Boot Order"
+ *   HDD tile:            .radio-tile > .radio-tile-label:has-text("HDD")
+ *   CD/DVD tile:         .radio-tile > .radio-tile-label:has-text("CD/DVD")
+ *   HDD radio:           input.radio-button[type="radio"][value="1"]
+ *   CD/DVD radio:        input.radio-button[type="radio"][value="2"]
+ *   Apply button:        button#server-boot-order-button   ⚠️ НЕ нажимать в тестах
+ *   Activity table:      table.table.table-normal
+ *   Complete badge:      span.badge.badge-active
  *
  * Запуск:
  *   npx playwright test tests/vps.panel.media.spec.ts --project=chromium
@@ -36,17 +28,9 @@
 import { test, expect, type Browser } from "@playwright/test";
 import { VpsPanelServerPage } from "../pages/VpsPanelServerPage";
 import { VpsPanelMediaPage } from "../pages/VpsPanelMediaPage";
-import {
-  loginAndSaveSession,
-  STORAGE_STATE_PATH,
-  TEST_SERVER_UUID,
-  PANEL_URL,
-} from "../utils/auth";
+import { loginAndSaveSession, STORAGE_STATE_PATH, TEST_SERVER_UUID } from "../utils/auth";
 
-test.use({
-  viewport: { width: 1440, height: 900 },
-  deviceScaleFactor: 1,
-});
+test.use({ viewport: { width: 1440, height: 900 } });
 
 test.beforeAll(async ({ browser }: { browser: Browser }) => {
   await loginAndSaveSession(browser);
@@ -61,360 +45,224 @@ async function openMediaTab(browser: Browser) {
   const mediaPage = new VpsPanelMediaPage(page, TEST_SERVER_UUID);
 
   await serverPage.goto();
+  await serverPage.clickTab("Media");
 
-  const mediaTab = serverPage.tab("Media");
-  const isVisible = await mediaTab.isVisible().catch(() => false);
-
-  if (isVisible) {
-    await serverPage.clickTab("Media");
-    console.log("[INFO] Media tab clicked");
-  } else {
-    console.log("[WARN] Media tab not found by button text — page may auto-show media");
-  }
-
-  await page.waitForLoadState("networkidle").catch(() => null);
   return { context, page, serverPage, mediaPage };
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// SUITE 1 — Media Tab Access & Structure
+// SUITE 1 — Вкладка Media: доступ и базовая структура
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — Media Tab Structure", () => {
+test.describe("VPS Panel — Media Tab: доступ", () => {
   test("вкладка Media присутствует на странице сервера", async ({ browser }) => {
     const context = await browser.newContext({ storageState: STORAGE_STATE_PATH });
     const page = await context.newPage();
     const serverPage = new VpsPanelServerPage(page, TEST_SERVER_UUID);
 
     await serverPage.goto();
-
-    const mediaTab = serverPage.tab("Media");
-    await expect(mediaTab).toBeVisible({ timeout: 15_000 });
-    console.log("[INFO] Media tab visible ✓");
+    await expect(serverPage.tab("Media")).toBeVisible({ timeout: 15_000 });
 
     await context.close();
   });
 
-  test("клик по вкладке Media — контент загружается", async ({ browser }) => {
+  test("клик по вкладке Media — страница не ломается, URL остаётся на сервере", async ({
+    browser,
+  }) => {
+    const { context, page } = await openMediaTab(browser);
+
+    expect(page.url()).toContain(TEST_SERVER_UUID);
+
+    await context.close();
+  });
+
+  test("страница сервера загружается (body > 200 символов)", async ({ browser }) => {
     const { context, page } = await openMediaTab(browser);
 
     const bodyText = await page.locator("body").innerText();
-    console.log(`[INFO] Media tab body length: ${bodyText.length}`);
-    expect(bodyText.length).toBeGreaterThan(100);
-
-    await context.close();
-  });
-
-  test("body содержит media-related текст (vlang-подтверждённые строки)", async ({ browser }) => {
-    const { context, page, mediaPage } = await openMediaTab(browser);
-
-    const bodyText = await page.locator("body").innerText();
-    console.log(`[INFO] Body snippet: "${bodyText.slice(0, 500)}"`);
-
-    // Check for confirmed vlang strings
-    const hasMediaContent =
-      bodyText.includes("Operating System") ||      // vlang[149]
-      bodyText.includes("Rebuild") ||               // vlang[196]
-      bodyText.includes("Install") ||               // vlang[173]
-      bodyText.includes("CD/DVD") ||                // vlang[182]
-      bodyText.includes("Rescue") ||                // vlang[376]
-      bodyText.includes("Install with Template");   // vlang[153]
-
-    console.log(`[INFO] Media content (vlang-confirmed strings): ${hasMediaContent}`);
-    expect(hasMediaContent).toBeTruthy();
-
-    await context.close();
-  });
-
-  test("'Operating System' секция (vlang[149]) видна на Media tab", async ({ browser }) => {
-    const { context, page, mediaPage } = await openMediaTab(browser);
-
-    // vlang[149] = "Operating System"
-    const labelVisible = await mediaPage.osLabel.isVisible().catch(() => false);
-    const bodyText = await page.locator("body").innerText();
-    const hasOsLabel = bodyText.includes("Operating System");
-
-    console.log(`[INFO] "Operating System" (vlang[149]) visible: ${labelVisible}`);
-    console.log(`[INFO] "Operating System" in body text: ${hasOsLabel}`);
-    expect(labelVisible || hasOsLabel).toBeTruthy();
-    console.log('[INFO] "Operating System" section confirmed ✓');
+    expect(bodyText.length).toBeGreaterThan(200);
 
     await context.close();
   });
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// SUITE 2 — OS Templates
+// SUITE 2 — Boot Order: структура секции
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — OS Templates", () => {
-  test("список ОС-шаблонов содержит хотя бы 1 пункт", async ({ browser }) => {
-    const { context, page, mediaPage } = await openMediaTab(browser);
+test.describe("VPS Panel — Boot Order: структура", () => {
+  test("заголовок 'Boot Order' (h2.mb-4) виден на вкладке Media", async ({ browser }) => {
+    const { context, mediaPage } = await openMediaTab(browser);
 
-    const templates = mediaPage.osTemplateItems;
-    const count = await templates.count();
-    console.log(`[INFO] OS template items found: ${count}`);
-
-    if (count === 0) {
-      // Fallback: look for known distro names (VirtFusion renders them in client component)
-      const bodyText = await page.locator("body").innerText();
-      const knownOs = ["ubuntu", "debian", "centos", "windows", "arch", "fedora", "alma", "rocky"];
-      const foundOs = knownOs.filter(os => bodyText.toLowerCase().includes(os));
-      console.log(`[INFO] Known OS names in body: ${foundOs.join(", ") || "none"}`);
-      console.log("[INFO] OS template count is 0 — check if component is client-side rendered");
-    } else {
-      expect(count).toBeGreaterThanOrEqual(1);
-      console.log("[INFO] OS template items present ✓");
-    }
+    await expect(mediaPage.bootOrderHeading).toBeVisible({ timeout: 10_000 });
 
     await context.close();
   });
 
-  test("в списке ОС есть знакомые дистрибутивы (Ubuntu, Debian и т.д.)", async ({ browser }) => {
-    const { context, page } = await openMediaTab(browser);
+  test("плитка HDD (.radio-tile с текстом 'HDD') видна", async ({ browser }) => {
+    const { context, mediaPage } = await openMediaTab(browser);
 
-    const bodyText = await page.locator("body").innerText().catch(() => "");
-    const knownOs = ["ubuntu", "debian", "centos", "windows", "arch", "fedora", "alma", "rocky"];
-    const foundOs = knownOs.filter(os => bodyText.toLowerCase().includes(os));
-    console.log(`[INFO] Known OS found in page: ${foundOs.join(", ") || "none"}`);
-
-    if (foundOs.length === 0) {
-      console.log("[INFO] No known OS names found — check Media tab content manually");
-    } else {
-      console.log("[INFO] Known OS distributions confirmed ✓");
-    }
+    await expect(mediaPage.hddTile).toBeVisible({ timeout: 10_000 });
 
     await context.close();
   });
 
-  test("'Install with Template' label (vlang[153]) видна", async ({ browser }) => {
-    const { context, page, mediaPage } = await openMediaTab(browser);
+  test("плитка CD/DVD (.radio-tile с текстом 'CD/DVD') видна", async ({ browser }) => {
+    const { context, mediaPage } = await openMediaTab(browser);
 
-    // vlang[153] = "Install with Template"
-    const labelVisible = await mediaPage.installWithTemplateLabel.isVisible().catch(() => false);
-    const bodyText = await page.locator("body").innerText();
-    const hasLabel = bodyText.includes("Install with Template");
+    await expect(mediaPage.cdDvdTile).toBeVisible({ timeout: 10_000 });
 
-    console.log(`[INFO] "Install with Template" (vlang[153]) visible: ${labelVisible}`);
-    console.log(`[INFO] "Install with Template" in body: ${hasLabel}`);
+    await context.close();
+  });
 
-    if (labelVisible || hasLabel) {
-      console.log('[INFO] "Install with Template" label confirmed ✓');
-    }
+  test("присутствуют ровно 2 radio-кнопки (HDD value=1 и CD/DVD value=2)", async ({
+    browser,
+  }) => {
+    const { context, mediaPage } = await openMediaTab(browser);
+
+    const radios = mediaPage.bootOrderRadios;
+    await expect(radios).toHaveCount(2, { timeout: 10_000 });
+
+    await context.close();
+  });
+
+  test("кнопка Apply (#server-boot-order-button) видна", async ({ browser }) => {
+    const { context, mediaPage } = await openMediaTab(browser);
+
+    await expect(mediaPage.applyButton).toBeVisible({ timeout: 10_000 });
+
+    await context.close();
+  });
+
+  test("один из radio (HDD или CD/DVD) выбран по умолчанию", async ({ browser }) => {
+    const { context, mediaPage } = await openMediaTab(browser);
+
+    const selected = await mediaPage.getSelectedBootDevice();
+    console.log(`[INFO] Current boot device: ${selected}`);
+
+    expect(["HDD", "CD/DVD"]).toContain(selected);
 
     await context.close();
   });
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// SUITE 3 — Rebuild Flow (safe — always cancels via Cancel/Cancel Rebuild)
+// SUITE 3 — Boot Order: взаимодействие (без Apply)
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — Rebuild Flow (Cancel only)", () => {
-  test("кнопка 'Rebuild' (vlang[196]) или 'Install' (vlang[173]) присутствует на Media tab", async ({ browser }) => {
-    const { context, page, mediaPage } = await openMediaTab(browser);
+test.describe("VPS Panel — Boot Order: переключение (Apply не нажимаем)", () => {
+  test("клик по плитке CD/DVD — radio[value=2] становится checked", async ({ browser }) => {
+    const { context, mediaPage } = await openMediaTab(browser);
 
-    // vlang[196] = "Rebuild" / vlang[173] = "Install"
-    const rebuildBtn = mediaPage.rebuildButton;
-    const rebuildVisible = await rebuildBtn.isVisible().catch(() => false);
+    await mediaPage.cdDvdTile.click();
+    await expect(mediaPage.cdDvdRadio).toBeChecked({ timeout: 5_000 });
+    console.log("[INFO] CD/DVD radio checked after tile click ✓");
 
-    const installVisible = await page.locator('button:has-text("Install")').first()
-      .isVisible().catch(() => false);
+    await context.close();
+  });  
 
-    console.log(`[INFO] "Rebuild" button (vlang[196]) visible: ${rebuildVisible}`);
-    console.log(`[INFO] "Install" button (vlang[173]) visible: ${installVisible}`);
+  test("клик по плитке HDD — radio[value=1] становится checked", async ({ browser }) => {
+    const { context, mediaPage } = await openMediaTab(browser);
 
-    if (rebuildVisible || installVisible) {
-      const btnText = rebuildVisible ? "Rebuild" : "Install";
-      console.log(`[INFO] Action button "${btnText}" confirmed ✓`);
-    } else {
-      const bodyText = await page.locator("body").innerText();
-      const hasRebuildText = /Rebuild|Install/i.test(bodyText);
-      console.log(`[INFO] "Rebuild"/"Install" text in body: ${hasRebuildText}`);
-    }
+    await mediaPage.hddTile.click();
+    await expect(mediaPage.hddRadio).toBeChecked({ timeout: 5_000 });
+    console.log("[INFO] HDD radio checked after tile click ✓");
 
     await context.close();
   });
 
-  test("Rebuild → модал с vlang[118] текстом → Cancel Rebuild (vlang[140]) (rebuild НЕ запускается)", async ({ browser }) => {
-    const { context, page, mediaPage } = await openMediaTab(browser);
+  test("после клика CD/DVD кнопка Apply видна и активна", async ({ browser }) => {
+    const { context, mediaPage } = await openMediaTab(browser);
 
-    const rebuildBtn = mediaPage.rebuildOrInstallButton;
-    const isVisible = await rebuildBtn.isVisible().catch(() => false);
+    await mediaPage.cdDvdTile.click();
 
-    if (!isVisible) {
-      console.log("[INFO] Rebuild/Install button not visible — skipping confirm/cancel test");
-      await context.close();
-      return;
-    }
-
-    const btnText = await rebuildBtn.innerText().catch(() => "");
-    console.log(`[INFO] Clicking "${btnText.trim()}" button`);
-
-    const modalShown = await mediaPage.clickRebuildAndCancel();
-
-    if (modalShown) {
-      console.log("[INFO] Rebuild modal appeared and was cancelled ✓");
-
-      // Verify we are still on the server page
-      expect(page.url()).toContain(TEST_SERVER_UUID);
-      console.log("[INFO] Stayed on server page after cancel ✓");
-    } else {
-      console.log("[INFO] No confirmation modal — action may require OS selection first");
-    }
+    await expect(mediaPage.applyButton).toBeVisible({ timeout: 5_000 });
+    await expect(mediaPage.applyButton).toBeEnabled({ timeout: 5_000 });
+    console.log("[INFO] Apply button visible and enabled after selecting CD/DVD ✓");
 
     await context.close();
   });
 
-  test("rebuild modal содержит текст vlang[118]: 'Are you sure you want to rebuild this server?'", async ({ browser }) => {
-    const { context, page, mediaPage } = await openMediaTab(browser);
+  test("переключение CD/DVD → HDD → radio[value=1] снова checked", async ({ browser }) => {
+    const { context, mediaPage } = await openMediaTab(browser);
 
-    const rebuildBtn = mediaPage.rebuildOrInstallButton;
-    const isVisible = await rebuildBtn.isVisible().catch(() => false);
+    await mediaPage.cdDvdTile.click();
+    await expect(mediaPage.cdDvdRadio).toBeChecked({ timeout: 5_000 });
 
-    if (!isVisible) {
-      console.log("[INFO] Rebuild button not visible — skipping modal text verification");
-      await context.close();
-      return;
-    }
-
-    await rebuildBtn.click();
-    console.log("[INFO] Clicked Rebuild/Install button");
-
-    const modal = mediaPage.confirmModal;
-    const modalAppeared = await modal.waitFor({ state: "visible", timeout: 8_000 })
-      .then(() => true).catch(() => false);
-
-    if (modalAppeared) {
-      const modalText = await modal.innerText().catch(() => "");
-      console.log(`[INFO] Modal full text: "${modalText.trim().slice(0, 300)}"`);
-
-      // vlang[118]: "Are you sure you want to rebuild this server?"
-      const hasRebuildConfirmText = /Are you sure you want to rebuild this server/i.test(modalText);
-      console.log(`[INFO] Modal contains vlang[118] text: ${hasRebuildConfirmText}`);
-      expect(hasRebuildConfirmText).toBeTruthy();
-
-      // vlang[137]: "Rebuilding will delete all existing data..."
-      const hasWarningText = /Rebuilding will delete all existing data/i.test(modalText);
-      console.log(`[INFO] Modal contains vlang[137] warning: ${hasWarningText}`);
-
-      // Cancel safely (prefer "Cancel Rebuild" vlang[140], fallback "Cancel")
-      const cancelRebuildBtn = page.locator('button:has-text("Cancel Rebuild")').first();
-      const cancelRebuildVisible = await cancelRebuildBtn.isVisible().catch(() => false);
-
-      if (cancelRebuildVisible) {
-        await cancelRebuildBtn.click();
-        console.log('[INFO] Cancelled via "Cancel Rebuild" (vlang[140]) ✓');
-      } else {
-        await page.locator('button:has-text("Cancel")').first().click();
-        console.log('[INFO] Cancelled via "Cancel" ✓');
-      }
-    } else {
-      console.log("[INFO] No modal appeared — may need OS selection first");
-    }
-
-    await context.close();
-  });
-
-  test("после отмены Rebuild — остаёмся на странице сервера", async ({ browser }) => {
-    const { context, page, mediaPage } = await openMediaTab(browser);
-
-    const rebuildBtn = mediaPage.rebuildOrInstallButton;
-    const isVisible = await rebuildBtn.isVisible().catch(() => false);
-
-    if (isVisible) {
-      await mediaPage.clickRebuildAndCancel();
-    }
-
-    const currentUrl = page.url();
-    console.log(`[INFO] Current URL after cancel: ${currentUrl}`);
-    expect(currentUrl).toContain(TEST_SERVER_UUID);
+    await mediaPage.hddTile.click();
+    await expect(mediaPage.hddRadio).toBeChecked({ timeout: 5_000 });
+    await expect(mediaPage.cdDvdRadio).not.toBeChecked({ timeout: 5_000 });
+    console.log("[INFO] CD/DVD → HDD toggle works correctly ✓");
 
     await context.close();
   });
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// SUITE 4 — CD/DVD Section (vlang[182])
+// SUITE 4 — Таблица активности
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — CD/DVD Section", () => {
-  test("'CD/DVD' кнопка/секция (vlang[182]) присутствует или задокументирована", async ({ browser }) => {
-    const { context, page, mediaPage } = await openMediaTab(browser);
+test.describe("VPS Panel — Таблица активности на вкладке Media", () => {
+  test("таблица активности (table.table.table-normal) присутствует", async ({ browser }) => {
+    const { context, mediaPage } = await openMediaTab(browser);
 
-    // vlang[182] = "CD/DVD"
-    const cdDvdVisible = await mediaPage.cdDvdButton.isVisible().catch(() => false);
-    const bodyText = await page.locator("body").innerText();
-    const hasCdDvdText = bodyText.includes("CD/DVD");
-
-    console.log(`[INFO] "CD/DVD" button (vlang[182]) visible: ${cdDvdVisible}`);
-    console.log(`[INFO] "CD/DVD" in body text: ${hasCdDvdText}`);
-
-    if (cdDvdVisible || hasCdDvdText) {
-      console.log('[INFO] "CD/DVD" section confirmed ✓');
-    } else {
-      console.log("[INFO] CD/DVD section not present — may not be available on this plan");
-    }
-
-    await context.close();
-  });
-});
-
-// ══════════════════════════════════════════════════════════════════════════════
-// SUITE 5 — Rescue Mode (vlang[376])
-// ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — Rescue Mode", () => {
-  test("'Rescue' кнопка/секция (vlang[376]) присутствует или задокументирована", async ({ browser }) => {
-    const { context, page, mediaPage } = await openMediaTab(browser);
-
-    // vlang[376] = "Rescue"
-    const rescueVisible = await mediaPage.rescueButton.isVisible().catch(() => false);
-    const bodyText = await page.locator("body").innerText();
-    const hasRescueText = bodyText.includes("Rescue");
-
-    console.log(`[INFO] "Rescue" button (vlang[376]) visible: ${rescueVisible}`);
-    console.log(`[INFO] "Rescue" in body text: ${hasRescueText}`);
-
-    if (rescueVisible || hasRescueText) {
-      console.log('[INFO] "Rescue" section confirmed ✓');
-    } else {
-      console.log("[INFO] Rescue section not present on this plan");
-    }
+    await expect(mediaPage.activityTable).toBeVisible({ timeout: 10_000 });
+    console.log("[INFO] Activity table visible ✓");
 
     await context.close();
   });
 
-  test("'Create Rescue Session' (vlang[371]) → модал → Cancel (Rescue Session не создаётся)", async ({ browser }) => {
-    const { context, page, mediaPage } = await openMediaTab(browser);
+  test("заголовки таблицы: Task | Requested | Duration | Progress", async ({ browser }) => {
+    const { context, mediaPage } = await openMediaTab(browser);
 
-    // vlang[371] = "Create Rescue Session"
-    const createRescueBtn = mediaPage.createRescueSessionButton;
-    const isVisible = await createRescueBtn.isVisible().catch(() => false);
+    const thead = mediaPage.activityTableHead;
+    await expect(thead).toBeVisible({ timeout: 10_000 });
 
-    console.log(`[INFO] "Create Rescue Session" (vlang[371]) visible: ${isVisible}`);
+    const headText = await thead.innerText();
+    console.log(`[INFO] Table headers: "${headText.trim()}"`);
 
-    if (!isVisible) {
-      console.log("[INFO] Create Rescue Session not visible — skipping confirm/cancel test");
-      await context.close();
-      return;
-    }
+    expect(headText).toContain("Task");
+    expect(headText).toContain("Requested");
+    expect(headText).toContain("Duration");
+    expect(headText).toContain("Progress");
 
-    await createRescueBtn.click();
-    console.log("[INFO] Clicked Create Rescue Session");
+    await context.close();
+  });
 
-    const modal = page.locator('[class*="modal"], [role="dialog"]').first();
-    const modalAppeared = await modal.waitFor({ state: "visible", timeout: 6_000 })
-      .then(() => true).catch(() => false);
+  test("таблица содержит хотя бы 1 строку с историей действий", async ({ browser }) => {
+    const { context, mediaPage } = await openMediaTab(browser);
 
-    if (modalAppeared) {
-      const modalText = await modal.innerText().catch(() => "");
-      console.log(`[INFO] Rescue session modal text: "${modalText.trim().slice(0, 200)}"`);
+    const rowCount = await mediaPage.activityRows.count();
+    console.log(`[INFO] Activity table rows: ${rowCount}`);
+    expect(rowCount).toBeGreaterThanOrEqual(1);
 
-      // vlang[372]: "Are you sure you want to create a rescue session for this server?..."
-      const isRescueModal = /rescue session for this server|Are you sure you want to create a rescue session/i.test(modalText);
-      console.log(`[INFO] Rescue session modal confirmed (vlang[372]): ${isRescueModal}`);
+    await context.close();
+  });
 
-      await page.locator('button:has-text("Cancel")').first().click();
-      console.log("[INFO] Rescue session modal cancelled via Cancel ✓");
-    } else {
-      console.log("[INFO] No modal appeared for Create Rescue Session");
-    }
+  test("задачи в таблице содержат известные типы (Boot, Poweroff, Restart и т.д.)", async ({
+    browser,
+  }) => {
+    const { context, mediaPage } = await openMediaTab(browser);
+
+    const tasks = await mediaPage.getActivityTaskNames();
+    console.log(`[INFO] Activity tasks: ${tasks.join(", ")}`);
+
+    const known = ["Boot", "Poweroff", "Shutdown", "Restart", "Rebuild", "Install"];
+    const hasKnown = tasks.some((t) => known.some((k) => t.toLowerCase().includes(k.toLowerCase())));
+
+    expect(hasKnown).toBeTruthy();
+
+    await context.close();
+  });
+
+  test("последние завершённые задачи имеют статус Complete (span.badge.badge-active)", async ({
+    browser,
+  }) => {
+    const { context, mediaPage } = await openMediaTab(browser);
+
+    const badgeCount = await mediaPage.completeBadges.count();
+    console.log(`[INFO] Complete badges found: ${badgeCount}`);
+    expect(badgeCount).toBeGreaterThanOrEqual(1);
+
+    const firstBadgeText = await mediaPage.completeBadges.first().innerText();
+    console.log(`[INFO] First badge text: "${firstBadgeText.trim()}"`);
+    expect(firstBadgeText.trim()).toBe("Complete");
 
     await context.close();
   });

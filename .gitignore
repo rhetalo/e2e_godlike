@@ -45,3 +45,13 @@ coverage/
 # build
 dist/
 build/
+
+# Playwright auth sessions (не хранить в git)
+storageState.*.json
+
+# Credentials (не хранить в git)
+credentials.csv
+
+# Артефакты запусков
+debug-output.txt
+results.json

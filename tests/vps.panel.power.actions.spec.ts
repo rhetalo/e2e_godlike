@@ -43,7 +43,7 @@
  *   Progress bar:      .progress-bar[aria-valuenow="100"] при завершении
  */
 import { test, expect, type Browser, type BrowserContext } from "@playwright/test";
-import { VpsPanelServerPage } from "../pages/VpsPanelServerPage.new";
+import { VpsPanelServerPage } from "../pages/VpsPanelServerPage";
 import { loginAndSaveSession, STORAGE_STATE_PATH, TEST_SERVER_UUID } from "../utils/auth";
 
 // ── Config ────────────────────────────────────────────────────────────────────
