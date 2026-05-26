@@ -28,13 +28,16 @@
  *   npx playwright test tests/vps.panel.power.actions.spec.ts --project=chromium
  *   npx playwright test tests/vps.panel.power.actions.spec.ts --project=chromium --headed
  *
- * ── ПОДТВЕРЖДЁННЫЕ СЕЛЕКТОРЫ (DevTools, May 2026) ──────────────────────────
+ * ── ПОДТВЕРЖДЁННЫЕ СЕЛЕКТОРЫ (accessibility tree, May 2026) ─────────────────
  *
- * Статус:      div.p-3 — текст "Running" / "Stopped"
- * Boot:        button[data-action="boot_server"]     — прямое действие, без модала
- * Shutdown:    button[data-action="shutdown_server"] — открывает модал → btn-primary "Shutdown"
- * Power Off:   button[data-action="poweroff_server"] — открывает модал → btn-primary "Power Off"
- * Restart:     button[data-action="restart_server"]  — открывает модал → btn-primary "Restart"
+ * ⚠️  data-action атрибутов на кнопках НЕТ — VirtFusion рендерит plain <button>.
+ *
+ * Статус:      div.p-3 — текст "RUNNING"/"STOPPED" (нормализуется в getStatusText())
+ * Boot:        button:has-text("Boot")      — ВСЕГДА в DOM; disabled при Running
+ * Shutdown:    button:has-text("Shutdown")  — открывает модал
+ * Power Off:   button:has-text("Power Off") — открывает модал
+ * Restart:     button:has-text("Restart")   — открывает модал
+ * Confirm:     .modal.show button.btn-primary:has-text("<Action>")
  * Cancel:      button.btn.btn-light.w-100[data-bs-dismiss="modal"]
  *
  * Activity table: table.table.table-normal

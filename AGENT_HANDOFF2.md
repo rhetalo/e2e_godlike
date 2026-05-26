@@ -199,6 +199,47 @@ if (/stopped/i.test(trimmed)) return "Stopped";
 Никогда не сравнивать статус VirtFusion напрямую без нормализации регистра.
 Всегда использовать `getStatusText()` из `VpsPanelServerPage` — не `innerText()` напрямую.
 
+### ⚠️ VirtFusion: кнопки питания НЕ имеют data-action атрибутов
+
+**Проблема (обнаружена: май 2026):**
+VirtFusion рендерит кнопки как обычные `<button>` с текстом — без атрибутов `data-action`.
+Селекторы вида `button[data-action="shutdown_server"]` не находят ничего.
+
+**Симптом:**
+```
+Error: element(s) not found
+Locator: locator('button[data-action="shutdown_server"]').first()
+Timeout: 10000ms
+```
+
+**Реальная структура DOM (из accessibility tree):**
+```
+button "Boot"      [disabled когда Running, enabled когда Stopped]
+button "Shutdown"
+button "Restart"
+button "Power Off"
+button "Rebuild"
+```
+Boot кнопка **всегда присутствует в DOM** — только disabled/enabled меняется.
+
+**Фикс (применён в `VpsPanelServerPage.ts`):**
+```typescript
+get bootButton()      { return this.page.locator('button:has-text("Boot")').first(); }
+get shutdownButton()  { return this.page.locator('button:has-text("Shutdown")').first(); }
+get powerOffButton()  { return this.page.locator('button:has-text("Power Off")').first(); }
+get restartButton()   { return this.page.locator('button:has-text("Restart")').first(); }
+
+// Modal confirm buttons — scoped to open modal:
+get shutdownConfirmButton()  { return this.page.locator('.modal.show button.btn-primary:has-text("Shutdown")').first(); }
+get powerOffConfirmButton()  { return this.page.locator('.modal.show button.btn-primary:has-text("Power Off")').first(); }
+get restartConfirmButton()   { return this.page.locator('.modal.show button.btn-primary:has-text("Restart")').first(); }
+```
+
+**Правило на будущее:**
+Никогда не использовать `data-action` в селекторах VirtFusion.
+Если нужен точный селектор — проверяй accessibility tree (`page.accessibility.snapshot()`)
+или DevTools, не полагайся на предположения об атрибутах.
+
 ---
 
 ## 11. Рекомендации по поддержке

@@ -13,11 +13,15 @@ import { setupBannerHandlers } from "../utils/bannerHandlers";
  *   <div class="p-3">&nbsp;&nbsp;Running</div>
  *   <div class="p-3">&nbsp;&nbsp;Stopped</div>
  *
- * POWER BUTTONS:
- *   button[data-action="boot_server"]     — Boot (NO modal — direct action + loader)
- *   button[data-action="shutdown_server"] — Shutdown (opens modal)
- *   button[data-action="poweroff_server"] — Power Off (opens modal)
- *   button[data-action="restart_server"]  — Restart (opens modal)
+ * POWER BUTTONS (confirmed May 2026 — NO data-action attributes on buttons):
+ *   button:has-text("Boot")       — disabled when Running, enabled when Stopped
+ *   button:has-text("Shutdown")   — opens modal
+ *   button:has-text("Power Off")  — opens modal
+ *   button:has-text("Restart")    — opens modal
+ *
+ * NOTE: VirtFusion renders plain <button> elements with text labels only.
+ *       data-action attributes do NOT exist on these buttons.
+ *       Boot button is ALWAYS in the DOM — disabled when Running, enabled when Stopped.
  *
  * BOOTSTRAP MODALS (.modal.show when open):
  *   Shutdown  title: "Shutdown Server"
@@ -103,37 +107,32 @@ export class VpsPanelServerPage {
 
   // ── Power Controls ────────────────────────────────────────────────────────
 
-  /** Boot — NO modal, direct action; loader appears, status → Running */
+  /**
+   * Boot — NO modal, direct action; status → Running.
+   * ALWAYS in DOM: disabled when Running, enabled when Stopped.
+   */
   get bootButton(): Locator {
-    return this.page
-      .locator('button[data-action="boot_server"]')
-      .first();
+    return this.page.locator('button:has-text("Boot")').first();
   }
 
   /** Shutdown — opens Bootstrap modal "Shutdown Server" */
   get shutdownButton(): Locator {
-    return this.page
-      .locator('button[data-action="shutdown_server"]')
-      .first();
+    return this.page.locator('button:has-text("Shutdown")').first();
   }
 
   /** Power Off — opens Bootstrap modal "Power Off Server" */
   get powerOffButton(): Locator {
-    return this.page
-      .locator('button[data-action="poweroff_server"]')
-      .first();
+    return this.page.locator('button:has-text("Power Off")').first();
   }
 
   /** Restart — opens Bootstrap modal "Restart Server" */
   get restartButton(): Locator {
-    return this.page
-      .locator('button[data-action="restart_server"]')
-      .first();
+    return this.page.locator('button:has-text("Restart")').first();
   }
 
   get allPowerButtons(): Locator {
     return this.page.locator(
-      'button[data-action="boot_server"], button[data-action="shutdown_server"], button[data-action="poweroff_server"], button[data-action="restart_server"]',
+      'button:has-text("Boot"), button:has-text("Shutdown"), button:has-text("Power Off"), button:has-text("Restart")',
     );
   }
 
@@ -155,25 +154,25 @@ export class VpsPanelServerPage {
     ).first();
   }
 
-  /** Shutdown confirm — "Shutdown" inside btn-primary */
+  /** Shutdown confirm — btn-primary inside the open modal */
   get shutdownConfirmButton(): Locator {
-    return this.page.locator(
-      'button.btn.btn-primary.w-100[data-bs-dismiss="modal"]:has-text("Shutdown")',
-    ).first();
+    return this.page
+      .locator('.modal.show button.btn-primary:has-text("Shutdown")')
+      .first();
   }
 
-  /** Restart confirm — "Restart" inside btn-primary */
+  /** Restart confirm — btn-primary inside the open modal */
   get restartConfirmButton(): Locator {
-    return this.page.locator(
-      'button.btn.btn-primary.w-100[data-bs-dismiss="modal"]:has-text("Restart")',
-    ).first();
+    return this.page
+      .locator('.modal.show button.btn-primary:has-text("Restart")')
+      .first();
   }
 
-  /** Power Off confirm — "Power Off" inside btn-primary */
+  /** Power Off confirm — btn-primary inside the open modal */
   get powerOffConfirmButton(): Locator {
-    return this.page.locator(
-      'button.btn.btn-primary.w-100[data-bs-dismiss="modal"]:has-text("Power Off")',
-    ).first();
+    return this.page
+      .locator('.modal.show button.btn-primary:has-text("Power Off")')
+      .first();
   }
 
   /** Rebuild confirm — btn-danger, id="server-install-button" (confirmed from HTML) */
@@ -306,7 +305,7 @@ export class VpsPanelServerPage {
    */
   get buttonLoader(): Locator {
     return this.page.locator(
-      'button[data-action] .v-loader, button[data-action] .spinner, button[data-action] [class*="loader"]',
+      '.v-loader, .spinner, [class*="loader"]',
     ).first();
   }
 
@@ -420,10 +419,7 @@ export class VpsPanelServerPage {
       .then(() => true)
       .catch(() => false);
     if (appeared) {
-      await this.page
-        .locator('button.btn.btn-primary.w-100[data-bs-dismiss="modal"]:has-text("Power Off")')
-        .first()
-        .click();
+      await this.powerOffConfirmButton.click();
     }
     await this.waitForStatus("Stopped", timeoutMs);
     console.log("[SETUP] Server is Stopped ✓");
