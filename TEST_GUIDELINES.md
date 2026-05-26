@@ -185,6 +185,18 @@ page.locator('.modal.show button.btn-primary:has-text("Shutdown")').first()
 
 Правило: power-кнопки всегда с :not([data-bs-dismiss="modal"]), confirm-кнопки всегда с .modal.show.
 
+7.4 Activity table: debug-строки — id на <td>, не на <tr>
+VirtFusion рендерит скрытые строки-лоадеры между задачами.
+id="debugNNNN" сидит на <td> внутри <tr>, а не на самом <tr>.
+
+// ❌ Плохо — tr:not([id^='debug']) не работает, id на td а не tr:
+"table.table.table-normal tbody tr:not([id^='debug'])"
+
+// ✓ Хорошо — исключаем tr содержащие td с таким id:
+"table.table.table-normal tbody tr:not(:has(td[id^='debug']))"
+
+Правило: перед написанием селектора — смотреть в DevTools на каком элементе атрибут.
+
 8. Что НЕ является E2E тестом
 Следующее не нужно тестировать отдельными тестами — это детали реализации:
 

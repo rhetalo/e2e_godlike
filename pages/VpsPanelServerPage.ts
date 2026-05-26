@@ -273,9 +273,13 @@ export class VpsPanelServerPage {
     return this.page.locator("table.table.table-normal").first();
   }
 
-  /** Visible activity rows — excludes hidden debug rows (id="debugNNNN") */
+  /**
+   * Visible task rows in the activity table.
+   * Excludes debug rows — their <td> has id="debugNNNN", NOT the <tr> itself.
+   * Using :has() to filter rows that contain such a td.
+   */
   get activityRows(): Locator {
-    return this.page.locator("table.table.table-normal tbody tr:not([id^='debug'])");
+    return this.page.locator("table.table.table-normal tbody tr:not(:has(td[id^='debug']))");
   }
 
   get completeBadges(): Locator {

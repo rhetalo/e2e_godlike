@@ -274,6 +274,40 @@ get shutdownConfirmButton() {
 Всегда добавлять `:not([data-bs-dismiss="modal"])` к power-кнопкам,
 и `:not([data-bs-dismiss])` если кнопка не должна быть внутри модала вообще.
 
+### ⚠️ Activity table: id="debugNNNN" на `<td>`, а не на `<tr>`
+
+**Проблема (обнаружена: май 2026):**
+VirtFusion рендерит скрытые debug-строки в activity table.
+Было предположение что `<tr>` имеет `id="debug..."` — но на самом деле `id` висит на `<td>` внутри:
+```html
+<tr>
+  <td id="debug5216" style="display: none" colspan="7">
+    <div class="v-loader"></div>
+  </td>
+</tr>
+```
+
+**Симптом:**
+```
+Expected: >= 22
+Received:    11
+```
+`activityRows` считала 22 (11 реальных + 11 debug), `completeBadges` находила 11.
+
+**Фикс (применён в `VpsPanelServerPage.ts`):**
+```typescript
+// ❌ Было — фильтровало tr[id^='debug'], которых не существует:
+"table.table.table-normal tbody tr:not([id^='debug'])"
+
+// ✓ Стало — исключает tr, содержащие td[id^='debug']:
+"table.table.table-normal tbody tr:not(:has(td[id^='debug']))"
+```
+
+**Правило на будущее:**
+Перед написанием селектора для строк таблицы — проверять в DevTools
+на каком именно элементе (`tr` или `td`) сидит нужный атрибут.
+Не предполагать — смотреть HTML.
+
 ---
 
 ## 11. Рекомендации по поддержке
