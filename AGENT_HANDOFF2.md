@@ -166,12 +166,38 @@ npx playwright test -g "Rebuild" --project=chromium --headed
 
 ---
 
-## 10. Известные ограничения
+## 10. Известные ограничения и баги VirtFusion
 
 - `workers` выставлен в `1`.
 - `storageState.panel.json` привязан к учётной записи.
 - Если тестовый сервер `UUID` удалят — нужно обновить `utils/auth.ts`.
 - Изменения UI требуют правки селекторов в `utils/selectors.ts` и страницах `pages/*.ts`.
+
+### ⚠️ VirtFusion: статус сервера в ВЕРХНЕМ РЕГИСТРЕ
+
+**Проблема (обнаружена: май 2026):**
+VirtFusion возвращает статус сервера в капслоке — `"RUNNING"`, `"STOPPED"` — вместо `"Running"`, `"Stopped"`.
+Прямое сравнение `status.includes("Running")` возвращает `false`, из-за чего `ensureRunning()`
+думает что сервер не запущен и пытается нажать Boot-кнопку, которой нет при Running-состоянии.
+
+**Симптом:**
+```
+[SETUP] Initial server status: "RUNNING"
+[SETUP] Server is "RUNNING" — booting before test...
+Error: element(s) not found — button[data-action="boot_server"]
+```
+
+**Фикс (применён в `VpsPanelServerPage.ts`):**
+`getStatusText()` нормализует возвращаемое значение через regex с флагом `i`:
+```typescript
+if (/running/i.test(trimmed)) return "Running";
+if (/stopped/i.test(trimmed)) return "Stopped";
+```
+Весь остальной код продолжает работать с `"Running"` / `"Stopped"` без изменений.
+
+**Правило на будущее:**
+Никогда не сравнивать статус VirtFusion напрямую без нормализации регистра.
+Всегда использовать `getStatusText()` из `VpsPanelServerPage` — не `innerText()` напрямую.
 
 ---
 
