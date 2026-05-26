@@ -42,3 +42,4 @@ export function parsePrice(raw: string): number {
   const m = raw.replace(/,/g, '').match(/([0-9]+(?:\.[0-9]+)?)/);
   return m ? parseFloat(m[1]) : NaN;
 }
+

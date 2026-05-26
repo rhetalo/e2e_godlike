@@ -31,8 +31,8 @@ test('test base funnel', async ({page}) => {
 
     await page.getByText('Login').click();
 
-    await page.getByRole('textbox', { name: '* Email' }).fill('fongolcs@gmail.com');
-    await page.getByRole('textbox', { name: '* Password' }).fill('Password_123');
+    await page.getByRole('textbox', { name: '* Email' }).fill('test@testmail.com');
+    await page.getByRole('textbox', { name: '* Password' }).fill('test@testmail.com');
     // Ищем кнопку "Login" по роли 'button' и тексту 'Login'
   // .click() - выполняем клик для отправки формы авторизации
   // После этого система должна проверить credentials и войти в аккаунт
