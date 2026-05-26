@@ -268,11 +268,20 @@ get shutdownConfirmButton() {
 }
 ```
 
+**Фикс modalCancelButton (также применён):**
+Та же проблема — три Cancel-кнопки в DOM (по одной на каждый модал), `.first()` брал скрытую:
+```typescript
+// ❌ Было — находит cancel из закрытого модала:
+'button.btn.btn-light.w-100[data-bs-dismiss="modal"]'
+
+// ✓ Стало — только кнопка из открытого модала:
+'.modal.show button[data-bs-dismiss="modal"]'
+```
+
 **Правило на будущее:**
-При использовании Bootstrap — любой `button:has-text()` на VirtFusion страницах может
-неожиданно резолвиться на скрытую кнопку внутри модала.
-Всегда добавлять `:not([data-bs-dismiss="modal"])` к power-кнопкам,
-и `:not([data-bs-dismiss])` если кнопка не должна быть внутри модала вообще.
+При использовании Bootstrap — ЛЮБАЯ кнопка внутри модала должна быть скоупирована на `.modal.show`.
+Всегда добавлять `:not([data-bs-dismiss="modal"])` к power-кнопкам на странице,
+и `.modal.show` к любым кнопкам внутри модала (confirm, cancel, close).
 
 ### ⚠️ Activity table: id="debugNNNN" на `<td>`, а не на `<tr>`
 

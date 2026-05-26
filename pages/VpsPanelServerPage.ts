@@ -159,11 +159,15 @@ export class VpsPanelServerPage {
     return this.page.locator(".modal.show").first();
   }
 
-  /** Cancel — confirmed identical HTML across ALL power modals */
+  /**
+   * Cancel button — scoped to the ACTIVE modal (.modal.show).
+   * Bootstrap keeps ALL modal HTML in DOM; without scoping this resolves
+   * to a hidden cancel button from a different (closed) modal.
+   */
   get modalCancelButton(): Locator {
-    return this.page.locator(
-      'button.btn.btn-light.w-100[data-bs-dismiss="modal"]',
-    ).first();
+    return this.page
+      .locator('.modal.show button[data-bs-dismiss="modal"]')
+      .first();
   }
 
   /** Shutdown confirm — btn-primary inside the open modal */
