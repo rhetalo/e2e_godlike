@@ -240,6 +240,40 @@ get restartConfirmButton()   { return this.page.locator('.modal.show button.btn-
 Если нужен точный селектор — проверяй accessibility tree (`page.accessibility.snapshot()`)
 или DevTools, не полагайся на предположения об атрибутах.
 
+### ⚠️ Bootstrap: HTML модалов всегда в DOM (скрыт, не удалён)
+
+**Проблема (обнаружена: май 2026):**
+Bootstrap рендерит HTML всех модалов в DOM сразу при загрузке страницы — они просто скрыты (`display:none`), а не удалены.
+Это значит, что `button:has-text("Shutdown")` находит **кнопку подтверждения внутри модала**,
+а не power-кнопку на странице — потому что скрытый modal-button идёт первым в DOM.
+
+**Симптом:**
+```
+locator resolved to <button data-bs-dismiss="modal" class="btn btn-primary w-100">Shutdown</button>
+- unexpected value "hidden"
+```
+Страница выглядит корректно (сервер Running, кнопки видны), но локатор резолвится на невидимый элемент.
+
+**Фикс (применён в `VpsPanelServerPage.ts`):**
+Добавить `:not([data-bs-dismiss="modal"])` ко всем power-кнопкам:
+```typescript
+// Power button (на странице) — исключаем modal confirm buttons:
+get shutdownButton() {
+  return this.page.locator('button:has-text("Shutdown"):not([data-bs-dismiss="modal"])').first();
+}
+
+// Modal confirm button (внутри .modal.show) — отдельный геттер:
+get shutdownConfirmButton() {
+  return this.page.locator('.modal.show button.btn-primary:has-text("Shutdown")').first();
+}
+```
+
+**Правило на будущее:**
+При использовании Bootstrap — любой `button:has-text()` на VirtFusion страницах может
+неожиданно резолвиться на скрытую кнопку внутри модала.
+Всегда добавлять `:not([data-bs-dismiss="modal"])` к power-кнопкам,
+и `:not([data-bs-dismiss])` если кнопка не должна быть внутри модала вообще.
+
 ---
 
 ## 11. Рекомендации по поддержке

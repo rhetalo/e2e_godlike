@@ -165,10 +165,25 @@ expect(status).toContain("Running");
 getStatusText() в VpsPanelServerPage нормализует любой вариант через /running/i regex.
 Правило: статус читаем только через getStatusText(), не через innerText() напрямую.
 
-7.2 Кнопка Boot — видна ТОЛЬКО при Stopped
-button[data-action="boot_server"] отсутствует в DOM когда сервер Running.
-ensureRunning() не должна пытаться его найти если сервер уже Running.
-Именно поэтому getStatusText() должна нормализовать регистр — см. 7.1.
+7.2 Кнопка Boot — ВСЕГДА в DOM, просто disabled
+Boot button присутствует в DOM при любом состоянии сервера.
+При Running: disabled. При Stopped: enabled.
+Проверяй через isEnabled(), не через isVisible().
+
+7.3 Bootstrap модалы — HTML всегда в DOM (display:none, не удалён)
+VirtFusion использует Bootstrap. Все модалы рендерятся в DOM при загрузке страницы.
+button:has-text("Shutdown") может найти кнопку ВНУТРИ скрытого модала, а не на странице.
+
+// ❌ Плохо — найдёт скрытую кнопку в модале:
+page.locator('button:has-text("Shutdown")').first()
+
+// ✓ Хорошо — исключаем кнопки внутри модалов:
+page.locator('button:has-text("Shutdown"):not([data-bs-dismiss="modal"])').first()
+
+// ✓ Для confirm-кнопки внутри открытого модала:
+page.locator('.modal.show button.btn-primary:has-text("Shutdown")').first()
+
+Правило: power-кнопки всегда с :not([data-bs-dismiss="modal"]), confirm-кнопки всегда с .modal.show.
 
 8. Что НЕ является E2E тестом
 Следующее не нужно тестировать отдельными тестами — это детали реализации:

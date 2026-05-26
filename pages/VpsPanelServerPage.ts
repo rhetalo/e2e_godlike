@@ -115,24 +115,36 @@ export class VpsPanelServerPage {
     return this.page.locator('button:has-text("Boot")').first();
   }
 
-  /** Shutdown — opens Bootstrap modal "Shutdown Server" */
+  /**
+   * Shutdown power button (NOT the modal confirm button).
+   * Bootstrap keeps modal HTML in DOM even when closed — exclude data-bs-dismiss buttons.
+   */
   get shutdownButton(): Locator {
-    return this.page.locator('button:has-text("Shutdown")').first();
+    return this.page
+      .locator('button:has-text("Shutdown"):not([data-bs-dismiss="modal"])')
+      .first();
   }
 
-  /** Power Off — opens Bootstrap modal "Power Off Server" */
+  /** Power Off power button (NOT the modal confirm button) */
   get powerOffButton(): Locator {
-    return this.page.locator('button:has-text("Power Off")').first();
+    return this.page
+      .locator('button:has-text("Power Off"):not([data-bs-dismiss="modal"])')
+      .first();
   }
 
-  /** Restart — opens Bootstrap modal "Restart Server" */
+  /** Restart power button (NOT the modal confirm button) */
   get restartButton(): Locator {
-    return this.page.locator('button:has-text("Restart")').first();
+    return this.page
+      .locator('button:has-text("Restart"):not([data-bs-dismiss="modal"])')
+      .first();
   }
 
   get allPowerButtons(): Locator {
     return this.page.locator(
-      'button:has-text("Boot"), button:has-text("Shutdown"), button:has-text("Power Off"), button:has-text("Restart")',
+      'button:has-text("Boot"):not([data-bs-dismiss="modal"]), ' +
+      'button:has-text("Shutdown"):not([data-bs-dismiss="modal"]), ' +
+      'button:has-text("Power Off"):not([data-bs-dismiss="modal"]), ' +
+      'button:has-text("Restart"):not([data-bs-dismiss="modal"])',
     );
   }
 
