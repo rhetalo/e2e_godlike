@@ -68,14 +68,13 @@ e2e_godlike/
 │   │   ├── panel/               ← VirtFusion VPS панель (vf-panel.godlike.host)
 │   │   │   ├── vps.panel.login.spec.ts           — логин в панель
 │   │   │   ├── vps.panel.power.actions.spec.ts   ✅ 3/3 passed
-│   │   │   ├── vps.panel.power.spec.ts           — power controls (старый, требует ревью)
-│   │   │   ├── vps.panel.media.spec.ts            ✅ 3/3 passed
-│   │   │   ├── vps.panel.network.spec.ts          ✅ написан (май 2026)
-│   │   │   ├── vps.panel.options.spec.ts          ✅ написан (май 2026)
-│   │   │   ├── vps.panel.rebuild.spec.ts          ✅ переработан (май 2026)
-│   │   │   ├── vps.panel.server.spec.ts           ⚠️ есть антипаттерны — см. CODE_REVIEW.md
-│   │   │   ├── vps.panel.storage.spec.ts          ⚠️ есть антипаттерны — см. CODE_REVIEW.md
-│   │   │   └── vps.build.spec.ts                 — не ревьюился
+│   │   │   ├── vps.panel.media.spec.ts           ✅ 3/3 passed
+│   │   │   ├── vps.panel.network.spec.ts         ✅ написан (май 2026)
+│   │   │   ├── vps.panel.options.spec.ts         ✅ написан (май 2026)
+│   │   │   ├── vps.panel.rebuild.spec.ts         ✅ переработан (май 2026)
+│   │   │   ├── vps.panel.server.spec.ts          ✅ рефакторинг (май 2026)
+│   │   │   ├── vps.panel.storage.spec.ts         ✅ рефакторинг (май 2026)
+│   │   │   └── vps.build.spec.ts                — не ревьюировался
 │   │   └── funnel/
 │   │       └── vps.funnel.spec.ts                ✅ 23/23 passed
 │   ├── funnels/                 ← Воронки покупки (Minecraft, seed, mobile, PayPal)
@@ -213,19 +212,21 @@ npx playwright show-report
 | `VpsConfigPage.ts` | ✅ переписан (OS-selection, точная фильтрация) |
 | `vps.panel.network.spec.ts` | ✅ написан (4 suite) |
 | `vps.panel.options.spec.ts` | ✅ написан (7 suite) |
+| `vps.panel.server.spec.ts` | ✅ рефакторинг: shared context, test.skip, test.step |
+| `vps.panel.storage.spec.ts` | ✅ рефакторинг: жёсткий expect для Drive:/Primary |
+| `package.json` скрипты | ✅ исправлены пути (tests/vps/panel/, tests/vps/funnel/ и др.) |
+| `url-builder.ts` | ✅ удалён (был сломан, нигде не использовался) |
+| `vps.panel.power.spec.ts` | ✅ удалён (дублировал power.actions.spec.ts) |
+| `.gitignore` | ✅ добавлен `storageState.json` |
 
 ### ⚠️ Требует работы (приоритет)
 
 | Задача | Приоритет | Детали |
 |---|---|---|
-| Исправить `package.json` скрипты | 🔴 High | Устаревшие пути, `npm run test:panel` не работает |
-| Рефакторинг `vps.panel.server.spec.ts` | 🔴 High | Антипаттерны: `if(!x) return`, `console.log` вместо `expect` |
-| Рефакторинг `vps.panel.storage.spec.ts` | 🔴 High | Те же антипаттерны, проверки "логируют" но не падают |
-| Удалить сломанный `url-builder.ts` | 🟡 Med | Импортирует несуществующие `../config/env` и `../data/promo-codes` |
+| Добавить теги `@smoke/@critical/@regression` | 🟡 Med | Большинство тестов без тегов |
 | Ревью `funnels/` | 🟡 Med | Не ревьюились после реструктуризации |
 | Ревью `modded/` | 🟡 Med | Не ревьюились |
-| Добавить теги `@smoke/@critical/@regression` | 🟡 Med | Большинство тестов без тегов |
-| `storageState.json` в `.gitignore` | 🟢 Low | Устаревший файл в репо |
+| Ревью `vps.build.spec.ts` | 🟡 Med | Не ревьюировался |
 
 ---
 
