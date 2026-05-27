@@ -7,7 +7,7 @@
  * Funnel steps (confirmed via debug spec 17-Apr-2026):
  *   1. /vps-hosting/  → click a.deploy-btn → /cart-vps/?productId=...
  *   2. Billing Cycle  — .billing-cycle, same BEM as game servers
- *   3. Configure      — /cart-vps?...&step=3 — location only (USA / Europe)
+ *   3. Configure      — /cart-vps?...&step=3 — location + OS selection
  *   4. Next Step      → WHMCS /clientarea/cart.php?a=checkout
  *
  * Key differences vs Minecraft funnel:
@@ -17,6 +17,8 @@
  *   - Only 2 DCs: USA, Europe — no continent dropdown
  *   - Price elem: .period__price-primary_amount
  *   - Promo VPS20 pre-applied from URL (20% discount visible on periods)
+ *   - OS selection: .configure-server__types — 8 types, most with version dropdown
+ *   - WordPress on Ubuntu has no dropdown (single option, no versions)
  *
  * Запуск:
  *   npx playwright test tests/vps.funnel.spec.ts --project=chromium
@@ -346,6 +348,8 @@ test.describe("VPS Funnel — Billing Cycle Step", () => {
 // SUITE 3 — Configure Your Server (step=3)
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS Funnel — Configure Your Server", () => {
+  // ── Location tests (existing) ─────────────────────────────────────────────
+
   test("шаг конфигурации загружается — локации видны", async ({ browser }) => {
     const context = await browser.newContext({
       storageState: storageStatePath,
@@ -448,6 +452,32 @@ test.describe("VPS Funnel — Configure Your Server", () => {
     await context.close();
   });
 
+  test("смена локации обновляет Location в order summary", async ({
+    browser,
+  }) => {
+    const context = await browser.newContext({
+      storageState: storageStatePath,
+    });
+    const page = await context.newPage();
+    const config = new VpsConfigPage(page);
+
+    await goToConfigureStep(page);
+
+    await test.step("выбрать USA → проверить summary", async () => {
+      await config.selectLocation("USA");
+      await expect(config.orderLocation).toContainText("USA");
+      console.log("[INFO] Summary Location → USA ✓");
+    });
+
+    await test.step("выбрать Europe → проверить summary", async () => {
+      await config.selectLocation("Europe");
+      await expect(config.orderLocation).toContainText("Europe");
+      console.log("[INFO] Summary Location → Europe ✓");
+    });
+
+    await context.close();
+  });
+
   test("кнопка NEXT STEP видна на шаге конфигурации", async ({ browser }) => {
     const context = await browser.newContext({
       storageState: storageStatePath,
@@ -457,11 +487,189 @@ test.describe("VPS Funnel — Configure Your Server", () => {
 
     await goToConfigureStep(page);
 
-    const nextStepButton = page.getByRole("button", { name: "Next step" });
-
-    await expect(nextStepButton).toBeVisible();
-    await expect(nextStepButton).toBeEnabled();
+    await expect(config.nextStepButton).toBeVisible();
+    await expect(config.nextStepButton).toBeEnabled();
     console.log("[INFO] Next Step button on configure step ✓");
+
+    await context.close();
+  });
+
+  // ── OS / Pre-installation tests (new) ─────────────────────────────────────
+
+  test("блок Choose your OS видим — типы ОС загружены", async ({ browser }) => {
+    const context = await browser.newContext({
+      storageState: storageStatePath,
+    });
+    const page = await context.newPage();
+    const config = new VpsConfigPage(page);
+
+    await goToConfigureStep(page);
+
+    await test.step("контейнер OS types виден", async () => {
+      await expect(config.osTypesContainer).toBeVisible();
+    });
+
+    await test.step("в списке >= 1 типа ОС", async () => {
+      const count = await config.osTypeItems.count();
+      console.log(`[INFO] OS types count: ${count}`);
+      expect(count).toBeGreaterThanOrEqual(1);
+    });
+
+    await context.close();
+  });
+
+  test("по умолчанию активна ОС Games, в summary есть Server type", async ({
+    browser,
+  }) => {
+    const context = await browser.newContext({
+      storageState: storageStatePath,
+    });
+    const page = await context.newPage();
+    const config = new VpsConfigPage(page);
+
+    await goToConfigureStep(page);
+
+    await test.step("активная ОС по умолчанию — Games", async () => {
+      const name = await config.getActiveOsTypeName();
+      console.log(`[INFO] Default OS type: "${name}"`);
+      expect(name).toBe("Games");
+    });
+
+    await test.step("summary содержит непустой Server type", async () => {
+      await expect(config.orderServerType).toBeVisible();
+      const serverType = (await config.orderServerType.innerText()).trim();
+      console.log(`[INFO] Default server type: "${serverType}"`);
+      expect(serverType.length).toBeGreaterThan(0);
+    });
+
+    await context.close();
+  });
+
+  test("выбор типа Ubuntu меняет активный тип и показывает дропдаун версий", async ({
+    browser,
+  }) => {
+    const context = await browser.newContext({
+      storageState: storageStatePath,
+    });
+    const page = await context.newPage();
+    const config = new VpsConfigPage(page);
+
+    await goToConfigureStep(page);
+
+    await test.step("кликнуть на тип Ubuntu", async () => {
+      await config.selectOsType("Ubuntu");
+    });
+
+    await test.step("Ubuntu стала активной", async () => {
+      const name = await config.getActiveOsTypeName();
+      console.log(`[INFO] Active OS after click: "${name}"`);
+      expect(name).toBe("Ubuntu");
+    });
+
+    await test.step("дропдаун версий виден", async () => {
+      await expect(config.osDropdown).toBeVisible();
+      const version = await config.getCurrentOsVersion();
+      console.log(`[INFO] Default Ubuntu version: "${version}"`);
+      expect(version.length).toBeGreaterThan(0);
+    });
+
+    await context.close();
+  });
+
+  test("выбор версии из дропдауна обновляет Summary 'Server type'", async ({
+    browser,
+  }) => {
+    const context = await browser.newContext({
+      storageState: storageStatePath,
+    });
+    const page = await context.newPage();
+    const config = new VpsConfigPage(page);
+
+    await goToConfigureStep(page);
+
+    await test.step("выбрать тип Ubuntu", async () => {
+      await config.selectOsType("Ubuntu");
+      await expect(config.osDropdown).toBeVisible();
+    });
+
+    let lastVersionText = "";
+
+    await test.step("открыть дропдаун и выбрать последнюю версию", async () => {
+      await config.openOsDropdown();
+      const items = config.osDropdownItems;
+      const count = await items.count();
+      console.log(`[INFO] Ubuntu versions in dropdown: ${count}`);
+      expect(count).toBeGreaterThanOrEqual(2);
+
+      const lastItem = items.last();
+      lastVersionText = (await lastItem.innerText()).trim();
+      console.log(`[INFO] Selecting version: "${lastVersionText}"`);
+      await lastItem.click();
+      await page.waitForTimeout(300);
+    });
+
+    await test.step("summary 'Server type' отражает выбранную версию", async () => {
+      await expect(config.orderServerType).toContainText(lastVersionText);
+      console.log(`[INFO] Summary Server type updated → "${lastVersionText}" ✓`);
+    });
+
+    await context.close();
+  });
+
+  test("смена типа ОС обновляет Summary 'Server type'", async ({ browser }) => {
+    const context = await browser.newContext({
+      storageState: storageStatePath,
+    });
+    const page = await context.newPage();
+    const config = new VpsConfigPage(page);
+
+    await goToConfigureStep(page);
+
+    await test.step("запомнить дефолтный Server type (Games)", async () => {
+      const defaultType = (await config.orderServerType.innerText()).trim();
+      console.log(`[INFO] Default server type: "${defaultType}"`);
+      expect(defaultType.length).toBeGreaterThan(0);
+    });
+
+    await test.step("выбрать Rocky Linux", async () => {
+      await config.selectOsType("Rocky Linux");
+      const name = await config.getActiveOsTypeName();
+      console.log(`[INFO] Active OS: "${name}"`);
+      expect(name).toBe("Rocky Linux");
+    });
+
+    await test.step("summary 'Server type' изменился", async () => {
+      await expect(config.orderServerType).toBeVisible();
+      const newType = (await config.orderServerType.innerText()).trim();
+      console.log(`[INFO] New server type: "${newType}"`);
+      expect(newType.length).toBeGreaterThan(0);
+    });
+
+    await context.close();
+  });
+
+  test("WordPress on Ubuntu — нет дропдауна версий (одиночный вариант)", async ({
+    browser,
+  }) => {
+    const context = await browser.newContext({
+      storageState: storageStatePath,
+    });
+    const page = await context.newPage();
+    const config = new VpsConfigPage(page);
+
+    await goToConfigureStep(page);
+
+    await test.step("выбрать WordPress", async () => {
+      await config.selectOsType("WordPress");
+      const name = await config.getActiveOsTypeName();
+      console.log(`[INFO] Active OS: "${name}"`);
+      expect(name).toContain("WordPress");
+    });
+
+    await test.step("дропдаун версий отсутствует", async () => {
+      await expect(config.osDropdown).not.toBeVisible();
+      console.log("[INFO] No version dropdown for WordPress on Ubuntu ✓");
+    });
 
     await context.close();
   });
@@ -471,7 +679,7 @@ test.describe("VPS Funnel — Configure Your Server", () => {
 // SUITE 4 — Full Happy Path
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS Funnel — Full Happy Path", () => {
-  test("Deploy Now → Billing → Configure → WHMCS checkout", async ({
+  test("Deploy Now → Billing → Configure (OS + Location) → WHMCS checkout", async ({
     browser,
   }) => {
     const context = await browser.newContext({
@@ -481,38 +689,56 @@ test.describe("VPS Funnel — Full Happy Path", () => {
     const cartBilling = new CartBillingPage(page);
     const config = new VpsConfigPage(page);
 
-    // Step 1: /vps-hosting/ → /cart-vps/
-    await deployFirstPlan(page);
-    await cartBilling.billing.container.waitFor({
-      state: "visible",
-      timeout: 15_000,
+    await test.step("Step 1: /vps-hosting/ → /cart-vps/", async () => {
+      await deployFirstPlan(page);
+      await cartBilling.billing.container.waitFor({
+        state: "visible",
+        timeout: 15_000,
+      });
+      console.log(`[STEP 1] Cart loaded: ${page.url()}`);
     });
-    console.log(`[STEP 1] Cart loaded: ${page.url()}`);
 
-    // Step 2: выбрать 1 Month → Next Step
-    await cartBilling.billing.selectCycle("1 Month");
-    await page.waitForTimeout(300);
-    await page.locator(".order__button-order").click();
-    await config.waitForConfigureStep();
-    console.log(`[STEP 2] Billing OK → Configure: ${page.url()}`);
+    await test.step("Step 2: Billing Cycle — выбрать 1 Month → Next Step", async () => {
+      await cartBilling.billing.selectCycle("1 Month");
+      await page.waitForTimeout(300);
+      await page.locator(".order__button-order").click();
+      await config.waitForConfigureStep();
+      console.log(`[STEP 2] Billing OK → Configure: ${page.url()}`);
+    });
 
-    // Step 3: выбрать локацию
-    const defaultLoc = await config.getActiveLocationName();
-    console.log(`[STEP 3] Default location: "${defaultLoc}"`);
-    // Переключаем на другую чтобы проверить интерактивность
-    const altLoc = defaultLoc === "USA" ? "Europe" : "USA";
-    await config.selectLocation(altLoc);
-    const confirmedLoc = await config.getActiveLocationName();
-    expect(confirmedLoc).toBe(altLoc);
-    console.log(`[STEP 3] Location selected: "${confirmedLoc}" ✓`);
+    await test.step("Step 3: Configure — выбрать ОС Ubuntu + версию + локацию Europe", async () => {
+      // Выбрать тип ОС
+      await config.selectOsType("Ubuntu");
+      await expect(config.osDropdown).toBeVisible();
 
-    // Step 4: Next Step → WHMCS checkout
-    await config.proceedToCheckout();
-    console.log(`[STEP 4] Checkout URL: ${page.url()}`);
+      // Выбрать первую версию из дропдауна
+      await config.openOsDropdown();
+      const firstVersion = config.osDropdownItems.first();
+      const versionText = (await firstVersion.innerText()).trim();
+      await firstVersion.click();
+      await page.waitForTimeout(300);
+      console.log(`[STEP 3] OS version selected: "${versionText}"`);
 
-    expect(page.url()).toMatch(/clientarea\/cart\.php/);
-    await expect(page.locator("#frmCheckout")).toBeVisible({ timeout: 15_000 });
-    console.log("[STEP 4] WHMCS checkout form visible ✓");
+      // Проверить summary Server type
+      await expect(config.orderServerType).toContainText(versionText);
+
+      // Выбрать локацию
+      await config.selectLocation("Europe");
+      expect(await config.getActiveLocationName()).toBe("Europe");
+      await expect(config.orderLocation).toContainText("Europe");
+      console.log("[STEP 3] Location: Europe ✓");
+    });
+
+    await test.step("Step 4: Next Step → WHMCS checkout form", async () => {
+      await config.proceedToCheckout();
+      console.log(`[STEP 4] Checkout URL: ${page.url()}`);
+
+      expect(page.url()).toMatch(/clientarea\/cart\.php/);
+      await expect(page.locator("#frmCheckout")).toBeVisible({
+        timeout: 15_000,
+      });
+      console.log("[STEP 4] WHMCS checkout form visible ✓");
+    });
 
     await context.close();
   });
