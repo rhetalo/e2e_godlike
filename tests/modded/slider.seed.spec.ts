@@ -12,7 +12,7 @@
  *   npx playwright test tests/slider.seed.spec.ts --project=chromium
  */
 import { test, expect } from "@playwright/test";
-import { SeedPage } from "../pages/SeedPage";
+import { SeedPage } from "../../pages/SeedPage";
 
 test.describe("Sky-haven seed page tariff slider", () => {
   let seed: SeedPage;

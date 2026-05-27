@@ -21,8 +21,8 @@
  *   Проверяем UI до подтверждения, затем жмём Cancel.
  */
 import { test, expect, type Browser } from "@playwright/test";
-import { VpsPanelServerPage } from "../pages/VpsPanelServerPage";
-import { VpsPanelDashboardPage } from "../pages/VpsPanelDashboardPage";
+import { VpsPanelServerPage } from "../../../pages/VpsPanelServerPage";
+import { VpsPanelDashboardPage } from "../../../pages/VpsPanelDashboardPage";
 import {
   loginAndSaveSession,
   PANEL_URL,
@@ -30,7 +30,7 @@ import {
   TEST_SERVER_UUID,
   TEST_SERVER_NAME,
   TEST_SERVER_URL,
-} from "../utils/auth";
+} from "../../../utils/auth";
 
 test.use({
   viewport: { width: 1440, height: 900 },

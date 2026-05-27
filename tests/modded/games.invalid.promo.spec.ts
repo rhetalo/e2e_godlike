@@ -1,13 +1,13 @@
 import { test, expect } from "@playwright/test";
-import gamesData from "../fixtures/games.json";
+import gamesData from "../../fixtures/games.json";
 
 const gamesToTest = gamesData.games;
 
 const BASE_URL = "https://godlike.host";
 
-const EMAIL = "testfree2@testmail.com";
-const PASSWORD = "testfree2@testmail.com";
-const storageStatePath = "storageState.free.json";
+const EMAIL = "test@testmail.com";
+const PASSWORD = "test@testmail.com";
+const storageStatePath = "storageState.json";
 
 // ---------------- LOGIN ----------------
 
@@ -38,10 +38,11 @@ test.beforeAll(async ({ browser }) => {
 // ---------------- TESTS ----------------
 
 for (const game of gamesToTest) {
-  test(`Valid promocode for: ${game.name}`, async ({ browser }) => {
+  test(`Invalid promocode for: ${game.name}`, async ({ browser }) => {
     test.setTimeout(60000);
 
     const gameName = game.name;
+    const expectPromoValid = game.expectPromoValid ?? false;
 
     console.log(`\n===== START TEST FOR: ${gameName} =====`);
 
@@ -51,7 +52,6 @@ for (const game of gamesToTest) {
 
     const page = await context.newPage();
 
-    // 🔴 ВАЖНО: копим ошибки
     const invalidPromos: string[] = [];
 
     try {
@@ -161,26 +161,25 @@ for (const game of gamesToTest) {
             }),
           ]);
 
-          // ---------------- STRICT CHECK ----------------
+          // ---------------- STRICT INVERTED CHECK ----------------
 
           if (await successLabel.isVisible()) {
             const promoText =
               (await successLabel.textContent())?.trim() || "";
 
             console.log(
-              `[PROMO SUCCESS] ${title}: ${promoText}`,
+              `[PROMO ACTIVE] ${title}: ${promoText}`,
             );
 
-            const isValid = promoText.includes(
-              "Activated promocode",
-            );
+            const hasActivation =
+              promoText.includes("Activated promocode");
 
-            if (!isValid) {
-              console.log(
-                `[PROMO INVALID] ${title}: ${promoText}`,
-              );
-
-              invalidPromos.push(`${title}: ${promoText}`);
+            if (hasActivation) {
+              if (!expectPromoValid) {
+                invalidPromos.push(
+                  `${title}: unexpected activation → ${promoText}`,
+                );
+              }
             }
           } else if (await errorLabel.isVisible()) {
             const errorText =
@@ -190,7 +189,11 @@ for (const game of gamesToTest) {
               `[PROMO ERROR] ${title}: ${errorText}`,
             );
 
-            invalidPromos.push(`${title}: ${errorText}`);
+            if (expectPromoValid) {
+              invalidPromos.push(
+                `${title}: expected activation but got error → ${errorText}`,
+              );
+            }
           }
 
           console.log(`[INFO] Tariff processed`);

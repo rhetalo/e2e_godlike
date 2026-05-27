@@ -26,9 +26,9 @@
  *   npx playwright test tests/vps.panel.media.spec.ts --project=chromium --headed
  */
 import { test, expect, type Browser, type BrowserContext } from "@playwright/test";
-import { VpsPanelServerPage } from "../pages/VpsPanelServerPage";
-import { VpsPanelMediaPage } from "../pages/VpsPanelMediaPage";
-import { loginAndSaveSession, STORAGE_STATE_PATH, TEST_SERVER_UUID } from "../utils/auth";
+import { VpsPanelServerPage } from "../../../pages/VpsPanelServerPage";
+import { VpsPanelMediaPage } from "../../../pages/VpsPanelMediaPage";
+import { loginAndSaveSession, STORAGE_STATE_PATH, TEST_SERVER_UUID } from "../../../utils/auth";
 
 // ── Config ────────────────────────────────────────────────────────────────────
 

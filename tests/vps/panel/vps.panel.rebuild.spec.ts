@@ -46,9 +46,9 @@
  *   npx playwright test tests/vps.panel.rebuild.spec.ts --project=chromium --headed
  */
 import { test, expect, type Browser, type Page } from "@playwright/test";
-import { VpsPanelServerPage } from "../pages/VpsPanelServerPage";
-import { VpsPanelRebuildPage } from "../pages/VpsPanelRebuildPage";
-import { loginAndSaveSession, STORAGE_STATE_PATH, TEST_SERVER_UUID, PANEL_URL } from "../utils/auth";
+import { VpsPanelServerPage } from "../../../pages/VpsPanelServerPage";
+import { VpsPanelRebuildPage } from "../../../pages/VpsPanelRebuildPage";
+import { loginAndSaveSession, STORAGE_STATE_PATH, TEST_SERVER_UUID, PANEL_URL } from "../../../utils/auth";
 
 test.use({ viewport: { width: 1440, height: 900 } });
 

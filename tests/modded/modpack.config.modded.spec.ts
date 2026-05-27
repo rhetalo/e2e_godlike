@@ -18,8 +18,8 @@
  *   npx playwright test tests/modpack.config.modded.spec.ts --project=chromium
  */
 import { test, expect } from "@playwright/test";
-import { ModdedHostingPage } from "../pages/ModdedHostingPage";
-import { QuickPickModpacks } from "../fixtures/test-data";
+import { ModdedHostingPage } from "../../pages/ModdedHostingPage";
+import { QuickPickModpacks } from "../../fixtures/test-data";
 
 test.describe("Modded modpack configuration", () => {
   let modded: ModdedHostingPage;

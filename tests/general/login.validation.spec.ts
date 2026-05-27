@@ -16,8 +16,8 @@
  *   npx playwright test tests/login.validation.spec.ts --project=chromium
  */
 import { test, expect, type Page } from "@playwright/test";
-import { CartPage } from "../pages/CartPage";
-import { VueCartStep2Pattern } from "../fixtures/test-data";
+import { CartPage } from "../../pages/CartPage";
+import { VueCartStep2Pattern } from "../../fixtures/test-data";
 
 const CART_URL =
   "/cart?productId=346&billingCycle=monthly&currency=1&modpackId=curseforge-925200&promo=COMMUNITY40";

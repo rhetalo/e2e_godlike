@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
-import { CreditBalanceSelector } from "../components/CreditBalanceSelector";
-import { PaymentMethodSelector } from "../components/PaymentMethodSelector";
+import { CreditBalanceSelector } from "../../components/CreditBalanceSelector";
+import { PaymentMethodSelector } from "../../components/PaymentMethodSelector";
 
 test.use({
   viewport: { width: 1800, height: 900 },

@@ -25,13 +25,13 @@
  *   npx playwright test tests/vps.panel.network.spec.ts --project=chromium --headed
  */
 import { test, expect, type Browser } from "@playwright/test";
-import { VpsPanelServerPage } from "../pages/VpsPanelServerPage";
-import { VpsPanelNetworkPage } from "../pages/VpsPanelNetworkPage";
+import { VpsPanelServerPage } from "../../../pages/VpsPanelServerPage";
+import { VpsPanelNetworkPage } from "../../../pages/VpsPanelNetworkPage";
 import {
   loginAndSaveSession,
   STORAGE_STATE_PATH,
   TEST_SERVER_UUID,
-} from "../utils/auth";
+} from "../../../utils/auth";
 
 test.use({
   viewport: { width: 1440, height: 900 },

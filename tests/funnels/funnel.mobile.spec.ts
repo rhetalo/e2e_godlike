@@ -1,5 +1,5 @@
 import { test, expect, Browser } from "@playwright/test";
-import { MobileCartPage } from "../pages/MobileCartPage";
+import { MobileCartPage } from "../../pages/MobileCartPage";
 
 test.use({
   viewport: { width: 390, height: 844 },

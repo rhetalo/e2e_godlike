@@ -20,7 +20,7 @@
  *   npx playwright test tests/slider.modded.spec.ts --project=chromium --headed
  */
 import { test, expect } from "@playwright/test";
-import { ModdedHostingPage } from "../pages/ModdedHostingPage";
+import { ModdedHostingPage } from "../../pages/ModdedHostingPage";
 
 test.describe("Modded hosting tariff slider", () => {
   let modded: ModdedHostingPage;

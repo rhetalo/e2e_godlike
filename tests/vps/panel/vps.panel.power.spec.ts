@@ -47,8 +47,8 @@
  *   npx playwright test tests/vps.panel.power.spec.ts --project=chromium --headed
  */
 import { test, expect, type Browser } from "@playwright/test";
-import { VpsPanelServerPage } from "../pages/VpsPanelServerPage";
-import { loginAndSaveSession, STORAGE_STATE_PATH, TEST_SERVER_UUID } from "../utils/auth";
+import { VpsPanelServerPage } from "../../../pages/VpsPanelServerPage";
+import { loginAndSaveSession, STORAGE_STATE_PATH, TEST_SERVER_UUID } from "../../../utils/auth";
 
 test.use({ viewport: { width: 1440, height: 900 } });
 

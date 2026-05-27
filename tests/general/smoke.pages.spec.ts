@@ -15,9 +15,9 @@
  *   npx playwright test tests/smoke.pages.spec.ts --project=chromium --headed
  */
 import { test, expect } from "@playwright/test";
-import { ModdedHostingPage } from "../pages/ModdedHostingPage";
-import { SeedPage } from "../pages/SeedPage";
-import { Urls } from "../fixtures/test-data";
+import { ModdedHostingPage } from "../../pages/ModdedHostingPage";
+import { SeedPage } from "../../pages/SeedPage";
+import { Urls } from "../../fixtures/test-data";
 
 test.describe("@smoke godlike.host pages load", () => {
   test("home loads and has 'godlike' in <title>", async ({ page }) => {

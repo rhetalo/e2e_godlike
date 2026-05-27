@@ -23,9 +23,9 @@
  *   npx playwright test tests/vps.funnel.spec.ts --project=chromium --headed
  */
 import { test, expect, type Browser, type Page } from "@playwright/test";
-import { VpsPage } from "../pages/VpsPage";
-import { VpsConfigPage } from "../pages/VpsConfigPage";
-import { CartBillingPage } from "../pages/CartBillingPage";
+import { VpsPage } from "../../../pages/VpsPage";
+import { VpsConfigPage } from "../../../pages/VpsConfigPage";
+import { CartBillingPage } from "../../../pages/CartBillingPage";
 
 test.use({
   viewport: { width: 1800, height: 900 },

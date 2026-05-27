@@ -16,9 +16,9 @@
  */
 
 import { test, expect, type Browser } from "@playwright/test";
-import { loginAndSaveSession, STORAGE_STATE_PATH, TEST_SERVER_NAME } from "../utils/auth";
-import { VpsPanelServersListPage } from "../pages/VpsPanelServersListPage";
-import { ServerDetailPage } from "../pages/VpsPanelServerDetailPage";
+import { loginAndSaveSession, STORAGE_STATE_PATH, TEST_SERVER_NAME } from "../../../utils/auth";
+import { VpsPanelServersListPage } from "../../../pages/VpsPanelServersListPage";
+import { ServerDetailPage } from "../../../pages/VpsPanelServerDetailPage";
 
 test.use({ viewport: { width: 1440, height: 900 } });
 

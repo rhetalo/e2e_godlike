@@ -1,5 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
-import { generateCredentials, saveCredentials } from '../utils/credentials';
+import { generateCredentials, saveCredentials } from '../../utils/credentials';
 
 test.describe('Registration flow from tariff', () => {
     test('User can register from tariff checkout',{tag: '@fast'}, async ({ page }: { page: Page }) => {
