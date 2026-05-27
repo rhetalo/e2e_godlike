@@ -197,25 +197,36 @@ id="debugNNNN" сидит на <td> внутри <tr>, а не на самом <
 
 Правило: перед написанием селектора — смотреть в DevTools на каком элементе атрибут.
 
-7.5 Кастомные radio-tile: input скрыт, .check() без force:true упадёт
+7.5 Кастомные radio-tile: input скрыт — ни .check() ни force:true не помогут
 VirtFusion использует кастомный UI для radio-кнопок (плитки с иконками).
-Реальный <input> визуально скрыт (custom CSS), хотя и присутствует в DOM.
-.check() по умолчанию требует видимость элемента — таймаутит.
+Реальный <input> CSS-скрыт (display:none / opacity:0 / position absolute за пределами).
 
-// ❌ Плохо — упадёт с "element is not visible":
+.check()               — падает: "element is not visible" (таймаут)
+.check({force:true})   — тоже падает: force обходит visibility check, но Playwright
+                         всё равно пытается прокрутить элемент в область видимости
+                         ("scrolling into view if needed") — и падает на этом шаге.
+
+Единственное рабочее решение: dispatchEvent('click')
+  Синтетический click — никаких actionability проверок, никакого скролла.
+
+// ❌ Плохо — таймаут "element is not visible":
 await page.locator('input.radio-button[value="2"]').check();
 
-// ✓ Хорошо — force:true пропускает проверку видимости:
+// ❌ Тоже плохо — падает на "scrolling into view":
 await page.locator('input.radio-button[value="2"]').check({ force: true });
 
-// ✓ Лучше — вынести в метод Page Object с говорящим именем:
+// ✓ Правильно — dispatchEvent('click') + verify:
+await page.locator('input.radio-button[value="2"]').dispatchEvent("click");
+await expect(page.locator('input.radio-button[value="2"]')).toBeChecked({ timeout: 5_000 });
+
+// ✓ Лучше — инкапсулировать в Page Object:
 async selectCDDVD(): Promise<void> {
-  await this.cdDvdRadio.check({ force: true });
+  await this.cdDvdRadio.dispatchEvent("click");
   await expect(this.cdDvdRadio).toBeChecked({ timeout: 5_000 });
 }
 
-Правило: при кастомных radio/checkbox UI — всегда проверять видимость через
-DevTools/accessibility tree перед написанием .check(). Если элемент скрыт — force:true.
+Правило: для любого CSS-скрытого input (radio, checkbox) использовать dispatchEvent('click'),
+не .check() и не .check({force:true}).
 
 8. Что НЕ является E2E тестом
 Следующее не нужно тестировать отдельными тестами — это детали реализации:

@@ -19,9 +19,10 @@ import { PANEL_URL, TEST_SERVER_UUID } from "../utils/auth";
  *   CD/DVD: input.radio-button[type="radio"][value="2"]
  *
  * ⚠️  Radio inputs are visually HIDDEN (custom tile UI replaces them).
- *     .check() without force:true times out because element is not visible.
- *     Always use selectHDD() / selectCDDVD() which pass force:true.
- *     Do NOT call .check() directly on hddRadio / cdDvdRadio in tests.
+ *     .check() and .check({force:true}) both fail — Playwright still tries to
+ *     scroll the element into view, which fails for CSS-hidden inputs.
+ *     Use dispatchEvent('click') instead: synthetic event, no actionability checks.
+ *     Always use selectHDD() / selectCDDVD() — do NOT touch radios directly.
  *
  * Apply button:  button#server-boot-order-button
  *
@@ -64,19 +65,21 @@ export class VpsPanelMediaPage {
 
   /**
    * Select HDD as boot device.
-   * Uses force:true because the radio input is visually hidden (custom tile UI).
+   * dispatchEvent('click') bypasses all actionability checks including scroll —
+   * required because the radio input is CSS-hidden by the custom tile UI.
    */
   async selectHDD(): Promise<void> {
-    await this.hddRadio.check({ force: true });
+    await this.hddRadio.dispatchEvent("click");
     await expect(this.hddRadio).toBeChecked({ timeout: 5_000 });
   }
 
   /**
    * Select CD/DVD as boot device.
-   * Uses force:true because the radio input is visually hidden (custom tile UI).
+   * dispatchEvent('click') bypasses all actionability checks including scroll —
+   * required because the radio input is CSS-hidden by the custom tile UI.
    */
   async selectCDDVD(): Promise<void> {
-    await this.cdDvdRadio.check({ force: true });
+    await this.cdDvdRadio.dispatchEvent("click");
     await expect(this.cdDvdRadio).toBeChecked({ timeout: 5_000 });
   }
 
