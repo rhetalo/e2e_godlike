@@ -447,3 +447,77 @@ function parsePrice(priceStr: string): number {
 ```
 
 Избегай: `/[\d]+\.[\d]+/` — не матчит целые числа, сломается если цена без копеек.
+
+9.8 test.skip() — правильный способ условного пропуска теста
+
+Если тест зависит от внешнего условия (сервер запущен, страница доступна, фича включена),
+используй `test.skip()`, а не `if (!condition) return` — иначе тест молча зеленеет.
+
+```typescript
+// ❌ АНТИПАТТЕРН — тест проходит даже если navigation полностью сломана
+const { navigated } = await openRebuildPage(browser);
+if (!navigated) {
+  console.log("[INFO] skip");
+  await context.close();
+  return; // ← тест GREEN, но ничего не проверялось
+}
+
+// ✓ ПРАВИЛЬНО — тест помечается orange/skipped, видно в отчёте
+const { navigated } = await openRebuildPage(browser);
+test.skip(!navigated, "Rebuild page not reachable — server may be stopped");
+// После test.skip() выполнение останавливается если условие true
+// В отчёте: "skipped" с причиной — явно и честно
+```
+
+**Разница в отчёте:**
+
+| Подход | Статус в Playwright | Видно ли проблему? |
+|--------|--------------------|--------------------|
+| `return` | ✅ PASSED (зелёный) | ❌ Нет — ложная уверенность |
+| `test.skip()` | ⏩ SKIPPED (оранжевый) | ✅ Да — видно что не выполнялось |
+| `expect(cond).toBe(true)` | ❌ FAILED (красный) | ✅ Да — явный сигнал о проблеме |
+
+**Когда что использовать:**
+
+- `test.skip(cond, reason)` — условие зависит от внешней среды (сервер выключен, фича за флагом)
+- `expect(cond).toBeTruthy()` — условие должно всегда выполняться (навигация сломана = баг)
+- `return` — **никогда** в теле теста. Если нужно выйти — это либо skip, либо fail.
+
+9.9 Rebuild page — подтверждённые селекторы (май 2026)
+
+Данные получены из живого HTML DevTools. Предыдущие предположения были ошибочными.
+
+**OS card selection:**
+```typescript
+// ❌ НЕВЕРНО — этот класс НИКОГДА не появляется при выборе
+div.card.os-select.card-inverted-big-border-os
+
+// ✓ ВЕРНО — при клике по карточке ДОБАВЛЯЮТСЯ эти классы
+// (card-not-inverted-big-border-os ОСТАЁТСЯ на карточке)
+div.card.os-select.selected-card        // ← правильный селектор "выбранная карточка"
+// + border-success + shadow-sm
+// + появляется div.position-absolute.card-selected > svg (чекмарк)
+```
+
+**Install button:**
+```typescript
+// Отсутствует в DOM до выбора ОС (не disabled, а просто не рендерится)
+// После выбора ОС — появляется с текстом "Install with {OS Name}"
+get finalInstallButton(): Locator {
+  return this.page.locator("button.btn-primary.btn-lg").filter({ hasText: /Install with/ });
+}
+// Тест: до выбора → isVisible() === false; после → toBeVisible() + text contains OS name
+```
+
+**Accordion groups (6 штук, heading-0..heading-5):**
+```
+AlmaLinux (heading-0) | CentOS (heading-1) | Debian (heading-2)
+Fedora (heading-3)    | Games (heading-4)  | Ubuntu (heading-5)  ← часто забывают!
+```
+
+**Swap Space** (появляется после выбора ОС):
+```typescript
+get swapSpaceCards(): Locator {
+  return this.page.locator("div.card.card-not-inverted-big-border.c-pointer");
+}
+```
