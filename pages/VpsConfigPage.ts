@@ -5,26 +5,26 @@ import { type Page, type Locator } from "@playwright/test";
  * URL: /cart-vps?...&step=3
  * Still inside the Vue SPA at /cart-vps/.
  *
- * VPS configure is fundamentally different from Minecraft configure:
- *   - Location: .configure-server__location (NOT .location or .location__header)
- *   - Only 2 locations: USA, Europe (NO continent dropdown)
- *   - Active location: .configure-server__location-active
- *   - No server type (Paper/Purpur/Spigot)
- *   - No OS selection found on step=3 (may be on a separate step or plan-dependent)
- *
- * Confirmed via debug spec 17-Apr-2026.
+ * VPS configure structure:
+ *   - Location:  .configure-server__location / .configure-server__location-active
+ *   - Only 2 locations: USA, Europe (no continent dropdown)
+ *   - OS Types:  .configure-server__types > .configure-server__type
+ *   - Active OS: .configure-server__type-active
+ *   - OS title:  .configure-server__type_title
+ *   - Versions:  .custom-dropdown / .custom-dropdown__item
+ *   - WordPress on Ubuntu has no dropdown (single option)
  */
 export class VpsConfigPage {
   constructor(private page: Page) {}
 
   // ── Location Selection ────────────────────────────────────────────────────
 
-  /** All location options (USA, Europe) */
+  /** All location option cards (USA, Europe) */
   get locationItems(): Locator {
     return this.page.locator(".configure-server__location");
   }
 
-  /** Currently active/selected location */
+  /** Currently active/selected location card */
   get activeLocation(): Locator {
     return this.page.locator(".configure-server__location-active");
   }
@@ -43,6 +43,90 @@ export class VpsConfigPage {
     return (await this.activeLocation.innerText()).trim();
   }
 
+  // ── OS / Pre-installation Type Selection ─────────────────────────────────
+
+  /** Container for all OS type cards */
+  get osTypesContainer(): Locator {
+    return this.page.locator(".configure-server__types");
+  }
+
+  /** All OS type cards */
+  get osTypeItems(): Locator {
+    return this.page.locator(".configure-server__type");
+  }
+
+  /** Currently active/selected OS type card */
+  get activeOsType(): Locator {
+    return this.page.locator(".configure-server__type-active");
+  }
+
+  /** Get the title of the currently active OS type */
+  async getActiveOsTypeName(): Promise<string> {
+    return (
+      await this.activeOsType
+        .locator(".configure-server__type_title")
+        .innerText()
+    ).trim();
+  }
+
+  /** Click an OS type card by its title text */
+  async selectOsType(name: string): Promise<void> {
+    await this.page
+      .locator(".configure-server__type")
+      .filter({ hasText: name })
+      .click();
+    await this.page.waitForTimeout(300);
+  }
+
+  // ── OS Version Dropdown ───────────────────────────────────────────────────
+
+  /**
+   * Version dropdown — only visible when the selected OS type has multiple
+   * versions. WordPress on Ubuntu has no dropdown.
+   */
+  get osDropdown(): Locator {
+    return this.page.locator(".custom-dropdown");
+  }
+
+  /** Clickable header of the dropdown (opens/closes the list) */
+  get osDropdownSelected(): Locator {
+    return this.page.locator(".custom-dropdown__selected");
+  }
+
+  /** Currently displayed version label inside the dropdown header */
+  get osDropdownSelectedText(): Locator {
+    return this.page.locator(".custom-dropdown__selected-content span");
+  }
+
+  /** All version items inside the open dropdown list */
+  get osDropdownItems(): Locator {
+    return this.page.locator(".custom-dropdown__item");
+  }
+
+  /** Get text of the currently selected OS version */
+  async getCurrentOsVersion(): Promise<string> {
+    return (await this.osDropdownSelectedText.innerText()).trim();
+  }
+
+  /** Open the OS version dropdown by clicking its header */
+  async openOsDropdown(): Promise<void> {
+    await this.osDropdownSelected.click();
+    await this.page.waitForTimeout(300);
+  }
+
+  /**
+   * Select an OS version by its label text.
+   * Opens the dropdown first, then clicks the matching item.
+   */
+  async selectOsVersion(version: string): Promise<void> {
+    await this.openOsDropdown();
+    await this.page
+      .locator(".custom-dropdown__item")
+      .filter({ hasText: version })
+      .click();
+    await this.page.waitForTimeout(300);
+  }
+
   // ── Order Summary ─────────────────────────────────────────────────────────
 
   /** "Billing cycle" caption in order summary */
@@ -53,14 +137,32 @@ export class VpsConfigPage {
       .locator(".order__details-item__caption");
   }
 
+  /** "Location" caption in order summary */
+  get orderLocation(): Locator {
+    return this.page
+      .locator(".order__details-item")
+      .filter({ hasText: "Location" })
+      .locator(".order__details-item__caption");
+  }
+
+  /** "Server type" caption in order summary */
+  get orderServerType(): Locator {
+    return this.page
+      .locator(".order__details-item")
+      .filter({ hasText: "Server type" })
+      .locator(".order__details-item__caption");
+  }
+
   /** Total price shown in order block */
   get orderTotal(): Locator {
     return this.page.locator(".order__pricing-price");
   }
 
+  // ── Navigation ────────────────────────────────────────────────────────────
+
   /** Next Step button */
   get nextStepButton(): Locator {
-    return this.page.getByRole("button", { name: "Next step" });
+    return this.page.locator(".order__button");
   }
 
   /** Click Next Step and wait for WHMCS checkout */
@@ -74,7 +176,7 @@ export class VpsConfigPage {
 
   // ── Page readiness ────────────────────────────────────────────────────────
 
-  /** Wait for configure step to be fully rendered */
+  /** Wait for configure step to be fully rendered (locations + OS types) */
   async waitForConfigureStep(): Promise<void> {
     await this.page
       .locator(".configure-server__locations")
@@ -82,5 +184,6 @@ export class VpsConfigPage {
     await this.locationItems
       .first()
       .waitFor({ state: "visible", timeout: 10_000 });
+    await this.osTypesContainer.waitFor({ state: "visible", timeout: 10_000 });
   }
 }
