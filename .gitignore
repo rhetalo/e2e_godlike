@@ -47,6 +47,7 @@ dist/
 build/
 
 # Playwright auth sessions (не хранить в git)
+storageState.json
 storageState.*.json
 
 # Credentials (не хранить в git)
