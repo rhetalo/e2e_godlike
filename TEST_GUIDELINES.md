@@ -371,3 +371,79 @@ Panel-тесты и funnel-тесты используют **разные** stor
 - `storageState.vps.json` — VPS воронка (`godlike.host`)
 
 Не перепутывай — домены и сессии разные.
+
+9.6 expect.poll() — правильный способ ждать динамические значения
+
+Используй `expect.poll()` вместо `waitForTimeout()` везде, где значение обновляется асинхронно.
+Подходит для: цен, статусов, счётчиков, любых реактивных данных в Vue/React.
+
+```typescript
+// ❌ Плохо — waitForTimeout: слепое ожидание, может быть слишком коротким или долгим
+await page.waitForTimeout(1000);
+const price = await cart.getTotalPrice();
+expect(parsePrice(price)).toBeGreaterThan(0); // упадёт если ещё не загрузилось
+
+// ❌ Плохо — прямая проверка без ожидания: упадёт сразу если значение ещё 0
+const price = await cart.getTotalPrice();
+expect(parsePrice(price)).toBeGreaterThan(0);
+
+// ✓ Правильно — poll крутит функцию пока условие не выполнится или timeout не истечёт
+await expect.poll(async () => {
+  const price = await cart.getTotalPrice();
+  return parsePrice(price);
+}, { timeout: 5000 }).toBeGreaterThan(0);
+```
+
+**Двухшаговый паттерн** — poll не возвращает значение, читай отдельно после:
+
+```typescript
+// Шаг 1: ждём пока значение станет валидным
+await expect.poll(async () => {
+  const price = await cart.getTotalPrice();
+  console.log(`[DEBUG] price: ${price}`); // видно каждую попытку в логах
+  return parsePrice(price);
+}, { timeout: 5000 }).toBeGreaterThan(0);
+
+// Шаг 2: читаем значение (уже точно готово)
+const actualPrice = parsePrice(await cart.getTotalPrice());
+```
+
+**Настройка интервалов** для быстрых реакций UI:
+
+```typescript
+await expect.poll(async () => {
+  return parsePrice(await cart.getTotalPrice());
+}, {
+  timeout: 5000,
+  intervals: [300, 500, 1000], // сначала быстро, потом реже
+}).toBeGreaterThan(basePrice);
+```
+
+**Когда использовать:**
+
+| Ситуация | Паттерн |
+|----------|---------|
+| Цена обновляется после выбора игры/тарифа/периода | `poll(() => parsePrice(el))` |
+| Статус сервера меняется (RUNNING → STOPPED) | `poll(() => getStatusText())` |
+| Счётчик строк в activity table растёт | `poll(() => rows.count())` |
+| Дропдаун заполняется после выбора игры | `poll(() => options.count())` |
+
+**Когда НЕ нужен:**
+
+- Элемент просто появляется/исчезает → `waitFor({ state: 'visible' })`
+- Статичный текст на странице → обычный `expect(el).toBeVisible()`
+- Встроенные Playwright-ретраи уже покрывают случай → `toBeVisible`, `toContainText`
+
+9.7 parsePrice — надёжная версия
+
+Используй эту версию — работает с любой валютой (€, $) и с целыми ценами:
+
+```typescript
+function parsePrice(priceStr: string): number {
+  const normalized = priceStr.replace(",", "."); // для европейских форматов
+  const m = normalized.match(/[\d]+(\.\d+)?/);  // матчит "6" и "6.29"
+  return m ? parseFloat(m[0]) : NaN;
+}
+```
+
+Избегай: `/[\d]+\.[\d]+/` — не матчит целые числа, сломается если цена без копеек.
