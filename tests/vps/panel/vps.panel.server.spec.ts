@@ -2,7 +2,7 @@
  * vps.panel.server.spec.ts
  * ────────────────────────
  * Тесты страницы управления сервером VirtFusion.
- * URL: https://vf-panel.godlike.host/server/9c49ed96-56f4-41c8-bc5f-a8d44c21a486
+ * URL: https://vf-panel.godlike.host/server/{UUID}
  *
  * Покрытие:
  *   1. Dashboard → навигация до сервера
@@ -10,17 +10,15 @@
  *   3. Прямой переход на страницу сервера
  *   4. Статус сервера виден
  *   5. Кнопки управления питанием (Boot / Shutdown / Power Off / Restart)
- *   6. Навигация по всем 7 вкладкам
- *   7. Breadcrumb / навигация назад
- *
- * Запуск:
- *   npx playwright test tests/vps.panel.server.spec.ts --project=chromium
- *   npx playwright test tests/vps.panel.server.spec.ts --project=chromium --headed
+ *   6. Навигация по всем вкладкам
  *
  * Деструктивные операции (power off, rebuild):
  *   Проверяем UI до подтверждения, затем жмём Cancel.
+ *
+ * Запуск:
+ *   npx playwright test tests/vps/panel/vps.panel.server.spec.ts --project=chromium --headed
  */
-import { test, expect, type Browser } from "@playwright/test";
+import { test, expect, type Browser, type BrowserContext } from "@playwright/test";
 import { VpsPanelServerPage } from "../../../pages/VpsPanelServerPage";
 import { VpsPanelDashboardPage } from "../../../pages/VpsPanelDashboardPage";
 import {
@@ -29,7 +27,6 @@ import {
   STORAGE_STATE_PATH,
   TEST_SERVER_UUID,
   TEST_SERVER_NAME,
-  TEST_SERVER_URL,
 } from "../../../utils/auth";
 
 test.use({
@@ -37,93 +34,85 @@ test.use({
   deviceScaleFactor: 1,
 });
 
+test.describe.configure({ mode: "serial" });
+
+let sharedContext: BrowserContext;
+let serverPage: VpsPanelServerPage;
+
 test.beforeAll(async ({ browser }: { browser: Browser }) => {
   await loginAndSaveSession(browser);
+  sharedContext = await browser.newContext({ storageState: STORAGE_STATE_PATH });
+  const page = await sharedContext.newPage();
+  serverPage = new VpsPanelServerPage(page, TEST_SERVER_UUID);
 });
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-async function openServerPage(browser: Browser) {
-  const context = await browser.newContext({ storageState: STORAGE_STATE_PATH });
-  const page = await context.newPage();
-  const serverPage = new VpsPanelServerPage(page, TEST_SERVER_UUID);
-  await serverPage.goto();
-  console.log(`[INFO] Server page URL: ${page.url()}`);
-  return { context, page, serverPage };
-}
+test.afterAll(async () => {
+  await sharedContext.close();
+});
 
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 1 — Dashboard Navigation
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS Panel — Dashboard & Navigation", () => {
-  test("dashboard загружается после логина", async ({ browser }) => {
-    const context = await browser.newContext({ storageState: STORAGE_STATE_PATH });
-    const page = await context.newPage();
+  test("dashboard загружается после логина", async () => {
+    const page = sharedContext.pages()[0];
     const dashboard = new VpsPanelDashboardPage(page);
 
     await dashboard.goto();
 
-    console.log(`[INFO] Dashboard URL: ${page.url()}`);
-    expect(page.url()).toMatch(/\/dashboard/);
-    console.log("[INFO] Dashboard loaded ✓");
-
-    await context.close();
+    await test.step("URL содержит /dashboard", async () => {
+      expect(page.url()).toMatch(/\/dashboard/);
+    });
   });
 
-  test("навигация: ссылки Dashboard и Servers видны", async ({ browser }) => {
-    const context = await browser.newContext({ storageState: STORAGE_STATE_PATH });
-    const page = await context.newPage();
+  test("навигация: ссылки Dashboard и Servers видны", async () => {
+    const page = sharedContext.pages()[0];
     const dashboard = new VpsPanelDashboardPage(page);
 
     await dashboard.goto();
 
-    await expect(dashboard.navDashboardLink).toBeVisible({ timeout: 10_000 });
-    await expect(dashboard.navServersLink).toBeVisible({ timeout: 10_000 });
-    console.log("[INFO] Nav links visible: Dashboard, Servers ✓");
-
-    await context.close();
+    await test.step("Dashboard link visible", async () => {
+      await expect(dashboard.navDashboardLink).toBeVisible({ timeout: 10_000 });
+    });
+    await test.step("Servers link visible", async () => {
+      await expect(dashboard.navServersLink).toBeVisible({ timeout: 10_000 });
+    });
   });
 
-  test("клик по Servers в навигации → /servers", async ({ browser }) => {
-    const context = await browser.newContext({ storageState: STORAGE_STATE_PATH });
-    const page = await context.newPage();
+  test("клик по Servers в навигации → /servers", async () => {
+    const page = sharedContext.pages()[0];
     const dashboard = new VpsPanelDashboardPage(page);
 
     await dashboard.goto();
     await dashboard.navigateToServers();
 
-    console.log(`[INFO] After Servers nav click: ${page.url()}`);
-    expect(page.url()).toMatch(/\/servers/);
-
-    await context.close();
+    await test.step("URL содержит /servers", async () => {
+      expect(page.url()).toMatch(/\/servers/);
+    });
   });
 
-  test("страница /servers — кнопка Manage видна для тестового сервера", async ({ browser }) => {
-    const context = await browser.newContext({ storageState: STORAGE_STATE_PATH });
-    const page = await context.newPage();
-    const dashboard = new VpsPanelDashboardPage(page);
+  test("страница /servers — кнопка Manage видна для тестового сервера", async () => {
+    const page = sharedContext.pages()[0];
 
-    await dashboard.gotoServers();
+    await page.goto(`${PANEL_URL}/servers`, { waitUntil: "domcontentloaded", timeout: 30_000 });
+    await page.waitForLoadState("networkidle").catch(() => null);
 
-    const manageBtn = page.locator('button:has-text("Manage"), a:has-text("Manage")').first();
-    await expect(manageBtn).toBeVisible({ timeout: 15_000 });
-    console.log("[INFO] Manage button visible on servers list ✓");
-
-    await context.close();
+    await test.step("Manage button visible", async () => {
+      const manageBtn = page.locator('button:has-text("Manage"), a:has-text("Manage")').first();
+      await expect(manageBtn).toBeVisible({ timeout: 15_000 });
+    });
   });
 
-  test("клик Manage на /servers → открывается страница сервера /server/", async ({ browser }) => {
-    const context = await browser.newContext({ storageState: STORAGE_STATE_PATH });
-    const page = await context.newPage();
+  test("клик Manage на /servers → открывается страница /server/", async () => {
+    const page = sharedContext.pages()[0];
     const dashboard = new VpsPanelDashboardPage(page);
 
     await dashboard.gotoServers();
     await dashboard.openFirstServer();
 
-    console.log(`[INFO] After Manage click URL: ${page.url()}`);
-    expect(page.url()).toMatch(/\/server\//);
-
-    await context.close();
+    await test.step("URL содержит /server/", async () => {
+      expect(page.url()).toMatch(/\/server\//);
+    });
   });
 });
 
@@ -131,44 +120,35 @@ test.describe("VPS Panel — Dashboard & Navigation", () => {
 // SUITE 2 — Server Detail Page Structure
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS Panel — Server Page Structure", () => {
-  test("прямой переход на /server/{UUID} загружается", async ({ browser }) => {
-    const { context, page } = await openServerPage(browser);
-
-    expect(page.url()).toContain(TEST_SERVER_UUID);
-    console.log(`[INFO] Server page loaded: ${page.url()}`);
-
-    await context.close();
+  test.beforeEach(async () => {
+    await serverPage.goto();
   });
 
-  test("имя сервера видно на странице", async ({ browser }) => {
-    const { context, page, serverPage } = await openServerPage(browser);
+  test("прямой переход на /server/{UUID} загружается", async () => {
+    const page = sharedContext.pages()[0];
 
-    const bodyText = await page.locator("body").innerText();
-    const hasServerName = bodyText.includes(TEST_SERVER_NAME);
-    console.log(`[INFO] Server name "${TEST_SERVER_NAME}" on page: ${hasServerName}`);
-    expect(hasServerName).toBeTruthy();
-
-    await context.close();
+    await test.step("URL содержит TEST_SERVER_UUID", async () => {
+      expect(page.url()).toContain(TEST_SERVER_UUID);
+    });
   });
 
-  test("статус сервера отображается (Running / Stopped / Paused)", async ({ browser }) => {
-    const { context, page, serverPage } = await openServerPage(browser);
+  test("имя сервера видно на странице", async () => {
+    const page = sharedContext.pages()[0];
 
+    await test.step(`Имя "${TEST_SERVER_NAME}" присутствует`, async () => {
+      const bodyText = await page.locator("body").innerText();
+      expect(bodyText).toContain(TEST_SERVER_NAME);
+    });
+  });
+
+  test("статус сервера отображается (Running / Stopped / Paused)", async () => {
     const statusText = await serverPage.getStatusText();
-    console.log(`[INFO] Server status: "${statusText}"`);
 
-    const validStatuses = ["Running", "Stopped", "Paused", "Building", "Starting"];
-    const hasValidStatus = validStatuses.some(s =>
-      statusText.toLowerCase().includes(s.toLowerCase())
-    ) || statusText.length > 0;
-
-    console.log(`[INFO] Status element found: ${hasValidStatus}`);
-    // Status может быть в любом месте страницы
-    const bodyText = await page.locator("body").innerText();
-    const hasAnyStatus = validStatuses.some(s => bodyText.includes(s));
-    console.log(`[INFO] Status in page body: ${hasAnyStatus}`);
-
-    await context.close();
+    await test.step("Статус-элемент содержит валидное значение", async () => {
+      const validStatuses = ["running", "stopped", "paused", "building", "starting"];
+      const isValid = validStatuses.some(s => statusText.toLowerCase().includes(s));
+      expect(isValid, `Неизвестный статус: "${statusText}"`).toBeTruthy();
+    });
   });
 });
 
@@ -176,122 +156,66 @@ test.describe("VPS Panel — Server Page Structure", () => {
 // SUITE 3 — Power Controls
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS Panel — Power Controls", () => {
-  test("кнопки управления питанием присутствуют на странице", async ({ browser }) => {
-    const { context, page, serverPage } = await openServerPage(browser);
-
-    // At least some power buttons should be present
-    const allPowerBtns = serverPage.allPowerButtons;
-    const count = await allPowerBtns.count();
-    console.log(`[INFO] Power buttons found via data-action: ${count}`);
-
-    // Also try text-based search
-    const textBtns = page.locator(
-      'button:has-text("Boot"), button:has-text("Shutdown"), button:has-text("Power Off"), button:has-text("Restart")'
-    );
-    const textCount = await textBtns.count();
-    console.log(`[INFO] Power buttons via text: ${textCount}`);
-
-    const total = count + textCount;
-    console.log(`[INFO] Total power buttons: ${total}`);
-    expect(total).toBeGreaterThanOrEqual(1);
-
-    await context.close();
+  test.beforeEach(async () => {
+    await serverPage.goto();
   });
 
-  test("кнопка Restart присутствует и активна", async ({ browser }) => {
-    const { context, page, serverPage } = await openServerPage(browser);
-
-    // Try data-action first, then text
-    const restartBtn = page.locator(
-      'button[data-action="restart_server"], button:has-text("Restart")'
-    ).first();
-
-    const isVisible = await restartBtn.isVisible().catch(() => false);
-    console.log(`[INFO] Restart button visible: ${isVisible}`);
-
-    if (isVisible) {
-      const isEnabled = await restartBtn.isEnabled().catch(() => false);
-      console.log(`[INFO] Restart button enabled: ${isEnabled}`);
-      await expect(restartBtn).toBeVisible();
-    } else {
-      // Server may be stopped — Boot button should be visible instead
-      const bootBtn = page.locator(
-        'button[data-action="boot_server"], button:has-text("Boot")'
-      ).first();
-      const bootVisible = await bootBtn.isVisible().catch(() => false);
-      console.log(`[INFO] Boot button visible (server stopped): ${bootVisible}`);
-    }
-
-    await context.close();
+  test("кнопки управления питанием присутствуют на странице", async () => {
+    await test.step("Хотя бы одна кнопка питания видна", async () => {
+      const textBtns = serverPage.page.locator(
+        'button:has-text("Boot"), button:has-text("Shutdown"), button:has-text("Power Off"), button:has-text("Restart")'
+      );
+      const count = await textBtns.count();
+      expect(count, "Ни одной кнопки питания не найдено").toBeGreaterThanOrEqual(1);
+    });
   });
 
-  test("кнопка Shutdown присутствует когда сервер запущен", async ({ browser }) => {
-    const { context, page, serverPage } = await openServerPage(browser);
+  test("при Running: Shutdown / Power Off / Restart видны и активны", async () => {
+    const isRunning = await serverPage.isRunning();
+    test.skip(!isRunning, "Сервер не Running — пропускаем Running-state проверку");
 
-    const bodyText = await page.locator("body").innerText();
-    const isRunning = bodyText.includes("Running");
-    console.log(`[INFO] Server is running: ${isRunning}`);
-
-    if (isRunning) {
-      const shutdownBtn = page.locator(
-        'button[data-action="shutdown_server"], button:has-text("Shutdown")'
-      ).first();
-      const isVisible = await shutdownBtn.isVisible().catch(() => false);
-      console.log(`[INFO] Shutdown button visible (server running): ${isVisible}`);
-      if (isVisible) {
-        await expect(shutdownBtn).toBeEnabled();
-        console.log("[INFO] Shutdown button enabled ✓");
-      }
-    } else {
-      console.log("[INFO] Server not running — skipping Shutdown check");
-    }
-
-    await context.close();
+    await test.step("Shutdown visible & enabled", async () => {
+      await expect(serverPage.shutdownButton).toBeVisible({ timeout: 10_000 });
+      await expect(serverPage.shutdownButton).toBeEnabled();
+    });
+    await test.step("Power Off visible & enabled", async () => {
+      await expect(serverPage.powerOffButton).toBeVisible({ timeout: 10_000 });
+      await expect(serverPage.powerOffButton).toBeEnabled();
+    });
+    await test.step("Restart visible & enabled", async () => {
+      await expect(serverPage.restartButton).toBeVisible({ timeout: 10_000 });
+      await expect(serverPage.restartButton).toBeEnabled();
+    });
   });
 
-  test("кнопка Power Off — клик открывает подтверждение, Cancel закрывает", async ({ browser }) => {
-    const { context, page, serverPage } = await openServerPage(browser);
+  test("при Stopped: Boot видна и активна", async () => {
+    const isStopped = await serverPage.isStopped();
+    test.skip(!isStopped, "Сервер не Stopped — пропускаем Stopped-state проверку");
 
-    const bodyText = await page.locator("body").innerText();
-    const isRunning = bodyText.includes("Running");
+    await test.step("Boot button visible & enabled", async () => {
+      await expect(serverPage.bootButton).toBeVisible({ timeout: 10_000 });
+      await expect(serverPage.bootButton).toBeEnabled();
+    });
+  });
 
-    if (!isRunning) {
-      console.log("[INFO] Server not running — skipping Power Off confirm test");
-      await context.close();
-      return;
-    }
+  test("Power Off — клик открывает модал подтверждения, Cancel закрывает", async () => {
+    const isRunning = await serverPage.isRunning();
+    test.skip(!isRunning, "Сервер не Running — Power Off недоступен");
 
-    const powerOffBtn = page.locator(
-      'button[data-action="poweroff_server"], button:has-text("Power Off")'
-    ).first();
-
-    const isVisible = await powerOffBtn.isVisible().catch(() => false);
-    if (!isVisible) {
-      console.log("[WARN] Power Off button not visible");
-      await context.close();
-      return;
-    }
-
-    await powerOffBtn.click();
-    console.log("[INFO] Clicked Power Off");
-
-    // Check for confirmation modal
-    const modal = page.locator('[class*="modal"], [role="dialog"]').first();
-    const modalAppeared = await modal.waitFor({ state: "visible", timeout: 5_000 })
-      .then(() => true).catch(() => false);
-
-    if (modalAppeared) {
-      const modalText = await modal.innerText().catch(() => "");
-      console.log(`[INFO] Power Off modal text: "${modalText.trim().slice(0, 100)}"`);
-
-      const cancelBtn = page.locator('button:has-text("Cancel")').first();
-      await cancelBtn.click();
-      console.log("[INFO] Cancelled Power Off modal ✓");
-    } else {
-      console.log("[INFO] No modal for Power Off (direct action)");
-    }
-
-    await context.close();
+    await test.step("Кликаем Power Off", async () => {
+      await serverPage.powerOffButton.click();
+    });
+    await test.step("Модал открылся (.modal.show)", async () => {
+      await expect(serverPage.activeModal).toBeVisible({ timeout: 8_000 });
+    });
+    await test.step("Модал содержит 'Power Off Server'", async () => {
+      const modalText = await serverPage.activeModal.innerText();
+      expect(modalText).toContain("Power Off Server");
+    });
+    await test.step("Cancel закрывает модал", async () => {
+      await serverPage.modalCancelButton.click();
+      await expect(serverPage.activeModal).not.toBeVisible({ timeout: 5_000 });
+    });
   });
 });
 
@@ -301,137 +225,89 @@ test.describe("VPS Panel — Power Controls", () => {
 test.describe("VPS Panel — Tab Navigation", () => {
   const tabLabels = ["Overview", "Media", "Options", "Network", "Storage", "Backups"] as const;
 
-  for (const tabLabel of tabLabels) {
-    test(`вкладка "${tabLabel}" — кликабельна, контент загружается`, async ({ browser }) => {
-      const { context, page, serverPage } = await openServerPage(browser);
+  test("все 6 вкладок присутствуют на странице сервера", async () => {
+    await serverPage.goto();
 
-      const tab = serverPage.tab(tabLabel);
-      const isVisible = await tab.isVisible().catch(() => false);
-
-      if (!isVisible) {
-        console.log(`[WARN] Tab "${tabLabel}" not visible — skipping`);
-        await context.close();
-        return;
-      }
-
-      await serverPage.clickTab(tabLabel);
-      console.log(`[INFO] Clicked tab "${tabLabel}", URL: ${page.url()}`);
-
-      // Content area should have something after click
-      const bodyText = await page.locator("body").innerText();
-      expect(bodyText.length).toBeGreaterThan(100);
-      console.log(`[INFO] Tab "${tabLabel}" content loaded ✓`);
-
-      await context.close();
-    });
-  }
-
-  test("все 6+ вкладок присутствуют на странице сервера", async ({ browser }) => {
-    const { context, page, serverPage } = await openServerPage(browser);
-
-    let foundCount = 0;
     const found: string[] = [];
-
     for (const label of tabLabels) {
-      const tab = serverPage.tab(label);
-      const isVisible = await tab.isVisible().catch(() => false);
-      if (isVisible) {
-        found.push(label);
-        foundCount++;
-      }
+      const isVisible = await serverPage.tab(label).isVisible().catch(() => false);
+      if (isVisible) found.push(label);
     }
 
-    console.log(`[INFO] Visible tabs (${foundCount}): ${found.join(", ")}`);
-    expect(foundCount).toBeGreaterThanOrEqual(4);
-
-    await context.close();
+    await test.step("Минимум 4 вкладки видны", async () => {
+      expect(found.length, `Видны: ${found.join(", ")}`).toBeGreaterThanOrEqual(4);
+    });
   });
+
+  for (const tabLabel of tabLabels) {
+    test(`вкладка "${tabLabel}" — кликабельна, контент загружается`, async () => {
+      await serverPage.goto();
+
+      const isVisible = await serverPage.tab(tabLabel).isVisible().catch(() => false);
+      test.skip(!isVisible, `Вкладка "${tabLabel}" не видна`);
+
+      await test.step(`Кликаем "${tabLabel}"`, async () => {
+        await serverPage.clickTab(tabLabel);
+      });
+      await test.step("Контент страницы загружен (body > 100 символов)", async () => {
+        const bodyText = await serverPage.page.locator("body").innerText();
+        expect(bodyText.length).toBeGreaterThan(100);
+      });
+    });
+  }
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// SUITE 5 — Server List Management
+// SUITE 5 — Servers List
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS Panel — Servers List (/servers)", () => {
-  test("/servers загружается и показывает хотя бы 1 сервер", async ({ browser }) => {
-    const context = await browser.newContext({ storageState: STORAGE_STATE_PATH });
-    const page = await context.newPage();
-
-    await page.goto(`${PANEL_URL}/servers`, {
-      waitUntil: "domcontentloaded",
-      timeout: 30_000,
-    });
+  test.beforeEach(async () => {
+    const page = sharedContext.pages()[0];
+    await page.goto(`${PANEL_URL}/servers`, { waitUntil: "domcontentloaded", timeout: 30_000 });
     await page.waitForLoadState("networkidle").catch(() => null);
-
-    console.log(`[INFO] Servers page URL: ${page.url()}`);
-
-    // Wait for at least one server/manage button to appear
-    const manageBtn = page.locator('button:has-text("Manage"), a:has-text("Manage")').first();
-    await expect(manageBtn).toBeVisible({ timeout: 15_000 });
-
-    const count = await page.locator('button:has-text("Manage"), a:has-text("Manage")').count();
-    console.log(`[INFO] Manage buttons found: ${count}`);
-    expect(count).toBeGreaterThanOrEqual(1);
-
-    await context.close();
   });
 
-  test("имя тестового сервера видно в списке", async ({ browser }) => {
-    const context = await browser.newContext({ storageState: STORAGE_STATE_PATH });
-    const page = await context.newPage();
+  test("/servers показывает хотя бы 1 Manage-кнопку", async () => {
+    const page = sharedContext.pages()[0];
 
-    await page.goto(`${PANEL_URL}/servers`, {
-      waitUntil: "domcontentloaded",
-      timeout: 30_000,
+    await test.step("Manage button visible", async () => {
+      const manageBtn = page.locator('button:has-text("Manage"), a:has-text("Manage")').first();
+      await expect(manageBtn).toBeVisible({ timeout: 15_000 });
     });
-    await page.waitForLoadState("networkidle").catch(() => null);
-
-    const bodyText = await page.locator("body").innerText();
-    console.log(`[INFO] Server name "${TEST_SERVER_NAME}" in list: ${bodyText.includes(TEST_SERVER_NAME)}`);
-    expect(bodyText).toContain(TEST_SERVER_NAME);
-
-    await context.close();
+    await test.step("Количество серверов >= 1", async () => {
+      const count = await page.locator('button:has-text("Manage"), a:has-text("Manage")').count();
+      expect(count).toBeGreaterThanOrEqual(1);
+    });
   });
 
-  test("Delete кнопка на сервере — открывает модал, Cancel закрывает", async ({ browser }) => {
-    const context = await browser.newContext({ storageState: STORAGE_STATE_PATH });
-    const page = await context.newPage();
+  test("имя тестового сервера видно в списке", async () => {
+    const page = sharedContext.pages()[0];
 
-    await page.goto(`${PANEL_URL}/servers`, {
-      waitUntil: "domcontentloaded",
-      timeout: 30_000,
+    await test.step(`"${TEST_SERVER_NAME}" присутствует в списке`, async () => {
+      const bodyText = await page.locator("body").innerText();
+      expect(bodyText).toContain(TEST_SERVER_NAME);
     });
-    await page.waitForLoadState("networkidle").catch(() => null);
+  });
+
+  test("Delete кнопка — открывает модал, Cancel закрывает", async () => {
+    const page = sharedContext.pages()[0];
 
     const deleteBtn = page.locator('button:has-text("Delete"), a:has-text("Delete")').first();
     const isVisible = await deleteBtn.isVisible().catch(() => false);
+    test.skip(!isVisible, "Delete button не найдена на /servers");
 
-    if (!isVisible) {
-      console.log("[INFO] Delete button not visible on servers list — skipping");
-      await context.close();
-      return;
-    }
-
-    await deleteBtn.click();
-    console.log("[INFO] Clicked Delete");
-
-    const modal = page.locator('[class*="modal"], [role="dialog"]').first();
-    const modalAppeared = await modal.waitFor({ state: "visible", timeout: 8_000 })
-      .then(() => true).catch(() => false);
-
-    if (modalAppeared) {
-      const modalText = await modal.innerText().catch(() => "");
-      console.log(`[INFO] Delete modal text: "${modalText.trim().slice(0, 150)}"`);
+    await test.step("Кликаем Delete", async () => {
+      await deleteBtn.click();
+    });
+    await test.step("Модал открылся", async () => {
+      const modal = page.locator('[class*="modal"], [role="dialog"]').first();
+      await expect(modal).toBeVisible({ timeout: 8_000 });
+      const modalText = await modal.innerText();
       expect(modalText).toMatch(/delete|Delete|sure/i);
-
+    });
+    await test.step("Cancel закрывает модал", async () => {
       const cancelBtn = page.locator('button:has-text("Cancel")').first();
       await cancelBtn.click();
-      console.log("[INFO] Delete cancelled via Cancel ✓");
-
-      await modal.waitFor({ state: "hidden", timeout: 5_000 }).catch(() => null);
-    } else {
-      console.log("[WARN] No modal appeared after Delete click");
-    }
-
-    await context.close();
+    });
   });
 });
