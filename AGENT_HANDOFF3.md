@@ -18,13 +18,21 @@
 - `VpsPanelServerPage.ts` и `VpsPanelMediaPage.ts` — переписаны с нуля, все VirtFusion-баги исправлены
 - `vps/funnel/vps.funnel.spec.ts` — **✅ 23/23 passed** — полное покрытие воронки VPS (4 suite)
 - `VpsConfigPage.ts` — переписан с нуля: добавлены OS-selection методы, точная фильтрация по заголовку
+- `vps/panel/vps.panel.rebuild.spec.ts` — **ревью и полная переработка** (май 2026):
+  - Исправлен критический баг: `selectedOsCard` использовал несуществующий класс `card-inverted-big-border-os`
+  - Заменён антипаттерн `if (!navigated) return` на `test.skip(!navigated, 'reason')`
+  - Добавлена группа Ubuntu (6-я группа, не была задокументирована)
+  - Games расширен: 5 шаблонов вместо 1
+  - Добавлен SUITE 5 — поведенческие тесты кнопки Install: отсутствует до выбора ОС, появляется после
+  - Добавлен тест на Swap Space секцию
+- `VpsPanelRebuildPage.ts` — обновлён: исправлены все локаторы, добавлены методы install button и swap space
 
 ### Что NOT сделано / отложено
 
 - `vps/panel/vps.panel.network.spec.ts` — пустая заглушка, нет сценариев
 - `vps/panel/vps.panel.options.spec.ts` — пустая заглушка, нет сценариев
 - Воронки (`funnels/`, `modded/`) — унаследованы из предыдущей работы, не ревьюились
-- `vps.panel.rebuild.spec.ts`, `vps.panel.storage.spec.ts`, `vps.panel.server.spec.ts` — не ревьюились
+- `vps.panel.storage.spec.ts`, `vps.panel.server.spec.ts` — не ревьюились
 
 ---
 
@@ -45,7 +53,7 @@ npx playwright test tests/modded/ --project=chromium
 npx playwright test tests/general/ --project=chromium
 
 # Конкретный файл
-npx playwright test tests/vps/funnel/vps.funnel.spec.ts --project=chromium --headed
+npx playwright test tests/vps/panel/vps.panel.rebuild.spec.ts --project=chromium --headed
 
 # По тегу
 npx playwright test --grep "@smoke" --project=chromium
@@ -70,7 +78,7 @@ e2e_godlike/
 │   │   │   ├── vps.panel.media.spec.ts            ✅ 3/3 passed
 │   │   │   ├── vps.panel.network.spec.ts          ⚠️ заглушка
 │   │   │   ├── vps.panel.options.spec.ts          ⚠️ заглушка
-│   │   │   ├── vps.panel.rebuild.spec.ts
+│   │   │   ├── vps.panel.rebuild.spec.ts          ✅ переработан май 2026
 │   │   │   ├── vps.panel.server.spec.ts
 │   │   │   ├── vps.panel.storage.spec.ts
 │   │   │   └── vps.build.spec.ts
@@ -83,6 +91,7 @@ e2e_godlike/
 ├── pages/                       ← Page Object Model
 │   ├── VpsPanelServerPage.ts    ← КЛЮЧЕВОЙ: Overview + power + activity table
 │   ├── VpsPanelMediaPage.ts     ← Boot Order, CD/DVD switch
+│   ├── VpsPanelRebuildPage.ts   ← ✅ обновлён май 2026 (исправлены локаторы!)
 │   ├── VpsConfigPage.ts         ← Configure step воронки VPS (location + OS selection)
 │   ├── VpsPage.ts               ← Landing /vps-hosting/
 │   ├── CartBillingPage.ts       ← Billing cycle step /cart-vps/
@@ -90,7 +99,6 @@ e2e_godlike/
 │   ├── VpsPanelDashboardPage.ts
 │   ├── VpsPanelNetworkPage.ts
 │   ├── VpsPanelOptionsPage.ts
-│   ├── VpsPanelRebuildPage.ts
 │   ├── VpsPanelStoragePage.ts
 │   ├── VpsPanelServersListPage.ts
 │   ├── VpsPanelServerDetailPage.ts
@@ -136,7 +144,79 @@ storageStatePath  = "storageState.vps.json"  // отдельный файл от
 
 ---
 
-## 5. VPS Funnel — vps.funnel.spec.ts (23 теста, все passing)
+## 5. Rebuild Page — VpsPanelRebuildPage.ts (критические находки)
+
+> ⚠️ Всё, что написано ниже, подтверждено из живого HTML DevTools (май 2026).
+> Предыдущие предположения о классах выбора карточек были ошибочными.
+
+### 5.1 Состояние выбора OS карточки — ПРАВИЛЬНЫЕ классы
+
+```
+// ❌ СТАРОЕ (неправильное) — этот класс НИКОГДА не добавляется
+div.card.os-select.card-inverted-big-border-os
+
+// ✓ ПРАВИЛЬНОЕ — при выборе ОС карточка ДОБАВЛЯЕТ эти классы
+// card-not-inverted-big-border-os ОСТАЁТСЯ, добавляются:
+div.card.os-select.selected-card   // ← основной селектор для "выбрана"
+// + border-success shadow-sm
+// + появляется checkmark: div.position-absolute.card-selected > svg
+```
+
+### 5.2 Кнопка Install — только после выбора ОС
+
+```html
+<!-- Появляется ТОЛЬКО после клика по карточке ОС -->
+<!-- ДО выбора ОС — кнопки нет в DOM вообще (не disabled, а просто отсутствует) -->
+<button type="button" class="mt-0 btn btn-primary btn-lg w-100 ...">
+  <span>Install with Debian 11 (Bullseye) Minimal</span>
+</button>
+```
+
+```typescript
+// Правильный селектор
+get finalInstallButton(): Locator {
+  return this.page.locator("button.btn-primary.btn-lg").filter({ hasText: /Install with/ });
+}
+```
+
+### 5.3 Полный список групп ОС и шаблонов (18 карточек, 6 групп)
+
+| Группа | heading | Шаблоны |
+|--------|---------|---------|
+| AlmaLinux | heading-0 | AlmaLinux 8 Minimal, AlmaLinux 9 Latest |
+| CentOS | heading-1 | CentOS 7 Minimal, CentOS Stream 9 Minimal |
+| Debian | heading-2 | Debian 11 (Bullseye) Minimal, Debian 12 (Bookworm) Minimal |
+| Fedora | heading-3 | Fedora 41 Minimal, Fedora 42 Minimal |
+| Games | heading-4 | Ubuntu+Valheim 24.04, Ubuntu+ARK 24.04, Ubuntu+Palworld 24.04, Ubuntu+Satisfactory 24.04, Ubuntu+Minecraft 22.04 |
+| Ubuntu | heading-5 | Ubuntu 20.04, Ubuntu 22.04, Ubuntu 24.04, Docker Ubuntu 24.04, WordPress Ubuntu 24.04 |
+
+### 5.4 Swap Space секция
+
+Появляется после выбора ОС. Карточки: None / 256 MB / 512 MB / 768 MB / 1 GB / 2 GB / ...
+
+```typescript
+get swapSpaceCards(): Locator {
+  return this.page.locator("div.card.card-not-inverted-big-border.c-pointer");
+}
+get selectedSwapCard(): Locator {
+  return this.page.locator("div.card.card-not-inverted-big-border.c-pointer.selected-card");
+}
+```
+
+### 5.5 Тесты rebuild.spec.ts — что проверяется (6 suite)
+
+| Suite | Тестов | Что проверяет |
+|-------|--------|--------------|
+| SUITE 1 — Навигация | 2 | URL изменился, 15+ OS-карточек |
+| SUITE 2 — Структура | 4 | Классы, h5.mb-1, 0 выбранных по умолчанию, AlmaLinux 9 |
+| SUITE 3 — Аккордеон | 7 | 6 групп, CentOS/Debian/Fedora/Games/Ubuntu, collapse/expand, шаблоны |
+| SUITE 4 — Выбор ОС | 3 | .selected-card/.border-success, count=1, single-select Alma→Debian |
+| SUITE 5 — Install button | 4 | Кнопка absent до ОС, появляется после, текст=OS name, Swap Space |
+| SUITE 6 — Возврат | 2 | URL back, сервер жив |
+
+---
+
+## 6. VPS Funnel — vps.funnel.spec.ts (23 теста, все passing)
 
 ### Структура (4 suite)
 
@@ -161,17 +241,9 @@ storageStatePath  = "storageState.vps.json"  // отдельный файл от
 - Выбор версии обновляет summary `Server type:`
 - `WordPress on Ubuntu` — единственный тип без дропдауна (нет версий)
 
-### Архитектура тестов в этом файле
-
-Каждый тест создаёт **отдельный** `browser.newContext({ storageState })` + новую страницу.
-Логин происходит один раз в `beforeAll`, сохраняется в `storageState.vps.json`.
-Это **изолированный** подход — тесты независимы, но каждый проходит путь до нужного шага заново (~10–15 сек).
-
-> Оптимизация через `serial` mode + shared page возможна, но не приоритетна — все 23 теста проходят стабильно.
-
 ---
 
-## 6. VpsConfigPage.ts — ключевые методы
+## 7. VpsConfigPage.ts — ключевые методы
 
 ```typescript
 // Локации
@@ -221,38 +293,48 @@ config.waitForConfigureStep()          // ждёт locations + OS container
 
 ---
 
-## 7. VirtFusion Gotchas — критически важно
+## 8. VirtFusion Gotchas — критически важно
 
 Подробнее в `TEST_GUIDELINES.md` §7. Краткая выжимка:
 
-### 7.1 Статус сервера — ВЕРХНИЙ РЕГИСТР
+### 8.1 Статус сервера — ВЕРХНИЙ РЕГИСТР
 `"RUNNING"`, `"STOPPED"` — всегда через `getStatusText()` из `VpsPanelServerPage`
 
-### 7.2 Кнопки питания — нет data-action атрибутов
+### 8.2 Кнопки питания — нет data-action атрибутов
 ```typescript
 button:has-text("Boot"):not([data-bs-dismiss="modal"])
 ```
 
-### 7.3 Bootstrap модалы — всегда в DOM
+### 8.3 Bootstrap модалы — всегда в DOM
 Scope на `.modal.show` для confirm-кнопок:
 ```typescript
 .modal.show button.btn-primary:has-text("Shutdown")
 ```
 
-### 7.4 Activity table debug-строки — id на `<td>`, не `<tr>`
+### 8.4 Activity table debug-строки — id на `<td>`, не `<tr>`
 ```typescript
 "table.table.table-normal tbody tr:not(:has(td[id^='debug']))"
 ```
 
-### 7.5 Radio-tile кнопки — только dispatchEvent
+### 8.5 Radio-tile кнопки — только dispatchEvent
 ```typescript
 await this.hddRadio.dispatchEvent("click");
 await expect(this.hddRadio).toBeChecked({ timeout: 5_000 });
 ```
 
+### 8.6 Rebuild — OS card selection НЕ использует card-inverted-big-border-os
+
+```typescript
+// ❌ НЕПРАВИЛЬНО — этот класс никогда не добавляется
+div.card.os-select.card-inverted-big-border-os
+
+// ✓ ПРАВИЛЬНО — selection добавляет .selected-card (и .border-success)
+div.card.os-select.selected-card
+```
+
 ---
 
-## 8. Паттерн panel-тестов (VirtFusion)
+## 9. Паттерн panel-тестов (VirtFusion)
 
 ```typescript
 import { test, expect, type Browser, type BrowserContext } from "@playwright/test";
@@ -276,9 +358,23 @@ test.beforeAll(async ({ browser }: { browser: Browser }) => {
 test.afterAll(async () => { await sharedContext.close(); });
 ```
 
+### Паттерн условного пропуска (не возврата!)
+
+```typescript
+// ❌ АНТИПАТТЕРН — тест молча зеленеет даже если navigation сломана
+if (!navigated) {
+  await context.close();
+  return;
+}
+
+// ✓ ПРАВИЛЬНО — тест помечается как skipped (оранжевый), не как passed
+test.skip(!navigated, "Rebuild page not reachable — server may be stopped or modal unavailable");
+// После test.skip() дальнейший код не выполняется
+```
+
 ---
 
-## 9. Пуш изменений в GitHub (из Replit)
+## 10. Пуш изменений в GitHub (из Replit)
 
 `git push` напрямую заблокирован. Использовать GitHub API через `curl`:
 
@@ -301,27 +397,28 @@ curl -s -X PUT \
 
 ---
 
-## 10. Что делать дальше
+## 11. Что делать дальше
 
 | Приоритет | Задача |
 |-----------|--------|
 | 🔴 High | `vps/panel/vps.panel.network.spec.ts` — написать тесты вкладки Network |
 | 🔴 High | `vps/panel/vps.panel.options.spec.ts` — написать тесты вкладки Options |
 | 🟡 Med | `vps/panel/vps.panel.storage.spec.ts` — ревью и починка |
-| 🟡 Med | `vps/panel/vps.panel.rebuild.spec.ts` — ревью (осторожно: rebuild стирает данные!) |
+| 🟡 Med | `vps/panel/vps.panel.server.spec.ts` — ревью |
 | 🟢 Low | `funnels/` — ревью существующих воронок |
 | 🟢 Low | Оптимизация `vps.funnel.spec.ts` — serial mode + shared page для SUITE 2 и 3 |
 
 ---
 
-## 11. Правила для нового агента
+## 12. Правила для нового агента
 
 1. **Пуш только через GitHub API** — секрет `GITHUB_SSH_KEY` в Replit, это PAT-токен
 2. **Клонировать в `/tmp/`** — не в `/home/runner/workspace/` (конфликт с внешним git)
 3. **Читать TEST_GUIDELINES.md** перед написанием любого теста
-4. **Для VirtFusion** — смотри §7 этого документа и §7 TEST_GUIDELINES.md
+4. **Для VirtFusion** — смотри §8 этого документа и §7 TEST_GUIDELINES.md
 5. **Не кликать** `Continue` / `Place Order` на платёжных страницах — реальный платёж
-6. **Не делать Rebuild** без явного разрешения пользователя
+6. **Не делать Rebuild** без явного разрешения пользователя — это стирает ОС!
 7. **Serial mode** для всех VirtFusion panel тестов (один сервер, меняющееся состояние)
 8. **Запускай с `--headed`** при отладке — помогает видеть что происходит в браузере
 9. **После каждой правки** — обновляй AGENT_HANDOFF3.md (эта секция) и TEST_GUIDELINES.md
+10. **Никогда не верь старым селекторам без проверки** — VirtFusion меняет классы. Всегда сверяй с DevTools HTML.
