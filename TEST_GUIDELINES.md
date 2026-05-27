@@ -274,3 +274,100 @@ test("@critical Пользователь делает X и получает ре
   await test.step("Шаг 2: ...", async () => { ... });
   await test.step("Проверка результата: ...", async () => { ... });
 });
+---
+
+9. Funnel/Storefront — специфичные паттерны
+
+Воронки покупки (`/cart/`, `/cart-vps/`) — Vue SPA, загружаемые динамически.
+Отличаются от panel-тестов: нет изменения состояния сервера, нет serial mode.
+
+9.1 Архитектура: изолированные vs shared контекст
+
+Для воронок используется **изолированный** подход по умолчанию:
+
+```typescript
+// Каждый тест создаёт свой контекст из сохранённого storageState
+test('проверка', async ({ browser }) => {
+  const context = await browser.newContext({ storageState: storageStatePath });
+  const page = await context.newPage();
+  // ...
+  await context.close();
+});
+```
+
+Логин выполняется **один раз** в `beforeAll` и сохраняется в `storageState.vps.json`.
+Это позволяет каждому тесту стартовать с авторизованной сессией без повторного логина.
+
+> Для оптимизации (когда все тесты проверяют один шаг воронки) можно использовать
+> shared page через `serial` mode — но это не обязательно, если тестов немного.
+
+9.2 Ожидание Vue SPA
+
+После клика Deploy Now / перехода в корзину — SPA монтируется асинхронно.
+**Всегда** дожидайся монтирования перед любыми действиями:
+
+```typescript
+// ✓ Ждать Vue root element
+await page.locator("[data-v-app]").waitFor({ state: "visible", timeout: 15_000 });
+
+// ✓ Ждать конкретный контейнер шага
+await page.locator(".billing-cycle").waitFor({ state: "visible", timeout: 15_000 });
+await page.locator(".configure-server__locations").waitFor({ state: "visible", timeout: 15_000 });
+```
+
+9.3 Custom Dropdown (выбор версии ОС)
+
+В VPS Configure используется кастомный Vue-дропдаун (`.custom-dropdown`).
+Клик на хедер открывает список, клик на item выбирает значение.
+Обычный `<select>` здесь не используется.
+
+```typescript
+// Открыть дропдаун
+await page.locator(".custom-dropdown__selected").click();
+await page.waitForTimeout(300);
+
+// Выбрать item по тексту
+await page.locator(".custom-dropdown__item").filter({ hasText: "Ubuntu 22.04 LTS" }).click();
+
+// Прочитать текущее выбранное значение
+const current = await page.locator(".custom-dropdown__selected-content span").innerText();
+```
+
+Дропдаун появляется **только** когда выбранный тип ОС имеет несколько версий.
+`WordPress on Ubuntu` — единственный тип без дропдауна (одна версия, нет выбора).
+
+Проверка наличия дропдауна:
+```typescript
+// Если тип имеет версии — дропдаун виден
+await expect(config.osDropdown).toBeVisible();
+
+// Если тип без версий (WordPress on Ubuntu) — дропдаун не виден
+await expect(config.osDropdown).not.toBeVisible();
+```
+
+9.4 Точное совпадение при фильтрации OS-карточек
+
+Фильтрация через `hasText` может дать несколько результатов, если текст подстрока другого.
+
+```typescript
+// ❌ Плохо — 'Ubuntu' матчит и "Ubuntu" и "WordPress on Ubuntu" → strict mode violation
+page.locator(".configure-server__type").filter({ hasText: "Ubuntu" })
+
+// ✓ Правильно — фильтровать по точному тексту заголовка .configure-server__type_title
+page.locator(".configure-server__type").filter({
+  has: page.locator(".configure-server__type_title", {
+    hasText: new RegExp(`^Ubuntu$`), // ^ и $ — точное совпадение
+  }),
+})
+```
+
+Правило: при фильтрации карточек, тегов, опций — всегда используй `^text$`
+если текст может быть подстрокой другого элемента.
+
+9.5 Отдельные storageState-файлы
+
+Panel-тесты и funnel-тесты используют **разные** storageState:
+- `storageState.json` — VirtFusion панель (`vf-panel.godlike.host`)
+- `storageState.vps.json` — VPS воронка (`godlike.host`)
+
+Не перепутывай — домены и сессии разные.
