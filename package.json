@@ -5,8 +5,11 @@
   "main": "index.js",
   "scripts": {
     "test": "npx playwright test",
-    "test:panel": "npx playwright test tests/vps.panel.*.spec.ts --project=chromium",
-    "test:funnel": "npx playwright test tests/funnel*.spec.ts --project=chromium",
+    "test:panel": "npx playwright test tests/vps/panel/ --project=chromium",
+    "test:funnel": "npx playwright test tests/vps/funnel/ tests/funnels/ --project=chromium",
+    "test:vps": "npx playwright test tests/vps/ --project=chromium",
+    "test:modded": "npx playwright test tests/modded/ --project=chromium",
+    "test:general": "npx playwright test tests/general/ --project=chromium",
     "test:smoke": "npx playwright test --grep @smoke --project=chromium",
     "test:critical": "npx playwright test --grep @critical --project=chromium",
     "test:regression": "npx playwright test --grep @regression --project=chromium",
