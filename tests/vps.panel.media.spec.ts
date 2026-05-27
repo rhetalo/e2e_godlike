@@ -122,10 +122,11 @@ test.describe("VPS Media — Boot Order", () => {
       expect(rowsAfter).toBeGreaterThan(rowsBefore);
     });
 
-    await test.step("Задача завершилась со статусом Complete", async () => {
+    await test.step("Задача 'Boot Order' завершилась со статусом Complete", async () => {
       await mediaPage.waitForLatestTaskComplete(90_000);
       const taskName = await mediaPage.getLatestTaskName();
       console.log(`[T1.2] Latest task: "${taskName}" — Complete ✓`);
+      expect(taskName).toMatch(/boot order/i);
     });
   });
 
@@ -159,10 +160,11 @@ test.describe("VPS Media — Boot Order", () => {
       expect(rowsAfter).toBeGreaterThan(rowsBefore);
     });
 
-    await test.step("Задача завершилась со статусом Complete", async () => {
+    await test.step("Задача 'Boot Order' завершилась со статусом Complete", async () => {
       await mediaPage.waitForLatestTaskComplete(90_000);
       const taskName = await mediaPage.getLatestTaskName();
       console.log(`[T1.3] Latest task: "${taskName}" — Complete ✓`);
+      expect(taskName).toMatch(/boot order/i);
       console.log(`[T1.3] Boot device restored to "${initialDevice}" ✓`);
     });
   });
