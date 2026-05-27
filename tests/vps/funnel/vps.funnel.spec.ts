@@ -42,7 +42,8 @@ const storageStatePath = "storageState.vps.json";
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function parsePrice(str: string): number {
-  const m = str.match(/[\d]+\.[\d]+/);
+  const normalized = str.replace(",", ".");
+  const m = normalized.match(/[\d]+(\.\d+)?/);
   return m ? parseFloat(m[0]) : NaN;
 }
 
