@@ -69,11 +69,15 @@ export class VpsConfigPage {
     ).trim();
   }
 
-  /** Click an OS type card by its title text */
+  /** Click an OS type card by its exact title text (`.configure-server__type_title`) */
   async selectOsType(name: string): Promise<void> {
     await this.page
       .locator(".configure-server__type")
-      .filter({ hasText: name })
+      .filter({
+        has: this.page.locator(".configure-server__type_title", {
+          hasText: new RegExp(`^${name}$`),
+        }),
+      })
       .click();
     await this.page.waitForTimeout(300);
   }
