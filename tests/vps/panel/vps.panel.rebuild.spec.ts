@@ -3,7 +3,7 @@
  * ──────────────────────────
  * Тесты страницы настройки Rebuild (выбор ОС) на панели VirtFusion.
  *
- * Путь навигации (подтверждён May 2026):
+ * Путь навигации (подтверждён May 2026, кнопка на вкладке Overview):
  *   /server/{UUID}
  *     → кнопка "Rebuild"
  *     → модал "Are you sure you want to rebuild this server?"
@@ -84,10 +84,9 @@ async function openRebuildPage(browser: Browser): Promise<{
 
   await serverPage.goto();
 
-  // Find Rebuild button — may be labeled "Rebuild" or "Install"
-  const rebuildBtn = page
-    .locator('button:has-text("Rebuild"), button:has-text("Install")')
-    .first();
+  // Find Rebuild button by its modal target — unique and immune to hidden modal buttons
+  // (data-bs-target="#reinstallServerModal" is only on the real Rebuild button in the Overview tab)
+  const rebuildBtn = page.locator('button[data-bs-target="#reinstallServerModal"]').first();
   const rebuildVisible = await rebuildBtn.isVisible().catch(() => false);
 
   if (!rebuildVisible) {
