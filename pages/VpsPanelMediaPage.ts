@@ -1,46 +1,32 @@
-import { type Page, type Locator } from "@playwright/test";
+import { type Page, type Locator, expect } from "@playwright/test";
 import { PANEL_URL, TEST_SERVER_UUID } from "../utils/auth";
 
 /**
  * VpsPanelMediaPage — Media tab on /server/{UUID}
  * VirtFusion v4.x — Boot Order control.
  *
- * ── WHAT IS ACTUALLY ON THE MEDIA TAB (confirmed May 2026) ──────────────────
+ * ── WHAT IS ON THE MEDIA TAB (confirmed May 2026) ────────────────────────────
  *   1. Power management buttons (same Boot/Shutdown/PowerOff/Restart as Overview)
- *   2. Activity table — history of server actions (Poweroff, Boot, etc.)
+ *   2. Activity table — history of server actions
  *   3. Boot Order section — switch between HDD and CD/DVD first-boot device
  *
- * NOTE: There is NO OS template selection on this tab.
- *       The old POM (OS templates / Rebuild / Rescue) was based on incorrect assumptions.
+ * ── CONFIRMED SELECTORS ──────────────────────────────────────────────────────
  *
- * ── CONFIRMED SELECTORS (from live DevTools, May 2026) ──────────────────────
+ * Boot Order heading:  h2.mb-4  text="Boot Order"
  *
- * Boot Order heading:
- *   <h2 class="mb-4">Boot Order</h2>
+ * Radio inputs (click these directly — NOT the tile wrappers):
+ *   HDD:    input.radio-button[type="radio"][value="1"]
+ *   CD/DVD: input.radio-button[type="radio"][value="2"]
  *
- * HDD radio tile:
- *   <div class="radio-tile">
- *     <label class="radio-tile-label">HDD</label>
- *   </div>
- *   <input class="radio-button" type="radio" value="1">
+ * ⚠️  Do NOT click .radio-tile (the div wrapper) — the hidden radio input
+ *     overlays it and intercepts pointer events causing a timeout.
+ *     Use hddRadio.check() / cdDvdRadio.check() instead.
  *
- * CD/DVD radio tile:
- *   <div class="radio-tile">
- *     <label class="radio-tile-label">CD/DVD</label>
- *   </div>
- *   <input class="radio-button" type="radio" value="2">
+ * Apply button:  button#server-boot-order-button
  *
- * Apply button:
- *   <button id="server-boot-order-button" class="mt-4 btn btn-primary ...">Apply</button>
- *
- * Activity table:
- *   <table class="table table-normal mb-0">
- *     <thead><tr><th>Task</th><th>Requested</th><th>Duration</th><th>Progress</th></tr></thead>
- *     <tbody><tr><td>Poweroff</td>...<span class="badge badge-active">Complete</span></tr></tbody>
- *   </table>
- *
- * ⚠️  Do NOT click the Apply button in automated tests — it changes the boot device.
- *     Radio tile clicks are safe (selection only; no side-effect until Apply is clicked).
+ * Activity table: table.table.table-normal
+ *   Debug rows:   tr:has(td[id^='debug'])  — excluded from activityRows
+ *   Complete:     span.badge.badge-active  text="Complete"
  */
 export class VpsPanelMediaPage {
   readonly serverUrl: string;
@@ -54,117 +40,64 @@ export class VpsPanelMediaPage {
 
   // ── Boot Order Section ────────────────────────────────────────────────────
 
-  /** "Boot Order" section heading — confirmed: <h2 class="mb-4">Boot Order</h2> */
+  /** "Boot Order" section heading */
   get bootOrderHeading(): Locator {
     return this.page.locator("h2.mb-4").filter({ hasText: "Boot Order" }).first();
   }
 
   /**
-   * HDD radio tile container.
-   * Confirmed HTML:
-   *   <div class="radio-tile">...<label class="radio-tile-label">HDD</label></div>
+   * HDD radio input — check() this to select HDD.
+   * value="1". Do NOT click the .radio-tile wrapper — see file header.
    */
-  get hddTile(): Locator {
-    return this.page
-      .locator(".radio-tile")
-      .filter({ has: this.page.locator('.radio-tile-label:has-text("HDD")') })
-      .first();
-  }
-
-  /**
-   * CD/DVD radio tile container.
-   * Confirmed HTML:
-   *   <div class="radio-tile">...<label class="radio-tile-label">CD/DVD</label></div>
-   */
-  get cdDvdTile(): Locator {
-    return this.page
-      .locator(".radio-tile")
-      .filter({ has: this.page.locator('.radio-tile-label:has-text("CD/DVD")') })
-      .first();
-  }
-
-  /** HDD radio input — value="1" */
   get hddRadio(): Locator {
     return this.page.locator('input.radio-button[type="radio"][value="1"]').first();
   }
 
-  /** CD/DVD radio input — value="2" */
+  /**
+   * CD/DVD radio input — check() this to select CD/DVD.
+   * value="2". Do NOT click the .radio-tile wrapper — see file header.
+   */
   get cdDvdRadio(): Locator {
     return this.page.locator('input.radio-button[type="radio"][value="2"]').first();
   }
 
-  /** All radio buttons in Boot Order */
-  get bootOrderRadios(): Locator {
-    return this.page.locator("input.radio-button[type=\"radio\"]");
-  }
-
-  /**
-   * Apply button — confirmed: button#server-boot-order-button
-   * ⚠️  Do NOT click in automated tests — actually changes boot order.
-   */
+  /** Apply button — button#server-boot-order-button */
   get applyButton(): Locator {
     return this.page.locator("button#server-boot-order-button").first();
   }
 
   // ── Activity Table ────────────────────────────────────────────────────────
   //
-  // Confirmed HTML (from DevTools snapshot):
-  //   <table class="table table-normal mb-0">
-  //     <thead><tr><th>Task</th><th>Requested</th><th>Duration</th><th>Progress</th></tr></thead>
-  //     <tbody>
-  //       <tr><td>Poweroff</td>...<span class="badge badge-active w-100">Complete</span></tr>
-  //       <tr><td>Boot</td>...</tr>
-  //     </tbody>
-  //   </table>
+  // Debug rows have id="debugNNNN" on the inner <td>, NOT on the <tr>.
+  // Use :has(td[id^='debug']) to identify and exclude them.
 
   get activityTable(): Locator {
     return this.page.locator("table.table.table-normal").first();
   }
 
-  get activityTableHead(): Locator {
-    return this.page.locator("table.table.table-normal thead").first();
-  }
-
-  /** Visible activity rows (excludes debug rows with id="debugNNNN") */
+  /**
+   * Visible task rows — excludes hidden debug rows.
+   * ⚠️ id="debugNNNN" is on the <td>, not the <tr>. Use :has() to filter.
+   */
   get activityRows(): Locator {
-    return this.page.locator("table.table.table-normal tbody tr:not([id^='debug'])");
+    return this.page.locator(
+      "table.table.table-normal tbody tr:not(:has(td[id^='debug']))",
+    );
   }
 
   get completeBadges(): Locator {
     return this.page.locator("span.badge.badge-active");
   }
 
-  /** Returns task name strings from first column of activity table */
-  async getActivityTaskNames(): Promise<string[]> {
-    const count = await this.activityRows.count();
-    const names: string[] = [];
-    for (let i = 0; i < count; i++) {
-      const text = (
-        await this.activityRows
-          .nth(i)
-          .locator("td")
-          .first()
-          .innerText()
-          .catch(() => "")
-      ).trim();
-      if (text) names.push(text);
-    }
-    return names;
+  /** Complete badge of the most recent activity row */
+  get latestTaskCompleteBadge(): Locator {
+    return this.activityRows.first().locator("span.badge.badge-active");
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
   /**
-   * Returns true if Boot Order section (heading + at least one radio tile) is visible.
-   */
-  async hasBootOrderSection(): Promise<boolean> {
-    const heading = await this.bootOrderHeading.isVisible().catch(() => false);
-    const hdd = await this.hddTile.isVisible().catch(() => false);
-    return heading && hdd;
-  }
-
-  /**
-   * Returns the currently selected boot device by checking which radio is checked.
+   * Returns the currently selected boot device.
    * Returns "HDD", "CD/DVD", or "unknown".
    */
   async getSelectedBootDevice(): Promise<"HDD" | "CD/DVD" | "unknown"> {
@@ -173,5 +106,40 @@ export class VpsPanelMediaPage {
     const cdChecked = await this.cdDvdRadio.isChecked().catch(() => false);
     if (cdChecked) return "CD/DVD";
     return "unknown";
+  }
+
+  /**
+   * Returns the number of visible task rows in the activity table.
+   */
+  async getActivityRowCount(): Promise<number> {
+    return this.activityRows.count();
+  }
+
+  /**
+   * Waits for a new row to appear in the activity table (count > rowCountBefore).
+   */
+  async waitForNewRow(rowCountBefore: number, timeoutMs = 30_000): Promise<void> {
+    await expect
+      .poll(
+        async () => this.activityRows.count(),
+        { timeout: timeoutMs, message: "Waiting for new activity row" },
+      )
+      .toBeGreaterThan(rowCountBefore);
+  }
+
+  /**
+   * Waits until the most recent task shows Complete badge (progress = 100%).
+   */
+  async waitForLatestTaskComplete(timeoutMs = 90_000): Promise<void> {
+    await expect(this.latestTaskCompleteBadge).toBeVisible({ timeout: timeoutMs });
+  }
+
+  /**
+   * Returns the task name from the most recent activity row.
+   */
+  async getLatestTaskName(): Promise<string> {
+    return (
+      await this.activityRows.first().locator("td").first().innerText().catch(() => "")
+    ).trim();
   }
 }

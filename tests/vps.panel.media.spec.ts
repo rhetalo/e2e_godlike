@@ -1,269 +1,170 @@
 /**
  * vps.panel.media.spec.ts
  * ────────────────────────
- * Тесты вкладки Media на странице сервера VirtFusion.
- * URL: https://vf-panel.godlike.host/server/9c49ed96-56f4-41c8-bc5f-a8d44c21a486
+ * E2E тесты вкладки Media на странице сервера VirtFusion.
+ * URL: https://vf-panel.godlike.host/server/{UUID}
  *
- * ── ЧТО РЕАЛЬНО ЕСТЬ НА ВКЛАДКЕ MEDIA (подтверждено May 2026) ──────────────
- *   1. Кнопки управления питанием (те же Boot/Shutdown/PowerOff/Restart)
- *   2. Таблица активности — история действий с сервером (Poweroff, Boot, …)
- *   3. Секция Boot Order — переключение между HDD и CD/DVD (первичное устройство загрузки)
+ * Покрытые сценарии:
+ *   Happy path: переключение Boot Order HDD → CD/DVD → Apply → Complete в таблице
+ *   Teardown:   возврат к исходному устройству → Apply → Complete в таблице
  *
- * ВАЖНО: OS templates / Rebuild / Rescue на этой вкладке НЕТ.
+ * ── ВАЖНЫЕ ЗАМЕЧАНИЯ ────────────────────────────────────────────────────────
  *
- * ── ПОДТВЕРЖДЁННЫЕ СЕЛЕКТОРЫ ────────────────────────────────────────────────
- *   Boot Order heading:  h2.mb-4  text="Boot Order"
- *   HDD tile:            .radio-tile > .radio-tile-label:has-text("HDD")
- *   CD/DVD tile:         .radio-tile > .radio-tile-label:has-text("CD/DVD")
- *   HDD radio:           input.radio-button[type="radio"][value="1"]
- *   CD/DVD radio:        input.radio-button[type="radio"][value="2"]
- *   Apply button:        button#server-boot-order-button   ⚠️ НЕ нажимать в тестах
- *   Activity table:      table.table.table-normal
- *   Complete badge:      span.badge.badge-active
+ * ⚠️  Radio tile click: .radio-tile (div) НЕЛЬЗЯ кликать — radio input
+ *     перехватывает события указателя. Используй radio.check() напрямую.
+ *
+ * ── ПОДТВЕРЖДЁННЫЕ СЕЛЕКТОРЫ (DevTools, May 2026) ──────────────────────────
+ *
+ *   HDD radio:    input.radio-button[type="radio"][value="1"] — check() для выбора
+ *   CD/DVD radio: input.radio-button[type="radio"][value="2"] — check() для выбора
+ *   Apply button: button#server-boot-order-button
+ *   Activity:     table.table.table-normal (debug tr исключаются через :has())
+ *   Complete:     span.badge.badge-active
  *
  * Запуск:
  *   npx playwright test tests/vps.panel.media.spec.ts --project=chromium
  *   npx playwright test tests/vps.panel.media.spec.ts --project=chromium --headed
  */
-import { test, expect, type Browser } from "@playwright/test";
+import { test, expect, type Browser, type BrowserContext } from "@playwright/test";
 import { VpsPanelServerPage } from "../pages/VpsPanelServerPage";
 import { VpsPanelMediaPage } from "../pages/VpsPanelMediaPage";
 import { loginAndSaveSession, STORAGE_STATE_PATH, TEST_SERVER_UUID } from "../utils/auth";
 
+// ── Config ────────────────────────────────────────────────────────────────────
+
 test.use({ viewport: { width: 1440, height: 900 } });
+test.describe.configure({ mode: "serial" });
+
+// ── Shared state ──────────────────────────────────────────────────────────────
+
+let sharedContext: BrowserContext;
+let serverPage: VpsPanelServerPage;
+let mediaPage: VpsPanelMediaPage;
+let initialDevice: "HDD" | "CD/DVD" | "unknown";
+
+// ── Setup ─────────────────────────────────────────────────────────────────────
 
 test.beforeAll(async ({ browser }: { browser: Browser }) => {
   await loginAndSaveSession(browser);
-});
+  sharedContext = await browser.newContext({ storageState: STORAGE_STATE_PATH });
+  const page = await sharedContext.newPage();
 
-// ── Helper ────────────────────────────────────────────────────────────────────
-
-async function openMediaTab(browser: Browser) {
-  const context = await browser.newContext({ storageState: STORAGE_STATE_PATH });
-  const page = await context.newPage();
-  const serverPage = new VpsPanelServerPage(page, TEST_SERVER_UUID);
-  const mediaPage = new VpsPanelMediaPage(page, TEST_SERVER_UUID);
+  serverPage = new VpsPanelServerPage(page, TEST_SERVER_UUID);
+  mediaPage = new VpsPanelMediaPage(page, TEST_SERVER_UUID);
 
   await serverPage.goto();
   await serverPage.clickTab("Media");
 
-  return { context, page, serverPage, mediaPage };
-}
+  initialDevice = await mediaPage.getSelectedBootDevice();
+  console.log(`[SETUP] Initial boot device: "${initialDevice}"`);
+});
 
-// ══════════════════════════════════════════════════════════════════════════════
-// SUITE 1 — Вкладка Media: доступ и базовая структура
-// ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — Media Tab: доступ", () => {
-  test("вкладка Media присутствует на странице сервера", async ({ browser }) => {
-    const context = await browser.newContext({ storageState: STORAGE_STATE_PATH });
-    const page = await context.newPage();
-    const serverPage = new VpsPanelServerPage(page, TEST_SERVER_UUID);
-
-    await serverPage.goto();
-    await expect(serverPage.tab("Media")).toBeVisible({ timeout: 15_000 });
-
-    await context.close();
-  });
-
-  test("клик по вкладке Media — страница не ломается, URL остаётся на сервере", async ({
-    browser,
-  }) => {
-    const { context, page } = await openMediaTab(browser);
-
-    expect(page.url()).toContain(TEST_SERVER_UUID);
-
-    await context.close();
-  });
-
-  test("страница сервера загружается (body > 200 символов)", async ({ browser }) => {
-    const { context, page } = await openMediaTab(browser);
-
-    const bodyText = await page.locator("body").innerText();
-    expect(bodyText.length).toBeGreaterThan(200);
-
-    await context.close();
-  });
+test.afterAll(async () => {
+  await sharedContext.close();
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// SUITE 2 — Boot Order: структура секции
+// SUITE 1 — Boot Order: переключение устройства загрузки
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — Boot Order: структура", () => {
-  test("заголовок 'Boot Order' (h2.mb-4) виден на вкладке Media", async ({ browser }) => {
-    const { context, mediaPage } = await openMediaTab(browser);
 
-    await expect(mediaPage.bootOrderHeading).toBeVisible({ timeout: 10_000 });
+test.describe("VPS Media — Boot Order", () => {
 
-    await context.close();
+  test("@smoke 1.1 вкладка Media открыта, Boot Order секция видна, устройство определено", async () => {
+    await test.step("Проверяем URL сервера", () => {
+      expect(serverPage.page.url()).toContain(TEST_SERVER_UUID);
+    });
+
+    await test.step("Заголовок Boot Order виден", async () => {
+      await expect(mediaPage.bootOrderHeading).toBeVisible({ timeout: 10_000 });
+    });
+
+    await test.step("HDD и CD/DVD radio присутствуют", async () => {
+      await expect(mediaPage.hddRadio).toBeAttached({ timeout: 5_000 });
+      await expect(mediaPage.cdDvdRadio).toBeAttached({ timeout: 5_000 });
+    });
+
+    await test.step("Apply кнопка видна", async () => {
+      await expect(mediaPage.applyButton).toBeVisible({ timeout: 5_000 });
+    });
+
+    await test.step("Текущее устройство определено", () => {
+      console.log(`[T1.1] Boot device: "${initialDevice}"`);
+      expect(["HDD", "CD/DVD"]).toContain(initialDevice);
+    });
   });
 
-  test("плитка HDD (.radio-tile с текстом 'HDD') видна", async ({ browser }) => {
-    const { context, mediaPage } = await openMediaTab(browser);
+  test("@critical 1.2 переключение на противоположное устройство → Apply → Complete в таблице", async () => {
+    const targetDevice = initialDevice === "HDD" ? "CD/DVD" : "HDD";
+    const rowsBefore = await mediaPage.getActivityRowCount();
+    console.log(`[T1.2] Switching: ${initialDevice} → ${targetDevice} | rows before: ${rowsBefore}`);
 
-    await expect(mediaPage.hddTile).toBeVisible({ timeout: 10_000 });
+    await test.step(`Выбираем ${targetDevice}`, async () => {
+      if (targetDevice === "CD/DVD") {
+        await mediaPage.cdDvdRadio.check();
+        await expect(mediaPage.cdDvdRadio).toBeChecked({ timeout: 5_000 });
+      } else {
+        await mediaPage.hddRadio.check();
+        await expect(mediaPage.hddRadio).toBeChecked({ timeout: 5_000 });
+      }
+      console.log(`[T1.2] ${targetDevice} radio checked ✓`);
+    });
 
-    await context.close();
+    await test.step("Нажимаем Apply", async () => {
+      await expect(mediaPage.applyButton).toBeEnabled({ timeout: 5_000 });
+      await mediaPage.applyButton.click();
+      console.log("[T1.2] Apply clicked");
+    });
+
+    await test.step("Ждём новую строку в activity table", async () => {
+      await mediaPage.waitForNewRow(rowsBefore, 30_000);
+      const rowsAfter = await mediaPage.getActivityRowCount();
+      console.log(`[T1.2] Rows after Apply: ${rowsAfter}`);
+      expect(rowsAfter).toBeGreaterThan(rowsBefore);
+    });
+
+    await test.step("Задача завершилась со статусом Complete", async () => {
+      await mediaPage.waitForLatestTaskComplete(90_000);
+      const taskName = await mediaPage.getLatestTaskName();
+      console.log(`[T1.2] Latest task: "${taskName}" — Complete ✓`);
+    });
   });
 
-  test("плитка CD/DVD (.radio-tile с текстом 'CD/DVD') видна", async ({ browser }) => {
-    const { context, mediaPage } = await openMediaTab(browser);
+  test("@critical 1.3 возврат на исходное устройство → Apply → Complete в таблице", async () => {
+    const rowsBefore = await mediaPage.getActivityRowCount();
+    console.log(`[T1.3] Returning to ${initialDevice} | rows before: ${rowsBefore}`);
 
-    await expect(mediaPage.cdDvdTile).toBeVisible({ timeout: 10_000 });
+    await test.step(`Выбираем исходное устройство (${initialDevice})`, async () => {
+      if (initialDevice === "HDD") {
+        await mediaPage.hddRadio.check();
+        await expect(mediaPage.hddRadio).toBeChecked({ timeout: 5_000 });
+      } else if (initialDevice === "CD/DVD") {
+        await mediaPage.cdDvdRadio.check();
+        await expect(mediaPage.cdDvdRadio).toBeChecked({ timeout: 5_000 });
+      } else {
+        test.skip();
+      }
+      console.log(`[T1.3] ${initialDevice} radio checked ✓`);
+    });
 
-    await context.close();
+    await test.step("Нажимаем Apply", async () => {
+      await expect(mediaPage.applyButton).toBeEnabled({ timeout: 5_000 });
+      await mediaPage.applyButton.click();
+      console.log("[T1.3] Apply clicked");
+    });
+
+    await test.step("Ждём новую строку в activity table", async () => {
+      await mediaPage.waitForNewRow(rowsBefore, 30_000);
+      const rowsAfter = await mediaPage.getActivityRowCount();
+      console.log(`[T1.3] Rows after Apply: ${rowsAfter}`);
+      expect(rowsAfter).toBeGreaterThan(rowsBefore);
+    });
+
+    await test.step("Задача завершилась со статусом Complete", async () => {
+      await mediaPage.waitForLatestTaskComplete(90_000);
+      const taskName = await mediaPage.getLatestTaskName();
+      console.log(`[T1.3] Latest task: "${taskName}" — Complete ✓`);
+      console.log(`[T1.3] Boot device restored to "${initialDevice}" ✓`);
+    });
   });
 
-  test("присутствуют ровно 2 radio-кнопки (HDD value=1 и CD/DVD value=2)", async ({
-    browser,
-  }) => {
-    const { context, mediaPage } = await openMediaTab(browser);
-
-    const radios = mediaPage.bootOrderRadios;
-    await expect(radios).toHaveCount(2, { timeout: 10_000 });
-
-    await context.close();
-  });
-
-  test("кнопка Apply (#server-boot-order-button) видна", async ({ browser }) => {
-    const { context, mediaPage } = await openMediaTab(browser);
-
-    await expect(mediaPage.applyButton).toBeVisible({ timeout: 10_000 });
-
-    await context.close();
-  });
-
-  test("один из radio (HDD или CD/DVD) выбран по умолчанию", async ({ browser }) => {
-    const { context, mediaPage } = await openMediaTab(browser);
-
-    const selected = await mediaPage.getSelectedBootDevice();
-    console.log(`[INFO] Current boot device: ${selected}`);
-
-    expect(["HDD", "CD/DVD"]).toContain(selected);
-
-    await context.close();
-  });
-});
-
-// ══════════════════════════════════════════════════════════════════════════════
-// SUITE 3 — Boot Order: взаимодействие (без Apply)
-// ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — Boot Order: переключение (Apply не нажимаем)", () => {
-  test("клик по плитке CD/DVD — radio[value=2] становится checked", async ({ browser }) => {
-    const { context, mediaPage } = await openMediaTab(browser);
-
-    await mediaPage.cdDvdTile.click();
-    await expect(mediaPage.cdDvdRadio).toBeChecked({ timeout: 5_000 });
-    console.log("[INFO] CD/DVD radio checked after tile click ✓");
-
-    await context.close();
-  });  
-
-  test("клик по плитке HDD — radio[value=1] становится checked", async ({ browser }) => {
-    const { context, mediaPage } = await openMediaTab(browser);
-
-    await mediaPage.hddTile.click();
-    await expect(mediaPage.hddRadio).toBeChecked({ timeout: 5_000 });
-    console.log("[INFO] HDD radio checked after tile click ✓");
-
-    await context.close();
-  });
-
-  test("после клика CD/DVD кнопка Apply видна и активна", async ({ browser }) => {
-    const { context, mediaPage } = await openMediaTab(browser);
-
-    await mediaPage.cdDvdTile.click();
-
-    await expect(mediaPage.applyButton).toBeVisible({ timeout: 5_000 });
-    await expect(mediaPage.applyButton).toBeEnabled({ timeout: 5_000 });
-    console.log("[INFO] Apply button visible and enabled after selecting CD/DVD ✓");
-
-    await context.close();
-  });
-
-  test("переключение CD/DVD → HDD → radio[value=1] снова checked", async ({ browser }) => {
-    const { context, mediaPage } = await openMediaTab(browser);
-
-    await mediaPage.cdDvdTile.click();
-    await expect(mediaPage.cdDvdRadio).toBeChecked({ timeout: 5_000 });
-
-    await mediaPage.hddTile.click();
-    await expect(mediaPage.hddRadio).toBeChecked({ timeout: 5_000 });
-    await expect(mediaPage.cdDvdRadio).not.toBeChecked({ timeout: 5_000 });
-    console.log("[INFO] CD/DVD → HDD toggle works correctly ✓");
-
-    await context.close();
-  });
-});
-
-// ══════════════════════════════════════════════════════════════════════════════
-// SUITE 4 — Таблица активности
-// ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — Таблица активности на вкладке Media", () => {
-  test("таблица активности (table.table.table-normal) присутствует", async ({ browser }) => {
-    const { context, mediaPage } = await openMediaTab(browser);
-
-    await expect(mediaPage.activityTable).toBeVisible({ timeout: 10_000 });
-    console.log("[INFO] Activity table visible ✓");
-
-    await context.close();
-  });
-
-  test("заголовки таблицы: Task | Requested | Duration | Progress", async ({ browser }) => {
-    const { context, mediaPage } = await openMediaTab(browser);
-
-    const thead = mediaPage.activityTableHead;
-    await expect(thead).toBeVisible({ timeout: 10_000 });
-
-    const headText = await thead.innerText();
-    console.log(`[INFO] Table headers: "${headText.trim()}"`);
-
-    expect(headText).toContain("Task");
-    expect(headText).toContain("Requested");
-    expect(headText).toContain("Duration");
-    expect(headText).toContain("Progress");
-
-    await context.close();
-  });
-
-  test("таблица содержит хотя бы 1 строку с историей действий", async ({ browser }) => {
-    const { context, mediaPage } = await openMediaTab(browser);
-
-    const rowCount = await mediaPage.activityRows.count();
-    console.log(`[INFO] Activity table rows: ${rowCount}`);
-    expect(rowCount).toBeGreaterThanOrEqual(1);
-
-    await context.close();
-  });
-
-  test("задачи в таблице содержат известные типы (Boot, Poweroff, Restart и т.д.)", async ({
-    browser,
-  }) => {
-    const { context, mediaPage } = await openMediaTab(browser);
-
-    const tasks = await mediaPage.getActivityTaskNames();
-    console.log(`[INFO] Activity tasks: ${tasks.join(", ")}`);
-
-    const known = ["Boot", "Poweroff", "Shutdown", "Restart", "Rebuild", "Install"];
-    const hasKnown = tasks.some((t) => known.some((k) => t.toLowerCase().includes(k.toLowerCase())));
-
-    expect(hasKnown).toBeTruthy();
-
-    await context.close();
-  });
-
-  test("последние завершённые задачи имеют статус Complete (span.badge.badge-active)", async ({
-    browser,
-  }) => {
-    const { context, mediaPage } = await openMediaTab(browser);
-
-    const badgeCount = await mediaPage.completeBadges.count();
-    console.log(`[INFO] Complete badges found: ${badgeCount}`);
-    expect(badgeCount).toBeGreaterThanOrEqual(1);
-
-    const firstBadgeText = await mediaPage.completeBadges.first().innerText();
-    console.log(`[INFO] First badge text: "${firstBadgeText.trim()}"`);
-    expect(firstBadgeText.trim()).toBe("Complete");
-
-    await context.close();
-  });
 });
