@@ -18,9 +18,10 @@ import { PANEL_URL, TEST_SERVER_UUID } from "../utils/auth";
  *   HDD:    input.radio-button[type="radio"][value="1"]
  *   CD/DVD: input.radio-button[type="radio"][value="2"]
  *
- * ⚠️  Do NOT click .radio-tile (the div wrapper) — the hidden radio input
- *     overlays it and intercepts pointer events causing a timeout.
- *     Use hddRadio.check() / cdDvdRadio.check() instead.
+ * ⚠️  Radio inputs are visually HIDDEN (custom tile UI replaces them).
+ *     .check() without force:true times out because element is not visible.
+ *     Always use selectHDD() / selectCDDVD() which pass force:true.
+ *     Do NOT call .check() directly on hddRadio / cdDvdRadio in tests.
  *
  * Apply button:  button#server-boot-order-button
  *
@@ -46,19 +47,37 @@ export class VpsPanelMediaPage {
   }
 
   /**
-   * HDD radio input — check() this to select HDD.
-   * value="1". Do NOT click the .radio-tile wrapper — see file header.
+   * HDD radio input — value="1".
+   * Visually hidden by custom tile UI — use selectHDD() not .check() directly.
    */
   get hddRadio(): Locator {
     return this.page.locator('input.radio-button[type="radio"][value="1"]').first();
   }
 
   /**
-   * CD/DVD radio input — check() this to select CD/DVD.
-   * value="2". Do NOT click the .radio-tile wrapper — see file header.
+   * CD/DVD radio input — value="2".
+   * Visually hidden by custom tile UI — use selectCDDVD() not .check() directly.
    */
   get cdDvdRadio(): Locator {
     return this.page.locator('input.radio-button[type="radio"][value="2"]').first();
+  }
+
+  /**
+   * Select HDD as boot device.
+   * Uses force:true because the radio input is visually hidden (custom tile UI).
+   */
+  async selectHDD(): Promise<void> {
+    await this.hddRadio.check({ force: true });
+    await expect(this.hddRadio).toBeChecked({ timeout: 5_000 });
+  }
+
+  /**
+   * Select CD/DVD as boot device.
+   * Uses force:true because the radio input is visually hidden (custom tile UI).
+   */
+  async selectCDDVD(): Promise<void> {
+    await this.cdDvdRadio.check({ force: true });
+    await expect(this.cdDvdRadio).toBeChecked({ timeout: 5_000 });
   }
 
   /** Apply button — button#server-boot-order-button */

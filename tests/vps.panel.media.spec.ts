@@ -94,19 +94,19 @@ test.describe("VPS Media — Boot Order", () => {
   });
 
   test("@critical 1.2 переключение на противоположное устройство → Apply → Complete в таблице", async () => {
-    const targetDevice = initialDevice === "HDD" ? "CD/DVD" : "HDD";
+    // Читаем текущее состояние непосредственно перед действием — не полагаемся только на beforeAll
+    const currentDevice = await mediaPage.getSelectedBootDevice();
+    const targetDevice = currentDevice === "HDD" ? "CD/DVD" : "HDD";
     const rowsBefore = await mediaPage.getActivityRowCount();
-    console.log(`[T1.2] Switching: ${initialDevice} → ${targetDevice} | rows before: ${rowsBefore}`);
+    console.log(`[T1.2] Current: "${currentDevice}" → switching to: "${targetDevice}" | rows before: ${rowsBefore}`);
 
-    await test.step(`Выбираем ${targetDevice}`, async () => {
+    await test.step(`Выбираем ${targetDevice} (radio.check с force:true — input скрыт custom UI)`, async () => {
       if (targetDevice === "CD/DVD") {
-        await mediaPage.cdDvdRadio.check();
-        await expect(mediaPage.cdDvdRadio).toBeChecked({ timeout: 5_000 });
+        await mediaPage.selectCDDVD();
       } else {
-        await mediaPage.hddRadio.check();
-        await expect(mediaPage.hddRadio).toBeChecked({ timeout: 5_000 });
+        await mediaPage.selectHDD();
       }
-      console.log(`[T1.2] ${targetDevice} radio checked ✓`);
+      console.log(`[T1.2] ${targetDevice} selected ✓`);
     });
 
     await test.step("Нажимаем Apply", async () => {
@@ -131,20 +131,26 @@ test.describe("VPS Media — Boot Order", () => {
   });
 
   test("@critical 1.3 возврат на исходное устройство → Apply → Complete в таблице", async () => {
-    const rowsBefore = await mediaPage.getActivityRowCount();
-    console.log(`[T1.3] Returning to ${initialDevice} | rows before: ${rowsBefore}`);
+    // Читаем текущее состояние — после теста 1.2 оно должно быть противоположным initialDevice
+    const currentDevice = await mediaPage.getSelectedBootDevice();
+    console.log(`[T1.3] Current: "${currentDevice}", restoring to initial: "${initialDevice}"`);
 
-    await test.step(`Выбираем исходное устройство (${initialDevice})`, async () => {
+    if (currentDevice === initialDevice) {
+      // Если уже на исходном (тест 1.2 не изменил состояние или пропущен) — пропускаем
+      console.log(`[T1.3] Already on "${initialDevice}", skipping restore`);
+      test.skip();
+      return;
+    }
+
+    const rowsBefore = await mediaPage.getActivityRowCount();
+
+    await test.step(`Возвращаемся на ${initialDevice}`, async () => {
       if (initialDevice === "HDD") {
-        await mediaPage.hddRadio.check();
-        await expect(mediaPage.hddRadio).toBeChecked({ timeout: 5_000 });
-      } else if (initialDevice === "CD/DVD") {
-        await mediaPage.cdDvdRadio.check();
-        await expect(mediaPage.cdDvdRadio).toBeChecked({ timeout: 5_000 });
+        await mediaPage.selectHDD();
       } else {
-        test.skip();
+        await mediaPage.selectCDDVD();
       }
-      console.log(`[T1.3] ${initialDevice} radio checked ✓`);
+      console.log(`[T1.3] ${initialDevice} selected ✓`);
     });
 
     await test.step("Нажимаем Apply", async () => {

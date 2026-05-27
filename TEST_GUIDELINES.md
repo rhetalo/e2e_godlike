@@ -197,6 +197,26 @@ id="debugNNNN" сидит на <td> внутри <tr>, а не на самом <
 
 Правило: перед написанием селектора — смотреть в DevTools на каком элементе атрибут.
 
+7.5 Кастомные radio-tile: input скрыт, .check() без force:true упадёт
+VirtFusion использует кастомный UI для radio-кнопок (плитки с иконками).
+Реальный <input> визуально скрыт (custom CSS), хотя и присутствует в DOM.
+.check() по умолчанию требует видимость элемента — таймаутит.
+
+// ❌ Плохо — упадёт с "element is not visible":
+await page.locator('input.radio-button[value="2"]').check();
+
+// ✓ Хорошо — force:true пропускает проверку видимости:
+await page.locator('input.radio-button[value="2"]').check({ force: true });
+
+// ✓ Лучше — вынести в метод Page Object с говорящим именем:
+async selectCDDVD(): Promise<void> {
+  await this.cdDvdRadio.check({ force: true });
+  await expect(this.cdDvdRadio).toBeChecked({ timeout: 5_000 });
+}
+
+Правило: при кастомных radio/checkbox UI — всегда проверять видимость через
+DevTools/accessibility tree перед написанием .check(). Если элемент скрыт — force:true.
+
 8. Что НЕ является E2E тестом
 Следующее не нужно тестировать отдельными тестами — это детали реализации:
 
