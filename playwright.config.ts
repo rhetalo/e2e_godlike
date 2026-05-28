@@ -10,7 +10,9 @@ export default defineConfig({
     timeout: 30_000,
   },
 
-  fullyParallel: true,
+  // workers:1 keeps panel tests serial so the shared auth session is not
+  // invalidated by concurrent logins. Remove or increase for pure UI tests.
+  fullyParallel: false,
 
   // Запрещает test.only в CI
   forbidOnly: !!process.env.CI,
