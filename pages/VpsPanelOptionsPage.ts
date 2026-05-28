@@ -221,7 +221,6 @@ export class VpsPanelOptionsPage {
   /** Wait for Options tab content to fully load (networkidle + settlement) */
   async waitForOptionsTab(): Promise<void> {
     await this.page.waitForLoadState("networkidle").catch(() => null);
-    await this.page.waitForTimeout(600);
   }
 
   /**
