@@ -258,3 +258,94 @@ test("@critical описание теста", async () => {
 3. **Hardcoded credentials** в `tests/funnels/*.spec.ts` — использование `EMAIL = "test@testmail.com"` вместо импорта из `utils/auth.ts`. Объединить.
 4. **Auth в globalSetup** — логин в `loginAndSaveSession` вызывается в `beforeAll` каждого suite. Лучше переместить в Playwright `globalSetup` + dependency projects.
 5. **`storageState.vps.json`** — проверить, не закоммичен ли в git (аналогичная проблема как с `storageState.json`).
+
+---
+
+## Дорожная карта: привести весь проект к единому стандарту
+
+> Статус на май 2026. В этой и предыдущей сессиях работали **только с VPS-тестами и page objects**.
+> Остальные модули (`funnels/`, `modded/`, `general/`, `scripts/`) ещё **не ревьюировались**.
+
+### Что сделано (покрыто)
+
+| Модуль | Статус |
+|---|---|
+| `tests/vps/panel/` | ✅ Ревью + большинство фиксов |
+| `pages/VpsPanelServer*.ts`, `Network`, `Options`, `Storage`, `Rebuild` | ✅ waitForTimeout, селекторы |
+| `utils/auth.ts`, `utils/credentials.ts` | ✅ process.env |
+| `playwright.config.ts` | ✅ fullyParallel противоречие |
+| `tests/modded/game-slider.spec.ts` | ✅ waitForTimeout(3000) |
+| `tests/modded/games.valid.promo.spec.ts` | ✅ process.env (CLIENTAREA_FREE_*) |
+| `tests/modded/games.invalid.promo.spec.ts` | ✅ process.env (CLIENTAREA_*) |
+| `.env.example`, `storageState.json` (удалён из git) | ✅ Security |
+
+### Что ещё НЕ тронуто (очередь на следующие сессии)
+
+#### 🔴 Приоритет 1 — Security / credentials
+
+Файлы с хардкодом `test@testmail.com` или `Password_123`, которые ещё не переведены на `process.env`:
+
+| Файл | Что хардкодит |
+|---|---|
+| `tests/funnels/funnel.spec.ts` | `EMAIL`, `PASSWORD` inline |
+| `tests/funnels/funnel.mobile.spec.ts` | `EMAIL = PASSWORD = "test@testmail.com"` |
+| `tests/funnels/funnel.cart.check.spec.ts` | `.fill("test@testmail.com")` x2 |
+| `tests/funnels/funnel.with.credit.check.spec.ts` | `.fill("test@testmail.com")` x2 |
+| `tests/funnels/funnel.paypal.redirect.spec.ts` | email + password inline |
+| `tests/vps/funnel/vps.funnel.spec.ts` | `EMAIL`, `PASSWORD` inline |
+| `tests/general/login.validation.spec.ts` | credentials inline |
+
+**Цель:** все эти файлы импортируют `CLIENTAREA_EMAIL` / `CLIENTAREA_PASSWORD` из одного места (либо `utils/auth.ts`, либо новый `utils/clientarea-auth.ts`).
+
+#### 🟡 Приоритет 2 — waitForTimeout (оставшиеся ~45 вхождений)
+
+| Файл | Кол-во | Сложность |
+|---|---|---|
+| `tests/vps/panel/vps.build.spec.ts` | ~12 | ⚠️ Высокая — реальный rebuild |
+| `pages/VpsConfigPage.ts` | 4 | Средняя — Vue JS-click micro-delays |
+| `pages/MobileCartPage.ts` | 4 | Средняя — анимации? |
+| `pages/VpsPanelServerDetailPage.ts` | 2 | Низкая — файл всё равно устарел |
+| `tests/vps/panel/vps.panel.power.actions.spec.ts` | 5 | Средняя |
+| `tests/vps/panel/vps.panel.rebuild.spec.ts` | 5 | Средняя |
+| `tests/funnels/vps.funnel.spec.ts` | 6 | Средняя |
+| `tests/general/valid.links.spec.ts` | 3 | Низкая |
+| `tests/funnels/funnel.seed.spec.ts` | 1 | Низкая |
+
+#### 🟡 Приоритет 3 — Устаревшие / дублирующие Page Objects
+
+| Файл | Проблема | Действие |
+|---|---|---|
+| `pages/VpsPanelServerDetailPage.ts` | Стаый PO с угаданными селекторами, используется только в `vps.build.spec.ts` | Мигрировать `vps.build.spec.ts` на `VpsPanelServerPage`, удалить файл |
+| `pages/VpsPage.ts` | Возможно перекрывается с `VpsConfigPage.ts` | Проверить и объединить |
+
+#### 🟡 Приоритет 4 — Структура тестов (не ревьюировались вообще)
+
+| Модуль | Что нужно проверить |
+|---|---|
+| `tests/funnels/` | antipatterns (return вместо skip, отсутствие expect, hardcoded selectors) |
+| `tests/modded/` (кроме game-slider и promo) | то же самое |
+| `tests/general/` | antipatterns, waitForTimeout |
+| `tests/funnels/funnel.seed.spec.ts` | выглядит как setup-скрипт, не тест — разобраться |
+
+#### 🟢 Приоритет 5 — Архитектурные улучшения (после всего выше)
+
+| Задача | Детали |
+|---|---|
+| Auth в `globalSetup` | Сейчас `loginAndSaveSession()` вызывается в `beforeAll` каждого suite. Один раз в глобальном setup экономит время |
+| Dependency projects | Разделить в `playwright.config.ts` на проекты: `setup` → `vps-panel`, `funnels`, etc. |
+| Теги `@smoke/@critical/@regression` | Большинство тестов без тегов — невозможно запустить только критические |
+| `workers: 1` | Рассмотреть увеличение для non-panel тестов |
+
+---
+
+### Соглашение об именовании env-переменных
+
+| Переменная | Для чего | Файл-источник |
+|---|---|---|
+| `PANEL_EMAIL` | VirtFusion vf-panel.godlike.host | `utils/auth.ts` |
+| `PANEL_PASSWORD` | VirtFusion vf-panel.godlike.host | `utils/auth.ts` |
+| `CLIENTAREA_EMAIL` | godlike.host/clientarea (основной аккаунт с сервисами) | будущий `utils/clientarea-auth.ts` |
+| `CLIENTAREA_PASSWORD` | то же | |
+| `CLIENTAREA_FREE_EMAIL` | godlike.host/clientarea (свежий аккаунт, нет сервисов) | |
+| `CLIENTAREA_FREE_PASSWORD` | то же | |
+| `TEST_USER_PASSWORD` | Авто-генерируемые тестовые аккаунты | `utils/credentials.ts` |
