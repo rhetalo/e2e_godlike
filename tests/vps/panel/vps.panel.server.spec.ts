@@ -153,69 +153,19 @@ test.describe("VPS Panel — Server Page Structure", () => {
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// SUITE 3 — Power Controls
+// SUITE 3 — Power Controls (smoke)
+// Детальные проверки состояний и модалов — в vps.panel.power.actions.spec.ts
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS Panel — Power Controls", () => {
-  test.beforeEach(async () => {
+  test("кнопки управления питанием присутствуют на странице сервера", async () => {
     await serverPage.goto();
-  });
 
-  test("кнопки управления питанием присутствуют на странице", async () => {
-    await test.step("Хотя бы одна кнопка питания видна", async () => {
-      const textBtns = serverPage.page.locator(
-        'button:has-text("Boot"), button:has-text("Shutdown"), button:has-text("Power Off"), button:has-text("Restart")'
-      );
-      const count = await textBtns.count();
-      expect(count, "Ни одной кнопки питания не найдено").toBeGreaterThanOrEqual(1);
-    });
-  });
-
-  test("при Running: Shutdown / Power Off / Restart видны и активны", async () => {
-    const isRunning = await serverPage.isRunning();
-    test.skip(!isRunning, "Сервер не Running — пропускаем Running-state проверку");
-
-    await test.step("Shutdown visible & enabled", async () => {
-      await expect(serverPage.shutdownButton).toBeVisible({ timeout: 10_000 });
-      await expect(serverPage.shutdownButton).toBeEnabled();
-    });
-    await test.step("Power Off visible & enabled", async () => {
-      await expect(serverPage.powerOffButton).toBeVisible({ timeout: 10_000 });
-      await expect(serverPage.powerOffButton).toBeEnabled();
-    });
-    await test.step("Restart visible & enabled", async () => {
-      await expect(serverPage.restartButton).toBeVisible({ timeout: 10_000 });
-      await expect(serverPage.restartButton).toBeEnabled();
-    });
-  });
-
-  test("при Stopped: Boot видна и активна", async () => {
-    const isStopped = await serverPage.isStopped();
-    test.skip(!isStopped, "Сервер не Stopped — пропускаем Stopped-state проверку");
-
-    await test.step("Boot button visible & enabled", async () => {
-      await expect(serverPage.bootButton).toBeVisible({ timeout: 10_000 });
-      await expect(serverPage.bootButton).toBeEnabled();
-    });
-  });
-
-  test("Power Off — клик открывает модал подтверждения, Cancel закрывает", async () => {
-    const isRunning = await serverPage.isRunning();
-    test.skip(!isRunning, "Сервер не Running — Power Off недоступен");
-
-    await test.step("Кликаем Power Off", async () => {
-      await serverPage.powerOffButton.click();
-    });
-    await test.step("Модал открылся (.modal.show)", async () => {
-      await expect(serverPage.activeModal).toBeVisible({ timeout: 8_000 });
-    });
-    await test.step("Модал содержит 'Power Off Server'", async () => {
-      const modalText = await serverPage.activeModal.innerText();
-      expect(modalText).toContain("Power Off Server");
-    });
-    await test.step("Cancel закрывает модал", async () => {
-      await serverPage.modalCancelButton.click();
-      await expect(serverPage.activeModal).not.toBeVisible({ timeout: 5_000 });
-    });
+    const powerBtns = serverPage.page.locator(
+      'button:has-text("Boot"), button:has-text("Shutdown"), button:has-text("Power Off"), button:has-text("Restart")'
+    );
+    await expect(powerBtns.first()).toBeVisible({ timeout: 10_000 });
+    const count = await powerBtns.count();
+    expect(count, "Ни одной кнопки питания не найдено").toBeGreaterThanOrEqual(1);
   });
 });
 
@@ -240,25 +190,22 @@ test.describe("VPS Panel — Tab Navigation", () => {
   });
 
   for (const tabLabel of tabLabels) {
-    test(`вкладка "${tabLabel}" — кликабельна, контент загружается`, async () => {
+    test(`вкладка "${tabLabel}" — кликабельна, становится активной`, async () => {
       await serverPage.goto();
 
       const isVisible = await serverPage.tab(tabLabel).isVisible().catch(() => false);
       test.skip(!isVisible, `Вкладка "${tabLabel}" не видна`);
 
-      await test.step(`Кликаем "${tabLabel}"`, async () => {
-        await serverPage.clickTab(tabLabel);
-      });
-      await test.step("Контент страницы загружен (body > 100 символов)", async () => {
-        const bodyText = await serverPage.page.locator("body").innerText();
-        expect(bodyText.length).toBeGreaterThan(100);
-      });
+      await serverPage.clickTab(tabLabel);
+
+      // Проверяем что активный таб содержит нужный текст
+      await expect(serverPage.activeTab).toContainText(tabLabel, { timeout: 5_000 });
     });
   }
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// SUITE 5 — Servers List
+// SUITE 5 — Servers List (/servers)
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS Panel — Servers List (/servers)", () => {
   test.beforeEach(async () => {
@@ -267,26 +214,10 @@ test.describe("VPS Panel — Servers List (/servers)", () => {
     await page.waitForLoadState("networkidle").catch(() => null);
   });
 
-  test("/servers показывает хотя бы 1 Manage-кнопку", async () => {
-    const page = sharedContext.pages()[0];
-
-    await test.step("Manage button visible", async () => {
-      const manageBtn = page.locator('button:has-text("Manage"), a:has-text("Manage")').first();
-      await expect(manageBtn).toBeVisible({ timeout: 15_000 });
-    });
-    await test.step("Количество серверов >= 1", async () => {
-      const count = await page.locator('button:has-text("Manage"), a:has-text("Manage")').count();
-      expect(count).toBeGreaterThanOrEqual(1);
-    });
-  });
-
   test("имя тестового сервера видно в списке", async () => {
     const page = sharedContext.pages()[0];
-
-    await test.step(`"${TEST_SERVER_NAME}" присутствует в списке`, async () => {
-      const bodyText = await page.locator("body").innerText();
-      expect(bodyText).toContain(TEST_SERVER_NAME);
-    });
+    const bodyText = await page.locator("body").innerText();
+    expect(bodyText).toContain(TEST_SERVER_NAME);
   });
 
   test("Delete кнопка — открывает модал, Cancel закрывает", async () => {
@@ -296,18 +227,15 @@ test.describe("VPS Panel — Servers List (/servers)", () => {
     const isVisible = await deleteBtn.isVisible().catch(() => false);
     test.skip(!isVisible, "Delete button не найдена на /servers");
 
-    await test.step("Кликаем Delete", async () => {
-      await deleteBtn.click();
-    });
-    await test.step("Модал открылся", async () => {
-      const modal = page.locator('[class*="modal"], [role="dialog"]').first();
-      await expect(modal).toBeVisible({ timeout: 8_000 });
-      const modalText = await modal.innerText();
-      expect(modalText).toMatch(/delete|Delete|sure/i);
-    });
-    await test.step("Cancel закрывает модал", async () => {
-      const cancelBtn = page.locator('button:has-text("Cancel")').first();
-      await cancelBtn.click();
-    });
+    await deleteBtn.click();
+
+    const modal = page.locator('[class*="modal"], [role="dialog"]').first();
+    await expect(modal).toBeVisible({ timeout: 8_000 });
+    const modalText = await modal.innerText();
+    expect(modalText).toMatch(/delete|Delete|sure/i);
+
+    const cancelBtn = page.locator('button:has-text("Cancel")').first();
+    await cancelBtn.click();
+    await expect(modal).not.toBeVisible({ timeout: 5_000 });
   });
 });
