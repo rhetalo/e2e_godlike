@@ -5,8 +5,10 @@ const gamesToTest = gamesData.games;
 
 const BASE_URL = "https://godlike.host";
 
-const EMAIL = "test@testmail.com";
-const PASSWORD = "test@testmail.com";
+// Стандартный аккаунт с активными сервисами — промокод НЕ должен срабатывать
+// Задай CLIENTAREA_EMAIL и CLIENTAREA_PASSWORD в .env
+const EMAIL = process.env.CLIENTAREA_EMAIL ?? "test@testmail.com";
+const PASSWORD = process.env.CLIENTAREA_PASSWORD ?? "test@testmail.com";
 const storageStatePath = "storageState.json";
 
 // ---------------- LOGIN ----------------
