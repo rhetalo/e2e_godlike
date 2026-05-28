@@ -228,7 +228,7 @@ export class VpsPanelServerPage {
     }
 
     await this.modalCancelButton.click();
-    await this.page.waitForTimeout(400);
+    await this.page.waitForSelector('[role="dialog"]', { state: "hidden", timeout: 5_000 }).catch(() => null);
 
     return { appeared: true, modalText: modalText.trim() };
   }
@@ -257,7 +257,6 @@ export class VpsPanelServerPage {
     label: "Overview" | "Media" | "Options" | "Network" | "Storage" | "Backups" | "Sharing",
   ): Promise<void> {
     await this.tab(label).click();
-    await this.page.waitForTimeout(800);
     await this.page.waitForLoadState("networkidle").catch(() => null);
   }
 
@@ -374,13 +373,10 @@ export class VpsPanelServerPage {
    * Polls every 500ms for up to 15s.
    */
   async waitForNewActivityRow(rowCountBefore: number, timeoutMs = 15_000): Promise<void> {
-    const deadline = Date.now() + timeoutMs;
-    while (Date.now() < deadline) {
-      const current = await this.activityRows.count().catch(() => rowCountBefore);
-      if (current > rowCountBefore) return;
-      await this.page.waitForTimeout(500);
-    }
-    throw new Error(`No new activity row appeared within ${timeoutMs}ms`);
+    await expect.poll(
+      async () => await this.activityRows.count().catch(() => rowCountBefore),
+      { timeout: timeoutMs, intervals: [500, 500, 1_000] },
+    ).toBeGreaterThan(rowCountBefore);
   }
 
   /**
