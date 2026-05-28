@@ -134,7 +134,6 @@ export class VpsPanelNetworkPage {
   // ── Tab readiness ──────────────────────────────────────────────────────────
 
   async waitForNetworkTab(): Promise<void> {
-    await this.page.waitForTimeout(800);
     await this.page.waitForLoadState("networkidle").catch(() => null);
   }
 
