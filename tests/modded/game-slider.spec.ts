@@ -110,7 +110,11 @@ class SliderPageHelper {
       waitUntil: "domcontentloaded",
       timeout: 30000,
     });
-    await this.page.waitForTimeout(3000);
+    // Wait for Vue to render the tariff section instead of a fixed 3-second delay
+    await this.page.waitForSelector('[class*="storefront__tariff"]', {
+      state: 'visible',
+      timeout: 15_000,
+    }).catch(() => null);
   }
 
   /** Returns true if a "Customize server" button exists on the page. */
