@@ -4,7 +4,7 @@ import path from 'path';
 export function generateCredentials() {
     const login =
     'user_' + Math.random().toString(36).substring(2, 8);
-    const password = 'Password_123';
+    const password = process.env.TEST_USER_PASSWORD ?? 'Password_123';
     const email = `${login}@testmail.com`;
 
     return { login, password, email };
