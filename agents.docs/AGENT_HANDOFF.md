@@ -210,3 +210,51 @@ test("@critical описание теста", async () => {
 4. Serial mode для всех VirtFusion panel тестов
 5. После каждой правки обновлять `AGENT_HANDOFF.md` и `CODE_REVIEW.md`
 6. `storageState.panel.json` ≠ `storageState.vps.json` — разные домены
+
+---
+
+## Сессия: Фиксы компиляции + security + waitForTimeout (май 2026)
+
+### Статус при входе
+`npx tsc --noEmit` давал 2 ошибки; `storageState.json` был закоммичен в git; credentials захардкожены; 58 вхождений `waitForTimeout`.
+
+### Что сделано
+
+| # | Файл | Изменение |
+|---|---|---|
+| 1 | `tests/vps/panel/vps.panel.login.spec.ts` | +`});` в конец — закрывает внешний `test.describe` |
+| 2 | `tests/vps/panel/vps.panel.options.spec.ts` | +`});` в конец — закрывает `describe(VNC)` |
+| 3 | `utils/auth.ts` | `EMAIL`/`PASSWORD` → `process.env.PANEL_EMAIL ?? ...` |
+| 4 | `utils/credentials.ts` | `Password_123` → `process.env.TEST_USER_PASSWORD ?? ...` |
+| 5 | `.env.example` | Новый файл — документирует все env-переменные |
+| 6 | `storageState.json` | **Удалён из git** (содержал реальные session cookies) |
+| 7 | `tests/modded/game-slider.spec.ts` | `waitForTimeout(3000)` → `waitForSelector('[class*="storefront__tariff"]', ...)` |
+| 8 | `playwright.config.ts` | `fullyParallel: true` → `fullyParallel: false` + комментарий |
+| 9 | `pages/VpsPanelServersListPage.ts` | `waitForTimeout(1500)` → `waitForURL(/\/server\//)` |
+| 10 | `pages/VpsPanelServerPage.ts` | 3 фикса: modal-cancel → `waitForSelector(hidden)`, clickTab → убран redundant wait, `waitForNewActivityRow` → `expect.poll()` |
+| 11 | `pages/VpsPanelNetworkPage.ts` | `waitForTimeout(800)` убран (networkidle достаточно) |
+| 12 | `pages/VpsPanelOptionsPage.ts` | `waitForTimeout(600)` убран |
+| 13 | `pages/VpsPanelStoragePage.ts` | `waitForTimeout(800)` убран |
+| 14 | `tests/vps/panel/vps.panel.login.spec.ts` | `waitForTimeout(3000/3000/1000)` → `networkidle` / удалён |
+| 15 | `agents.docs/TEST_GUIDELINES.md` | +§9.10 waitForTimeout правила, §9.11 credentials, §9.12 storageState |
+
+**`npx tsc --noEmit` — 0 ошибок** после всех изменений.
+
+### Оставшиеся waitForTimeout (~45 вхождений)
+
+| Файл | Сложность замены | Приоритет |
+|---|---|---|
+| `tests/vps/panel/vps.build.spec.ts` | ⚠️ High — нужно понять каждый контекст | 🔴 |
+| `pages/VpsPanelServerDetailPage.ts` | Стаый PO, нужна миграция на ServerPage | 🟡 |
+| `pages/VpsConfigPage.ts` (4×300–400ms) | Vue-click micro-delays, сложно без live DOM | 🟡 |
+| `pages/MobileCartPage.ts` (4×500–1000ms) | Анимации? Нужна проверка | 🟡 |
+| `tests/vps/panel/vps.panel.power.actions.spec.ts` | После power-кнопок (400ms) | 🟡 |
+| `tests/vps/panel/vps.panel.rebuild.spec.ts` | После OS-выбора (400–500ms) | 🟡 |
+
+### Следующие приоритеты (открытые задачи)
+
+1. **VpsPanelServerDetailPage.ts** → дубль / устарел. Используется в `vps.build.spec.ts`. Мигрировать `vps.build.spec.ts` на `VpsPanelServerPage.ts`, потом удалить старый PO.
+2. **`vps.build.spec.ts`** — монолит (310 строк), запускает реальный rebuild. Обсудить с владельцем.
+3. **Hardcoded credentials** в `tests/funnels/*.spec.ts` — использование `EMAIL = "test@testmail.com"` вместо импорта из `utils/auth.ts`. Объединить.
+4. **Auth в globalSetup** — логин в `loginAndSaveSession` вызывается в `beforeAll` каждого suite. Лучше переместить в Playwright `globalSetup` + dependency projects.
+5. **`storageState.vps.json`** — проверить, не закоммичен ли в git (аналогичная проблема как с `storageState.json`).
