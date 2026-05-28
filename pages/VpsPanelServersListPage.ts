@@ -133,8 +133,8 @@ export class VpsPanelServersListPage {
     const btn = this.manageButton(index);
     await btn.waitFor({ state: "visible", timeout: 10_000 });
     await btn.click();
-    // Wait for SPA navigation — either URL changes or networkidle
-    await this.page.waitForTimeout(1_500);
+    // Wait for SPA navigation to /server/UUID — more reliable than a fixed delay
+    await this.page.waitForURL(/\/server\//, { timeout: 10_000 }).catch(() => null);
     await this.page.waitForLoadState("networkidle").catch(() => null);
   }
 
