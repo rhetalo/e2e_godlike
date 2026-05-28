@@ -142,8 +142,8 @@ test.describe("VPS Panel — Invalid Credentials", () => {
 
     await loginPage.loginWith("test@testmail.com", "wrong_password_xyz");
 
-    // Wait briefly for page to settle
-    await page.waitForTimeout(3_000);
+    // On invalid credentials the server responds quickly; just wait for networkidle
+    await page.waitForLoadState("networkidle").catch(() => null);
 
     console.log(`[INFO] After wrong password URL: ${page.url()}`);
     // Should stay on /login (not redirect to /dashboard)
@@ -157,7 +157,7 @@ test.describe("VPS Panel — Invalid Credentials", () => {
     const loginPage = new VpsPanelLoginPage(page);
 
     await loginPage.loginWith("nobody@nowhere.invalid", "Password_123");
-    await page.waitForTimeout(3_000);
+    await page.waitForLoadState("networkidle").catch(() => null);
 
     console.log(`[INFO] After invalid email URL: ${page.url()}`);
     expect(page.url()).not.toMatch(/\/dashboard/);
@@ -171,10 +171,7 @@ test.describe("VPS Panel — Invalid Credentials", () => {
 
     await loginPage.goto();
     await expect(loginPage.loginButton).toBeDisabled();
-    // await loginPage.loginButton.click();
-    await page.waitForTimeout(1_000);
-
-    // Should stay on /login
+    // Button is disabled — no click, so no need to wait; URL stays on /login immediately
     console.log(`[INFO] After empty submit URL: ${page.url()}`);
     expect(page.url()).toMatch(/\/login/);
 
