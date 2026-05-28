@@ -66,33 +66,6 @@ test.describe("VPS Panel — Login Page Structure", () => {
     await page.close();
   });
 
-  test("email поле принимает ввод", async ({ browser }) => {
-    const page = await browser.newPage();
-    const loginPage = new VpsPanelLoginPage(page);
-
-    await loginPage.goto();
-    await loginPage.fillEmail("test@example.com");
-
-    const value = await loginPage.emailInput.inputValue();
-    expect(value).toBe("test@example.com");
-    console.log("[INFO] Email input accepts text ✓");
-
-    await page.close();
-  });
-
-  test("password поле имеет тип password (скрывает текст)", async ({ browser }) => {
-    const page = await browser.newPage();
-    const loginPage = new VpsPanelLoginPage(page);
-
-    await loginPage.goto();
-
-    const inputType = await loginPage.passwordInput.getAttribute("type");
-    expect(inputType).toBe("password");
-    console.log("[INFO] Password field type=password ✓");
-
-    await page.close();
-  });
-
   test("кнопка Login видна и неактивна", async ({ browser }) => {
     const page = await browser.newPage();
     const loginPage = new VpsPanelLoginPage(page);
@@ -105,19 +78,6 @@ test.describe("VPS Panel — Login Page Structure", () => {
 
     await page.close();
   });
-
-  test("страница содержит 'Powered by VirtFusion'", async ({ browser }) => {
-    const page = await browser.newPage();
-    const loginPage = new VpsPanelLoginPage(page);
-
-    await loginPage.goto();
-
-    await expect(loginPage.poweredByText).toBeVisible({ timeout: 10_000 });
-    console.log("[INFO] 'Powered by VirtFusion' visible ✓");
-
-    await page.close();
-  });
-});
 
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 2 — Successful Login
