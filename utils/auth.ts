@@ -2,8 +2,8 @@ import { type Browser, type Page } from "@playwright/test";
 import * as path from "path";
 
 export const PANEL_URL = "https://vf-panel.godlike.host";
-export const EMAIL = "test@testmail.com";
-export const PASSWORD = "Password_123";
+export const EMAIL = process.env.PANEL_EMAIL ?? "test@testmail.com";
+export const PASSWORD = process.env.PANEL_PASSWORD ?? "Password_123";
 export const STORAGE_STATE_PATH = path.join(__dirname, "..", "storageState.panel.json");
 
 /**
