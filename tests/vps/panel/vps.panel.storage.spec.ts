@@ -74,29 +74,11 @@ test.describe("VPS Panel — Storage Tab", () => {
     });
   });
 
-  test("клик по Storage — контент загружается", async () => {
+  test("клик по Storage — Drive: и Primary labels загружаются", async () => {
     await openStorageTab();
 
-    await test.step("Body содержит storage-контент", async () => {
-      const hasContent = await storagePage.hasStorageContent();
-      expect(hasContent, "Storage tab не содержит storage-контент").toBeTruthy();
-    });
-  });
-
-  test("'Drive:' label (vlang[206]) видна на Storage tab", async () => {
-    await openStorageTab();
-
-    await test.step('"Drive:" label видна (vlang[206])', async () => {
-      await expect(storagePage.driveLabel).toBeVisible({ timeout: 10_000 });
-    });
-  });
-
-  test("'Primary' disk designation (vlang[207]) видна", async () => {
-    await openStorageTab();
-
-    await test.step('"Primary" label видна (vlang[207])', async () => {
-      await expect(storagePage.primaryDiskLabel).toBeVisible({ timeout: 10_000 });
-    });
+    await expect(storagePage.driveLabel).toBeVisible({ timeout: 10_000 });
+    await expect(storagePage.primaryDiskLabel).toBeVisible({ timeout: 10_000 });
   });
 
   test("'HDD' disk type (vlang[308]) — проверяем если HDD-план", async () => {
