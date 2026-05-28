@@ -67,7 +67,6 @@ export class VpsPanelStoragePage {
   // ── Tab readiness ──────────────────────────────────────────────────────────
 
   async waitForStorageTab(): Promise<void> {
-    await this.page.waitForTimeout(800);
     await this.page.waitForLoadState("networkidle").catch(() => null);
   }
 
