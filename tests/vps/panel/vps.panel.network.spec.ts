@@ -2,29 +2,25 @@
  * vps.panel.network.spec.ts
  * ──────────────────────────
  * Тесты вкладки Network на странице управления сервером VirtFusion.
- * URL: https://vf-panel.godlike.host/server/9c49ed96-56f4-41c8-bc5f-a8d44c21a486
+ * URL: https://vf-panel.godlike.host/server/{UUID}
  *
  * Покрытие:
- *   1. Вкладка Network открывается
+ *   1. Вкладка Network открывается и становится активной
  *   2. IP-адрес(а) сервера видны
- *   3. "Primary IPv4:" / "Primary Network:" labels видны (vlang[203] / vlang[201])
- *   4. Секция "Reverse DNS" присутствует (vlang[83]) — NOT "rDNS"
- *   5. "Network Traffic" секция (vlang[194])
+ *   3. "Primary IPv4:" / "Primary Network:" labels видны
+ *   4. "Reverse DNS" секция — жёсткий expect если присутствует, test.skip если план не поддерживает
+ *   5. "Network Traffic" секция — аналогично
  *
- * vlang-ссылки для подтверждения строк:
- *   vlang[83]  = "Reverse DNS"     ← точная метка секции
+ * vlang-строки подтверждены на живом сервере (май 2026):
+ *   vlang[83]  = "Reverse DNS"
  *   vlang[194] = "Network Traffic"
  *   vlang[201] = "Primary Network:"
  *   vlang[203] = "Primary IPv4:"
- *   vlang[204] = "Primary IPv6:"
- *   vlang[242] = "Interface:"
- *   vlang[244] = "MAC:"
  *
  * Запуск:
- *   npx playwright test tests/vps.panel.network.spec.ts --project=chromium
- *   npx playwright test tests/vps.panel.network.spec.ts --project=chromium --headed
+ *   npx playwright test tests/vps/panel/vps.panel.network.spec.ts --project=chromium --headed
  */
-import { test, expect, type Browser } from "@playwright/test";
+import { test, expect, type Browser, type BrowserContext } from "@playwright/test";
 import { VpsPanelServerPage } from "../../../pages/VpsPanelServerPage";
 import { VpsPanelNetworkPage } from "../../../pages/VpsPanelNetworkPage";
 import {
@@ -38,186 +34,97 @@ test.use({
   deviceScaleFactor: 1,
 });
 
+test.describe.configure({ mode: "serial" });
+
+let sharedContext: BrowserContext;
+let serverPage: VpsPanelServerPage;
+let networkPage: VpsPanelNetworkPage;
+
 test.beforeAll(async ({ browser }: { browser: Browser }) => {
   await loginAndSaveSession(browser);
+  sharedContext = await browser.newContext({ storageState: STORAGE_STATE_PATH });
+  const page = await sharedContext.newPage();
+  serverPage = new VpsPanelServerPage(page, TEST_SERVER_UUID);
+  networkPage = new VpsPanelNetworkPage(page);
 });
 
-// ── Helper ────────────────────────────────────────────────────────────────────
+test.afterAll(async () => {
+  await sharedContext.close();
+});
 
-async function openNetworkTab(browser: Browser) {
-  const context = await browser.newContext({ storageState: STORAGE_STATE_PATH });
-  const page = await context.newPage();
-  const serverPage = new VpsPanelServerPage(page, TEST_SERVER_UUID);
-  const networkPage = new VpsPanelNetworkPage(page);
-
+async function openNetworkTab(): Promise<void> {
   await serverPage.goto();
-
-  const networkTab = serverPage.tab("Network");
-  const isVisible = await networkTab.isVisible().catch(() => false);
-  if (isVisible) {
-    await serverPage.clickTab("Network");
-    console.log("[INFO] Network tab clicked");
-  }
-
+  await expect(serverPage.tab("Network")).toBeVisible({ timeout: 15_000 });
+  await serverPage.clickTab("Network");
   await networkPage.waitForNetworkTab();
-  return { context, page, serverPage, networkPage };
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// SUITE 1 — Network Tab Access
+// SUITE 1 — Навигация
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — Network Tab", () => {
-  test("вкладка Network присутствует на странице сервера", async ({ browser }) => {
-    const context = await browser.newContext({ storageState: STORAGE_STATE_PATH });
-    const page = await context.newPage();
-    const serverPage = new VpsPanelServerPage(page, TEST_SERVER_UUID);
-
+test.describe("VPS Panel — Network Tab: навигация", () => {
+  test("вкладка Network присутствует на странице сервера", async () => {
     await serverPage.goto();
-
-    const networkTab = serverPage.tab("Network");
-    await expect(networkTab).toBeVisible({ timeout: 15_000 });
-    console.log("[INFO] Network tab visible ✓");
-
-    await context.close();
+    await expect(serverPage.tab("Network")).toBeVisible({ timeout: 15_000 });
   });
 
-  test("клик по Network — контент загружается", async ({ browser }) => {
-    const { context, page } = await openNetworkTab(browser);
-
-    const bodyText = await page.locator("body").innerText();
-    expect(bodyText.length).toBeGreaterThan(50);
-    console.log("[INFO] Network tab content loaded ✓");
-
-    await context.close();
-  });
-
-  test("body содержит network-related текст (подтверждённые vlang-строки)", async ({ browser }) => {
-    const { context, page } = await openNetworkTab(browser);
-
-    const bodyText = await page.locator("body").innerText();
-    console.log(`[INFO] Body snippet: "${bodyText.slice(0, 400)}"`);
-
-    // Check for confirmed vlang strings from live page
-    const hasNetworkContent =
-      bodyText.includes("Primary Network") ||  // vlang[201]
-      bodyText.includes("Primary IPv4") ||     // vlang[203]
-      bodyText.includes("Primary IPv6") ||     // vlang[204]
-      bodyText.includes("Reverse DNS") ||      // vlang[83]
-      bodyText.includes("Network Traffic") ||  // vlang[194]
-      bodyText.includes("Interface") ||        // vlang[242]
-      /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/.test(bodyText); // IP address
-
-    console.log(`[INFO] Network-related content (vlang-confirmed): ${hasNetworkContent}`);
-    expect(hasNetworkContent).toBeTruthy();
-
-    await context.close();
+  test("клик по Network — вкладка становится активной", async () => {
+    await openNetworkTab();
+    await expect(serverPage.activeTab).toContainText("Network", { timeout: 5_000 });
   });
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// SUITE 2 — IP Addresses
+// SUITE 2 — IP-адреса
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — IP Address Display", () => {
-  test("IP-адрес (IPv4) присутствует на вкладке Network", async ({ browser }) => {
-    const { context, page, networkPage } = await openNetworkTab(browser);
+test.describe("VPS Panel — Network Tab: IP-адреса", () => {
+  test("'Primary IPv4:' label (vlang[203]) видна на вкладке Network", async () => {
+    await openNetworkTab();
+    await expect(networkPage.primaryIpv4Label).toBeVisible({ timeout: 10_000 });
+  });
 
+  test("'Primary Network:' label (vlang[201]) видна на вкладке Network", async () => {
+    await openNetworkTab();
+    await expect(networkPage.primaryNetworkLabel).toBeVisible({ timeout: 10_000 });
+  });
+
+  test("IPv4-адрес сервера присутствует на странице", async () => {
+    await openNetworkTab();
     const ips = await networkPage.getVisibleIpAddresses();
-    console.log(`[INFO] IPv4 addresses found in body text: ${ips.join(", ")}`);
-
-    expect(ips.length).toBeGreaterThanOrEqual(1);
-    console.log("[INFO] IP address present on Network tab ✓");
-
-    await context.close();
-  });
-
-  test("'Primary IPv4:' label (vlang[203]) видна на Network tab", async ({ browser }) => {
-    const { context, page, networkPage } = await openNetworkTab(browser);
-
-    const labelVisible = await networkPage.primaryIpv4Label.isVisible().catch(() => false);
-    console.log(`[INFO] "Primary IPv4:" label (vlang[203]) visible: ${labelVisible}`);
-
-    if (labelVisible) {
-      console.log('[INFO] "Primary IPv4:" label confirmed ✓');
-    } else {
-      // Fallback: check body text
-      const bodyText = await page.locator("body").innerText();
-      const hasIpv4Label = bodyText.includes("Primary IPv4");
-      console.log(`[INFO] "Primary IPv4" in body text: ${hasIpv4Label}`);
-      expect(hasIpv4Label || labelVisible).toBeTruthy();
-    }
-
-    await context.close();
-  });
-
-  test("'Primary Network:' label (vlang[201]) видна на Network tab", async ({ browser }) => {
-    const { context, page, networkPage } = await openNetworkTab(browser);
-
-    const labelVisible = await networkPage.primaryNetworkLabel.isVisible().catch(() => false);
-    console.log(`[INFO] "Primary Network:" label (vlang[201]) visible: ${labelVisible}`);
-
-    const bodyText = await page.locator("body").innerText();
-    const hasNetworkLabel = bodyText.includes("Primary Network");
-    console.log(`[INFO] "Primary Network" in body text: ${hasNetworkLabel}`);
-
-    if (labelVisible || hasNetworkLabel) {
-      console.log('[INFO] "Primary Network:" label confirmed ✓');
-    }
-
-    await context.close();
+    expect(ips.length, "Ни одного IPv4 адреса не найдено на Network tab").toBeGreaterThanOrEqual(1);
   });
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// SUITE 3 — Reverse DNS (vlang[83]: "Reverse DNS")
+// SUITE 3 — Reverse DNS (vlang[83])
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — Reverse DNS", () => {
-  test("'Reverse DNS' секция (vlang[83]) — присутствует или задокументирована как отсутствующая", async ({ browser }) => {
-    const { context, page, networkPage } = await openNetworkTab(browser);
+test.describe("VPS Panel — Network Tab: Reverse DNS", () => {
+  test("'Reverse DNS' секция (vlang[83]) — видна если план поддерживает", async () => {
+    await openNetworkTab();
 
-    // vlang[83] = "Reverse DNS" — exact confirmed text (NOT "rDNS")
-    const sectionVisible = await networkPage.reverseDnsSection.isVisible().catch(() => false);
-    console.log(`[INFO] "Reverse DNS" section (vlang[83]) visible: ${sectionVisible}`);
+    const page = sharedContext.pages()[0];
+    const bodyText = await page.locator("body").innerText();
+    const hasReverseDns = bodyText.includes("Reverse DNS");
 
-    if (sectionVisible) {
-      console.log('[INFO] "Reverse DNS" section confirmed ✓');
-    } else {
-      // Check body text — may be rendered by client-side component
-      const bodyText = await page.locator("body").innerText();
-      const hasReverseDns = bodyText.includes("Reverse DNS");
-      console.log(`[INFO] "Reverse DNS" in body text: ${hasReverseDns}`);
+    test.skip(!hasReverseDns, "Reverse DNS не включён на этом плане — пропускаем");
 
-      if (hasReverseDns) {
-        console.log('[INFO] "Reverse DNS" text found in page body ✓');
-      } else {
-        console.log("[INFO] Reverse DNS not present — may not be enabled for this server plan");
-      }
-    }
-
-    await context.close();
+    await expect(networkPage.reverseDnsSection).toBeVisible({ timeout: 10_000 });
   });
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 4 — Network Traffic (vlang[194])
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — Network Traffic", () => {
-  test("'Network Traffic' секция (vlang[194]) — присутствует или не применима", async ({ browser }) => {
-    const { context, page, networkPage } = await openNetworkTab(browser);
+test.describe("VPS Panel — Network Tab: Network Traffic", () => {
+  test("'Network Traffic' секция (vlang[194]) — видна если план поддерживает", async () => {
+    await openNetworkTab();
 
-    // vlang[194] = "Network Traffic"
-    const sectionVisible = await networkPage.networkTrafficSection.isVisible().catch(() => false);
-    console.log(`[INFO] "Network Traffic" section (vlang[194]) visible: ${sectionVisible}`);
-
+    const page = sharedContext.pages()[0];
     const bodyText = await page.locator("body").innerText();
-    const hasNetworkTrafficText = bodyText.includes("Network Traffic");
-    console.log(`[INFO] "Network Traffic" in body text: ${hasNetworkTrafficText}`);
+    const hasTraffic = bodyText.includes("Network Traffic");
 
-    if (sectionVisible || hasNetworkTrafficText) {
-      console.log('[INFO] "Network Traffic" section confirmed ✓');
-    } else {
-      console.log("[INFO] Network Traffic not present — may not be enabled for this plan");
-    }
+    test.skip(!hasTraffic, "Network Traffic не включён на этом плане — пропускаем");
 
-    await context.close();
+    await expect(networkPage.networkTrafficSection).toBeVisible({ timeout: 10_000 });
   });
 });
