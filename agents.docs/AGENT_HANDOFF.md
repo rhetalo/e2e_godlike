@@ -1,148 +1,95 @@
 # AGENT HANDOFF — godlike.host Playwright E2E Suite
 
-> **Дата последнего обновления:** Май 2026 (ревью и рефакторинг)
+> **Последнее обновление:** Май 2026
 > **Стек:** TypeScript · Playwright · Chromium
 > **Репо:** https://github.com/rhetalo/e2e_godlike
 
 ---
 
-## 0. Как читать этот документ
+## 0. Порядок чтения
 
-Этот файл — **живой онбординг-документ** для любого агента или разработчика, который продолжает работу над проектом. Читай его целиком перед любыми изменениями. После внесения изменений — обязательно обновляй этот файл.
-
-**Порядок чтения:**
-1. `AGENT_HANDOFF.md` (этот файл) — контекст, состояние, правила работы
-2. `TEST_GUIDELINES.md` — как писать тесты (обязательно перед написанием любого теста)
-3. `CODE_REVIEW.md` — итоги полного ревью кодовой базы (май 2026)
+1. `AGENT_HANDOFF.md` (этот файл) — контекст, структура, правила
+2. `TEST_GUIDELINES.md` — как писать тесты (читать перед любым изменением теста)
+3. `CODE_REVIEW.md` — текущее состояние всех файлов
 
 ---
 
-## 1. Секреты и доступы
+## 1. Git — пуш изменений
 
-| Переменная | Что это | Где используется |
-|---|---|---|
-| `GITHUB_TOKEN` | GitHub PAT (Personal Access Token) | Клонирование репо, GitHub API |
-| `GITHUB_SSH_KEY` | Тот же PAT (исторический алиас) | Скрипты пуша через GitHub API |
-
-> ⚠️ Оба секрета хранятся в Replit Secrets и указывают на один токен. `GITHUB_SSH_KEY` — исторически сложившееся имя из предыдущей работы, `GITHUB_TOKEN` — добавлен позже для стандартизации. Используй любой из них.
-
----
-
-## 2. Пуш изменений в GitHub из Replit
-
-`git push` напрямую **заблокирован** в Replit. Используй GitHub API через `curl`.
-
-### Рабочий флоу:
+Репо клонируется стандартно. Пуш через `git push` работает с токеном:
 
 ```bash
-# 1. Работать с файлами в /home/runner/workspace/e2e_godlike/
-# (репо уже клонирован, НЕ клонируй повторно)
-
-# 2. После редактирования файла — получить текущий SHA
-FILE_PATH="agents.docs/AGENT_HANDOFF.md"  # путь относительно корня репо
-SHA=$(curl -s \
-  -H "Authorization: token $GITHUB_SSH_KEY" \
-  "https://api.github.com/repos/rhetalo/e2e_godlike/contents/${FILE_PATH}" \
-  | python3 -c "import sys,json; print(json.load(sys.stdin)['sha'])")
-
-# 3. Закодировать файл и запушить
-CONTENT=$(base64 -w 0 "/home/runner/workspace/e2e_godlike/${FILE_PATH}")
-curl -s -X PUT \
-  -H "Authorization: token $GITHUB_SSH_KEY" \
-  -H "Content-Type: application/json" \
-  "https://api.github.com/repos/rhetalo/e2e_godlike/contents/${FILE_PATH}" \
-  -d "{\"message\":\"docs: update AGENT_HANDOFF\",\"content\":\"${CONTENT}\",\"sha\":\"${SHA}\"}" \
-  | python3 -c "import sys,json; d=json.load(sys.stdin); print('OK:', d.get('commit',{}).get('sha','ERROR'))"
+git remote set-url origin https://<USERNAME>:<TOKEN>@github.com/rhetalo/e2e_godlike.git
+git add <файл>
+git commit -m "тип(scope): описание"
+git push origin main
 ```
-
-> Если файл **новый** (не существует в репо) — пропусти шаг получения SHA, просто не передавай поле `sha` в JSON.
 
 ---
 
-## 3. Структура проекта
+## 2. Структура проекта
 
 ```
 e2e_godlike/
 ├── tests/
 │   ├── vps/
 │   │   ├── panel/               ← VirtFusion VPS панель (vf-panel.godlike.host)
-│   │   │   ├── vps.panel.login.spec.ts           — логин в панель
-│   │   │   ├── vps.panel.power.actions.spec.ts   ✅ 3/3 passed
-│   │   │   ├── vps.panel.media.spec.ts           ✅ 3/3 passed
-│   │   │   ├── vps.panel.network.spec.ts         ✅ написан (май 2026)
-│   │   │   ├── vps.panel.options.spec.ts         ✅ написан (май 2026)
-│   │   │   ├── vps.panel.rebuild.spec.ts         ✅ переработан (май 2026)
+│   │   │   ├── vps.panel.login.spec.ts           ✅ ревью (май 2026)
+│   │   │   ├── vps.panel.power.actions.spec.ts   ✅ 3/3 passed — не трогать
+│   │   │   ├── vps.panel.media.spec.ts           ✅ 3/3 passed — не трогать
+│   │   │   ├── vps.panel.rebuild.spec.ts         ✅ фикс селектора (май 2026)
 │   │   │   ├── vps.panel.server.spec.ts          ✅ рефакторинг (май 2026)
 │   │   │   ├── vps.panel.storage.spec.ts         ✅ рефакторинг (май 2026)
-│   │   │   └── vps.build.spec.ts                — не ревьюировался
+│   │   │   ├── vps.panel.network.spec.ts         ✅ переписан (май 2026)
+│   │   │   ├── vps.panel.options.spec.ts         ✅ рефакторинг (май 2026)
+│   │   │   └── vps.build.spec.ts                ⚠️  не ревьюировался, T2.6 опасен
 │   │   └── funnel/
-│   │       └── vps.funnel.spec.ts                ✅ 23/23 passed
-│   ├── funnels/                 ← Воронки покупки (Minecraft, seed, mobile, PayPal)
-│   │   ├── funnel.cart.check.spec.ts
-│   │   ├── funnel.mobile.spec.ts
-│   │   ├── funnel.paypal.redirect.spec.ts
-│   │   ├── funnel.seed.spec.ts
-│   │   ├── funnel.spec.ts
-│   │   └── funnel.with.credit.check.spec.ts
-│   ├── modded/                  ← Modded/seed серверы, игровые промо, слайдеры
-│   └── general/                 ← Smoke, валидация, регистрация, ссылки
+│   │       └── vps.funnel.spec.ts                ✅ 23/23 passed — не трогать
+│   ├── funnels/                 ← Воронки покупки (не ревьюировались)
+│   ├── modded/                  ← Modded/seed/слайдеры (не ревьюировались)
+│   └── general/                 ← Smoke, ссылки, логин, регистрация
 │
-├── pages/                       ← Page Object Model
-│   ├── VpsPanelServerPage.ts    ✅ КЛЮЧЕВОЙ — Overview + power + activity table
-│   ├── VpsPanelMediaPage.ts     ✅ Boot Order, CD/DVD switch
-│   ├── VpsPanelRebuildPage.ts   ✅ обновлён (май 2026)
-│   ├── VpsPanelNetworkPage.ts   ✅ написан с нуля (май 2026)
-│   ├── VpsPanelOptionsPage.ts   ✅ написан с нуля (май 2026)
-│   ├── VpsPanelStoragePage.ts   ✅ написан (май 2026)
-│   ├── VpsConfigPage.ts         ✅ OS-selection, точная фильтрация
-│   ├── VpsPage.ts               — Landing /vps-hosting/
-│   ├── CartBillingPage.ts       — Billing cycle step /cart-vps/
-│   ├── VpsPanelLoginPage.ts
-│   ├── VpsPanelDashboardPage.ts
-│   ├── VpsPanelServersListPage.ts
-│   ├── VpsPanelServerDetailPage.ts
-│   ├── CartPage.ts
-│   ├── CheckoutPage.ts
-│   ├── ModdedHostingPage.ts
-│   ├── SeedPage.ts
-│   └── MobileCartPage.ts
+├── pages/
+│   ├── VpsPanelServerPage.ts    ✅ КЛЮЧЕВОЙ — эталон, не менять без причины
+│   ├── VpsPanelMediaPage.ts     ✅
+│   ├── VpsPanelRebuildPage.ts   ✅
+│   ├── VpsPanelNetworkPage.ts   ✅
+│   ├── VpsPanelOptionsPage.ts   ✅
+│   ├── VpsPanelStoragePage.ts   ✅
+│   ├── VpsPanelLoginPage.ts     ✅
+│   ├── VpsPanelDashboardPage.ts ✅
+│   ├── VpsPanelServerDetailPage.ts  ⚠️  старый PO, используется только в vps.build.spec.ts
+│   ├── VpsPanelServersListPage.ts   ⚠️  старый PO, используется только в vps.build.spec.ts
+│   └── (CartPage, CheckoutPage, ModdedHostingPage, SeedPage и др.)
 │
-├── components/                  ← Shared UI-компоненты (переиспользуемые блоки)
-│   ├── CookieBanner.ts          ← управление баннерами/модалами
-│   ├── AuthBlock.ts
-│   ├── BillingCycleSelector.ts
-│   ├── OrderSummary.ts
-│   └── ...
+├── components/                  ← Shared UI-компоненты
+│   └── CookieBanner.ts          ← управление баннерами (используй везде)
 │
 ├── utils/
 │   ├── auth.ts                  ← PANEL_URL, TEST_SERVER_UUID, loginAndSaveSession()
 │   ├── bannerHandlers.ts        ← setupBannerHandlers() — автозакрытие баннеров
 │   ├── helpers.ts               ← dismissPromoBannerIfAny, parsePrice и др.
-│   ├── selectors.ts             ← централизованные CSS-селекторы по зонам
-│   ├── credentials.ts           ← generateCredentials, saveCredentials (CSV)
-│   ├── iframe-helper.ts
-│   ├── slider-helpers.ts
-│   └── url-builder.ts           ⚠️ импортирует несуществующие модули — см. CODE_REVIEW.md
+│   ├── selectors.ts             ← централизованные CSS-селекторы
+│   ├── credentials.ts           ← generateCredentials, saveCredentials (CSV) — нужен для registration-flow.spec.ts
+│   └── iframe-helper.ts
 │
 ├── fixtures/
 │   ├── test-data.ts             ← BASE_URL, Credentials, Urls, QuickPickModpacks
-│   ├── users.ts
 │   └── games.json
 │
 ├── agents.docs/
 │   ├── AGENT_HANDOFF.md         ← этот файл
 │   ├── TEST_GUIDELINES.md       ← правила написания тестов
-│   └── CODE_REVIEW.md           ← итоги ревью (май 2026)
+│   └── CODE_REVIEW.md           ← состояние всех файлов
 │
-├── storageState.json            ⚠️ закоммичен — может быть устаревшим
-├── playwright.config.ts
+├── playwright.config.ts         ✅ почищен (май 2026)
 ├── package.json
 └── tsconfig.json
 ```
 
 ---
 
-## 4. Критические константы
+## 3. Критические константы
 
 ```typescript
 // utils/auth.ts
@@ -152,101 +99,77 @@ TEST_SERVER_NAME   = "srv-433986"
 STORAGE_STATE_PATH = "storageState.panel.json"  // для panel-тестов
 
 // fixtures/test-data.ts
-BASE_URL      = "https://godlike.host"
-EMAIL         = "test@testmail.com"
-PASSWORD      = "test@testmail.com"  // storefront
-
-// vps.funnel.spec.ts (локально)
-storageStatePath = "storageState.vps.json"  // отдельный от panel!
+BASE_URL  = "https://godlike.host"
+EMAIL     = "test@testmail.com"
+PASSWORD  = "test@testmail.com"
 ```
 
-> ⚠️ `storageState.panel.json` и `storageState.vps.json` — разные домены, разные сессии. Не перепутывай.
+> ⚠️ `storageState.panel.json` (панель) и `storageState.vps.json` (воронка) — разные домены, разные сессии. Не путай.
 
 ---
 
-## 5. Команды запуска
+## 4. Команды запуска
 
 ```bash
-# Установка (один раз)
-npm install
+npm install  # один раз
 
-# Запуск по группам
-npx playwright test tests/vps/panel/ --project=chromium --headed
-npx playwright test tests/vps/funnel/ --project=chromium
-npx playwright test tests/funnels/ --project=chromium
-npx playwright test tests/modded/ --project=chromium
-npx playwright test tests/general/ --project=chromium
+npx playwright test tests/vps/panel/     --project=chromium --headed
+npx playwright test tests/vps/funnel/    --project=chromium
+npx playwright test tests/funnels/       --project=chromium
+npx playwright test tests/modded/        --project=chromium
+npx playwright test tests/general/       --project=chromium
 
-# Конкретный файл
-npx playwright test tests/vps/panel/vps.panel.options.spec.ts --project=chromium --headed
+npx playwright test --grep "@smoke"      --project=chromium
+npx playwright test --grep "@critical"   --project=chromium
 
-# По тегу
-npx playwright test --grep "@smoke" --project=chromium
-npx playwright test --grep "@critical" --project=chromium
-npx playwright test --grep "@regression" --project=chromium
-
-# Отчёт
 npx playwright show-report
 ```
 
-> ⚠️ Скрипты в `package.json` содержат **устаревшие пути** (`tests/vps.panel.*.spec.ts` вместо `tests/vps/panel/`). При запуске через `npm run test:panel` — тесты не найдутся. Используй `npx playwright test` напрямую с правильными путями.
-
 ---
 
-## 6. Что сделано / что осталось
+## 5. Состояние работ
 
-### ✅ Сделано
+### ✅ Сделано (май 2026)
 
-| Файл | Статус |
+| Файл / задача | Что сделано |
 |---|---|
-| `vps.panel.power.actions.spec.ts` | ✅ 3/3 passed |
-| `vps.panel.media.spec.ts` | ✅ 3/3 passed |
-| `vps.funnel.spec.ts` | ✅ 23/23 passed |
-| `vps.panel.rebuild.spec.ts` | ✅ переработан, все баги исправлены |
-| `VpsPanelServerPage.ts` | ✅ полностью переписан |
-| `VpsPanelMediaPage.ts` | ✅ переписан |
-| `VpsPanelRebuildPage.ts` | ✅ обновлён (исправлены локаторы) |
-| `VpsPanelNetworkPage.ts` | ✅ написан с нуля |
-| `VpsPanelOptionsPage.ts` | ✅ написан с нуля |
-| `VpsPanelStoragePage.ts` | ✅ написан |
-| `VpsConfigPage.ts` | ✅ переписан (OS-selection, точная фильтрация) |
-| `vps.panel.network.spec.ts` | ✅ написан (4 suite) |
-| `vps.panel.options.spec.ts` | ✅ написан (7 suite) |
-| `vps.panel.server.spec.ts` | ✅ рефакторинг: shared context, test.skip, test.step |
-| `vps.panel.storage.spec.ts` | ✅ рефакторинг: жёсткий expect для Drive:/Primary |
-| `package.json` скрипты | ✅ исправлены пути (tests/vps/panel/, tests/vps/funnel/ и др.) |
-| `url-builder.ts` | ✅ удалён (был сломан, нигде не использовался) |
-| `vps.panel.power.spec.ts` | ✅ удалён (дублировал power.actions.spec.ts) |
-| `.gitignore` | ✅ добавлен `storageState.json` |
+| `vps.panel.rebuild.spec.ts` | Фикс: `button[data-bs-target="#reinstallServerModal"]` вместо `has-text("Rebuild")` — 23 теста скипались из-за скрытых Bootstrap модалов |
+| `vps.panel.server.spec.ts` | Удалён Suite 3 (дубль power.actions), Tab Navigation → `activeTab.toContainText()`, очищен Suite 5 |
+| `vps.panel.network.spec.ts` | Полностью переписан: убраны все тесты без `expect()`, добавлены жёсткие ассерты |
+| `vps.panel.options.spec.ts` | Убраны дубли VNC-тестов, `return` → `test.skip()` в Protect Server |
+| `vps.panel.storage.spec.ts` | `hasStorageContent()` (body regex) → `toBeVisible()` на конкретные локаторы |
+| `vps.panel.login.spec.ts` | Убраны 3 тривиальных теста из Suite 1 (browser behavior) |
+| `fixtures/users.ts` | Удалён — нигде не импортировался |
+| `utils/slider-helpers.ts` | Удалён — нигде не импортировался (все слайдер-тесты имеют inline-хелперы) |
+| `playwright.config.ts` | Почищены ~130 строк tutorial-комментариев |
+| `tests/general/valid.links.spec.ts` | Почищены избыточные комментарии и section dividers, таймаут 1ч → 10мин |
 
-### ⚠️ Требует работы (приоритет)
+### ⚠️ Отложено / требует решения
 
 | Задача | Приоритет | Детали |
 |---|---|---|
-| Добавить теги `@smoke/@critical/@regression` | 🟡 Med | Большинство тестов без тегов |
-| Ревью `funnels/` | 🟡 Med | Не ревьюились после реструктуризации |
-| Ревью `modded/` | 🟡 Med | Не ревьюились |
-| Ревью `vps.build.spec.ts` | 🟡 Med | Не ревьюировался |
+| `vps.build.spec.ts` — T2.6 | 🔴 High | Реально запускает rebuild сервера. Обсудить с владельцем |
+| `VpsPanelServerDetailPage.ts` + `VpsPanelServersListPage.ts` | 🟡 Med | Старые PO, висят на vps.build.spec.ts. Удалить вместе с ним или мигрировать |
+| Ревью `funnels/`, `modded/`, `general/` | 🟡 Med | Не ревьюировались на антипаттерны |
+| Теги `@smoke/@critical/@regression` | 🟡 Med | Большинство тестов без тегов |
 
 ---
 
-## 7. VirtFusion Gotchas — обязательно читать
-
-Подробнее в `TEST_GUIDELINES.md` §7. Краткая выжимка:
+## 6. VirtFusion Gotchas
 
 | Проблема | Правильное решение |
 |---|---|
 | Статус "RUNNING"/"running" вместо "Running" | Только через `getStatusText()` из `VpsPanelServerPage` |
-| Bootstrap модалы всегда в DOM | Scope на `.modal.show` для confirm-кнопок |
+| Bootstrap модалы всегда в DOM | Scope на `.modal.show`; для кнопок используй `data-bs-target` |
 | Boot button всегда в DOM | Проверять `isEnabled()`, не `isVisible()` |
-| CSS-скрытые radio/checkbox | `dispatchEvent('click')`, не `.check()` |
+| CSS-скрытые radio/checkbox | `radio.check({ force: true })` |
 | OS card selection (Rebuild) | Класс `.selected-card`, не `card-inverted-big-border-os` |
-| Activity table debug-строки | `tr:not(:has(td[id^='debug']))`, id на `<td>` а не `<tr>` |
-| `button:has-text("Shutdown")` — попадает в модал | Добавлять `:not([data-bs-dismiss="modal"])` |
+| Activity table debug-строки | `tr:not(:has(td[id^='debug']))` |
+| `button:has-text("Shutdown")` попадает в модал | Scope через `activeModal` или `:not([data-bs-dismiss="modal"])` |
 
 ---
 
-## 8. Паттерн panel-тестов (шаблон)
+## 7. Шаблон panel-теста
 
 ```typescript
 import { test, expect, type Browser, type BrowserContext } from "@playwright/test";
@@ -254,7 +177,7 @@ import { VpsPanelServerPage } from "../../../pages/VpsPanelServerPage";
 import { loginAndSaveSession, STORAGE_STATE_PATH, TEST_SERVER_UUID } from "../../../utils/auth";
 
 test.use({ viewport: { width: 1440, height: 900 } });
-test.describe.configure({ mode: "serial" }); // обязателен для stateful тестов
+test.describe.configure({ mode: "serial" });
 
 let sharedContext: BrowserContext;
 let serverPage: VpsPanelServerPage;
@@ -268,67 +191,22 @@ test.beforeAll(async ({ browser }: { browser: Browser }) => {
 
 test.afterAll(async () => { await sharedContext.close(); });
 
-test.beforeEach(async () => {
+test("@critical описание теста", async () => {
   await serverPage.goto();
-  await serverPage.ensureRunning(60_000); // или ensureStopped
-});
-
-test("@critical Пользователь делает X", async () => {
-  await test.step("Шаг 1", async () => { ... });
-  await test.step("Проверка результата", async () => { ... });
+  await test.step("шаг", async () => { /* ... */ });
 });
 ```
 
-> ❌ **Антипаттерн** — `if (!condition) return` → тест зелёный, хотя пропущен
-> ✅ **Правильно** — `test.skip(!condition, "причина")` → тест оранжевый (skipped)
+> ❌ `if (!condition) return` — тест зелёный, хотя пропущен
+> ✅ `test.skip(!condition, "причина")` — тест оранжевый (skipped)
 
 ---
 
-## 9. Правила для нового агента
+## 8. Правила для агента
 
-1. **Читай `TEST_GUIDELINES.md` и `CODE_REVIEW.md`** перед написанием или изменением любого теста
-2. **Пуш только через GitHub API** (см. §2) — `git push` заблокирован
-3. **Не нажимать** "Continue" / "Place Order" на платёжных страницах — реальный платёж
-4. **Не делать Rebuild** без явного разрешения — стирает ОС сервера
-5. **Serial mode** для всех VirtFusion panel тестов
-6. **`--headed`** при отладке — помогает видеть что происходит
-7. **После каждой правки** — обновляй этот файл и `CODE_REVIEW.md`
-8. **Никогда не доверяй старым селекторам без проверки** — VirtFusion меняет классы
-9. **`storageState.panel.json` ≠ `storageState.vps.json`** — разные домены
-10. **Файл `url-builder.ts` сломан** — не используй его, пока не исправлен
-
----
-
-## 10. Rebuild Page — критические находки
-
-### Правильные классы выбора OS-карточки
-
-```typescript
-// ❌ НЕПРАВИЛЬНО — этот класс никогда не добавляется
-div.card.os-select.card-inverted-big-border-os
-
-// ✅ ПРАВИЛЬНО — при выборе добавляются:
-div.card.os-select.selected-card   // + border-success shadow-sm
-```
-
-### Полный список групп ОС (6 групп, 18 карточек)
-
-| Группа | heading | Шаблоны |
-|---|---|---|
-| AlmaLinux | heading-0 | AlmaLinux 8 Minimal, AlmaLinux 9 Latest |
-| CentOS | heading-1 | CentOS 7 Minimal, CentOS Stream 9 Minimal |
-| Debian | heading-2 | Debian 11 Minimal, Debian 12 Minimal |
-| Fedora | heading-3 | Fedora 41 Minimal, Fedora 42 Minimal |
-| Games | heading-4 | Valheim, ARK, Palworld, Satisfactory, Minecraft (Ubuntu 24/22) |
-| Ubuntu | heading-5 | Ubuntu 20.04, 22.04, 24.04, Docker, WordPress |
-
----
-
-## 11. VPS Funnel — структура (все 23 теста passing)
-
-| Suite | Тестов | Описание |
-|---|---|---|
-| SUITE 1 — VPS Landing | 3 | Кнопки Deploy Now, href-атрибуты, Vue SPA |
-| SUITE 2 — Billing Cycle | 6 | 4 периода, цены, discount badges |
-| SUITE 3 — Configure Your Server | 13 | Локации + OS/Pre-installation selection |
-| SUITE 4 — Full Happy Path | 1 | Landing → Billing → Configure → WHMCS |
+1. Читай `TEST_GUIDELINES.md` перед написанием или изменением теста
+2. Не нажимать "Continue" / "Place Order" на платёжных страницах — реальный платёж
+3. Не делать Rebuild без явного разрешения владельца — стирает ОС сервера
+4. Serial mode для всех VirtFusion panel тестов
+5. После каждой правки обновлять `AGENT_HANDOFF.md` и `CODE_REVIEW.md`
+6. `storageState.panel.json` ≠ `storageState.vps.json` — разные домены
