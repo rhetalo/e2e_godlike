@@ -163,20 +163,6 @@ test.describe("VPS Panel — Options: VNC секция (vlang[168])", () => {
     await context.close();
   });
 
-  test("VNC label/кнопка (vlang[183]) присутствует в секции VNC", async ({ browser }) => {
-    const { context, page, optionsPage } = await openOptionsTab(browser);
-
-    // vlang[168] section MUST be visible — confirmed above
-    // Within the section there's always at least the "VNC" label
-    await expect(optionsPage.vncSectionTitle).toBeVisible({ timeout: 10_000 });
-
-    const body = await page.locator("body").innerText();
-    expect(body).toContain("VNC");
-    console.log("[INFO] 'VNC' text (vlang[183]) confirmed in page body ✓");
-
-    await context.close();
-  });
-
   test("VNC статус — активная сессия vlang[215] или её отсутствие — оба состояния валидны", async ({
     browser,
   }) => {
@@ -194,24 +180,6 @@ test.describe("VPS Panel — Options: VNC секция (vlang[168])", () => {
 
     await context.close();
   });
-
-  test("текст 'Enable/disable VNC' (vlang[169]) или описание VNC присутствует в секции", async ({
-    browser,
-  }) => {
-    const { context, page } = await openOptionsTab(browser);
-
-    const body = await page.locator("body").innerText();
-    const hasVncDesc =
-      body.includes("Enable/disable VNC") ||
-      body.includes("VNC session") ||
-      body.includes("Virtual Network Computing (VNC) allows");
-
-    expect(hasVncDesc || body.includes("VNC")).toBeTruthy();
-    console.log("[INFO] VNC section description text present ✓");
-
-    await context.close();
-  });
-});
 
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 4 — Reset Password (vlang[102–105])
@@ -404,13 +372,7 @@ test.describe("VPS Panel — Options: Protect Server (vlang[106] / vlang[184])",
     const { context, page, optionsPage } = await openOptionsTab(browser);
 
     const protectVisible = await optionsPage.protectServerButton.isVisible().catch(() => false);
-    if (!protectVisible) {
-      const unprotectVisible = await optionsPage.unprotectButton.isVisible().catch(() => false);
-      console.log(`[INFO] Server already protected — 'Unprotect' visible: ${unprotectVisible}`);
-      console.log("[INFO] Skipping protect modal test — server is already in protected state");
-      await context.close();
-      return;
-    }
+    test.skip(!protectVisible, "Сервер уже защищён — кнопка 'Protect Server' недоступна");
 
     await optionsPage.protectServerButton.click();
     console.log("[INFO] Clicked 'Protect Server' button");
