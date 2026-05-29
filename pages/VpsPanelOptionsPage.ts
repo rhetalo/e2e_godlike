@@ -82,11 +82,9 @@ export class VpsPanelOptionsPage {
 
   // ── Boot Type (vlang[354–356]) ─────────────────────────────────────────────
 
-  /** "Boot Type" section heading (vlang[354]) */
+  /** "Boot Type" section heading (vlang[354]) — scoped to Settings sub-tab pane */
   get bootTypeLabel(): Locator {
-    return this.page
-      .locator('label:has-text("Boot Type"), span:has-text("Boot Type"), h5:has-text("Boot Type"), div:has-text("Boot Type")')
-      .first();
+    return this.page.locator('#pills-options-settings h4:has-text("Boot Type")');
   }
 
   /** "BIOS (Legacy Mode)" option (vlang[355]) */
@@ -130,10 +128,11 @@ export class VpsPanelOptionsPage {
 
   /**
    * "Reset Password" button (vlang[102]).
-   * Always visible on Options tab — safe to test (cancel after click).
+   * Located inside the Password sub-tab pane (#pills-options-password).
+   * May be disabled when server is Stopped — check isEnabled() before clicking.
    */
   get resetPasswordButton(): Locator {
-    return this.page.locator('button:has-text("Reset Password")').first();
+    return this.page.locator('#pills-options-password button:has-text("Reset Password")');
   }
 
   /**
@@ -178,20 +177,21 @@ export class VpsPanelOptionsPage {
   // ── Protect Server (vlang[106–109] / vlang[184]) ──────────────────────────
 
   /**
-   * "Protect Server" button (vlang[106]).
-   * Shown when server is NOT yet protected.
+   * "Protect Server" trigger (vlang[106]).
+   * Rendered as a div.bubble in the server sidebar (always in DOM).
+   * Uses data-bs-target="#protectServerModal" — unique identifier from HTML.
    */
   get protectServerButton(): Locator {
-    return this.page.locator('button:has-text("Protect Server")').first();
+    return this.page.locator('[data-bs-target="#protectServerModal"]').first();
   }
 
   /**
-   * "Unprotect" button (vlang[184]).
-   * Shown when server IS already protected.
-   * Exactly one of protectServerButton / unprotectButton is visible at any time.
+   * "Disable Protection" / Unprotect trigger (vlang[184]).
+   * Uses data-bs-target="#unProtectModal" — shown when server IS protected.
+   * Exactly one of protectServerButton / unprotectButton is in DOM at a time.
    */
   get unprotectButton(): Locator {
-    return this.page.locator('button:has-text("Unprotect")').first();
+    return this.page.locator('[data-bs-target="#unProtectModal"]').first();
   }
 
   /**
@@ -217,6 +217,17 @@ export class VpsPanelOptionsPage {
   }
 
   // ── Page Readiness ─────────────────────────────────────────────────────────
+
+  /**
+   * Click a sub-tab within the Options pane.
+   * Sub-tabs: VNC (default), Rescue, Password, Settings.
+   * IDs confirmed from live HTML: #pills-options-{name}-tab
+   */
+  async clickSubTab(name: "VNC" | "Rescue" | "Password" | "Settings"): Promise<void> {
+    const tabId = `#pills-options-${name.toLowerCase()}-tab`;
+    await this.page.locator(tabId).click();
+    await this.page.waitForLoadState("networkidle").catch(() => null);
+  }
 
   /** Wait for Options tab content to fully load (networkidle + settlement) */
   async waitForOptionsTab(): Promise<void> {
