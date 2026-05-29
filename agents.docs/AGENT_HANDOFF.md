@@ -35,7 +35,7 @@ e2e_godlike/
 │   ├── vps/
 │   │   ├── panel/               ← VirtFusion VPS панель (vf-panel.godlike.host)
 │   │   │   ├── vps.panel.login.spec.ts           ✅ ревью (май 2026)
-│   │   │   ├── vps.panel.power.actions.spec.ts   ✅ 3/3 passed — не трогать
+│   │   │   ├── vps.panel.power.actions.spec.ts   ✅ фикс goto() (май 2026) — должен проходить
 │   │   │   ├── vps.panel.media.spec.ts           ✅ 3/3 passed — не трогать
 │   │   │   ├── vps.panel.rebuild.spec.ts         ✅ фикс селектора (май 2026)
 │   │   │   ├── vps.panel.server.spec.ts          ✅ рефакторинг (май 2026)
@@ -166,6 +166,7 @@ npx playwright show-report
 | OS card selection (Rebuild) | Класс `.selected-card`, не `card-inverted-big-border-os` |
 | Activity table debug-строки | `tr:not(:has(td[id^='debug']))` |
 | `button:has-text("Shutdown")` попадает в модал | Scope через `activeModal` или `:not([data-bs-dismiss="modal"])` |
+| **⚠️ CRITICAL: Rebuild view — URL не меняется** | VirtFusion рендерит OS-selection прямо на `/server/{uuid}` — URL остаётся прежним. Определяется ТОЛЬКО по кнопке `button.btn-primary:has-text("Cancel Rebuild")`. `goto()` в `VpsPanelServerPage` автоматически кликает её. Если после rebuild-теста power-тест не видит `bootButton` или статус `""` — причина в этом. |
 
 ---
 
