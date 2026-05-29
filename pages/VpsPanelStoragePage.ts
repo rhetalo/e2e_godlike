@@ -2,90 +2,49 @@ import { type Page, type Locator } from "@playwright/test";
 
 /**
  * VpsPanelStoragePage — Storage tab on /server/{UUID}
- * VirtFusion v4.x disk / storage management.
+ * VirtFusion v4.x disk / storage information.
  *
- * ALL strings confirmed from :vlang on live server page (May 2026):
- *   vlang[199] = "Storage:"
- *   vlang[206] = "Drive:"           ← exact disk label
- *   vlang[207] = "Primary"          ← primary disk designation
- *   vlang[308] = "HDD"              ← disk type
- *   vlang[186] = "Memory"
- *   vlang[187] = "of"
- *   vlang[188] = "Used"
- *   vlang[189] = "Free"
- *   vlang[200] = "Traffic:"
- *   vlang[277] = "Disk enabled successfully. A restart is required to complete the process."
- *   vlang[278] = "Disk disabled successfully. A restart is required to complete the process."
+ * ── CONFIRMED HTML (from live DevTools, May 2026) ───────────────────────────
+ *
+ * STORAGE TAB PANE:
+ *   <div id="pills-storage" role="tabpanel">
+ *
+ * DISK CARD (inside the tab pane):
+ *   <h4>Drive: A</h4>                          ← drive identifier (letter varies)
+ *   <span class="badge badge-warning">Primary</span>
+ *   <span class="mt-3" style="font-size:1rem;">30 GB</span>
+ *
+ * NOTES:
+ *   • The tab is informational only — no actionable controls.
+ *   • Contains the standard Activity table (shared across all tabs).
+ *   • Drive letter (A, B, …) varies by server; selectors use :has-text.
+ *   • All locators are scoped to #pills-storage to avoid matching
+ *     nav-link text or other tabs' content.
  */
 export class VpsPanelStoragePage {
   constructor(private page: Page) {}
 
-  // ── Disk Labels (confirmed vlang) ─────────────────────────────────────────
-
-  /** "Drive:" label (vlang 206) — confirmed exact text */
-  get driveLabel(): Locator {
-    return this.page.locator('text="Drive:"').first();
+  /** Storage tab pane — used to scope child locators */
+  get tabPane(): Locator {
+    return this.page.locator("#pills-storage");
   }
 
-  /** "Primary" disk designation (vlang 207) */
-  get primaryDiskLabel(): Locator {
-    return this.page.locator('text="Primary"').first();
+  /** Drive heading inside the disk card: <h4>Drive: A</h4> */
+  get driveHeading(): Locator {
+    return this.tabPane.locator("h4:has-text('Drive:')").first();
   }
 
-  /** "HDD" disk type indicator (vlang 308) */
-  get hddLabel(): Locator {
-    return this.page.locator('text="HDD"').first();
+  /** Primary badge: <span class="badge badge-warning">Primary</span> */
+  get primaryBadge(): Locator {
+    return this.tabPane.locator(".badge:has-text('Primary')").first();
   }
 
-  /** "Storage:" label (vlang 199) */
-  get storageLabel(): Locator {
-    return this.page.locator('text="Storage:"').first();
+  /** Disk size label: <span>30 GB</span> */
+  get diskSizeLabel(): Locator {
+    return this.tabPane.locator("span:has-text('GB')").first();
   }
-
-  /** "Used" indicator (vlang 188) */
-  get usedLabel(): Locator {
-    return this.page.locator('text="Used"').first();
-  }
-
-  /** "Free" indicator (vlang 189) */
-  get freeLabel(): Locator {
-    return this.page.locator('text="Free"').first();
-  }
-
-  // ── Disk info elements ────────────────────────────────────────────────────
-
-  /** Any GB size display (numeric + "GB" text) */
-  get diskSizeGb(): Locator {
-    return this.page.locator(':has-text("GB")').first();
-  }
-
-  /** Usage bar / progress bar if present */
-  get usageBar(): Locator {
-    return this.page.locator('[role="progressbar"], [class*="progress"]').first();
-  }
-
-  // ── Tab readiness ──────────────────────────────────────────────────────────
 
   async waitForStorageTab(): Promise<void> {
     await this.page.waitForLoadState("networkidle").catch(() => null);
-  }
-
-  /**
-   * Get disk size text from the page.
-   * Returns first "NNN GB" pattern found, or empty string.
-   */
-  async getDiskInfoText(): Promise<string> {
-    const body = await this.page.locator("body").innerText().catch(() => "");
-    const gbMatch = body.match(/\d+\s*GB/i);
-    return gbMatch ? gbMatch[0] : "";
-  }
-
-  /**
-   * Checks if Storage tab has loaded real content.
-   * Looks for confirmed vlang strings.
-   */
-  async hasStorageContent(): Promise<boolean> {
-    const body = await this.page.locator("body").innerText().catch(() => "");
-    return /Drive:|Primary|HDD|Storage:|GB|disk/i.test(body);
   }
 }
