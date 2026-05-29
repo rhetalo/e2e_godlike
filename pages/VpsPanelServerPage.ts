@@ -258,11 +258,9 @@ export class VpsPanelServerPage {
   }
 
   get activeTab(): Locator {
-    return this.page
-      .locator(
-        '[class*="active"][class*="tab"], [class*="nav-link"][class*="active"], [aria-selected="true"]',
-      )
-      .first();
+    // [role="tab"] targets only pill-tab buttons, NOT the top navbar links
+    // (navbar <a class="main nav-link active"> has no role="tab").
+    return this.page.locator('[role="tab"][aria-selected="true"]').first();
   }
 
   async clickTab(

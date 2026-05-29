@@ -1,21 +1,17 @@
 /**
  * vps.panel.network.spec.ts
  * ──────────────────────────
- * Тесты вкладки Network на странице управления сервером VirtFusion.
- * URL: https://vf-panel.godlike.host/server/{UUID}
+ * Тесты вкладки Network (/server/{UUID} → таб "Network").
  *
- * Покрытие:
- *   1. Вкладка Network открывается и становится активной
- *   2. IP-адрес(а) сервера видны
- *   3. "Primary IPv4:" / "Primary Network:" labels видны
- *   4. "Reverse DNS" секция — жёсткий expect если присутствует, test.skip если план не поддерживает
- *   5. "Network Traffic" секция — аналогично
+ * Покрытие (May 2026, подтверждено на живом сервере):
+ *   1. Вкладка Network видна и становится активной после клика
+ *   2. Карточка Primary Network — h2 заголовок и IPv4 адрес присутствуют
+ *   3. Statistics button — видна и клик рендерит Plotly-чарт
+ *   4. Reverse DNS — кнопка открывает модал, Cancel закрывает
+ *   5. DNS resolver — Cloudflare отображён в multiselect
  *
- * vlang-строки подтверждены на живом сервере (май 2026):
- *   vlang[83]  = "Reverse DNS"
- *   vlang[194] = "Network Traffic"
- *   vlang[201] = "Primary Network:"
- *   vlang[203] = "Primary IPv4:"
+ * Селекторы основаны на HTML-снимках от 2026-05-25.
+ * Все тесты работают в serial mode на одном шаренном контексте.
  *
  * Запуск:
  *   npx playwright test tests/vps/panel/vps.panel.network.spec.ts --project=chromium --headed
@@ -46,85 +42,100 @@ test.beforeAll(async ({ browser }: { browser: Browser }) => {
   const page = await sharedContext.newPage();
   serverPage = new VpsPanelServerPage(page, TEST_SERVER_UUID);
   networkPage = new VpsPanelNetworkPage(page);
+  // Navigate once; remaining tests run on the open Network tab
+  await serverPage.goto();
+  await serverPage.clickTab("Network");
+  await networkPage.waitForNetworkTab();
 });
 
 test.afterAll(async () => {
   await sharedContext.close();
 });
 
-async function openNetworkTab(): Promise<void> {
-  await serverPage.goto();
-  await expect(serverPage.tab("Network")).toBeVisible({ timeout: 15_000 });
-  await serverPage.clickTab("Network");
-  await networkPage.waitForNetworkTab();
-}
-
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 1 — Навигация
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS Panel — Network Tab: навигация", () => {
   test("вкладка Network присутствует на странице сервера", async () => {
-    await serverPage.goto();
-    await expect(serverPage.tab("Network")).toBeVisible({ timeout: 15_000 });
+    await expect(serverPage.tab("Network")).toBeVisible({ timeout: 10_000 });
   });
 
   test("клик по Network — вкладка становится активной", async () => {
-    await openNetworkTab();
+    // activeTab uses [role="tab"][aria-selected="true"] which targets pill-tab
+    // buttons only — skips the top navbar <a class="main nav-link active">
     await expect(serverPage.activeTab).toContainText("Network", { timeout: 5_000 });
   });
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// SUITE 2 — IP-адреса
+// SUITE 2 — Карточка Primary Network
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — Network Tab: IP-адреса", () => {
-  test("'Primary IPv4:' label (vlang[203]) видна на вкладке Network", async () => {
-    await openNetworkTab();
-    await expect(networkPage.primaryIpv4Label).toBeVisible({ timeout: 10_000 });
-  });
-
-  test("'Primary Network:' label (vlang[201]) видна на вкладке Network", async () => {
-    await openNetworkTab();
-    await expect(networkPage.primaryNetworkLabel).toBeVisible({ timeout: 10_000 });
+test.describe("VPS Panel — Network Tab: Primary Network", () => {
+  test("заголовок 'Primary Network' (h2) виден в таб-панели", async () => {
+    await expect(networkPage.primaryNetworkHeading).toBeVisible({ timeout: 10_000 });
   });
 
   test("IPv4-адрес сервера присутствует на странице", async () => {
-    await openNetworkTab();
     const ips = await networkPage.getVisibleIpAddresses();
     expect(ips.length, "Ни одного IPv4 адреса не найдено на Network tab").toBeGreaterThanOrEqual(1);
   });
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// SUITE 3 — Reverse DNS (vlang[83])
+// SUITE 3 — Statistics (трафик-чарты)
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — Network Tab: Reverse DNS", () => {
-  test("'Reverse DNS' секция (vlang[83]) — видна если план поддерживает", async () => {
-    await openNetworkTab();
+test.describe("VPS Panel — Network Tab: Statistics", () => {
+  test("кнопка Statistics видна в карточке Primary Network", async () => {
+    await expect(networkPage.statisticsButton).toBeVisible({ timeout: 10_000 });
+  });
 
-    const page = sharedContext.pages()[0];
-    const bodyText = await page.locator("body").innerText();
-    const hasReverseDns = bodyText.includes("Reverse DNS");
+  test("клик по Statistics — Plotly-чарт #traffic-chart-monthly рендерится", async () => {
+    await networkPage.statisticsButton.click();
 
-    test.skip(!hasReverseDns, "Reverse DNS не включён на этом плане — пропускаем");
-
-    await expect(networkPage.reverseDnsSection).toBeVisible({ timeout: 10_000 });
+    await test.step("chart container получает class js-plotly-plot", async () => {
+      // Plotly adds class="js-plotly-plot" after rendering the chart
+      await expect(networkPage.trafficChartMonthly).toHaveClass(/js-plotly-plot/, {
+        timeout: 15_000,
+      });
+    });
   });
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// SUITE 4 — Network Traffic (vlang[194])
+// SUITE 4 — Reverse DNS модал
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — Network Tab: Network Traffic", () => {
-  test("'Network Traffic' секция (vlang[194]) — видна если план поддерживает", async () => {
-    await openNetworkTab();
+test.describe("VPS Panel — Network Tab: Reverse DNS", () => {
+  test("кнопка Reverse DNS видна в таб-панели", async () => {
+    await expect(networkPage.reverseDnsButton).toBeVisible({ timeout: 10_000 });
+  });
 
-    const page = sharedContext.pages()[0];
-    const bodyText = await page.locator("body").innerText();
-    const hasTraffic = bodyText.includes("Network Traffic");
+  test("клик Reverse DNS → модал открывается → Cancel закрывает", async () => {
+    await networkPage.reverseDnsButton.click();
 
-    test.skip(!hasTraffic, "Network Traffic не включён на этом плане — пропускаем");
+    await test.step("модал #rdnsModal виден", async () => {
+      await expect(networkPage.rdnsModal).toBeVisible({ timeout: 10_000 });
+    });
 
-    await expect(networkPage.networkTrafficSection).toBeVisible({ timeout: 10_000 });
+    await test.step("заголовок содержит 'Reverse DNS'", async () => {
+      await expect(networkPage.rdnsModalTitle).toContainText("Reverse DNS", { timeout: 5_000 });
+    });
+
+    await test.step("поле ввода rdns присутствует", async () => {
+      await expect(networkPage.rdnsModalInput).toBeVisible({ timeout: 5_000 });
+    });
+
+    await test.step("Cancel закрывает модал", async () => {
+      await networkPage.rdnsModalCancel.click();
+      await expect(networkPage.rdnsModal).not.toBeVisible({ timeout: 5_000 });
+    });
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SUITE 5 — DNS Resolver (multiselect)
+// ══════════════════════════════════════════════════════════════════════════════
+test.describe("VPS Panel — Network Tab: DNS Resolvers", () => {
+  test("Cloudflare DNS resolver отображён в multiselect", async () => {
+    await expect(networkPage.primaryDnsResolverLabel).toBeVisible({ timeout: 10_000 });
   });
 });
