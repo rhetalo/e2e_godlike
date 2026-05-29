@@ -105,23 +105,50 @@ export class VpsPanelOptionsPage {
    * Always rendered on Options tab regardless of VNC enabled/disabled.
    */
   get vncSectionTitle(): Locator {
-    return this.page.locator(':has-text("Virtual Network Computing (VNC)")').first();
+    return this.page.locator('#pills-options-vnc :has-text("Virtual Network Computing (VNC)")').first();
   }
 
   /**
-   * VNC button/tab — "VNC" (vlang[183]).
-   * Compact label used in radio-tile / toggle area.
+   * VNC toggle button — текст меняется в зависимости от состояния:
+   * "Enable VNC Access" (VNC выключен) | "Disable VNC Access" (VNC включён).
+   * Confirmed HTML: <button class="btn btn-primary ...">Enable/Disable VNC Access</button>
    */
-  get vncButton(): Locator {
-    return this.page.locator('button:has-text("VNC"), label:has-text("VNC"), span:has-text("VNC")').first();
+  get vncToggleButton(): Locator {
+    return this.page.locator(
+      '#pills-options-vnc button:has-text("Enable VNC Access"), #pills-options-vnc button:has-text("Disable VNC Access")'
+    ).first();
+  }
+
+  /**
+   * "Browser VNC" button — появляется только когда VNC активен.
+   */
+  get browserVncButton(): Locator {
+    return this.page.locator('#pills-options-vnc button:has-text("Browser VNC")');
   }
 
   /**
    * "A VNC session is currently Active" status message (vlang[215]).
-   * Only shown when a VNC session is running — optional check.
+   * Scoped к VNC пейну — только когда сессия активна.
    */
   get vncActiveMessage(): Locator {
-    return this.page.locator(':has-text("A VNC session is currently Active")').first();
+    return this.page.locator('#pills-options-vnc :has-text("A VNC session is currently Active")').first();
+  }
+
+  /**
+   * Activity table (Task / Requested / Duration / Progress).
+   * Shared между всеми секциями — показывает последние задачи сервера.
+   * Confirmed HTML: table.table-normal > thead > th:has-text("Task")
+   */
+  get activityTable(): Locator {
+    return this.page.locator('table.table-normal');
+  }
+
+  /**
+   * Последняя строка activity table (первая tr в tbody).
+   * Используй для проверки что VNC-таск появился после тогла.
+   */
+  get latestActivityRow(): Locator {
+    return this.page.locator('table.table-normal tbody tr').first();
   }
 
   // ── Reset Password (vlang[102–105]) ───────────────────────────────────────
@@ -178,20 +205,33 @@ export class VpsPanelOptionsPage {
 
   /**
    * "Protect Server" trigger (vlang[106]).
-   * Rendered as a div.bubble in the server sidebar (always in DOM).
-   * Uses data-bs-target="#protectServerModal" — unique identifier from HTML.
+   * div.bubble[data-bs-target="#protectServerModal"] в сайдбаре.
+   * Рендерится только когда сервер НЕ защищён (Vue v-if, не v-show).
    */
   get protectServerButton(): Locator {
-    return this.page.locator('[data-bs-target="#protectServerModal"]').first();
+    return this.page.locator('[data-bs-target="#protectServerModal"]');
   }
 
   /**
    * "Disable Protection" / Unprotect trigger (vlang[184]).
-   * Uses data-bs-target="#unProtectModal" — shown when server IS protected.
+   * div.bubble[data-bs-target="#unProtectModal"] в сайдбаре.
+   * Рендерится только когда сервер защищён (Vue v-if, не v-show).
    * Exactly one of protectServerButton / unprotectButton is in DOM at a time.
    */
   get unprotectButton(): Locator {
-    return this.page.locator('[data-bs-target="#unProtectModal"]').first();
+    return this.page.locator('[data-bs-target="#unProtectModal"]');
+  }
+
+  /**
+   * Текущее состояние защиты сервера.
+   * Возвращает "protect" | "unprotect" | "unknown"
+   */
+  async protectionState(): Promise<"protect" | "unprotect" | "unknown"> {
+    const hasProtect = await this.protectServerButton.count() > 0;
+    const hasUnprotect = await this.unprotectButton.count() > 0;
+    if (hasProtect && !hasUnprotect) return "protect";
+    if (hasUnprotect && !hasProtect) return "unprotect";
+    return "unknown";
   }
 
   /**

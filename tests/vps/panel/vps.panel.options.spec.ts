@@ -99,15 +99,38 @@ test.describe("VPS Panel — Options: VNC (vlang[168])", () => {
     await expect(optionsPage.vncSectionTitle).toBeVisible({ timeout: 10_000 });
   });
 
-  test("кнопка 'Enable VNC Access' или статус активной сессии присутствует", async () => {
-    const page = serverPage.page;
-    const enableBtn = page.locator('#pills-options-vnc button:has-text("Enable VNC Access")');
-    const activeMsg = optionsPage.vncActiveMessage;
+  test("кнопка Enable/Disable VNC Access присутствует", async () => {
+    await expect(optionsPage.vncToggleButton).toBeVisible({ timeout: 10_000 });
+  });
 
-    const hasEnable = await enableBtn.isVisible().catch(() => false);
-    const hasActive = await activeMsg.isVisible().catch(() => false);
+  test("VNC toggle: клик меняет состояние и задача появляется в activity table", async () => {
+    const toggleBtn = optionsPage.vncToggleButton;
+    await expect(toggleBtn).toBeVisible({ timeout: 10_000 });
 
-    expect(hasEnable || hasActive, "Ни Enable VNC Access, ни сообщение об активной сессии не найдено").toBeTruthy();
+    const labelBefore = (await toggleBtn.innerText()).trim();
+    const actionExpected = labelBefore.includes("Enable") ? "Enable VNC" : "Disable VNC";
+
+    await toggleBtn.click();
+
+    // Ждём появления строки в activity table с нужным task-ом
+    await expect.poll(
+      async () => {
+        const row = await optionsPage.latestActivityRow.innerText().catch(() => "");
+        return row;
+      },
+      { timeout: 15_000, message: `Activity table не показала задачу "${actionExpected}"` }
+    ).toMatch(new RegExp(actionExpected, "i"));
+
+    // Проверяем что кнопка переключилась
+    const labelAfter = (await toggleBtn.innerText()).trim();
+    expect(labelAfter).not.toBe(labelBefore);
+
+    // Откатываем обратно чтобы не менять состояние сервера
+    await toggleBtn.click();
+    await expect.poll(
+      async () => optionsPage.latestActivityRow.innerText().catch(() => ""),
+      { timeout: 15_000 }
+    ).toMatch(/Enable VNC|Disable VNC/i);
   });
 });
 
@@ -176,22 +199,28 @@ test.describe("VPS Panel — Options: Settings / Boot Type (vlang[354–356])", 
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// SUITE 5 — Protect Server (сайдбар, всегда в DOM)
+// SUITE 5 — Protect Server (сайдбар, условный рендер через Vue v-if)
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS Panel — Options: Protect Server (vlang[106] / vlang[184])", () => {
   test.beforeEach(async () => { await gotoOptions(); });
 
-  test("кнопка Protect или Unprotect присутствует (взаимоисключающие)", async () => {
-    const protect = await optionsPage.protectServerButton.isVisible().catch(() => false);
-    const unprotect = await optionsPage.unprotectButton.isVisible().catch(() => false);
-    expect(protect || unprotect, "Ни Protect, ни Unprotect не найдены").toBeTruthy();
-    // XOR: ровно одна должна быть видна
-    expect(protect !== unprotect, "Обе кнопки видны одновременно — ошибка состояния").toBeTruthy();
+  test("кнопка Protect или Unprotect присутствует в DOM (взаимоисключающие)", async () => {
+    // Элементы рендерятся через Vue v-if — проверяем count(), не isVisible()
+    const protectCount = await optionsPage.protectServerButton.count();
+    const unprotectCount = await optionsPage.unprotectButton.count();
+    expect(
+      protectCount > 0 || unprotectCount > 0,
+      "Ни Protect, ни Unprotect не найдены в DOM"
+    ).toBeTruthy();
+    expect(
+      !(protectCount > 0 && unprotectCount > 0),
+      "Обе кнопки в DOM одновременно — ошибка состояния"
+    ).toBeTruthy();
   });
 
   test("клик Protect Server → модал с предупреждением → Cancel", async () => {
-    const isProtected = await optionsPage.unprotectButton.isVisible().catch(() => false);
-    test.skip(isProtected, "Сервер уже защищён — тест Protect модала неприменим");
+    const state = await optionsPage.protectionState();
+    test.skip(state !== "protect", "Сервер уже защищён — тест Protect модала неприменим");
 
     await optionsPage.protectServerButton.click();
     await expect(optionsPage.activeModal).toBeVisible({ timeout: 8_000 });
