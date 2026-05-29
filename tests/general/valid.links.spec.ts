@@ -74,7 +74,7 @@ test.describe("Internal links validation", () => {
           const status = response.status();
           if (status >= 400) return { ok: false, status, reason: `HTTP ${status}` };
 
-          await page.waitForTimeout(1500);
+          await page.waitForTimeout(1500); // intentional: allow page JS to finish before reading content-type
 
           const contentType = response.headers()["content-type"] || "";
           if (!contentType.includes("text/html")) return { ok: false, reason: "Non-HTML content" };
@@ -88,7 +88,7 @@ test.describe("Internal links validation", () => {
           return { ok: true, status };
         } catch {
           if (attempt === RETRIES) return { ok: false, reason: "Navigation failed" };
-          await page.waitForTimeout(5000);
+          await page.waitForTimeout(5000); // intentional: retry back-off delay before next attempt
         }
       }
       return { ok: false, reason: "Unknown failure" };
@@ -137,7 +137,7 @@ test.describe("Internal links validation", () => {
         }
       }
 
-      await page.waitForTimeout(DELAY_BETWEEN_PAGES);
+      await page.waitForTimeout(DELAY_BETWEEN_PAGES); // intentional: crawler rate-limiting to avoid hammering the server
     }
 
     console.log(`\nCrawl done. Pages: ${visited.size}, Broken: ${brokenLinks.length}`);

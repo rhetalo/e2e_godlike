@@ -1,14 +1,12 @@
 import { test, expect, Browser } from "@playwright/test";
 import { MobileCartPage } from "../../pages/MobileCartPage";
+import { BASE_URL, Credentials } from "../../fixtures/test-data";
 
 test.use({
   viewport: { width: 390, height: 844 },
   deviceScaleFactor: 2,
 });
 
-const BASE_URL = "https://godlike.host";
-const EMAIL = "test@testmail.com";
-const PASSWORD = "test@testmail.com";
 const storageStatePath = "storageState.mobile.json";
 
 // Извлекаем число из строки цены — устойчиво к валютам и форматам
@@ -38,8 +36,8 @@ test.beforeAll(async ({ browser }: { browser: Browser }) => {
       waitUntil: "domcontentloaded",
       timeout: 60000,
     });
-    await page.fill("#inputEmail", EMAIL);
-    await page.fill("#inputPassword", PASSWORD);
+    await page.fill("#inputEmail", Credentials.email);
+    await page.fill("#inputPassword", Credentials.password);
     await Promise.all([
       page.waitForURL("**/clientarea/clientarea.php", { timeout: 60000 }),
       page.click("#login"),

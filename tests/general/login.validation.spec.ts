@@ -45,7 +45,7 @@ test.describe("Login validation (cart auth-block)", () => {
       .click({ force: true })
       .catch(() => undefined);
 
-    await page.waitForTimeout(2_000);
+    await expect.poll(() => page.url(), { timeout: 2_000 }).not.toMatch(VueCartStep2Pattern);
     console.log(`[INFO] URL after empty submit: ${page.url()}`);
 
     expect(page.url()).not.toMatch(VueCartStep2Pattern);

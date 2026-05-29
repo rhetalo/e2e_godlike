@@ -349,3 +349,49 @@ test("@critical описание теста", async () => {
 | `CLIENTAREA_FREE_EMAIL` | godlike.host/clientarea (свежий аккаунт, нет сервисов) | |
 | `CLIENTAREA_FREE_PASSWORD` | то же | |
 | `TEST_USER_PASSWORD` | Авто-генерируемые тестовые аккаунты | `utils/credentials.ts` |
+
+---
+
+## Сессия: Security cleanup + waitForTimeout фаза 2 (май 2026)
+
+### Статус при входе
+Credentials захардкожены в 6 funnel-файлах; оставшиеся ~45 waitForTimeout без Why-комментариев.
+
+### Что сделано
+
+| # | Файл | Изменение |
+|---|---|---|
+| 1 | `tests/funnels/funnel.spec.ts` | Импорт `Credentials`, `.fill('test@testmail.com')` → `Credentials.email/password` |
+| 2 | `tests/funnels/funnel.mobile.spec.ts` | Убраны `const EMAIL/PASSWORD/BASE_URL`, импорт из `fixtures/test-data` |
+| 3 | `tests/funnels/funnel.cart.check.spec.ts` | Импорт `Credentials`, 2× `.fill("test@testmail.com")` → `Credentials.email/password` |
+| 4 | `tests/funnels/funnel.with.credit.check.spec.ts` | То же |
+| 5 | `tests/funnels/funnel.paypal.redirect.spec.ts` | То же |
+| 6 | `tests/vps/funnel/vps.funnel.spec.ts` | Убраны `const EMAIL/PASSWORD/BASE_URL`, импорт из `fixtures/test-data` |
+| 7 | `tests/general/login.validation.spec.ts` | `waitForTimeout(2_000)` → `expect.poll(() => page.url())` |
+| 8 | `tests/funnels/funnel.seed.spec.ts` | `waitForTimeout(1_000)` → `waitForLoadState('networkidle')` |
+| 9 | `tests/modded/funnel.modded.spec.ts` | `waitForTimeout(1_000)` → `waitForLoadState('networkidle')` |
+| 10 | `pages/VpsPanelRebuildPage.ts` | `waitForTimeout(500)` в `expandAccordion` → `expect(btn).not.toHaveClass(/collapsed/)`; добавлен импорт `expect` |
+| 11 | `tests/modded/game-slider.spec.ts` | 2× `waitForTimeout(300)` — первый удалён (selector уже дождался), второй → `expect.poll()` |
+| 12 | `tests/general/valid.links.spec.ts` | 3× `waitForTimeout` оставлены — добавлены комментарии "Why" (краулер, рейт-лимит) |
+
+**`npx tsc --noEmit` — 0 ошибок** после всех изменений.
+
+### Оставшиеся waitForTimeout (~35 вхождений)
+
+| Файл | Кол-во | Сложность | Приоритет |
+|---|---|---|---|
+| `tests/vps/panel/vps.build.spec.ts` | ~12 | ⚠️ Высокая — реальный rebuild | 🔴 |
+| `tests/vps/panel/vps.panel.power.actions.spec.ts` | 4 | Средняя — после power-кнопок | 🟡 |
+| `tests/vps/panel/vps.panel.rebuild.spec.ts` | 5 | Средняя — после OS-выбора | 🟡 |
+| `tests/vps/funnel/vps.funnel.spec.ts` | 6 | Средняя — Vue dropdown | 🟡 |
+| `pages/MobileCartPage.ts` | 4 | Средняя — анимации? | 🟡 |
+| `pages/VpsConfigPage.ts` | 4 | Средняя — Vue JS-click delays | 🟡 |
+| `pages/VpsPanelServerDetailPage.ts` | 2 | Низкая — файл устарел | 🟢 |
+
+### Следующие приоритеты (открытые задачи)
+
+1. **waitForTimeout в vps.funnel.spec.ts** (6 штук, Vue dropdown) — средняя сложность, безопасно
+2. **waitForTimeout в power.actions + rebuild** — нужен живой контекст (что ждём после клика)
+3. **MobileCartPage.ts + VpsConfigPage.ts** — разобраться с природой задержек
+4. **vps.build.spec.ts** — обсудить с владельцем (реальный rebuild)
+

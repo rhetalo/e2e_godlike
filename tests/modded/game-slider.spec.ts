@@ -140,7 +140,6 @@ class SliderPageHelper {
     await this.page.waitForSelector(".storefront__tariffs-customizer-block", {
       timeout: 10000,
     });
-    await this.page.waitForTimeout(300);
   }
 
   /** Read all slider block data from the current DOM state. */
@@ -187,7 +186,12 @@ class SliderPageHelper {
       },
       { idx: blockIndex, val: value },
     );
-    await this.page.waitForTimeout(300);
+    // Poll until Vue re-renders the selected value
+    await expect.poll(
+      () => this.page.locator('.storefront__tariffs-customizer-block').nth(blockIndex)
+        .locator('.storefront__tariffs-customizer-block__value').innerText(),
+      { timeout: 3_000 }
+    ).not.toBe("");
   }
 
   /** Get the displayed value for the Nth block. */

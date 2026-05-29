@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { Credentials } from "../../fixtures/test-data";
 import { CreditBalanceSelector } from "../../components/CreditBalanceSelector";
 import { PaymentMethodSelector } from "../../components/PaymentMethodSelector";
 
@@ -27,8 +28,8 @@ test("PayPal redirect", async ({ page }) => {
   await expect(page.locator(".auth-block__form")).toBeVisible();
   await page.getByText("Login").click();
 
-  await page.getByRole("textbox", { name: "* Email" }).fill("test@testmail.com");
-  await page.getByRole("textbox", { name: "* Password" }).fill("test@testmail.com");
+  await page.getByRole("textbox", { name: "* Email" }).fill(Credentials.email);
+  await page.getByRole("textbox", { name: "* Password" }).fill(Credentials.password);
   await page.getByRole("button", { name: "Login" }).click();
 
   // ШАГ 8: Переход на следующий шаг (выбор локации сервера)

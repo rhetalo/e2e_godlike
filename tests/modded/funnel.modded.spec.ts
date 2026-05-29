@@ -116,7 +116,7 @@ test.describe("Modded purchase funnel (stops at payment page)", () => {
       expect(page.url()).toContain(`productId=${meta.productId}`);
 
       // ─── Step 3: auth-step (skipped via storageState) ────────────────
-      await page.waitForTimeout(1_000); // give Vue a beat to mount auth-block if it's coming
+      await page.waitForLoadState('networkidle', { timeout: 5_000 }).catch(() => {}); // wait for Vue to mount auth-block if it's coming
       await ensurePastAuthStep(page, cartPage);
 
       // Either we were already past step 1, or fallback login moved us to step 2.

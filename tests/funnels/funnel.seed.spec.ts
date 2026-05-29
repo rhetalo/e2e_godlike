@@ -100,7 +100,7 @@ test.describe("Seed purchase funnel (stops at payment page)", () => {
       expect(page.url()).toContain("productId=");
 
       // ─── Step 3: auth-step (skipped via storageState) ────────────────
-      await page.waitForTimeout(1_000);
+      await page.waitForLoadState('networkidle', { timeout: 5_000 }).catch(() => {});
       await ensurePastAuthStep(page, cartPage);
 
       await page

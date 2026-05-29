@@ -28,15 +28,13 @@ import { test, expect, type Browser, type Page } from "@playwright/test";
 import { VpsPage } from "../../../pages/VpsPage";
 import { VpsConfigPage } from "../../../pages/VpsConfigPage";
 import { CartBillingPage } from "../../../pages/CartBillingPage";
+import { BASE_URL, Credentials } from "../../../fixtures/test-data";
 
 test.use({
   viewport: { width: 1800, height: 900 },
   deviceScaleFactor: 1,
 });
 
-const BASE_URL = "https://godlike.host";
-const EMAIL = "test@testmail.com";
-const PASSWORD = "test@testmail.com";
 const storageStatePath = "storageState.vps.json";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -83,8 +81,8 @@ test.beforeAll(async ({ browser }: { browser: Browser }) => {
       waitUntil: "domcontentloaded",
       timeout: 60_000,
     });
-    await page.fill("#inputEmail", EMAIL);
-    await page.fill("#inputPassword", PASSWORD);
+    await page.fill("#inputEmail", Credentials.email);
+    await page.fill("#inputPassword", Credentials.password);
     await Promise.all([
       page.waitForURL("**/clientarea/clientarea.php", { timeout: 60_000 }),
       page.click("#login"),

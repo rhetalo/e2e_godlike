@@ -1,4 +1,4 @@
-import { type Page, type Locator } from "@playwright/test";
+import { type Page, type Locator, expect } from "@playwright/test";
 import { PANEL_URL, TEST_SERVER_UUID } from "../utils/auth";
 
 /**
@@ -165,7 +165,7 @@ export class VpsPanelRebuildPage {
     const isCollapsed = await btn.evaluate((el) => el.classList.contains("collapsed")).catch(() => true);
     if (isCollapsed) {
       await btn.click();
-      await this.page.waitForTimeout(500);
+      await expect(btn).not.toHaveClass(/collapsed/, { timeout: 3_000 });
     }
   }
 

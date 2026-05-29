@@ -20,6 +20,7 @@
 // expect - используется для проверки assertions (утверждений о состоянии элементов/страницы)
 // Зависимость: @playwright/test (указана в package.json в секции devDependencies)
 import { test, expect } from "@playwright/test";
+import { Credentials } from "../../fixtures/test-data";
 
 /**
  * ============================================================================================
@@ -160,13 +161,13 @@ test("test checkout", async ({ page }) => {
   // Вводим email пользователя (тестовый аккаунт)
   await page
     .getByRole("textbox", { name: "* Email" })
-    .fill("test@testmail.com");
+    .fill(Credentials.email);
 
   // Вводим пароль пользователя
   // Поле ищется по name: '* Password' (обязательное поле пароля)
   await page
     .getByRole("textbox", { name: "* Password" })
-    .fill("test@testmail.com");
+    .fill(Credentials.password);
 
   // Ищем кнопку "Login" по роли 'button' и тексту 'Login'
   // .click() - выполняем клик для отправки формы авторизации

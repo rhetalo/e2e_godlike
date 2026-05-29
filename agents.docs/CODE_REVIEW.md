@@ -127,3 +127,33 @@ T2.6 ждёт только 3 секунды после подтверждени�
 | `tests/modded/` (7 файлов) | То же |
 | `pages/CartPage.ts`, `CheckoutPage.ts` и др. | Ревью при работе с funnels |
 | `components/` | Ревью |
+
+
+---
+
+## 5. Правки май 2026 — сессия 2 (Security + waitForTimeout фаза 2)
+
+### Credentials — убраны хардкод-строки из funnel-файлов
+
+| Файл | До | После |
+|---|---|---|
+| `funnel.spec.ts` | `.fill('test@testmail.com')` inline | `Credentials.email/password` из `fixtures/test-data` |
+| `funnel.mobile.spec.ts` | `const EMAIL = "test@testmail.com"` | Импорт `Credentials` из `fixtures/test-data` |
+| `funnel.cart.check.spec.ts` | 2× `.fill("test@testmail.com")` | `Credentials.email/password` |
+| `funnel.with.credit.check.spec.ts` | То же | То же |
+| `funnel.paypal.redirect.spec.ts` | То же | То же |
+| `vps.funnel.spec.ts` | `const EMAIL/PASSWORD = "test@testmail.com"` | Импорт `Credentials` из `fixtures/test-data` |
+
+Единственный источник правды для storefront-учётки теперь — `fixtures/test-data.ts` → `Credentials` (с `process.env.GODLIKE_USER` override).
+
+### waitForTimeout — убраны нетривиальные ожидания
+
+| Файл | Было | Стало |
+|---|---|---|
+| `login.validation.spec.ts` | `waitForTimeout(2_000)` | `expect.poll(() => page.url(), { timeout: 2_000 })` |
+| `funnel.seed.spec.ts` | `waitForTimeout(1_000)` | `waitForLoadState('networkidle')` |
+| `funnel.modded.spec.ts` | `waitForTimeout(1_000)` | `waitForLoadState('networkidle')` |
+| `VpsPanelRebuildPage.ts:expandAccordion` | `waitForTimeout(500)` | `expect(btn).not.toHaveClass(/collapsed/)` |
+| `game-slider.spec.ts` | 2× `waitForTimeout(300)` | 1-й удалён; 2-й → `expect.poll(innerText)` |
+| `valid.links.spec.ts` | 3× `waitForTimeout` | Оставлены + добавлены "Why" комментарии |
+

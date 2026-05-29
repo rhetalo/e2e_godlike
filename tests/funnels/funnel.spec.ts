@@ -1,4 +1,5 @@
 import {test, expect} from '@playwright/test';
+import { Credentials } from '../../fixtures/test-data';
 
 test.use({
     viewport: {
@@ -31,8 +32,8 @@ test('test base funnel', async ({page}) => {
 
     await page.getByText('Login').click();
 
-    await page.getByRole('textbox', { name: '* Email' }).fill('test@testmail.com');
-    await page.getByRole('textbox', { name: '* Password' }).fill('test@testmail.com');
+    await page.getByRole('textbox', { name: '* Email' }).fill(Credentials.email);
+    await page.getByRole('textbox', { name: '* Password' }).fill(Credentials.password);
     // Ищем кнопку "Login" по роли 'button' и тексту 'Login'
   // .click() - выполняем клик для отправки формы авторизации
   // После этого система должна проверить credentials и войти в аккаунт
