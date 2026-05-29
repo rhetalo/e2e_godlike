@@ -170,8 +170,8 @@ test.describe("VPS Panel — Options: Settings / Boot Type (vlang[354–356])", 
 
   test("опции 'BIOS (Legacy Mode)' и 'UEFI' присутствуют в Settings", async () => {
     const settingsPane = serverPage.page.locator("#pills-options-settings");
-    await expect(settingsPane.getByText("BIOS (Legacy Mode)", { exact: false })).toBeVisible({ timeout: 8_000 });
-    await expect(settingsPane.getByText("UEFI", { exact: false })).toBeVisible({ timeout: 8_000 });
+    await expect(settingsPane.getByText("BIOS (Legacy Mode)", { exact: false }).first()).toBeVisible({ timeout: 8_000 });
+    await expect(settingsPane.getByText("UEFI", { exact: false }).first()).toBeVisible({ timeout: 8_000 });
   });
 });
 
