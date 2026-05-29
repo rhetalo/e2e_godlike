@@ -63,6 +63,18 @@ export class VpsPanelServerPage {
     await this.page.goto(this.url, { waitUntil: "domcontentloaded", timeout: 30_000 });
     await this.page.waitForLoadState("networkidle").catch(() => null);
 
+    // VirtFusion рендерит rebuild (OS-selection) view на том же URL, что и
+    // обычная страница сервера — URL не меняется. Единственный способ
+    // обнаружить rebuild view — наличие кнопки "Cancel Rebuild".
+    // Если она есть — кликаем, чтобы вернуться в обычный режим сервера.
+    const cancelRebuild = this.page.locator('button.btn-primary:has-text("Cancel Rebuild")');
+    const isRebuildView = await cancelRebuild.isVisible({ timeout: 2_000 }).catch(() => false);
+    if (isRebuildView) {
+      console.log('[goto] Rebuild view detected — clicking "Cancel Rebuild"');
+      await cancelRebuild.click();
+      await this.page.waitForLoadState("networkidle").catch(() => null);
+    }
+
     // Проактивное закрытие — на случай если баннер уже был на странице
     // до того, как addLocatorHandler успел зарегистрироваться.
     await new CookieBanner(this.page).dismissAll();
