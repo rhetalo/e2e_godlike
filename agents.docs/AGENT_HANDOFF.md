@@ -41,7 +41,7 @@ e2e_godlike/
 │   │   │   ├── vps.panel.server.spec.ts          ✅ рефакторинг (май 2026)
 │   │   │   ├── vps.panel.storage.spec.ts         ✅ рефакторинг (май 2026)
 │   │   │   ├── vps.panel.network.spec.ts         ✅ переписан (май 2026)
-│   │   │   ├── vps.panel.options.spec.ts         ✅ рефакторинг (май 2026)
+│   │   │   ├── vps.panel.options.spec.ts         ✅ полная перезапись (май 2026)
 │   │   │   └── vps.build.spec.ts                ⚠️  не ревьюировался, T2.6 опасен
 │   │   └── funnel/
 │   │       └── vps.funnel.spec.ts                ✅ 23/23 passed — не трогать
@@ -396,3 +396,41 @@ Credentials захардкожены в 6 funnel-файлах; оставшие�
 3. **MobileCartPage.ts + VpsConfigPage.ts** — разобраться с природой задержек
 4. **vps.build.spec.ts** — обсудить с владельцем (реальный rebuild)
 
+
+---
+
+## Сессия 4 — май 2026 (VNC toggle + Protect fix + docs)
+
+### Что сделано
+1. **vps.panel.options.spec.ts** — VNC и Protect доработка
+   - VNC тест теперь кликает кнопку и проверяет activity table (Enable VNC / Disable VNC задача)
+   - Тест всегда откатывает состояние обратно
+   - Protect: `isVisible()` → `count() > 0` (Vue v-if, не v-show)
+
+2. **VpsPanelOptionsPage.ts** — новые локаторы
+   - `vncToggleButton`, `browserVncButton`, `activityTable`, `latestActivityRow`
+   - `protectionState()` метод
+
+3. **CODE_REVIEW.md** — обновлён (сессии 3 и 4)
+
+4. **.github/workflows/playwright.yml** — `on: workflow_dispatch` (убран автозапуск при push)
+
+### Паттерны для следующего агента
+
+**Vue v-if vs v-show:**
+Элементы сайдбара (Protect, Unprotect) рендерятся через `v-if` — они отсутствуют в DOM когда не нужны.
+Используй `locator.count() > 0` вместо `isVisible()` для проверки их наличия.
+
+**Activity table:**
+`table.table-normal tbody tr:first-child` — последняя задача сервера.
+После любого действия (VNC toggle, Power, Rebuild) новая строка появляется вверху таблицы.
+Используй `expect.poll()` с timeout 15_000ms для ожидания.
+
+**VNC toggle:**
+Кнопка `btn btn-primary` в `#pills-options-vnc`, текст меняется: "Enable VNC Access" ↔ "Disable VNC Access".
+Единый локатор: `#pills-options-vnc button:has-text("Enable VNC Access"), #pills-options-vnc button:has-text("Disable VNC Access")`
+
+### Открытые задачи (следующий приоритет)
+- `vps.panel.network.spec.ts` — не ревьюировался
+- `vps.panel.storage.spec.ts` — не ревьюировался
+- `vps.panel.server.spec.ts` — антипаттерны `if (!isRunning) return`, нужен рефакторинг

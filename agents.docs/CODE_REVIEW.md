@@ -157,3 +157,90 @@ T2.6 ждёт только 3 секунды после подтверждени�
 | `game-slider.spec.ts` | 2× `waitForTimeout(300)` | 1-й удалён; 2-й → `expect.poll(innerText)` |
 | `valid.links.spec.ts` | 3× `waitForTimeout` | Оставлены + добавлены "Why" комментарии |
 
+
+---
+
+## 6. Правки май 2026 — сессия 3 (Options rewrite + CI fix)
+
+### `vps.panel.options.spec.ts` — полная перезапись ✅
+
+**Корневые проблемы:**
+- Структурный баг: Suite 3 (VNC) не закрывался `});`, Suites 4–7 были вложены внутрь него
+- Тесты не навигировали по под-табам — искали кнопки в скрытых пейнах
+- Каждый тест перелогинивался (нет serial + shared context)
+- Hostname/Save тестировали `#editNameModal` (gear-иконка в сайдбаре), а не Options tab
+
+**Структура Options tab (подтверждена из live HTML):**
+Options → 4 под-таба (Bootstrap pills):
+- `#pills-options-vnc-tab` — VNC (активен по умолчанию)
+- `#pills-options-rescue-tab` — Rescue
+- `#pills-options-password-tab` — Password (Reset Password button)
+- `#pills-options-settings-tab` — Settings (Boot Type, BIOS/UEFI, Protect Server)
+
+**Что изменилось в spec:**
+- `describe.configure({ mode: 'serial' })` + shared context → один логин на весь файл
+- Хелпер `gotoSubTab(name)` навигирует в нужный под-таб перед тестом
+- Reset Password: `test.skip(!isEnabled)` — корректно скипается когда сервер Stopped
+- Hostname/Save тесты убраны — это другой flow
+- 21 тест → 13 сфокусированных
+
+### `VpsPanelOptionsPage.ts` — фикс локаторов ✅
+
+| Локатор | Было | Стало |
+|---|---|---|
+| `resetPasswordButton` | `button:has-text("Reset Password")` — матчил скрытые пейны | `#pills-options-password button:has-text("Reset Password")` |
+| `protectServerButton` | `button:has-text("Protect Server")` — кнопки нет, это `div.bubble` | `[data-bs-target="#protectServerModal"]` |
+| `unprotectButton` | `button:has-text("Unprotect")` — неверный текст | `[data-bs-target="#unProtectModal"]` |
+| `bootTypeLabel` | широкий `div:has-text("Boot Type")` | `#pills-options-settings h4:has-text("Boot Type")` |
+
+**Новый метод:**
+```typescript
+async clickSubTab(name: "VNC" | "Rescue" | "Password" | "Settings"): Promise<void> {
+  await this.page.locator(`#pills-options-${name.toLowerCase()}-tab`).click();
+  await this.page.waitForLoadState("networkidle").catch(() => null);
+}
+```
+
+### `.github/workflows/playwright.yml` — CI trigger ✅
+
+Убран автозапуск тестов при пуше:
+```yaml
+# Было: запускалось при каждом push/PR → реальные покупки на тестовом аккаунте
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+# Стало: только вручную через GitHub UI → Actions → Run workflow
+on:
+  workflow_dispatch:
+```
+
+---
+
+## 7. Правки май 2026 — сессия 4 (VNC toggle + Protect fix)
+
+### `vps.panel.options.spec.ts` — VNC и Protect доработка ✅
+
+**VNC Suite (Suite 2):**
+- Убран слабый тест "Enable VNC или активная сессия" — заменён на два:
+  1. `vncToggleButton` visible (Enable/Disable — единый локатор)
+  2. VNC toggle тест: клик → activity table показывает задачу → откат обратно
+- Поведение VNC: клик записывает таску в `table.table-normal` (Enable VNC / Disable VNC)
+- Тест всегда откатывает состояние обратно (не меняет среду)
+
+**Protect Suite (Suite 5):**
+- Причина падения: `protectServerButton` и `unprotectButton` рендерятся через **Vue v-if** (не v-show) → элемент отсутствует в DOM когда не нужен → `isVisible()` = false
+- Фикс: `count() > 0` вместо `isVisible()`
+- Добавлен `protectionState()` в page object
+
+### `VpsPanelOptionsPage.ts` — новые локаторы ✅
+
+| Добавлено | Описание |
+|---|---|
+| `vncToggleButton` | `#pills-options-vnc button:has-text("Enable/Disable VNC Access")` |
+| `browserVncButton` | появляется только при активной VNC сессии |
+| `activityTable` | `table.table-normal` — общая для всех секций |
+| `latestActivityRow` | первая `tbody tr` activity table |
+| `protectionState()` | `"protect" \| "unprotect" \| "unknown"` через `count()` |
