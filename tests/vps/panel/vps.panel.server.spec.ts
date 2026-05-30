@@ -218,22 +218,34 @@ test.describe("VPS Panel — Servers List (/servers)", () => {
     expect(bodyText).toContain(TEST_SERVER_NAME);
   });
 
-  test("Delete кнопка — открывает модал, Cancel закрывает", async () => {
+  test("вкладки 'All Servers' и 'Bookmarked Servers' присутствуют", async () => {
     const page = sharedContext.pages()[0];
 
-    const deleteBtn = page.locator('button:has-text("Delete"), a:has-text("Delete")').first();
-    const isVisible = await deleteBtn.isVisible().catch(() => false);
-    test.skip(!isVisible, "Delete button не найдена на /servers");
+    const allTab = page.locator('label[for="serverListType1"]');
+    const bookmarkedTab = page.locator('label[for="serverListType2"]');
 
-    await deleteBtn.click();
+    await expect(allTab).toBeVisible({ timeout: 10_000 });
+    await expect(bookmarkedTab).toBeVisible({ timeout: 10_000 });
+  });
 
-    const modal = page.locator('[class*="modal"], [role="dialog"]').first();
-    await expect(modal).toBeVisible({ timeout: 8_000 });
-    const modalText = await modal.innerText();
-    expect(modalText).toMatch(/delete|Delete|sure/i);
+  test("клик 'Bookmarked Servers' переключает вкладку", async () => {
+    const page = sharedContext.pages()[0];
 
-    const cancelBtn = page.locator('button:has-text("Cancel")').first();
-    await cancelBtn.click();
-    await expect(modal).not.toBeVisible({ timeout: 5_000 });
+    const bookmarkedTab = page.locator('label[for="serverListType2"]');
+    await bookmarkedTab.click();
+
+    // radio input для Bookmarked должен стать checked
+    const input = page.locator('input#serverListType2');
+    await expect(input).toBeChecked({ timeout: 5_000 });
+
+    // Возвращаемся обратно
+    await page.locator('label[for="serverListType1"]').click();
+  });
+
+  test("у сервера есть bookmark-иконка", async () => {
+    const page = sharedContext.pages()[0];
+
+    const bookmarkIcon = page.locator('[tt="Bookmark"], [tt="Remove bookmark"]').first();
+    await expect(bookmarkIcon).toBeVisible({ timeout: 10_000 });
   });
 });
