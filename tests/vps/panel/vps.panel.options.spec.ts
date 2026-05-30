@@ -112,25 +112,18 @@ test.describe("VPS Panel — Options: VNC (vlang[168])", () => {
 
     await toggleBtn.click();
 
-    // Ждём появления строки в activity table с нужным task-ом
+    // Ждём пока Vue перерендерит секцию и кнопка сменит текст
+    await expect(toggleBtn).not.toHaveText(labelBefore, { timeout: 15_000 });
+
+    // Проверяем activity table — задача появилась
     await expect.poll(
-      async () => {
-        const row = await optionsPage.latestActivityRow.innerText().catch(() => "");
-        return row;
-      },
+      async () => optionsPage.latestActivityRow.innerText().catch(() => ""),
       { timeout: 15_000, message: `Activity table не показала задачу "${actionExpected}"` }
     ).toMatch(new RegExp(actionExpected, "i"));
 
-    // Проверяем что кнопка переключилась
-    const labelAfter = (await toggleBtn.innerText()).trim();
-    expect(labelAfter).not.toBe(labelBefore);
-
-    // Откатываем обратно чтобы не менять состояние сервера
+    // Откатываем обратно — ждём возврата исходного текста кнопки
     await toggleBtn.click();
-    await expect.poll(
-      async () => optionsPage.latestActivityRow.innerText().catch(() => ""),
-      { timeout: 15_000 }
-    ).toMatch(/Enable VNC|Disable VNC/i);
+    await expect(toggleBtn).toHaveText(labelBefore, { timeout: 15_000 });
   });
 });
 
