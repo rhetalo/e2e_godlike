@@ -244,3 +244,34 @@ on:
 | `activityTable` | `table.table-normal` — общая для всех секций |
 | `latestActivityRow` | первая `tbody tr` activity table |
 | `protectionState()` | `"protect" \| "unprotect" \| "unknown"` через `count()` |
+
+---
+
+## 8. Правки май 2026 — сессия 5 (options финализация)
+
+### `vps.panel.options.spec.ts` ✅ ГОТОВ
+
+**VNC toggle timing fix:**
+После клика Vue перерендеривает всю секцию. `innerText()` сразу после `expect.poll(activityTable)` возвращал старый текст. Фикс: `expect(btn).not.toHaveText(labelBefore, { timeout: 15_000 })`.
+
+**Protect Server — убран:**
+`div.bubble[data-bs-target="#protectServerModal"]` в DOM но скрыт. На тестовом аккаунте не отображается. Оставлен NOTE-комментарий.
+
+**Итог файла: 12 тестов, все проходят. Файл считается завершённым.**
+
+### Паттерн debug-теста (добавить в TEST_GUIDELINES)
+```typescript
+// tests/debug/debug.temp.spec.ts — ВРЕМЕННЫЙ, удалить после использования
+test('DEBUG: структура DOM', async ({ browser }) => {
+  const ctx = await browser.newContext({ storageState: STORAGE_STATE_PATH });
+  const page = await ctx.newPage();
+  // навигация...
+  const pane = page.locator('#pills-options-vnc');
+  const buttons = await pane.locator('button').all();
+  for (const btn of buttons) {
+    console.log('BTN:', await btn.innerText(), '| visible:', await btn.isVisible(), '| class:', await btn.getAttribute('class'));
+  }
+  console.log('HTML:', await pane.innerHTML());
+  await ctx.close();
+});
+```

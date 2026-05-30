@@ -434,3 +434,36 @@ Credentials захардкожены в 6 funnel-файлах; оставшие�
 - `vps.panel.network.spec.ts` — не ревьюировался
 - `vps.panel.storage.spec.ts` — не ревьюировался
 - `vps.panel.server.spec.ts` — антипаттерны `if (!isRunning) return`, нужен рефакторинг
+
+---
+
+## Сессия 5 — май 2026 (финализация options.spec.ts)
+
+### Что сделано
+
+1. **VNC toggle тест** — фикс timing: `expect(toggleBtn).not.toHaveText(labelBefore)` вместо немедленного `innerText()` после клика. Vue перерендеривает всю VNC секцию после клика — нужно ждать DOM update через built-in retry Playwright.
+
+2. **Protect Server** — убран из тестов. Элемент `div.bubble[data-bs-target="#protectServerModal"]` присутствует в DOM (Vue-шаблон всегда рендерит его), но `isVisible() = false` и клик падает с timeout. На тестовом аккаунте кнопка не отображается — возможно feature-флаг или ограничение плана. Оставлен NOTE-комментарий в spec.
+
+3. **Скрины под-табов Options** (получены от владельца):
+   - **VNC**: "Enable VNC Access" / после клика → "A VNC session is currently Active" + IP/Port/Password + "Disable VNC Access" + "Browser VNC"
+   - **Password**: "Reset Password" (disabled когда сервер Stopped), описание про QEMU guest agent
+   - **Settings**: Boot Type (BIOS/UEFI toggle) + Auto Configuration toggle
+   - **Rescue**: dropdown выбора rescue системы + "Create Rescue Session"
+
+4. **Debug-тест паттерн** — договорились: когда нужна структура DOM без HTML, пишу `tests/debug/debug.temp.spec.ts`, владелец запускает и возвращает вывод консоли.
+
+### Итоговое состояние vps.panel.options.spec.ts ✅
+
+12 тестов, 0 failed:
+- Suite 1: навигация (4 теста)
+- Suite 2: VNC — заголовок + кнопка + toggle с activity table (3 теста)
+- Suite 3: Password — Reset Password кнопка + модал + cancel (3 теста, skip когда Stopped)
+- Suite 4: Settings — Boot Type + BIOS/UEFI (2 теста)
+- Protect Server — убран (NOTE в коде)
+
+### Rescue под-таб — не покрыт тестами
+
+Видно из скринов: dropdown "Linux (Debian Live) Rescue v1" + кнопка "Create Rescue Session".
+**Create Rescue Session нажимать нельзя** — рестартует сервер.
+Можно добавить: проверка наличия dropdown + кнопки без клика.
