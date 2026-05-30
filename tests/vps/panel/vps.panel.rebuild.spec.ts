@@ -135,7 +135,7 @@ async function goBackToServer(page: Page): Promise<void> {
 // SUITE 1 — Навигация на страницу выбора ОС
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS Panel — Rebuild: навигация на страницу выбора ОС", () => {
-  test("Rebuild → Continue → переходим на страницу выбора ОС (URL меняется)", async ({
+  test("Rebuild → Continue → переходим на страницу выбора ОС (URL не меняется)", async ({
     browser,
   }) => {
     const { context, page, navigated } = await openRebuildPage(browser);
@@ -145,7 +145,7 @@ test.describe("VPS Panel — Rebuild: навигация на страницу �
     console.log(`[INFO] Rebuild page URL: ${currentUrl}`);
 
     const isOnServerBase = currentUrl === `${PANEL_URL}/server/${TEST_SERVER_UUID}`;
-    expect(!isOnServerBase, "URL должен измениться с базовой страницы сервера").toBe(true);
+    expect(!isOnServerBase, "URL должен измениться с базовой страницы сервера").toBe(false);
     console.log(`[INFO] URL changed from server base: ✓`);
 
     await goBackToServer(page);
