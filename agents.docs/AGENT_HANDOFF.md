@@ -491,3 +491,27 @@ Credentials захардкожены в 6 funnel-файлах; оставшие�
 
 ### Итоговое состояние vps.panel.server.spec.ts ✅
 20 тестов, 17 passed, 1 skipped (Media tab — скрыта), 0 failed
+
+---
+
+## Сессия 7 — май 2026 (rebuild.spec.ts fixes)
+
+### Что сделано
+
+**vps.panel.rebuild.spec.ts** — 6 падений, 2 причины:
+
+1. **Все тесты с AlmaLinux карточкой** — accordion `collapse-0` (AlmaLinux группа) свёрнут по умолчанию. Карточки в DOM но скрыты. Тесты шли напрямую к `osCardByName("AlmaLinux 9 Latest")` без раскрытия группы. Фикс: добавить `await rebuildPage.expandAccordion("AlmaLinux")` перед каждым `osCardByName("AlmaLinux ...")`.
+
+2. **goBackToServer** — не ждал `networkidle`, Vue-рендеренный `statusBadge` не успевал появиться. Фикс: добавить `await page.waitForLoadState("networkidle")`.
+
+### Паттерн для OS-карточек в rebuild
+
+**Всегда** раскрывай аккордеон перед взаимодействием с карточкой:
+```typescript
+await rebuildPage.expandAccordion("AlmaLinux"); // группа 0
+await rebuildPage.expandAccordion("Debian");    // группа 2
+await rebuildPage.expandAccordion("Games");     // группа 4
+// и т.д.
+```
+
+Группы (порядок подтверждён из HTML): 0=AlmaLinux, 1=CentOS, 2=Debian, 3=Fedora, 4=Games, 5=Ubuntu
