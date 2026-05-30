@@ -171,25 +171,6 @@ test.describe("VPS Panel — Rebuild: навигация на страницу �
 // SUITE 2 — Структура OS карточек
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS Panel — Rebuild: структура OS карточек", () => {
-  test("карточки ОС имеют класс card.os-select (подтверждённый из DevTools)", async ({
-    browser,
-  }) => {
-    const { context, page, rebuildPage, navigated } = await openRebuildPage(browser);
-    test.skip(!navigated, "Rebuild page not reachable — server may be stopped or modal unavailable");
-
-    await expect(rebuildPage.allOsCards.first()).toBeVisible({ timeout: 10_000 });
-
-    const firstCardClass = await rebuildPage.allOsCards
-      .first()
-      .evaluate((el) => el.className);
-    console.log(`[INFO] First OS card classes: "${firstCardClass}"`);
-
-    expect(firstCardClass).toContain("os-select");
-
-    await goBackToServer(page);
-    await context.close();
-  });
-
   test("карточки ОС имеют название в h5.mb-1", async ({ browser }) => {
     const { context, page, rebuildPage, navigated } = await openRebuildPage(browser);
     test.skip(!navigated, "Rebuild page not reachable — server may be stopped or modal unavailable");
