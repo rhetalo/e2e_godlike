@@ -229,6 +229,7 @@ test.describe("VPS Panel — Rebuild: структура OS карточек", (
     test.skip(!navigated, "Rebuild page not reachable — server may be stopped or modal unavailable");
 
     const card = rebuildPage.osCardByName("AlmaLinux 9 Latest");
+    await rebuildPage.expandAccordion("AlmaLinux");
     await expect(card).toBeVisible({ timeout: 10_000 });
     console.log("[INFO] AlmaLinux 9 Latest card found ✓");
 
@@ -631,7 +632,9 @@ test.describe("VPS Panel — Rebuild: возврат на страницу се�
     const { context, page, serverPage, rebuildPage, navigated } = await openRebuildPage(browser);
     test.skip(!navigated, "Rebuild page not reachable — server may be stopped or modal unavailable");
 
-    await goBackToServer(page);
+    // serverPage.goto() обрабатывает Cancel Rebuild если страница в rebuild-режиме
+    // и ждёт networkidle — надёжнее чем goBackToServer(page)
+    await serverPage.goto();
 
     await expect(serverPage.statusBadge).toBeVisible({ timeout: 15_000 });
     const status = await serverPage.getStatusText();
