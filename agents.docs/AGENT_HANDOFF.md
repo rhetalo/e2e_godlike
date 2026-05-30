@@ -467,3 +467,27 @@ Credentials захардкожены в 6 funnel-файлах; оставшие�
 Видно из скринов: dropdown "Linux (Debian Live) Rescue v1" + кнопка "Create Rescue Session".
 **Create Rescue Session нажимать нельзя** — рестартует сервер.
 Можно добавить: проверка наличия dropdown + кнопки без клика.
+
+---
+
+## Сессия 6 — май 2026 (server.spec.ts + server list fixes)
+
+### Что сделано
+
+1. **vps.panel.server.spec.ts** — два фикса:
+   - Power Controls: использовал инлайн-локатор вместо `serverPage.allPowerButtons` — матчил скрытую кнопку Restart в модале. Фикс: перейти на page object метод.
+   - Tab Navigation: "Backups" → "Sharing" (Backups скрыт, Sharing — реальная 6-я вкладка из скрина).
+
+2. **Suite 5 (Servers List)**: Delete тест убран — кнопка Delete существует только в `#deleteBackupModal` (скрытый модал), не на странице списка.
+   Заменён на реальные тесты по HTML `/servers`:
+   - All Servers / Bookmarked Servers tabs (`label[for="serverListType1/2"]`) — radio-группа, не кнопки
+   - Клик Bookmarked → `input#serverListType2` checked → откат обратно
+   - Bookmark icon: `[tt="Bookmark"]` или `[tt="Remove bookmark"]`
+
+### Структура /servers страницы (подтверждена из HTML)
+- Заголовок "Servers" + radio-tabs: All Servers / Bookmarked Servers
+- Таблица серверов: имя (`h4#server-label`), статус (.badge), дата, IP (.badge-grey), Manage (`button.btn-action.btn-primary`), bookmark icon (`div[tt="Bookmark/Remove bookmark"]`)
+- НЕТ Delete кнопки на этой странице
+
+### Итоговое состояние vps.panel.server.spec.ts ✅
+20 тестов, 17 passed, 1 skipped (Media tab — скрыта), 0 failed
