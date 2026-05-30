@@ -275,3 +275,20 @@ test('DEBUG: структура DOM', async ({ browser }) => {
   await ctx.close();
 });
 ```
+
+---
+
+## 9. Правки май 2026 — сессии 7-8 (rebuild.spec.ts)
+
+### `vps.panel.rebuild.spec.ts` ✅ ГОТОВ
+
+**Проблема accordion (сессия 7):**
+Все OS-карточки находятся внутри Bootstrap accordion групп (collapse-0..5), которые свёрнуты по умолчанию. Карточки есть в DOM но `isVisible() = false`. Во всех тестах где нужно кликнуть или проверить карточку — обязательно сначала `expandAccordion(family)`.
+
+Группы (порядок из HTML): `0=AlmaLinux, 1=CentOS, 2=Debian, 3=Fedora, 4=Games, 5=Ubuntu`
+
+**goBackToServer (сессия 7):** добавлен `networkidle` wait.
+
+**Test 23 (сессия 8):** `goBackToServer(page)` → `serverPage.goto()` — только `goto()` обрабатывает Cancel Rebuild и корректно рендерит server overview.
+
+**Test 6 (сессия 8):** пропущен `expandAccordion("AlmaLinux")` — добавлен.

@@ -515,3 +515,26 @@ await rebuildPage.expandAccordion("Games");     // группа 4
 ```
 
 Группы (порядок подтверждён из HTML): 0=AlmaLinux, 1=CentOS, 2=Debian, 3=Fedora, 4=Games, 5=Ubuntu
+
+---
+
+## Сессия 8 — май 2026 (rebuild.spec.ts финализация)
+
+### Что сделано
+
+**vps.panel.rebuild.spec.ts** — 2 оставшихся падения:
+
+1. **Test 6 (AlmaLinux 9 Latest присутствует в списке)** — пропущен `expandAccordion` при первом рефакторинге. Фикс: добавить `await rebuildPage.expandAccordion("AlmaLinux")` перед `osCardByName`.
+
+2. **Test 23 (статус сервера после возврата)** — `goBackToServer(page)` использует `page.goto()` напрямую без логики Cancel Rebuild. Vue-роутер оставался в rebuild-состоянии, `statusBadge` не рендерился. Фикс: заменить на `serverPage.goto()` который обрабатывает Cancel Rebuild + networkidle.
+
+### Итоговое состояние vps.panel.rebuild.spec.ts ✅
+23 теста. При Stopped сервере: ~12 passed, 11 skipped (требуют Running + Rebuild кнопка).
+При Running сервере: все 23 должны проходить.
+
+### Открытые задачи (следующий приоритет)
+- `vps.panel.network.spec.ts` — не ревьюировался
+- `vps.panel.storage.spec.ts` — не ревьюировался
+- `vps.panel.server.spec.ts` — ✅ завершён (сессия 6)
+- `vps.panel.options.spec.ts` — ✅ завершён (сессии 3-5)
+- `vps.panel.rebuild.spec.ts` — ✅ завершён (сессии 7-8)
