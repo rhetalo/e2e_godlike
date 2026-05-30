@@ -128,6 +128,7 @@ async function goBackToServer(page: Page): Promise<void> {
     waitUntil: "domcontentloaded",
     timeout: 15_000,
   }).catch(() => null);
+  await page.waitForLoadState("networkidle").catch(() => null);
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -413,6 +414,7 @@ test.describe("VPS Panel — Rebuild: выбор ОС (Install не нажима
     test.skip(!navigated, "Rebuild page not reachable — server may be stopped or modal unavailable");
 
     const almaCard = rebuildPage.osCardByName("AlmaLinux 9 Latest");
+    await rebuildPage.expandAccordion("AlmaLinux");
     await expect(almaCard).toBeVisible({ timeout: 10_000 });
 
     const classBefore = await almaCard.evaluate((el) => el.className);
@@ -440,6 +442,7 @@ test.describe("VPS Panel — Rebuild: выбор ОС (Install не нажима
     test.skip(!navigated, "Rebuild page not reachable — server may be stopped or modal unavailable");
 
     const almaCard = rebuildPage.osCardByName("AlmaLinux 9 Latest");
+    await rebuildPage.expandAccordion("AlmaLinux");
     await expect(almaCard).toBeVisible({ timeout: 10_000 });
     await almaCard.click();
     await page.waitForTimeout(500);
@@ -460,6 +463,7 @@ test.describe("VPS Panel — Rebuild: выбор ОС (Install не нажима
 
     // Select AlmaLinux first
     const almaCard = rebuildPage.osCardByName("AlmaLinux 9 Latest");
+    await rebuildPage.expandAccordion("AlmaLinux");
     await expect(almaCard).toBeVisible({ timeout: 10_000 });
     await almaCard.click();
     await page.waitForTimeout(400);
@@ -518,6 +522,7 @@ test.describe("VPS Panel — Rebuild: кнопка Install (не нажимае�
     test.skip(!navigated, "Rebuild page not reachable — server may be stopped or modal unavailable");
 
     const almaCard = rebuildPage.osCardByName("AlmaLinux 9 Latest");
+    await rebuildPage.expandAccordion("AlmaLinux");
     await expect(almaCard).toBeVisible({ timeout: 10_000 });
     await almaCard.click();
 
@@ -541,6 +546,7 @@ test.describe("VPS Panel — Rebuild: кнопка Install (не нажимае�
 
     // Select AlmaLinux
     const almaCard = rebuildPage.osCardByName("AlmaLinux 9 Latest");
+    await rebuildPage.expandAccordion("AlmaLinux");
     await expect(almaCard).toBeVisible({ timeout: 10_000 });
     await almaCard.click();
     await expect(rebuildPage.finalInstallButton).toBeVisible({ timeout: 5_000 });
@@ -579,6 +585,7 @@ test.describe("VPS Panel — Rebuild: кнопка Install (не нажимае�
     console.log(`[INFO] Swap space cards before OS selection: ${swapCountBefore}`);
 
     const almaCard = rebuildPage.osCardByName("AlmaLinux 9 Latest");
+    await rebuildPage.expandAccordion("AlmaLinux");
     await expect(almaCard).toBeVisible({ timeout: 10_000 });
     await almaCard.click();
 
