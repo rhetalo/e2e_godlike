@@ -160,11 +160,9 @@ test.describe("VPS Panel — Power Controls", () => {
   test("кнопки управления питанием присутствуют на странице сервера", async () => {
     await serverPage.goto();
 
-    const powerBtns = serverPage.page.locator(
-      'button:has-text("Boot"), button:has-text("Shutdown"), button:has-text("Power Off"), button:has-text("Restart")'
-    );
-    await expect(powerBtns.first()).toBeVisible({ timeout: 10_000 });
-    const count = await powerBtns.count();
+    // allPowerButtons исключает data-bs-dismiss="modal" — только реальные кнопки в хедере
+    await expect(serverPage.allPowerButtons.first()).toBeVisible({ timeout: 10_000 });
+    const count = await serverPage.allPowerButtons.count();
     expect(count, "Ни одной кнопки питания не найдено").toBeGreaterThanOrEqual(1);
   });
 });
@@ -173,7 +171,7 @@ test.describe("VPS Panel — Power Controls", () => {
 // SUITE 4 — Tab Navigation
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS Panel — Tab Navigation", () => {
-  const tabLabels = ["Overview", "Media", "Options", "Network", "Storage", "Backups"] as const;
+  const tabLabels = ["Overview", "Media", "Options", "Network", "Storage", "Sharing"] as const;
 
   test("все 6 вкладок присутствуют на странице сервера", async () => {
     await serverPage.goto();
