@@ -354,3 +354,32 @@ Note: `expect` не добавлялся в импорт — все замены
 | Happy Path version click (300ms) | после `firstVersion.click()` | Удалён — `orderServerType.toContainText(versionText)` auto-retries |
 
 **`npx tsc --noEmit` — 0 ошибок** после всех изменений.
+
+---
+
+## 11. Правки июнь 2026 — сессия 12 (фикс addLocatorHandler)
+
+### `utils/bannerHandlers.ts` — фикс infinite intercept ✅
+
+**Проблема:** `setupBannerHandlers` регистрировал `addLocatorHandler` для `acceptCookieButton()` (содержал `button:has-text("Accept")`) и `flashSaleClose()`. Широкий текст-селектор перехватывал клики по обычным ссылкам → `dismissAll()` в обработчике кликал что-то, вызывая навигацию назад на godlike.host/.
+
+**Фикс:** Убраны `acceptCookieButton()` и `flashSaleClose()` из `addLocatorHandler`. Остался только точный `.flash-sale-modal`.
+
+```typescript
+// ❌ Было — слишком широко:
+await page.addLocatorHandler(banner.acceptCookieButton(), ...) // has-text("Accept") матчит всё
+await page.addLocatorHandler(banner.flashSaleClose(), ...)     // избыточно
+
+// ✅ Стало — только точный подтверждённый селектор:
+await page.addLocatorHandler(page.locator(".flash-sale-modal").first(), async () => {
+  await banner.dismissPromo();
+})
+```
+
+### Правило (финальное)
+```
+addLocatorHandler → .flash-sale-modal ONLY (и любые другие ТОЧНЫЕ подтверждённые)
+dismissAll()      → вызывать после page.goto() в тесте / автоматически в BasePage.goto()
+```
+
+**`npx tsc --noEmit` — 0 ошибок.**
