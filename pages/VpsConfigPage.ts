@@ -35,7 +35,7 @@ export class VpsConfigPage {
       .locator(".configure-server__location")
       .filter({ hasText: name })
       .click();
-    await this.page.waitForTimeout(400);
+    await this.page.locator('.configure-server__location-active').filter({ hasText: name }).waitFor({ state: 'visible', timeout: 5_000 });
   }
 
   /** Get text of the currently selected location */
@@ -79,7 +79,7 @@ export class VpsConfigPage {
         }),
       })
       .click();
-    await this.page.waitForTimeout(300);
+    await this.activeOsType.locator('.configure-server__type_title', { hasText: name }).waitFor({ state: 'visible', timeout: 5_000 });
   }
 
   // ── OS Version Dropdown ───────────────────────────────────────────────────
@@ -115,7 +115,7 @@ export class VpsConfigPage {
   /** Open the OS version dropdown by clicking its header */
   async openOsDropdown(): Promise<void> {
     await this.osDropdownSelected.click();
-    await this.page.waitForTimeout(300);
+    await this.osDropdownItems.first().waitFor({ state: 'visible', timeout: 5_000 });
   }
 
   /**
@@ -128,7 +128,7 @@ export class VpsConfigPage {
       .locator(".custom-dropdown__item")
       .filter({ hasText: version })
       .click();
-    await this.page.waitForTimeout(300);
+    await this.page.locator('.custom-dropdown__selected-content span', { hasText: version }).waitFor({ state: 'visible', timeout: 5_000 });
   }
 
   // ── Order Summary ─────────────────────────────────────────────────────────

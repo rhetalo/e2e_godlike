@@ -114,7 +114,7 @@ async function openRebuildPage(browser: Browser): Promise<{
 
   // Wait for OS selection page to load
   await page.waitForLoadState("networkidle").catch(() => null);
-  await page.waitForTimeout(1_000);
+  await rebuildPage.allOsCards.first().waitFor({ state: 'attached', timeout: 5_000 }).catch(() => null);
 
   const loaded = await rebuildPage.isLoaded();
   console.log(`[INFO] Rebuild/OS selection page loaded: ${loaded}, URL: ${page.url()}`);
@@ -290,7 +290,7 @@ test.describe("VPS Panel — Rebuild: аккордеон групп ОС", () =>
     expect(initialClass).toContain("collapsed");
 
     await debianBtn.click();
-    await page.waitForTimeout(500);
+    await expect(debianBtn).not.toHaveClass(/collapsed/, { timeout: 5_000 });
 
     const afterClass = await debianBtn.evaluate((el) => el.className);
     console.log(`[INFO] Debian button class after click: "${afterClass}"`);
@@ -405,7 +405,7 @@ test.describe("VPS Panel — Rebuild: выбор ОС (Install не нажима
     expect(classBefore).not.toContain("border-success");
 
     await almaCard.click();
-    await page.waitForTimeout(500);
+    await expect(almaCard).toHaveClass(/selected-card/, { timeout: 5_000 });
 
     const classAfter = await almaCard.evaluate((el) => el.className);
     console.log(`[INFO] AlmaLinux card class after click: "${classAfter}"`);
@@ -427,7 +427,7 @@ test.describe("VPS Panel — Rebuild: выбор ОС (Install не нажима
     await rebuildPage.expandAccordion("AlmaLinux");
     await expect(almaCard).toBeVisible({ timeout: 10_000 });
     await almaCard.click();
-    await page.waitForTimeout(500);
+    await expect(almaCard).toHaveClass(/selected-card/, { timeout: 5_000 });
 
     const selectedCount = await rebuildPage.selectedOsCard.count();
     console.log(`[INFO] Selected OS cards after click: ${selectedCount} (expected 1)`);
@@ -448,7 +448,7 @@ test.describe("VPS Panel — Rebuild: выбор ОС (Install не нажима
     await rebuildPage.expandAccordion("AlmaLinux");
     await expect(almaCard).toBeVisible({ timeout: 10_000 });
     await almaCard.click();
-    await page.waitForTimeout(400);
+    await expect(almaCard).toHaveClass(/selected-card/, { timeout: 5_000 });
 
     expect(await rebuildPage.selectedOsCard.count()).toBe(1);
     console.log("[INFO] AlmaLinux selected ✓");
@@ -458,7 +458,7 @@ test.describe("VPS Panel — Rebuild: выбор ОС (Install не нажима
     const debianCard = rebuildPage.osCardByName("Debian 12");
     await expect(debianCard).toBeVisible({ timeout: 8_000 });
     await debianCard.click();
-    await page.waitForTimeout(500);
+    await expect(debianCard).toHaveClass(/selected-card/, { timeout: 5_000 });
 
     // Debian 12 should now be selected
     const debianClass = await debianCard.evaluate((el) => el.className);

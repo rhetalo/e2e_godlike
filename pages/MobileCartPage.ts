@@ -126,8 +126,6 @@ export class MobileCartPage {
       () => !document.querySelector('.custom-select--disabled'),
       { timeout: 5_000 }
     );
-    // Allow price to update
-    await this.page.waitForTimeout(1000);
   }
 
   async selectGameBySearch(gameName: string): Promise<void> {
@@ -139,7 +137,6 @@ export class MobileCartPage {
       () => !document.querySelector('.custom-select--disabled'),
       { timeout: 5_000 }
     );
-    await this.page.waitForTimeout(500);
   }
 
   /* --- RAM / Plan --- */
@@ -151,7 +148,7 @@ export class MobileCartPage {
   async selectPlan(planName: string): Promise<void> {
     await this.ramDropdown.locator(MOBILE_CART.customSelectSelected).click();
     await this.ramDropdown.locator(MOBILE_CART.customSelectOption).filter({ hasText: planName }).click();
-    await this.page.waitForTimeout(500);
+    await expect(this.ramDropdown.locator(MOBILE_CART.customSelectSelected)).toContainText(planName, { timeout: 5_000 });
   }
 
   async getPlanOptions(): Promise<string[]> {
@@ -175,7 +172,7 @@ export class MobileCartPage {
   async selectBillingPeriod(label: string): Promise<void> {
     await this.billingDropdown.locator(MOBILE_CART.customSelectSelected).click();
     await this.billingDropdown.locator(MOBILE_CART.billingOptionRow).filter({ hasText: label }).click();
-    await this.page.waitForTimeout(500);
+    await expect(this.billingDropdown.locator(MOBILE_CART.customSelectSelected)).toContainText(label, { timeout: 5_000 });
   }
 
   /* --- Pricing --- */

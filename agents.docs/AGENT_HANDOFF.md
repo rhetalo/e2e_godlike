@@ -298,19 +298,12 @@ test("@critical описание теста", async () => {
 
 **Цель:** все эти файлы импортируют `CLIENTAREA_EMAIL` / `CLIENTAREA_PASSWORD` из одного места (либо `utils/auth.ts`, либо новый `utils/clientarea-auth.ts`).
 
-#### 🟡 Приоритет 2 — waitForTimeout (оставшиеся ~45 вхождений)
+#### 🟡 Приоритет 2 — waitForTimeout (оставшиеся ~10 вхождений)
 
 | Файл | Кол-во | Сложность |
 |---|---|---|
-| `tests/vps/panel/vps.build.spec.ts` | ~12 | ⚠️ Высокая — реальный rebuild |
-| `pages/VpsConfigPage.ts` | 4 | Средняя — Vue JS-click micro-delays |
-| `pages/MobileCartPage.ts` | 4 | Средняя — анимации? |
+| `tests/vps/panel/vps.build.spec.ts` | ~10 | ⚠️ Высокая — реальный rebuild |
 | `pages/VpsPanelServerDetailPage.ts` | 2 | Низкая — файл всё равно устарел |
-| `tests/vps/panel/vps.panel.power.actions.spec.ts` | 5 | Средняя |
-| `tests/vps/panel/vps.panel.rebuild.spec.ts` | 5 | Средняя |
-| `tests/funnels/vps.funnel.spec.ts` | 6 | Средняя |
-| `tests/general/valid.links.spec.ts` | 3 | Низкая |
-| `tests/funnels/funnel.seed.spec.ts` | 1 | Низкая |
 
 #### 🟡 Приоритет 3 — Устаревшие / дублирующие Page Objects
 
@@ -377,24 +370,17 @@ Credentials захардкожены в 6 funnel-файлах; оставшие�
 
 **`npx tsc --noEmit` — 0 ошибок** после всех изменений.
 
-### Оставшиеся waitForTimeout (~35 вхождений)
+### Оставшиеся waitForTimeout (~10 вхождений)
 
 | Файл | Кол-во | Сложность | Приоритет |
 |---|---|---|---|
-| `tests/vps/panel/vps.build.spec.ts` | ~12 | ⚠️ Высокая — реальный rebuild | 🔴 |
-| `tests/vps/panel/vps.panel.power.actions.spec.ts` | 4 | Средняя — после power-кнопок | 🟡 |
-| `tests/vps/panel/vps.panel.rebuild.spec.ts` | 5 | Средняя — после OS-выбора | 🟡 |
-| `tests/vps/funnel/vps.funnel.spec.ts` | 6 | Средняя — Vue dropdown | 🟡 |
-| `pages/MobileCartPage.ts` | 4 | Средняя — анимации? | 🟡 |
-| `pages/VpsConfigPage.ts` | 4 | Средняя — Vue JS-click delays | 🟡 |
+| `tests/vps/panel/vps.build.spec.ts` | ~10 | ⚠️ Высокая — реальный rebuild | 🔴 |
 | `pages/VpsPanelServerDetailPage.ts` | 2 | Низкая — файл устарел | 🟢 |
 
 ### Следующие приоритеты (открытые задачи)
 
-1. **waitForTimeout в vps.funnel.spec.ts** (6 штук, Vue dropdown) — средняя сложность, безопасно
-2. **waitForTimeout в power.actions + rebuild** — нужен живой контекст (что ждём после клика)
-3. **MobileCartPage.ts + VpsConfigPage.ts** — разобраться с природой задержек
-4. **vps.build.spec.ts** — обсудить с владельцем (реальный rebuild)
+1. **vps.build.spec.ts** — обсудить с владельцем (реальный rebuild), после чего удалить/мигрировать
+2. **VpsPanelServerDetailPage.ts** + **VpsPanelServersListPage.ts** — устарели, удалить вместе с `vps.build.spec.ts`
 
 
 ---
@@ -574,6 +560,29 @@ await rebuildPage.expandAccordion("Games");     // группа 4
 .flash-sale-modal__button      — CTA кнопка (НЕ закрывает, ведёт на оффер)
 ```
 Селекторы уже прописаны в `PROMO_BANNER_SELECTORS` / `PROMO_CLOSE_SELECTORS` в `CookieBanner.ts`.
+
+---
+
+## Сессия 11 — июнь 2026 (waitForTimeout финальная фаза: 25 вхождений)
+
+### Статус при входе
+`npx tsc --noEmit` — 0 ошибок; ~35 `waitForTimeout` оставалось в 5 целевых файлах.
+
+### Что сделано
+
+| # | Файл | Кол-во | Замена |
+|---|---|---|---|
+| 1 | `pages/VpsConfigPage.ts` | 4 | `.waitFor({state:'visible'})` — ждём DOM-изменений Vue вместо слепого таймаута |
+| 2 | `pages/MobileCartPage.ts` | 4 | 2 удалены (waitForFunction уже гарантирует состояние); 2 → `toContainText` |
+| 3 | `vps.panel.power.actions.spec.ts` | 5 | 1 → `expect(activeModal).not.toBeVisible`; 4 удалены (следующий expect уже ждёт) |
+| 4 | `vps.panel.rebuild.spec.ts` | 6 | `allOsCards.first().waitFor('attached')`, `not.toHaveClass(/collapsed/)`, `toHaveClass(/selected-card/)` |
+| 5 | `vps.funnel.spec.ts` | 6 | 3 удалены (toContainText auto-retries); 3 → `expect(activePeriod()).toContainText(label)` |
+
+**`npx tsc --noEmit` — 0 ошибок** после всех изменений.
+
+### Оставшиеся waitForTimeout (~10 вхождений)
+- `tests/vps/panel/vps.build.spec.ts` — ~10, реальный rebuild, обсудить с владельцем
+- `pages/VpsPanelServerDetailPage.ts` — 2, устаревший файл
 
 ---
 

@@ -75,7 +75,7 @@ async function confirmModal(sp: VpsPanelServerPage, confirmSelector: string): Pr
   await expect(confirmBtn).toBeVisible({ timeout: 5_000 });
   await confirmBtn.click();
   // data-bs-dismiss закрывает модал автоматически при клике
-  await sp.page.waitForTimeout(300);
+  await expect(sp.activeModal).not.toBeVisible({ timeout: 5_000 });
 }
 
 // ── Setup ─────────────────────────────────────────────────────────────────────
@@ -459,7 +459,6 @@ test.describe("VPS Power — Структура модалов подтверж�
     console.log("[T6.2] Shutdown modal structure verified ✓");
 
     await serverPage.modalCancelButton.click();
-    await serverPage.page.waitForTimeout(400);
     await expect(serverPage.activeModal).not.toBeVisible({ timeout: 5_000 });
   });
 
@@ -480,7 +479,6 @@ test.describe("VPS Power — Структура модалов подтверж�
     console.log("[T6.3] Power Off modal structure verified ✓");
 
     await serverPage.modalCancelButton.click();
-    await serverPage.page.waitForTimeout(400);
     await expect(serverPage.activeModal).not.toBeVisible({ timeout: 5_000 });
   });
 
@@ -501,7 +499,6 @@ test.describe("VPS Power — Структура модалов подтверж�
     console.log("[T6.4] Restart modal structure verified ✓");
 
     await serverPage.modalCancelButton.click();
-    await serverPage.page.waitForTimeout(400);
     await expect(serverPage.activeModal).not.toBeVisible({ timeout: 5_000 });
   });
 
@@ -512,7 +509,6 @@ test.describe("VPS Power — Структура модалов подтверж�
     await serverPage.shutdownButton.click();
     await expect(serverPage.activeModal).toBeVisible({ timeout: 8_000 });
     await serverPage.modalCancelButton.click();
-    await serverPage.page.waitForTimeout(600);
     await expect(serverPage.activeModal).not.toBeVisible({ timeout: 5_000 });
 
     const statusAfter = await serverPage.getStatusText();

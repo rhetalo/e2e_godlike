@@ -279,7 +279,6 @@ test.describe("VPS Funnel — Billing Cycle Step", () => {
 
     for (const label of ["3 Months", "6 Months", "12 Months", "1 Month"]) {
       await cartBilling.billing.selectCycle(label);
-      await page.waitForTimeout(400);
       await expect(billingCaption).toContainText(label);
       console.log(`[INFO] Billing caption → "${label}" ✓`);
     }
@@ -306,13 +305,13 @@ test.describe("VPS Funnel — Billing Cycle Step", () => {
     await expect(totalEl).toBeVisible({ timeout: 10_000 });
 
     await cartBilling.billing.selectCycle("1 Month");
-    await page.waitForTimeout(400);
+    await expect(cartBilling.billing.activePeriod()).toContainText("1 Month", { timeout: 3_000 });
     const total1m = parsePrice(await totalEl.innerText());
     console.log(`[INFO] Total 1 Month: ${total1m}`);
     expect(total1m).toBeGreaterThan(0);
 
     await cartBilling.billing.selectCycle("12 Months");
-    await page.waitForTimeout(400);
+    await expect(cartBilling.billing.activePeriod()).toContainText("12 Months", { timeout: 3_000 });
     const total12m = parsePrice(await totalEl.innerText());
     console.log(`[INFO] Total 12 Months: ${total12m}`);
     expect(total12m).toBeGreaterThan(0);
@@ -604,7 +603,6 @@ test.describe("VPS Funnel — Configure Your Server", () => {
       lastVersionText = (await lastItem.innerText()).trim();
       console.log(`[INFO] Selecting version: "${lastVersionText}"`);
       await lastItem.click();
-      await page.waitForTimeout(300);
     });
 
     await test.step("summary 'Server type' отражает выбранную версию", async () => {
@@ -699,7 +697,7 @@ test.describe("VPS Funnel — Full Happy Path", () => {
 
     await test.step("Step 2: Billing Cycle — выбрать 1 Month → Next Step", async () => {
       await cartBilling.billing.selectCycle("1 Month");
-      await page.waitForTimeout(300);
+      await expect(cartBilling.billing.activePeriod()).toContainText("1 Month", { timeout: 3_000 });
       await page.locator(".order__button-order").click();
       await config.waitForConfigureStep();
       console.log(`[STEP 2] Billing OK → Configure: ${page.url()}`);
@@ -715,7 +713,6 @@ test.describe("VPS Funnel — Full Happy Path", () => {
       const firstVersion = config.osDropdownItems.first();
       const versionText = (await firstVersion.innerText()).trim();
       await firstVersion.click();
-      await page.waitForTimeout(300);
       console.log(`[STEP 3] OS version selected: "${versionText}"`);
 
       // Проверить summary Server type
