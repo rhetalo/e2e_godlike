@@ -27,15 +27,14 @@ export class VpsPage {
     return this.page.locator(".vps-vds-dedi__plans-item");
   }
 
-  /** All "Deploy Now" buttons/links — scoped to cart-vps links only.
-   * Excludes affiliate / UTM links that share the deploy-btn class. */
+  /** All "Deploy Now" buttons/links */
   get deployButtons(): Locator {
-    return this.page.locator("a.deploy-btn[href*='/cart-vps/']");
+    return this.page.locator("a.deploy-btn");
   }
 
-  /** First "Deploy Now" link pointing to /cart-vps/ */
+  /** First "Deploy Now" link */
   get firstDeployButton(): Locator {
-    return this.page.locator("a.deploy-btn[href*='/cart-vps/']").first();
+    return this.page.locator("a.deploy-btn").first();
   }
 
   /** Plan card title */

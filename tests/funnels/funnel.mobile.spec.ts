@@ -118,11 +118,6 @@ test.describe("Mobile Cart Funnel", () => {
 
     await cart.selectGameByChip("Minecraft");
 
-    // Minecraft auto-selects a default plan — wait for Vue to populate the dropdown
-    // (was waitForTimeout(1000), replaced per TEST_GUIDELINES §9.6)
-    await expect.poll(async () => cart.getSelectedPlan(), { timeout: 5_000 })
-      .toContain("GB");
-
     const planText = await cart.getSelectedPlan();
     expect(planText).toContain("GB");
     console.log(`[INFO] Auto-selected plan: ${planText}`);
