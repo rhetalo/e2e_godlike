@@ -1,4 +1,5 @@
 import { type Page, type Locator } from "@playwright/test";
+import { CookieBanner } from "../components/CookieBanner";
 
 /**
  * VpsPage — https://godlike.host/vps-hosting/
@@ -20,6 +21,7 @@ export class VpsPage {
       waitUntil: "domcontentloaded",
       timeout: 30_000,
     });
+    await new CookieBanner(this.page).dismissAll().catch(() => {});
   }
 
   /** All plan cards on the page */
