@@ -133,7 +133,15 @@ export class MobileCartPage {
   async selectGameBySearch(gameName: string): Promise<void> {
     await this.gameSelect.locator(MOBILE_CART.gameSelectSelected).click();
     await this.gameSearchInput.fill(gameName);
-    await this.page.locator(MOBILE_CART.gameSelectOption).filter({ hasText: gameName }).first().click();
+
+    const option = this.page
+    .locator(MOBILE_CART.gameSelectOption)
+    .filter({ hasText: gameName })
+      .first();
+
+await expect(option).toBeVisible();
+
+await option.click();
     // Wait for RAM dropdown to become enabled
     await this.page.waitForFunction(
       () => !document.querySelector('.custom-select--disabled'),
