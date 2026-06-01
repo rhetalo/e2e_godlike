@@ -538,3 +538,39 @@ await rebuildPage.expandAccordion("Games");     // группа 4
 - `vps.panel.server.spec.ts` — ✅ завершён (сессия 6)
 - `vps.panel.options.spec.ts` — ✅ завершён (сессии 3-5)
 - `vps.panel.rebuild.spec.ts` — ✅ завершён (сессии 7-8)
+
+---
+
+## Сессия 9 — май 2026 (CookieBanner / flash-sale modal во всех тестах)
+
+### Что сделано
+
+Добавлен `new CookieBanner(page).dismissAll()` после `page.goto()` во все тесты которые используют прямую навигацию.
+
+**Файлы изменены:**
+- `tests/funnels/funnel.spec.ts`
+- `tests/funnels/funnel.cart.check.spec.ts`
+- `tests/funnels/funnel.with.credit.check.spec.ts`
+- `tests/funnels/funnel.paypal.redirect.spec.ts`
+- `tests/general/registration-flow.spec.ts`
+- `tests/general/smoke.pages.spec.ts`
+- `tests/modded/games.invalid.promo.spec.ts`
+- `tests/modded/games.valid.promo.spec.ts`
+- `tests/modded/game-slider.spec.ts` — `dismissAll()` добавлен внутрь метода `navigate()`
+
+**Уже были покрыты через `BasePage.goto()` (не изменялись):**
+- `slider.modded.spec.ts`, `slider.seed.spec.ts` — `ModdedHostingPage`
+- `modpack.config.modded.spec.ts` — `ModdedHostingPage`
+- `funnel.seed.spec.ts`, `funnel.modded.spec.ts` — `CartPage` / `SeedPage`
+- `login.validation.spec.ts` — `CartPage`
+
+**Не изменялся:**
+- `valid.links.spec.ts` — краулер HTTP статусов, UI не использует
+
+### Flash-sale modal структура (HTML подтверждён май 2026)
+```
+.flash-sale-modal              — root
+.flash-sale-modal__close       — кнопка закрытия (внутри __header)
+.flash-sale-modal__button      — CTA кнопка (НЕ закрывает, ведёт на оффер)
+```
+Селекторы уже прописаны в `PROMO_BANNER_SELECTORS` / `PROMO_CLOSE_SELECTORS` в `CookieBanner.ts`.
