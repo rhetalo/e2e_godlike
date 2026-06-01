@@ -18,10 +18,12 @@ import { test, expect } from "@playwright/test";
 import { ModdedHostingPage } from "../../pages/ModdedHostingPage";
 import { SeedPage } from "../../pages/SeedPage";
 import { Urls } from "../../fixtures/test-data";
+import { CookieBanner } from "../../components/CookieBanner";
 
 test.describe("@smoke godlike.host pages load", () => {
   test("home loads and has 'godlike' in <title>", async ({ page }) => {
     const resp = await page.goto(Urls.home, { waitUntil: "domcontentloaded" });
+    await new CookieBanner(page).dismissAll();
     expect(resp?.ok()).toBeTruthy();
     const title = await page.title();
     console.log(`[INFO] Home <title>: ${title}`);

@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 import { Credentials } from "../../fixtures/test-data";
 import { CreditBalanceSelector } from "../../components/CreditBalanceSelector";
 import { PaymentMethodSelector } from "../../components/PaymentMethodSelector";
+import { CookieBanner } from "../../components/CookieBanner";
 
 test.use({
   viewport: { width: 1800, height: 900 },
@@ -10,6 +11,7 @@ test.use({
 
 test("PayPal redirect", async ({ page }) => {
   await page.goto("https://godlike.host");
+  await new CookieBanner(page).dismissAll();
 
   await page
     .getByRole("banner")

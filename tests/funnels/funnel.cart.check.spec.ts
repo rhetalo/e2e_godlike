@@ -21,6 +21,7 @@
 // Зависимость: @playwright/test (указана в package.json в секции devDependencies)
 import { test, expect } from "@playwright/test";
 import { Credentials } from "../../fixtures/test-data";
+import { CookieBanner } from "../../components/CookieBanner";
 
 /**
  * ============================================================================================
@@ -79,6 +80,7 @@ test("test Credit/Debit Card", async ({ page }) => {
   // 'https://godlike.host' - адрес тестируемого сайта (хостинг-провайдер для игровых серверов)
   // await - ожидает, пока страница полностью загрузится, перед переходом к следующему шагу
   await page.goto("https://godlike.host");
+  await new CookieBanner(page).dismissAll();
 
   // ШАГ 2: Поиск и клик по ссылке "Minecraft Server Hosting" в шапке сайта
   // page.getByRole('banner') - ищет элемент с ролью 'banner' (это header/шапка сайта)

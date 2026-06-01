@@ -11,6 +11,7 @@
  */
 
 import { test, expect, Page } from "@playwright/test";
+import { CookieBanner } from "../../components/CookieBanner";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Game registry
@@ -110,6 +111,7 @@ class SliderPageHelper {
       waitUntil: "domcontentloaded",
       timeout: 30000,
     });
+    await new CookieBanner(this.page).dismissAll();
     // Wait for Vue to render the tariff section instead of a fixed 3-second delay
     await this.page.waitForSelector('[class*="storefront__tariff"]', {
       state: 'visible',

@@ -1,4 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
+import { CookieBanner } from '../../components/CookieBanner';
 import { generateCredentials, saveCredentials } from '../../utils/credentials';
 
 test.describe('Registration flow from tariff', () => {
@@ -10,6 +11,7 @@ test.describe('Registration flow from tariff', () => {
     await page.goto('https://godlike.host/', {
         waitUntil: 'domcontentloaded'
     });
+    await new CookieBanner(page).dismissAll();
 
     /* ---------- VIEW ALL PLANS ---------- */
     const viewAllPlans = page.locator(
