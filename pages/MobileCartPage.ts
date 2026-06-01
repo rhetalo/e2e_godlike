@@ -1,6 +1,5 @@
 import { type Locator, type Page, expect } from '@playwright/test';
 import { MOBILE_CART } from '../utils/selectors';
-import { CookieBanner } from '../components/CookieBanner';
 
 /**
  * MobileCartPage — Page Object for /mobile-cart/?is_cart_opened=true
@@ -88,12 +87,7 @@ export class MobileCartPage {
   }
 
   async goto(): Promise<void> {
-    await this.page.goto('/mobile-cart/?is_cart_opened=true', {
-      waitUntil: 'domcontentloaded',
-      timeout: 30_000,
-    });
-    await new CookieBanner(this.page).dismissAll().catch(() => {});
-    await this.page.waitForLoadState('networkidle', { timeout: 10_000 }).catch(() => {});
+    await this.page.goto('/mobile-cart/?is_cart_opened=true');
     await this.waitForReady();
   }
 
