@@ -1,27 +1,39 @@
 /**
  * fixtures/base.ts
  * ─────────────────
- * Расширенная фикстура Playwright — автоматически регистрирует обработчики
- * баннеров для каждой страницы.
+ * Расширенная фикстура Playwright — автоматически закрывает баннеры
+ * после каждого page.goto().
  *
  * ИСПОЛЬЗОВАНИЕ:
  *   Вместо:  import { test, expect } from '@playwright/test';
  *   Писать:  import { test, expect } from '../../fixtures/base';
  *
- * После этого любой `page` в тесте автоматически получает setupBannerHandlers()
- * — не нужно вручную вызывать dismissAll() или setupBannerHandlers().
+ * КАК РАБОТАЕТ:
+ *   Оборачивает page.goto() — после каждой навигации вызывает dismissAll().
+ *   Это то же самое что делает BasePage.goto() для Page Object тестов.
  *
- * ЗАЧЕМ:
- *   BasePage.goto() уже вызывает dismissAll() для Page Object тестов.
- *   Эта фикстура покрывает тесты с прямым page.goto() тем же механизмом,
- *   чтобы поведение было единообразным во всём проекте.
+ * ПОЧЕМУ НЕ addLocatorHandler:
+ *   addLocatorHandler перехватывает клики ПОСРЕДИ теста, в том числе по
+ *   навигационным ссылкам. Это вызывает редирект обратно на godlike.host/
+ *   вместо перехода на целевую страницу.
+ *   Безопасная альтернатива — одноразовый dismissAll() сразу после goto().
  */
 import { test as base, expect, type Page, type Browser, type BrowserContext } from '@playwright/test';
-import { setupBannerHandlers } from '../utils/bannerHandlers';
+import { CookieBanner } from '../components/CookieBanner';
 
-export const test = base.extend<{ page: ReturnType<typeof base['info']> }>({
+export const test = base.extend<{ page: Page }>({
   page: async ({ page }, use) => {
-    await setupBannerHandlers(page);
+    const banner = new CookieBanner(page);
+
+    // Оборачиваем page.goto() — после каждой навигации автоматически
+    // закрываем все баннеры. Аналог BasePage.goto() → dismissIfPresent().
+    const origGoto = page.goto.bind(page);
+    (page as any).goto = async (...args: Parameters<Page['goto']>) => {
+      const resp = await origGoto(...args);
+      await banner.dismissAll().catch(() => {});
+      return resp;
+    };
+
     await use(page);
   },
 });
