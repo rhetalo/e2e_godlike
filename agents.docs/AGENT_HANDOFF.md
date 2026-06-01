@@ -298,12 +298,19 @@ test("@critical описание теста", async () => {
 
 **Цель:** все эти файлы импортируют `CLIENTAREA_EMAIL` / `CLIENTAREA_PASSWORD` из одного места (либо `utils/auth.ts`, либо новый `utils/clientarea-auth.ts`).
 
-#### 🟡 Приоритет 2 — waitForTimeout (оставшиеся ~10 вхождений)
+#### 🟡 Приоритет 2 — waitForTimeout (оставшиеся ~45 вхождений)
 
 | Файл | Кол-во | Сложность |
 |---|---|---|
-| `tests/vps/panel/vps.build.spec.ts` | ~10 | ⚠️ Высокая — реальный rebuild |
+| `tests/vps/panel/vps.build.spec.ts` | ~12 | ⚠️ Высокая — реальный rebuild |
+| `pages/VpsConfigPage.ts` | 4 | Средняя — Vue JS-click micro-delays |
+| `pages/MobileCartPage.ts` | 4 | Средняя — анимации? |
 | `pages/VpsPanelServerDetailPage.ts` | 2 | Низкая — файл всё равно устарел |
+| `tests/vps/panel/vps.panel.power.actions.spec.ts` | 5 | Средняя |
+| `tests/vps/panel/vps.panel.rebuild.spec.ts` | 5 | Средняя |
+| `tests/funnels/vps.funnel.spec.ts` | 6 | Средняя |
+| `tests/general/valid.links.spec.ts` | 3 | Низкая |
+| `tests/funnels/funnel.seed.spec.ts` | 1 | Низкая |
 
 #### 🟡 Приоритет 3 — Устаревшие / дублирующие Page Objects
 
@@ -370,17 +377,24 @@ Credentials захардкожены в 6 funnel-файлах; оставшие�
 
 **`npx tsc --noEmit` — 0 ошибок** после всех изменений.
 
-### Оставшиеся waitForTimeout (~10 вхождений)
+### Оставшиеся waitForTimeout (~35 вхождений)
 
 | Файл | Кол-во | Сложность | Приоритет |
 |---|---|---|---|
-| `tests/vps/panel/vps.build.spec.ts` | ~10 | ⚠️ Высокая — реальный rebuild | 🔴 |
+| `tests/vps/panel/vps.build.spec.ts` | ~12 | ⚠️ Высокая — реальный rebuild | 🔴 |
+| `tests/vps/panel/vps.panel.power.actions.spec.ts` | 4 | Средняя — после power-кнопок | 🟡 |
+| `tests/vps/panel/vps.panel.rebuild.spec.ts` | 5 | Средняя — после OS-выбора | 🟡 |
+| `tests/vps/funnel/vps.funnel.spec.ts` | 6 | Средняя — Vue dropdown | 🟡 |
+| `pages/MobileCartPage.ts` | 4 | Средняя — анимации? | 🟡 |
+| `pages/VpsConfigPage.ts` | 4 | Средняя — Vue JS-click delays | 🟡 |
 | `pages/VpsPanelServerDetailPage.ts` | 2 | Низкая — файл устарел | 🟢 |
 
 ### Следующие приоритеты (открытые задачи)
 
-1. **vps.build.spec.ts** — обсудить с владельцем (реальный rebuild), после чего удалить/мигрировать
-2. **VpsPanelServerDetailPage.ts** + **VpsPanelServersListPage.ts** — устарели, удалить вместе с `vps.build.spec.ts`
+1. **waitForTimeout в vps.funnel.spec.ts** (6 штук, Vue dropdown) — средняя сложность, безопасно
+2. **waitForTimeout в power.actions + rebuild** — нужен живой контекст (что ждём после клика)
+3. **MobileCartPage.ts + VpsConfigPage.ts** — разобраться с природой задержек
+4. **vps.build.spec.ts** — обсудить с владельцем (реальный rebuild)
 
 
 ---
@@ -524,137 +538,3 @@ await rebuildPage.expandAccordion("Games");     // группа 4
 - `vps.panel.server.spec.ts` — ✅ завершён (сессия 6)
 - `vps.panel.options.spec.ts` — ✅ завершён (сессии 3-5)
 - `vps.panel.rebuild.spec.ts` — ✅ завершён (сессии 7-8)
-
----
-
-## Сессия 9 — май 2026 (CookieBanner / flash-sale modal во всех тестах)
-
-### Что сделано
-
-Добавлен `new CookieBanner(page).dismissAll()` после `page.goto()` во все тесты которые используют прямую навигацию.
-
-**Файлы изменены:**
-- `tests/funnels/funnel.spec.ts`
-- `tests/funnels/funnel.cart.check.spec.ts`
-- `tests/funnels/funnel.with.credit.check.spec.ts`
-- `tests/funnels/funnel.paypal.redirect.spec.ts`
-- `tests/general/registration-flow.spec.ts`
-- `tests/general/smoke.pages.spec.ts`
-- `tests/modded/games.invalid.promo.spec.ts`
-- `tests/modded/games.valid.promo.spec.ts`
-- `tests/modded/game-slider.spec.ts` — `dismissAll()` добавлен внутрь метода `navigate()`
-
-**Уже были покрыты через `BasePage.goto()` (не изменялись):**
-- `slider.modded.spec.ts`, `slider.seed.spec.ts` — `ModdedHostingPage`
-- `modpack.config.modded.spec.ts` — `ModdedHostingPage`
-- `funnel.seed.spec.ts`, `funnel.modded.spec.ts` — `CartPage` / `SeedPage`
-- `login.validation.spec.ts` — `CartPage`
-
-**Не изменялся:**
-- `valid.links.spec.ts` — краулер HTTP статусов, UI не использует
-
-### Flash-sale modal структура (HTML подтверждён май 2026)
-```
-.flash-sale-modal              — root
-.flash-sale-modal__close       — кнопка закрытия (внутри __header)
-.flash-sale-modal__button      — CTA кнопка (НЕ закрывает, ведёт на оффер)
-```
-Селекторы уже прописаны в `PROMO_BANNER_SELECTORS` / `PROMO_CLOSE_SELECTORS` в `CookieBanner.ts`.
-
----
-
-## Сессия 11 — июнь 2026 (waitForTimeout финальная фаза: 25 вхождений)
-
-### Статус при входе
-`npx tsc --noEmit` — 0 ошибок; ~35 `waitForTimeout` оставалось в 5 целевых файлах.
-
-### Что сделано
-
-| # | Файл | Кол-во | Замена |
-|---|---|---|---|
-| 1 | `pages/VpsConfigPage.ts` | 4 | `.waitFor({state:'visible'})` — ждём DOM-изменений Vue вместо слепого таймаута |
-| 2 | `pages/MobileCartPage.ts` | 4 | 2 удалены (waitForFunction уже гарантирует состояние); 2 → `toContainText` |
-| 3 | `vps.panel.power.actions.spec.ts` | 5 | 1 → `expect(activeModal).not.toBeVisible`; 4 удалены (следующий expect уже ждёт) |
-| 4 | `vps.panel.rebuild.spec.ts` | 6 | `allOsCards.first().waitFor('attached')`, `not.toHaveClass(/collapsed/)`, `toHaveClass(/selected-card/)` |
-| 5 | `vps.funnel.spec.ts` | 6 | 3 удалены (toContainText auto-retries); 3 → `expect(activePeriod()).toContainText(label)` |
-
-**`npx tsc --noEmit` — 0 ошибок** после всех изменений.
-
-### Оставшиеся waitForTimeout (~10 вхождений)
-- `tests/vps/panel/vps.build.spec.ts` — ~10, реальный rebuild, обсудить с владельцем
-- `pages/VpsPanelServerDetailPage.ts` — 2, устаревший файл
-
----
-
-## Сессия 10 — май 2026 (унификация banner handling)
-
-### Проблема
-Было два несовместимых подхода:
-1. Page Object тесты → `BasePage.goto()` → `dismissIfPresent()` ✅
-2. Тесты с прямым `page.goto()` → ручной `dismissAll()` в каждом файле 🔶
-
-### Решение: `fixtures/base.ts`
-Создан кастомный Playwright fixture, который расширяет `page`:
-```typescript
-// fixtures/base.ts
-export const test = base.extend({
-  page: async ({ page }, use) => {
-    await setupBannerHandlers(page); // ← автоматически для КАЖДОГО теста
-    await use(page);
-  },
-});
-```
-
-### Правило для новых тестов
-**Всегда** импортировать из `fixtures/base` вместо `@playwright/test`:
-```typescript
-// ✅ Правильно
-import { test, expect } from '../../fixtures/base';
-
-// ❌ Неправильно (нет автоматической обработки баннеров)
-import { test, expect } from '@playwright/test';
-```
-
-### Файлы обновлены (9 файлов)
-funnels: funnel.spec.ts, funnel.cart.check.spec.ts, funnel.with.credit.check.spec.ts, funnel.paypal.redirect.spec.ts
-general: registration-flow.spec.ts, smoke.pages.spec.ts
-modded: games.invalid.promo.spec.ts, games.valid.promo.spec.ts, game-slider.spec.ts
-
-### Файлы которые используют @playwright/test напрямую (легитимно)
-- `tests/vps/panel/*` — VPS панель, баннеры не нужны (другой домен)
-- `tests/vps/funnel/*` — аналогично
-- `tests/general/valid.links.spec.ts` — краулер HTTP, UI не использует
-- `tests/funnels/funnel.mobile.spec.ts` — использует CartPage (BasePage) ✅
-- `tests/funnels/funnel.seed.spec.ts` — использует SeedPage (BasePage) ✅
-- `tests/modded/slider.*.spec.ts` — используют ModdedHostingPage (BasePage) ✅
-
----
-
-## Сессия 12 — июнь 2026 (фикс addLocatorHandler — infinite intercept loop)
-
-### Проблема
-`funnel.cart.check.spec.ts` падал: URL оставался `https://godlike.host/` после клика "Minecraft Server Hosting".
-
-Причина: `setupBannerHandlers` регистрировал `addLocatorHandler` для `acceptCookieButton()`, который содержал `button:has-text("Accept")`. Этот слишком широкий селектор:
-1. Перехватывал клики по любым ссылкам (не только баннер)
-2. Запускал `dismissAll()` — внутри которого возможен клик по `[class*="sale"] [data-bs-dismiss]` или cookie-кнопке, что вызывало навигацию обратно на главную
-
-### Правило (окончательное, нарушать нельзя)
-```
-addLocatorHandler → ТОЛЬКО точные подтверждённые селекторы с ИЗВЕСТНОЙ кнопкой закрытия
-                    ✅ .flash-sale-modal  (есть .flash-sale-modal__close)
-                    ❌ button:has-text("Accept")  — слишком широко, матчит всё
-                    ❌ [class*="sale-banner"]      — постоянный hidden элемент в DOM → бесконечный цикл
-                    ❌ acceptCookieButton()        — содержит has-text("Accept")
-
-dismissAll()      → широкие паттерны ОК — это одноразовый вызов после goto(), не фоновый handler
-```
-
-### Что изменилось
-
-| Файл | Изменение |
-|---|---|
-| `utils/bannerHandlers.ts` | Убраны `acceptCookieButton()` и `flashSaleClose()` из `addLocatorHandler`; остался только `.flash-sale-modal` |
-| `components/CookieBanner.ts` | `promoBannerRoot()` — обновлён комментарий: явно указано NOT для addLocatorHandler |
-
-**`npx tsc --noEmit` — 0 ошибок.**

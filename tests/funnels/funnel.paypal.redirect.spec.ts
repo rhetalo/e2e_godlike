@@ -1,4 +1,4 @@
-import { test, expect } from "../../fixtures/base";
+import { test, expect } from "@playwright/test";
 import { Credentials } from "../../fixtures/test-data";
 import { CreditBalanceSelector } from "../../components/CreditBalanceSelector";
 import { PaymentMethodSelector } from "../../components/PaymentMethodSelector";

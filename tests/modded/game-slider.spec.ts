@@ -10,7 +10,7 @@
  *    invariants asserted across all games, because they never change per-game.
  */
 
-import { test, expect, Page } from "../../fixtures/base";
+import { test, expect, Page } from "@playwright/test";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Game registry

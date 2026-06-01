@@ -1,4 +1,4 @@
-import { test, expect } from "../../fixtures/base";
+import { test, expect } from "@playwright/test";
 import gamesData from "../../fixtures/games.json";
 
 const gamesToTest = gamesData.games;
@@ -20,7 +20,7 @@ test.beforeAll(async ({ browser }) => {
     waitUntil: "domcontentloaded",
     timeout: 60000,
   });
-  
+
   await page.fill("#inputEmail", EMAIL);
   await page.fill("#inputPassword", PASSWORD);
 
@@ -63,7 +63,7 @@ for (const game of gamesToTest) {
         waitUntil: "domcontentloaded",
         timeout: 60000,
       });
-  
+
       const gameLink = page
         .locator("a.game__title")
         .filter({ hasText: new RegExp(`^${gameName}$`) })
@@ -201,7 +201,7 @@ for (const game of gamesToTest) {
             waitUntil: "domcontentloaded",
             timeout: 60000,
           });
-          });
+        });
       }
 
       // ---------------- FINAL ASSERT ----------------

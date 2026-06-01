@@ -1,4 +1,4 @@
-import { test, expect, Page } from "../../fixtures/base";
+import { test, expect, Page } from '@playwright/test';
 import { generateCredentials, saveCredentials } from '../../utils/credentials';
 
 test.describe('Registration flow from tariff', () => {
@@ -10,7 +10,7 @@ test.describe('Registration flow from tariff', () => {
     await page.goto('https://godlike.host/', {
         waitUntil: 'domcontentloaded'
     });
-  
+
     /* ---------- VIEW ALL PLANS ---------- */
     const viewAllPlans = page.locator(
         `a[href*="minecraft-java-servers-hosting"], a:has-text("View all plans")`

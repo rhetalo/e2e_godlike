@@ -1,52 +1,102 @@
 /**
  * bannerHandlers.ts
  * ──────────────────
- * Утилиты для закрытия баннеров и оверлеев.
+ * Регистрирует `page.addLocatorHandler()` для всех баннеров и оверлеев.
  *
- * ── АРХИТЕКТУРА ──────────────────────────────────────────────────────────────
+ * ── ЧТО ДЕЛАЕТ addLocatorHandler ────────────────────────────────────────────
  *
- * Баннеры закрываются через ОДНОРАЗОВЫЙ вызов dismissAll() после goto(),
- * а НЕ через addLocatorHandler.
+ * Playwright наблюдает за указанным локатором в фоне.
+ * Как только элемент появляется на странице (даже посреди теста, посреди клика),
+ * Playwright:
+ *   1. Останавливает текущее действие
+ *   2. Запускает обработчик (handler)
+ *   3. Повторяет остановленное действие
  *
- * Почему не addLocatorHandler:
- *   Playwright's addLocatorHandler перехватывает ВСЕ клики (в том числе по
- *   навигационным ссылкам) как только указанный локатор становится видим.
- *   Широкие селекторы (button:has-text("Accept"), [class*="sale-banner"]) матчат
- *   постоянные элементы DOM → бесконечный цикл перехвата или случайный клик по
- *   чему-то, что вызывает навигацию обратно на главную.
+ * Это означает: тест НЕ падает из-за баннера, баннер закрывается автоматически,
+ * действие выполняется как будто баннера не было.
  *
- * ── КАК ИСПОЛЬЗУЕТСЯ ─────────────────────────────────────────────────────────
+ * ── КАК ИСПОЛЬЗОВАТЬ ────────────────────────────────────────────────────────
  *
- * Page Object тесты (CartPage, ModdedHostingPage и др.):
- *   BasePage.goto() → dismissIfPresent() → автоматически ✅
+ * Вызови один раз после создания страницы (`context.newPage()`):
  *
- * VPS-панель (VpsPanelServerPage):
- *   setupBannerHandlers(page) — вызывается в goto() (исторически, теперь no-op)
- *   new CookieBanner(page).dismissAll() — явный вызов после goto() ✅
+ *   const page = await context.newPage();
+ *   await setupBannerHandlers(page);         // ← добавь эту строку
+ *   // ... дальше работа с page как обычно
  *
- * Тесты с прямым page.goto() (funnels, general, modded):
- *   fixtures/base.ts оборачивает page.goto() → dismissAll() автоматически ✅
+ * Для VPS-панели: вызов уже встроен в `VpsPanelServerPage.goto()`.
+ * Для других тестов: вызывай вручную там, где создаётся page.
+ *
+ * ── КАК ДОБАВИТЬ НОВЫЙ БАННЕР АКЦИИ ─────────────────────────────────────────
+ *
+ * 1. Открой браузер, дождись появления баннера
+ * 2. F12 → Elements → найди корневой элемент баннера
+ * 3. Правая кнопка → Copy → Copy selector
+ * 4. Добавь его в PROMO_BANNER_SELECTORS в CookieBanner.ts
+ * 5. Найди кнопку закрытия → добавь в PROMO_CLOSE_SELECTORS в CookieBanner.ts
+ * 6. Готово — `setupBannerHandlers` подберёт новый селектор автоматически
+ *
+ * ── ВАЖНО ────────────────────────────────────────────────────────────────────
+ *
+ * addLocatorHandler срабатывает только когда элемент ВИДЕН (visible).
+ * Поэтому селектор в PROMO_BANNER_SELECTORS должен совпадать с видимым
+ * корневым элементом баннера, а не с каким-то скрытым контейнером.
  */
 import type { Page } from "@playwright/test";
+import { CookieBanner } from "../components/CookieBanner";
 
 /**
- * Регистрирует автоматические обработчики баннеров.
+ * Регистрирует автоматические обработчики для всех известных баннеров.
  *
- * @deprecated Ранее использовал addLocatorHandler — теперь no-op.
- * Баннеры закрываются через page.goto()-обёртку в fixtures/base.ts
- * и явные dismissAll() в Page Object goto().
- * Функция оставлена для обратной совместимости (VpsPanelServerPage вызывает её).
+ * Вызывай один раз после `context.newPage()`.
+ * Работает на любом сайте: godlike.host и vf-panel.godlike.host.
  */
-export async function setupBannerHandlers(_page: Page): Promise<void> {
-  // Intentionally empty — see module-level docs above.
+export async function setupBannerHandlers(page: Page): Promise<void> {
+  const banner = new CookieBanner(page);
+
+  // ── 1. Баннер акции / weekend sale ────────────────────────────────────────
+  //
+  // Срабатывает при появлении любого элемента из PROMO_BANNER_SELECTORS.
+  // Обработчик: закрывает баннер кнопкой + убивает CSS.
+  //
+  // noWaitAfter: true — не ждать скрытия баннера после клика
+  // (Playwright по умолчанию ждёт, но баннер может анимироваться)
+  await page
+    .addLocatorHandler(banner.promoBannerRoot(), async () => {
+      await banner.dismissPromo();
+    })
+    .catch(() => {
+      // addLocatorHandler может не поддерживаться в очень старых версиях Playwright
+      // В таком случае тихо игнорируем — dismissAll() в goto() всё равно отработает
+    });
+
+  // ── 2. Cookie / GDPR баннер ───────────────────────────────────────────────
+  await page
+    .addLocatorHandler(banner.acceptCookieButton(), async () => {
+      await banner.dismissAll();
+    })
+    .catch(() => undefined);
+
+  // ── 3. Flash-sale (legacy) ────────────────────────────────────────────────
+  await page
+    .addLocatorHandler(banner.flashSaleClose(), async () => {
+      await banner.dismissAll();
+    })
+    .catch(() => undefined);
 }
 
 /**
- * Вспомогательная функция: создаёт страницу.
- * @deprecated Используй context.newPage() напрямую.
+ * Вспомогательная функция: создаёт страницу с уже настроенными обработчиками.
+ *
+ * Используй вместо `context.newPage()` если хочешь одной строкой получить
+ * страницу, готовую к работе без баннеров.
+ *
+ * Пример:
+ *   const page = await newPageWithHandlers(context);
  */
 export async function newPageWithHandlers(
   context: Awaited<ReturnType<import("@playwright/test").Browser["newContext"]>>,
 ): Promise<import("@playwright/test").Page> {
-  return context.newPage();
+  const page = await context.newPage();
+  await setupBannerHandlers(page);
+  return page;
 }
