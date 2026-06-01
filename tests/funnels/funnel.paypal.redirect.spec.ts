@@ -33,28 +33,20 @@ test("PayPal redirect", async ({ page }) => {
   await page.getByRole("button", { name: "Login" }).click();
 
   // ШАГ 8: Переход на следующий шаг (выбор локации сервера)
-  // После успешной авторизации пользователь перенаправляется на страницу настройки заказа
-  // Нажимаем кнопку "Next step" (Следующий шаг) для перехода к выбору локации
-  await Promise.all([
-  page.waitForURL(/cart\?/),
-  page.getByRole('button', { name: 'Next step' }).click(),
-]);
+  // Ждём появления "Next step" — логин асинхронный, кнопка появится после редиректа
+  const nextStepBtn = page.getByRole('button', { name: 'Next step' });
+  await nextStepBtn.waitFor({ state: 'visible', timeout: 15_000 });
+  await nextStepBtn.click();
 
-  // ПРОВЕРКА 5: Проверка заголовка "Choose location" (Выберите локацию)
-  // page.getByRole('heading', { name: 'Choose location' }) - ищет заголовок (h1-h6) с текстом "Choose location"
-  // Примечание: здесь нет await expect().toBeVisible(), поэтому проверка может быть нестрогой
-  // (это скорее "подтверждение", чем обязательная проверка)
+  // ПРОВЕРКА 5: Заголовок "Choose location" должен появиться после клика
   await expect(
-  page.getByRole('heading', { name: 'Choose location' })
-).toBeVisible();
+    page.getByRole('heading', { name: 'Choose location' })
+  ).toBeVisible({ timeout: 15_000 });
 
   // ШАГ 9: Повторный клик по "Next step" для подтверждения выбора локации
-  // После выбора локации (или оставления значений по умолчанию) переходим к следующему шагу
-  // Обычно на этом этапе выбирается локация сервера (например, Germany, USA, Russia)
-  await Promise.all([
-  page.waitForURL(/cart\?/),
-  page.getByRole('button', { name: 'Next step' }).click(),
-]);
+  const nextStepBtn2 = page.getByRole('button', { name: 'Next step' });
+  await nextStepBtn2.waitFor({ state: 'visible', timeout: 10_000 });
+  await nextStepBtn2.click();
 
   // ПРОВЕРКА 6: Проверка финального URL после прохождения всех шагов настройки
   // После выбора локации пользователь должен оказаться на странице оформления заказа
