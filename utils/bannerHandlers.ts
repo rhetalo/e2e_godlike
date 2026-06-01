@@ -53,21 +53,17 @@ import { CookieBanner } from "../components/CookieBanner";
 export async function setupBannerHandlers(page: Page): Promise<void> {
   const banner = new CookieBanner(page);
 
-  // ── 1. Баннер акции / weekend sale ────────────────────────────────────────
+  // ── 1. Flash-sale modal (.flash-sale-modal) ───────────────────────────────
   //
-  // Срабатывает при появлении любого элемента из PROMO_BANNER_SELECTORS.
-  // Обработчик: закрывает баннер кнопкой + убивает CSS.
-  //
-  // noWaitAfter: true — не ждать скрытия баннера после клика
-  // (Playwright по умолчанию ждёт, но баннер может анимироваться)
+  // ВАЖНО: addLocatorHandler регистрируем ТОЛЬКО для точных подтверждённых
+  // селекторов с известной кнопкой закрытия.
+  // Широкие паттерны [class*="sale-banner"] etc. — только в dismissAll(),
+  // иначе они матчат постоянные элементы DOM и зацикливают перехват кликов.
   await page
-    .addLocatorHandler(banner.promoBannerRoot(), async () => {
+    .addLocatorHandler(page.locator(".flash-sale-modal").first(), async () => {
       await banner.dismissPromo();
     })
-    .catch(() => {
-      // addLocatorHandler может не поддерживаться в очень старых версиях Playwright
-      // В таком случае тихо игнорируем — dismissAll() в goto() всё равно отработает
-    });
+    .catch(() => undefined);
 
   // ── 2. Cookie / GDPR баннер ───────────────────────────────────────────────
   await page
@@ -76,7 +72,7 @@ export async function setupBannerHandlers(page: Page): Promise<void> {
     })
     .catch(() => undefined);
 
-  // ── 3. Flash-sale (legacy) ────────────────────────────────────────────────
+  // ── 3. Flash-sale close button (legacy selector) ──────────────────────────
   await page
     .addLocatorHandler(banner.flashSaleClose(), async () => {
       await banner.dismissAll();
