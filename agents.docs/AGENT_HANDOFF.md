@@ -627,3 +627,34 @@ modded: games.invalid.promo.spec.ts, games.valid.promo.spec.ts, game-slider.spec
 - `tests/funnels/funnel.mobile.spec.ts` — использует CartPage (BasePage) ✅
 - `tests/funnels/funnel.seed.spec.ts` — использует SeedPage (BasePage) ✅
 - `tests/modded/slider.*.spec.ts` — используют ModdedHostingPage (BasePage) ✅
+
+---
+
+## Сессия 12 — июнь 2026 (фикс addLocatorHandler — infinite intercept loop)
+
+### Проблема
+`funnel.cart.check.spec.ts` падал: URL оставался `https://godlike.host/` после клика "Minecraft Server Hosting".
+
+Причина: `setupBannerHandlers` регистрировал `addLocatorHandler` для `acceptCookieButton()`, который содержал `button:has-text("Accept")`. Этот слишком широкий селектор:
+1. Перехватывал клики по любым ссылкам (не только баннер)
+2. Запускал `dismissAll()` — внутри которого возможен клик по `[class*="sale"] [data-bs-dismiss]` или cookie-кнопке, что вызывало навигацию обратно на главную
+
+### Правило (окончательное, нарушать нельзя)
+```
+addLocatorHandler → ТОЛЬКО точные подтверждённые селекторы с ИЗВЕСТНОЙ кнопкой закрытия
+                    ✅ .flash-sale-modal  (есть .flash-sale-modal__close)
+                    ❌ button:has-text("Accept")  — слишком широко, матчит всё
+                    ❌ [class*="sale-banner"]      — постоянный hidden элемент в DOM → бесконечный цикл
+                    ❌ acceptCookieButton()        — содержит has-text("Accept")
+
+dismissAll()      → широкие паттерны ОК — это одноразовый вызов после goto(), не фоновый handler
+```
+
+### Что изменилось
+
+| Файл | Изменение |
+|---|---|
+| `utils/bannerHandlers.ts` | Убраны `acceptCookieButton()` и `flashSaleClose()` из `addLocatorHandler`; остался только `.flash-sale-modal` |
+| `components/CookieBanner.ts` | `promoBannerRoot()` — обновлён комментарий: явно указано NOT для addLocatorHandler |
+
+**`npx tsc --noEmit` — 0 ошибок.**
