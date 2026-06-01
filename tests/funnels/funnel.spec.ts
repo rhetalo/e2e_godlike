@@ -1,6 +1,5 @@
-import {test, expect} from '@playwright/test';
+import {test, expect} from "../../fixtures/base";
 import { Credentials } from '../../fixtures/test-data';
-import { CookieBanner } from '../../components/CookieBanner';
 
 test.use({
     viewport: {
@@ -12,8 +11,7 @@ test.use({
 
 test('test base funnel', async ({page}) => {
     await page.goto('https://godlike.host');
-    await new CookieBanner(page).dismissAll();
-
+  
     await page
         .getByRole('banner')
         .getByRole('link', {name: 'Minecraft Server Hosting'})
@@ -90,8 +88,7 @@ test('test base funnel', async ({page}) => {
 
 test('check old funnel redirect', async ({page}) => {
     await page.goto('https://godlike.host/clientarea/cart.php?a=add&pid=341&billingcycle=monthly&currency=1&language=english&promocode=VANILLA20');
-    await new CookieBanner(page).dismissAll();
-
+  
 
     await expect(page).toHaveURL('https://godlike.host/');
 })

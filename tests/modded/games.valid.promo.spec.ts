@@ -1,5 +1,4 @@
-import { test, expect } from "@playwright/test";
-import { CookieBanner } from "../../components/CookieBanner";
+import { test, expect } from "../../fixtures/base";
 import gamesData from "../../fixtures/games.json";
 
 const gamesToTest = gamesData.games;
@@ -21,8 +20,7 @@ test.beforeAll(async ({ browser }) => {
     waitUntil: "domcontentloaded",
     timeout: 60000,
   });
-    await new CookieBanner(page).dismissAll();
-
+  
   await page.fill("#inputEmail", EMAIL);
   await page.fill("#inputPassword", PASSWORD);
 
@@ -65,8 +63,7 @@ for (const game of gamesToTest) {
         waitUntil: "domcontentloaded",
         timeout: 60000,
       });
-    await new CookieBanner(page).dismissAll();
-
+  
       const gameLink = page
         .locator("a.game__title")
         .filter({ hasText: new RegExp(`^${gameName}$`) })
@@ -204,8 +201,7 @@ for (const game of gamesToTest) {
             waitUntil: "domcontentloaded",
             timeout: 60000,
           });
-    await new CookieBanner(page).dismissAll();
-        });
+          });
       }
 
       // ---------------- FINAL ASSERT ----------------
