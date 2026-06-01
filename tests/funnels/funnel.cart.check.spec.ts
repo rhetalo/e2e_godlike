@@ -19,7 +19,7 @@
 // test - используется для определения тестовых сценариев (каждый test() = один тест)
 // expect - используется для проверки assertions (утверждений о состоянии элементов/страницы)
 // Зависимость: @playwright/test (указана в package.json в секции devDependencies)
-import { test, expect } from "@playwright/test";
+import { test, expect } from "../../fixtures/base";
 import { Credentials } from "../../fixtures/test-data";
 
 /**

@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "../../fixtures/base";
 import gamesData from "../../fixtures/games.json";
 
 const gamesToTest = gamesData.games;

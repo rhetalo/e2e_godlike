@@ -14,7 +14,7 @@
  *   npx playwright test tests/smoke.pages.spec.ts --project=chromium
  *   npx playwright test tests/smoke.pages.spec.ts --project=chromium --headed
  */
-import { test, expect } from "@playwright/test";
+import { test, expect } from "../../fixtures/base";
 import { ModdedHostingPage } from "../../pages/ModdedHostingPage";
 import { SeedPage } from "../../pages/SeedPage";
 import { Urls } from "../../fixtures/test-data";

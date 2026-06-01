@@ -1,4 +1,4 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect, Page } from '../../fixtures/base';
 import { generateCredentials, saveCredentials } from '../../utils/credentials';
 
 test.describe('Registration flow from tariff', () => {
