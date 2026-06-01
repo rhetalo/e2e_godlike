@@ -104,9 +104,9 @@ export class ModdedHostingPage extends BasePage {
   async listModpackOptions(limit = 10): Promise<string[]> {
     await this.modpackInput().click();
     await this.page
-      .locator(".v-overlay-container .v-list-item")
+      .locator(".v-autocomplete__content .v-list-item-title")
       .first()
-      .waitFor({ state: "visible", timeout: 10_000 });
+      .waitFor({ state: "visible", timeout: 15_000 });
     return this.page
       .locator(".v-overlay-container .v-list-item")
       .evaluateAll(

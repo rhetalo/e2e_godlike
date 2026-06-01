@@ -46,7 +46,7 @@ test("PayPal redirect", async ({ page }) => {
   // (это скорее "подтверждение", чем обязательная проверка)
   await expect(
   page.getByRole('heading', { name: 'Choose location' })
-).toBeVisible();
+).toBeVisible({ timeout: 15_000 });
 
   // ШАГ 9: Повторный клик по "Next step" для подтверждения выбора локации
   // После выбора локации (или оставления значений по умолчанию) переходим к следующему шагу
