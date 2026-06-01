@@ -658,3 +658,25 @@ dismissAll()      → широкие паттерны ОК — это однор
 | `components/CookieBanner.ts` | `promoBannerRoot()` — обновлён комментарий: явно указано NOT для addLocatorHandler |
 
 **`npx tsc --noEmit` — 0 ошибок.**
+
+---
+
+## Сессия 13 — июнь 2026 (фикс регрессий после сессий 9 и 12)
+
+### Статус при входе
+Три теста падали после удаления `waitForTimeout` (сессия 9) и переработки банеров (сессия 12).
+
+### Что сделано
+
+| # | Файл | Проблема | Фикс |
+|---|---|---|---|
+| 1 | `pages/VpsPage.ts` | `a.deploy-btn.first()` кликал аффилиатную ссылку `utm_campaign=affiliate_vps_hosting` → `waitForURL(/cart-vps/)` timeout | `a.deploy-btn[href*='/cart-vps/']` — исключает не-cart ссылки с тем же классом |
+| 2 | `tests/funnels/funnel.mobile.spec.ts` | "Game chips" тест: `getSelectedPlan()` возвращал `"Select plan"` — Vue ещё не проставил авто-выбор Minecraft | `expect.poll(() => cart.getSelectedPlan(), { timeout: 5_000 }).toContain("GB")` после `selectGameByChip` |
+| 3 | `tests/funnels/funnel.paypal.redirect.spec.ts` | `Promise.all([page.waitForURL(/cart\?/), nextStep.click()])` — `waitForURL` резолвился сразу на текущем URL, Next step кликался до готовности страницы → "Choose location" не найден | `nextStepBtn.waitFor({ state: 'visible', timeout: 15_000 })` + `.click()` без Promise.all |
+
+**`npx tsc --noEmit` — 0 ошибок** после всех изменений.
+
+### Открытые задачи (без изменений)
+
+1. **vps.build.spec.ts** — обсудить с владельцем (реальный rebuild)
+2. **VpsPanelServerDetailPage.ts** + **VpsPanelServersListPage.ts** — устарели

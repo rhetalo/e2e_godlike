@@ -383,3 +383,38 @@ dismissAll()      → вызывать после page.goto() в тесте / а
 ```
 
 **`npx tsc --noEmit` — 0 ошибок.**
+
+---
+
+## 12. Правки июнь 2026 — сессия 13 (фикс регрессий сессий 9 и 12)
+
+### `pages/VpsPage.ts` — фикс аффилиатного клика ✅
+
+**Проблема:** `a.deploy-btn.first()` в `deployButtons`/`firstDeployButton` матчил аффилиатную ссылку с `utm_campaign=affiliate_vps_hosting`, которая появилась на странице `/vps-hosting/`. Клик вёл обратно на ту же страницу вместо `/cart-vps/` → `waitForURL timeout`.
+
+**Фикс:**
+```typescript
+// ❌ Было — матчит все a.deploy-btn включая аффилиатные:
+this.page.locator("a.deploy-btn")
+
+// ✅ Стало — только ссылки в /cart-vps/:
+this.page.locator("a.deploy-btn[href*='/cart-vps/']")
+```
+
+---
+
+### `tests/funnels/funnel.mobile.spec.ts` — Game chips race condition ✅
+
+**Проблема:** `selectGameByChip("Minecraft")` ждал только убирания CSS-класса `.custom-select--disabled`, но Vue ещё не проставил авто-выбор плана → `getSelectedPlan()` возвращал `"Select plan"`. Это была гонка, которую скрывал `waitForTimeout(1000)` из сессии 9.
+
+**Фикс:** `expect.poll(() => cart.getSelectedPlan(), { timeout: 5_000 }).toContain("GB")` перед `getSelectedPlan()`.
+
+---
+
+### `tests/funnels/funnel.paypal.redirect.spec.ts` — Next step click race ✅
+
+**Проблема:** `Promise.all([page.waitForURL(/cart\?/), nextStepBtn.click()])` — `waitForURL(/cart\?/)` матчил текущий URL немедленно (URL уже содержал `cart?`), поэтому Promise разрешался без ожидания навигации. Next step кликался до готовности страницы → heading "Choose location" не появлялся.
+
+**Фикс:** Заменён `Promise.all` на `waitFor({ state: 'visible', timeout: 15_000 })` + `.click()` — явное ожидание кнопки перед кликом.
+
+**`npx tsc --noEmit` — 0 ошибок.**
