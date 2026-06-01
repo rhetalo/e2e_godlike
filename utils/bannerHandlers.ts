@@ -53,29 +53,23 @@ import { CookieBanner } from "../components/CookieBanner";
 export async function setupBannerHandlers(page: Page): Promise<void> {
   const banner = new CookieBanner(page);
 
-  // ── 1. Flash-sale modal (.flash-sale-modal) ───────────────────────────────
+  // ── Flash-sale modal (.flash-sale-modal) ──────────────────────────────────
   //
-  // ВАЖНО: addLocatorHandler регистрируем ТОЛЬКО для точных подтверждённых
+  // ПРАВИЛО: addLocatorHandler регистрируем ТОЛЬКО для точных подтверждённых
   // селекторов с известной кнопкой закрытия.
-  // Широкие паттерны [class*="sale-banner"] etc. — только в dismissAll(),
-  // иначе они матчат постоянные элементы DOM и зацикливают перехват кликов.
+  //
+  // ЗАПРЕЩЕНО в addLocatorHandler:
+  //   - button:has-text("Accept") — слишком широко, матчит любую кнопку "Accept"
+  //     на странице, перехватывает клики по ссылкам и вызывает навигацию
+  //   - [class*="sale-banner"] — матчит постоянные элементы DOM (div.flash-sale-banner),
+  //     создаёт бесконечный цикл перехвата
+  //   - acceptCookieButton() — содержит button:has-text("Accept"), см. выше
+  //
+  // Куки-баннеры обрабатываются через dismissAll() в BasePage.goto().
+  // Для тестов с прямым page.goto() — вызывай banner.dismissAll() после goto().
   await page
     .addLocatorHandler(page.locator(".flash-sale-modal").first(), async () => {
       await banner.dismissPromo();
-    })
-    .catch(() => undefined);
-
-  // ── 2. Cookie / GDPR баннер ───────────────────────────────────────────────
-  await page
-    .addLocatorHandler(banner.acceptCookieButton(), async () => {
-      await banner.dismissAll();
-    })
-    .catch(() => undefined);
-
-  // ── 3. Flash-sale close button (legacy selector) ──────────────────────────
-  await page
-    .addLocatorHandler(banner.flashSaleClose(), async () => {
-      await banner.dismissAll();
     })
     .catch(() => undefined);
 }
