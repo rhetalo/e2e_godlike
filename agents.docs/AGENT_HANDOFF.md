@@ -574,3 +574,47 @@ await rebuildPage.expandAccordion("Games");     // группа 4
 .flash-sale-modal__button      — CTA кнопка (НЕ закрывает, ведёт на оффер)
 ```
 Селекторы уже прописаны в `PROMO_BANNER_SELECTORS` / `PROMO_CLOSE_SELECTORS` в `CookieBanner.ts`.
+
+---
+
+## Сессия 10 — май 2026 (унификация banner handling)
+
+### Проблема
+Было два несовместимых подхода:
+1. Page Object тесты → `BasePage.goto()` → `dismissIfPresent()` ✅
+2. Тесты с прямым `page.goto()` → ручной `dismissAll()` в каждом файле 🔶
+
+### Решение: `fixtures/base.ts`
+Создан кастомный Playwright fixture, который расширяет `page`:
+```typescript
+// fixtures/base.ts
+export const test = base.extend({
+  page: async ({ page }, use) => {
+    await setupBannerHandlers(page); // ← автоматически для КАЖДОГО теста
+    await use(page);
+  },
+});
+```
+
+### Правило для новых тестов
+**Всегда** импортировать из `fixtures/base` вместо `@playwright/test`:
+```typescript
+// ✅ Правильно
+import { test, expect } from '../../fixtures/base';
+
+// ❌ Неправильно (нет автоматической обработки баннеров)
+import { test, expect } from '@playwright/test';
+```
+
+### Файлы обновлены (9 файлов)
+funnels: funnel.spec.ts, funnel.cart.check.spec.ts, funnel.with.credit.check.spec.ts, funnel.paypal.redirect.spec.ts
+general: registration-flow.spec.ts, smoke.pages.spec.ts
+modded: games.invalid.promo.spec.ts, games.valid.promo.spec.ts, game-slider.spec.ts
+
+### Файлы которые используют @playwright/test напрямую (легитимно)
+- `tests/vps/panel/*` — VPS панель, баннеры не нужны (другой домен)
+- `tests/vps/funnel/*` — аналогично
+- `tests/general/valid.links.spec.ts` — краулер HTTP, UI не использует
+- `tests/funnels/funnel.mobile.spec.ts` — использует CartPage (BasePage) ✅
+- `tests/funnels/funnel.seed.spec.ts` — использует SeedPage (BasePage) ✅
+- `tests/modded/slider.*.spec.ts` — используют ModdedHostingPage (BasePage) ✅
