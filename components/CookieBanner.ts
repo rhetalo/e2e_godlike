@@ -140,7 +140,8 @@ export class CookieBanner {
 
   /**
    * Root element of any known promotional/sale banner.
-   * Used by setupBannerHandlers() as the addLocatorHandler trigger.
+   * Used by dismissAll() / dismissPromo() — NOT by addLocatorHandler
+   * (too broad: matches always-present hidden DOM elements like .flash-sale-banner).
    */
   promoBannerRoot(): Locator {
     return this.page.locator(PROMO_BANNER_SELECTORS.join(", ")).first();
