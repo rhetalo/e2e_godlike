@@ -22,7 +22,13 @@ export default defineConfig({
 
   workers: 1,
 
-  reporter: 'html',
+  // Тихий вывод: в CI — dot (точка на пройденный тест, подробно только падения),
+  // локально — list (видны имена тестов). HTML-отчёт пишется всегда в
+  // playwright-report/ (открыть: npm run report). Это убирает построчный флуд
+  // от больших матриц вроде game-slider (сотни тестов = сотни строк).
+  reporter: process.env.CI
+    ? [['dot'], ['html', { open: 'never' }]]
+    : [['list'], ['html', { open: 'never' }]],
 
   // use: {
   //   baseURL: 'https://godlike.host',
