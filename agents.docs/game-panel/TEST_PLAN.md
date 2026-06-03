@@ -10,6 +10,7 @@
 | 0. Foundation | env + `gameAuth` + `storageState.game.json` + page objects + селекторы + доки | — | enabling | ✅ done |
 | 1. Smoke / структурный | Login, Dashboard, Server overview | read-only | P1 | ✅ done (8 тестов) |
 | 2. Power lifecycle | Start (+EULA) → Online; Restart (полный цикл); Kill → Offline | мутации (serial + teardown) | **P1 — ядро** | ✅ done (3 теста) |
+| 2b. Console (live) | стрим лога + поле команд; безопасная команда `list` → отклик | read-only команда (serial, поднимает Online) | P1 | ✅ done (2 теста) |
 | 3. Stateful (мягкие) | **Files: create folder → delete ✅ (2 теста)**; Config (edit→verify→revert), Players (whitelist/op) — todo; Databases — заблокировано (баг ноды) | мутации, self-cleaning | P2 | 🔄 in progress |
 | 3b. Stateful (тяжёлые) | Backups (create→restore→delete); смена версии (Versions); установка плагинов/модпаков | мутации, перезапуск сервера | P2 — позже | parked |
 | 4. Access / multi-actor | Sharing: invite → invitee видит сервер → enforcement ролей; Port & Domains; Tasks | мутации, 2-й аккаунт | P3 | unlocked |
@@ -41,9 +42,19 @@
 Подтверждено recon'ом (детали — в `KNOWLEDGE_BASE.md` §5a): EULA-диалог при первом старте,
 статус online = «Running», цикл рестарта ~65–70с, консоль в `.terminal`.
 
+## Phase 2b — Console реализовано
+
+`tests/game/panel/console.spec.ts` (`@critical`, serial, `beforeAll` → Online, `afterAll` → Offline):
+
+| TC | Проверка |
+|----|----------|
+| TC-GP-CON-001 | консоль стримит лог сервера (regex `INFO/Done/Pterodactyl/Server thread`); поле команд видимо и доступно |
+| TC-GP-CON-002 | команда `list` (read-only) → отклик в логе (`players online` / `There are N of a max`) |
+
+Источник правды — `.terminal` (`getConsoleText()`); команда `list` состояние не меняет.
+
 ## Phase 2 — что ещё можно добить
 
-- **Console (live)** — на Online-сервере отправить команду → отклик в `.terminal` (источник правды).
 - **Boost** — поведение кнопки Boost (промо-апгрейд? — осторожно, проверить, что не списывает лишнего).
 
 ## Известные проблемы прода (на 03-Jun-2026)
@@ -58,3 +69,16 @@
 - Серверы не вечные → `GAME_PANEL_SERVER_UUID` в env; при ротации сервера обновить.
 - A/B-промо Amplitude бьёт по storefront-воронке, **не** по панели (см. основной CLAUDE.md).
 - Phase 3b (restore/версии) делаем после стабилизации мягких мутаций.
+
+## ▶ Продолжаем здесь (resume point, 04-Jun-2026)
+
+Реализовано: **15 тестов** — Phase 1 (8) + Phase 2 power (3) + Phase 2b console (2) + Phase 3 files (2). `npx tsc --noEmit` чистый.
+
+Следующее по плану (Phase 3 «мягкие мутации», self-cleaning):
+1. **Config** — `tests/game/panel/config.spec.ts`: открыть Config-таб → изменить значение → проверить → **вернуть как было**. Нужен recon полей формы (KB §4 описывает таб, но не конкретные инпуты).
+2. **Players** — whitelist / op на Online-сервере (команды через консоль или UI-таб Players); обязательно откат.
+3. Databases — **остаются запаркованы** (баг ноды, 400/Connection refused).
+
+Потом Phase 4 (Sharing/мульти-актор, 2-й аккаунт) → Phase 5 (негатив/security).
+
+> Перед написанием: прочитать `KNOWLEDGE_BASE.md`, проверить что `GAME_PANEL_SERVER_UUID` в `.env` указывает на живой сервер, и что сервер не suspended.
