@@ -521,3 +521,44 @@ get swapSpaceCards(): Locator {
   return this.page.locator("div.card.card-not-inverted-big-border.c-pointer");
 }
 ```
+
+9.10 Обход A/B-экспериментов Amplitude (storefront) — обязательно для воронок
+
+godlike.host гоняет Amplitude Experiment SDK. Вариант назначается по случайному
+device id на каждый свежий контекст → форма URL корзины (`/cart-vps?…` vs
+`/cart-vps/?…`) и показ flash-sale-баннера НЕДЕТЕРМИНИРОВАНЫ → плавающие падения.
+
+Решение: `utils/amplitude.ts` → `pinAmplitudeExperiments(context)` фиксирует
+вариант (route на `…/sdk/v2/vardata` + cookie + пред-засев LS).
+
+- Тесты на `fixtures/base` получают обход АВТОМАТИЧЕСКИ (override фикстуры `context`).
+- Тесты с собственным `browser.newContext()` ОБЯЗАНЫ звать его сами, сразу после
+  создания контекста (до `newPage()`):
+
+```typescript
+const context = await browser.newContext({ storageState });
+await pinAmplitudeExperiments(context);   // ← до context.newPage()
+const page = await context.newPage();
+```
+
+Правило: любой storefront-тест (`godlike.host`) идёт через `fixtures/base`
+ЛИБО явно зовёт `pinAmplitudeExperiments(context)`. (panel-тесты `vf-panel` —
+не нужно, промо туда не бьёт.)
+
+---
+
+10. Отчётность и стиль (CI)
+
+10.1 Репортер. `playwright.config.ts`: в CI — `dot` (точка на тест, подробно
+только падения), локально — `list`; HTML-отчёт пишется всегда (`npm run report`).
+НЕ возвращай `reporter: 'html'` как единственный — он печатает строку на каждый
+тест и засоряет вывод CI на больших матрицах.
+
+10.2 Язык. Названия тестов, `describe`, `test.step` и комментарии — на русском;
+технические термины, селекторы, UI-лейблы (Deploy Now, Add to Cart, Slots/RAM/Days,
+Running/Stopped), ID кейсов (`TC-GP-*`) и теги (`@smoke/@critical`) — оставляем как есть.
+
+10.3 Большие параметризованные матрицы. Если матрица даёт сотни тестов
+(`game-slider`: 21 игра × N проверок), объединяй независимые READ-ONLY проверки
+в один тест через `test.step` — меньше строк в CI при том же покрытии. Мутационные
+проверки, которым нужно свежее состояние, оставляй отдельными тестами.

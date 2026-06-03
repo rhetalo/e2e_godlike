@@ -1,6 +1,6 @@
 # AGENT HANDOFF — godlike.host Playwright E2E Suite
 
-> **Последнее обновление:** Май 2026
+> **Последнее обновление:** 03-Jun-2026
 > **Стек:** TypeScript · Playwright · Chromium
 > **Репо:** https://github.com/rhetalo/e2e_godlike
 
@@ -11,6 +11,32 @@
 1. `AGENT_HANDOFF.md` (этот файл) — контекст, структура, правила
 2. `TEST_GUIDELINES.md` — как писать тесты (читать перед любым изменением теста)
 3. `CODE_REVIEW.md` — текущее состояние всех файлов
+
+---
+
+## Изменения сессии (03-Jun-2026)
+
+- **Обход A/B Amplitude.** `utils/amplitude.ts` → `pinAmplitudeExperiments(context)`
+  детерминированно фиксирует акционный flash-sale-вариант: `context.route` на
+  `…/sdk/v2/vardata` отдаёт фиксированный ответ (+ cookie `amplitudeExpFetched`/
+  `amdDeviceId` и пред-засев LS как страховка). Вписан в `fixtures/base.ts` (override
+  фикстуры `context`) — все storefront-тесты на `fixtures/base` получают обход
+  автоматически. Тесты, создающие свой `browser.newContext()`, обязаны звать
+  `pinAmplitudeExperiments(context)` сами (см. games.promo, funnel.modded, valid.links,
+  vps.funnel). **Зачем:** промо-A/B менял форму URL корзины (`/cart-vps?…` vs
+  `/cart-vps/?…`) и показ flash-sale-баннера → плавающие падения воронок.
+- **Тихий репортер.** `playwright.config.ts`: в CI — `dot` (точка на тест, подробно
+  только падения), локально — `list`; HTML-отчёт пишется всегда (`npm run report`,
+  авто-открытие выключено). Убирает построчный флуд от больших матриц.
+- **`tests/modded/game-slider.spec.ts` оптимизирован.** Read-only проверки (структура +
+  стартовые значения) объединены в `test.step` (631 → 442 теста, покрытие то же).
+  Мутационные оставлены отдельными — им нужно свежее состояние кастомайзера.
+- **Читабельность (весь набор).** modded/general/funnels/vps/game-panel приведены к
+  единому стилю: русские названия тестов, `describe`, `test.step`, комментарии
+  (тех-термины, селекторы, ID кейсов `TC-GP-*`, теги `@smoke/@critical/[game-panel]`
+  сохранены). Менялись только строки — логика, флоу и stateful-восстановление panel
+  не тронуты.
+- **`CookieBanner`**: в дисмисс добавлен липкий `.flash-sale-banner` (перехватывал клики).
 
 ---
 

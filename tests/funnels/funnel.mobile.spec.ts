@@ -1,6 +1,7 @@
 import { test, expect, Browser } from "@playwright/test";
 import { MobileCartPage } from "../../pages/MobileCartPage";
 import { BASE_URL, Credentials } from "../../fixtures/test-data";
+import { pinAmplitudeExperiments } from "../../utils/amplitude";
 
 test.use({
   viewport: { width: 390, height: 844 },
@@ -60,6 +61,8 @@ test.describe("Мобильная воронка корзины", () => {
     const context = await browser.newContext({
       storageState: storageStatePath,
     });
+    // Фиксируем A/B-вариант Amplitude, чтобы акционный flash-sale не мешал флоу
+    await pinAmplitudeExperiments(context);
     const page = await context.newPage();
     const cart = new MobileCartPage(page);
 
@@ -84,6 +87,8 @@ test.describe("Мобильная воронка корзины", () => {
     const context = await browser.newContext({
       storageState: storageStatePath,
     });
+    // Фиксируем A/B-вариант Amplitude, чтобы акционный flash-sale не мешал флоу
+    await pinAmplitudeExperiments(context);
     const page = await context.newPage();
     const cart = new MobileCartPage(page);
 
@@ -106,6 +111,8 @@ test.describe("Мобильная воронка корзины", () => {
     const context = await browser.newContext({
       storageState: storageStatePath,
     });
+    // Фиксируем A/B-вариант Amplitude, чтобы акционный flash-sale не мешал флоу
+    await pinAmplitudeExperiments(context);
     const page = await context.newPage();
     const cart = new MobileCartPage(page);
 
@@ -129,6 +136,8 @@ test.describe("Мобильная воронка корзины", () => {
     const context = await browser.newContext({
       storageState: storageStatePath,
     });
+    // Фиксируем A/B-вариант Amplitude, чтобы акционный flash-sale не мешал флоу
+    await pinAmplitudeExperiments(context);
     const page = await context.newPage();
     const cart = new MobileCartPage(page);
 
@@ -178,6 +187,8 @@ expect(quarterlyPrice).toBeGreaterThan(monthlyPrice);
   const context = await browser.newContext({
     storageState: storageStatePath,
   });
+  // Фиксируем A/B-вариант Amplitude, чтобы акционный flash-sale не мешал флоу
+  await pinAmplitudeExperiments(context);
   const page = await context.newPage();
   const cart = new MobileCartPage(page);
 
@@ -221,6 +232,8 @@ expect(quarterlyPrice).toBeGreaterThan(monthlyPrice);
     const context = await browser.newContext({
       storageState: storageStatePath,
     });
+    // Фиксируем A/B-вариант Amplitude, чтобы акционный flash-sale не мешал флоу
+    await pinAmplitudeExperiments(context);
     const page = await context.newPage();
     const cart = new MobileCartPage(page);
 
@@ -253,6 +266,8 @@ expect(quarterlyPrice).toBeGreaterThan(monthlyPrice);
     const context = await browser.newContext({
       storageState: storageStatePath,
     });
+    // Фиксируем A/B-вариант Amplitude, чтобы акционный flash-sale не мешал флоу
+    await pinAmplitudeExperiments(context);
     const page = await context.newPage();
     const cart = new MobileCartPage(page);
 
@@ -280,6 +295,8 @@ expect(quarterlyPrice).toBeGreaterThan(monthlyPrice);
     const context = await browser.newContext({
       storageState: storageStatePath,
     });
+    // Фиксируем A/B-вариант Amplitude, чтобы акционный flash-sale не мешал флоу
+    await pinAmplitudeExperiments(context);
     const page = await context.newPage();
     const cart = new MobileCartPage(page);
 

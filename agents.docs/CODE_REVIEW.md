@@ -1,7 +1,20 @@
 # CODE REVIEW — godlike.host E2E Suite
 
-> **Дата ревью:** Май 2026
+> **Дата ревью:** Май 2026 · обновлено 03-Jun-2026
 > **Охват:** vps/panel/, general/ — полное ревью; funnels/, modded/ — не ревьюировались
+
+---
+
+## Сессия 03-Jun-2026 (детали в `AGENT_HANDOFF.md` → «Изменения сессии»)
+
+- **Обход A/B Amplitude** во всех storefront-тестах: `utils/amplitude.ts` +
+  override `context` в `fixtures/base.ts`; ручные контексты (games.promo,
+  funnel.modded, funnel.mobile, valid.links, vps.funnel) зовут `pinAmplitudeExperiments` сами.
+- **Тихий репортер** (`dot` в CI / `list` локально) в `playwright.config.ts`.
+- **`game-slider`**: read-only проверки объединены в `test.step` (631→442 теста).
+- **Читабельность всего набора**: русские названия/`describe`/`test.step`/комментарии
+  (тех-термины, ID `TC-GP-*`, теги сохранены). Менялись только строки.
+- **`CookieBanner`**: добавлен дисмисс липкого `.flash-sale-banner`.
 
 ---
 
