@@ -316,77 +316,56 @@ function registerGameTests(game: GameConfig): void {
 
     // ── structure ────────────────────────────────────────────────────────────
 
-    test("кастомайзер открывается и показывает ровно 3 блока-слайдера", async ({
-      page,
-    }) => {
+    test("структура кастомайзера", async ({ page }) => {
       const blocks = await helper.getSliderBlocks();
-      expect(blocks).toHaveLength(3);
-    });
 
-    test('заголовок блока 0 содержит "Slots"', async ({ page }) => {
-      const blocks = await helper.getSliderBlocks();
-      expect(blocks[0].title.toLowerCase()).toContain("slot");
-    });
-
-    test('заголовок блока 1 содержит "Ram"', async ({ page }) => {
-      const blocks = await helper.getSliderBlocks();
-      expect(blocks[1].title.toLowerCase()).toContain("ram");
-    });
-
-    test('заголовок блока 2 содержит "Days"', async ({ page }) => {
-      const blocks = await helper.getSliderBlocks();
-      expect(blocks[2].title.toLowerCase()).toContain("day");
-    });
-
-    test("блок Days Runtime всегда имеет опции [30, 90, 180, 360]", async ({
-      page,
-    }) => {
-      const blocks = await helper.getSliderBlocks();
-      expect(blocks[2].options).toEqual(["30", "90", "180", "360"]);
-    });
-
-    test("у каждого блока минимум 1 опция", async ({ page }) => {
-      const blocks = await helper.getSliderBlocks();
-      for (const block of blocks) {
-        expect(block.options.length).toBeGreaterThanOrEqual(1);
-      }
-    });
-
-    test("блоки Slots и RAM имеют одинаковое число опций (они парные)", async ({
-      page,
-    }) => {
-      const blocks = await helper.getSliderBlocks();
-      expect(blocks[0].options.length).toBe(blocks[1].options.length);
-    });
-
-    test("присутствуют все 3 ползунка (.range_slider__selector)", async ({
-      page,
-    }) => {
-      const count = await page.evaluate(
-        () =>
-          document.querySelectorAll(".range_slider .range_slider__selector")
-            .length,
-      );
-      expect(count).toBe(3);
+      await test.step("показывает ровно 3 блока-слайдера", async () => {
+        expect(blocks).toHaveLength(3);
+      });
+      await test.step('заголовок блока 0 содержит "Slots"', async () => {
+        expect(blocks[0].title.toLowerCase()).toContain("slot");
+      });
+      await test.step('заголовок блока 1 содержит "Ram"', async () => {
+        expect(blocks[1].title.toLowerCase()).toContain("ram");
+      });
+      await test.step('заголовок блока 2 содержит "Days"', async () => {
+        expect(blocks[2].title.toLowerCase()).toContain("day");
+      });
+      await test.step("блок Days Runtime имеет опции [30, 90, 180, 360]", async () => {
+        expect(blocks[2].options).toEqual(["30", "90", "180", "360"]);
+      });
+      await test.step("у каждого блока минимум 1 опция", async () => {
+        for (const block of blocks) {
+          expect(block.options.length).toBeGreaterThanOrEqual(1);
+        }
+      });
+      await test.step("блоки Slots и RAM имеют одинаковое число опций (парные)", async () => {
+        expect(blocks[0].options.length).toBe(blocks[1].options.length);
+      });
+      await test.step("присутствуют все 3 ползунка (.range_slider__selector)", async () => {
+        const count = await page.evaluate(
+          () =>
+            document.querySelectorAll(".range_slider .range_slider__selector")
+              .length,
+        );
+        expect(count).toBe(3);
+      });
     });
 
     // ── initial values ───────────────────────────────────────────────────────
 
-    test("начальное значение Slots равно первой опции Slots", async ({ page }) => {
+    test("стартовые значения слайдеров", async ({ page }) => {
       const blocks = await helper.getSliderBlocks();
-      const firstOption = blocks[0].options[0];
-      expect(blocks[0].currentValue).toBe(firstOption);
-    });
 
-    test("начальное значение RAM равно первой опции RAM", async ({ page }) => {
-      const blocks = await helper.getSliderBlocks();
-      const firstOption = blocks[1].options[0];
-      expect(blocks[1].currentValue).toBe(firstOption);
-    });
-
-    test('начальное значение Days равно "30"', async ({ page }) => {
-      const blocks = await helper.getSliderBlocks();
-      expect(blocks[2].currentValue).toBe("30");
+      await test.step("Slots = первая опция Slots", async () => {
+        expect(blocks[0].currentValue).toBe(blocks[0].options[0]);
+      });
+      await test.step("RAM = первая опция RAM", async () => {
+        expect(blocks[1].currentValue).toBe(blocks[1].options[0]);
+      });
+      await test.step('Days = "30"', async () => {
+        expect(blocks[2].currentValue).toBe("30");
+      });
     });
 
     // ── Slots slider interactions ─────────────────────────────────────────────
