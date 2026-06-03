@@ -14,7 +14,7 @@
 import { test, expect } from "../../fixtures/base";
 import { SeedPage } from "../../pages/SeedPage";
 
-test.describe("Sky-haven seed page tariff slider", () => {
+test.describe("Сид-страница Sky-haven: слайдер тарифа", () => {
   let seed: SeedPage;
 
   test.beforeEach(async ({ page }) => {
@@ -22,14 +22,14 @@ test.describe("Sky-haven seed page tariff slider", () => {
     await seed.open();
   });
 
-  test("slider exposes ARIA range", async () => {
+  test("слайдер отдаёт ARIA-диапазон", async () => {
     const state = await seed.calculator.readSlider();
     console.log(`[INFO] seed slider:`, state);
     expect(state.min).toBe(0);
     expect(state.max).toBe(100);
   });
 
-  test("ArrowRight increments aria-valuenow by one tick (12.5)", async () => {
+  test("ArrowRight увеличивает aria-valuenow на один шаг (12.5)", async () => {
     const before = await seed.calculator.readSlider();
     await seed.calculator.stepRight(1);
     const after = await seed.calculator.readSlider();
@@ -39,7 +39,7 @@ test.describe("Sky-haven seed page tariff slider", () => {
     expect(after.value - before.value).toBeCloseTo(12.5, 1);
   });
 
-  test("hidden #fieldPlayersCount mirrors slider", async () => {
+  test("скрытый #fieldPlayersCount повторяет значение слайдера", async () => {
     await seed.calculator.toMin();
     const lo = Number(await seed.calculator.hiddenPlayerInput().inputValue());
     console.log(`[INFO] at min: hidden=${lo}`);
@@ -51,7 +51,7 @@ test.describe("Sky-haven seed page tariff slider", () => {
     expect(hi).toBeGreaterThan(lo);
   });
 
-  test("BUY-A-SERVER button has a real cart URL with productId & promo", async () => {
+  test("кнопка BUY-A-SERVER ведёт на корзину с productId и promo", async () => {
     const cartUrl = await seed.buyServerCartUrl();
     console.log(`[INFO] BUY data-url: ${cartUrl}`);
     expect(cartUrl).toBeTruthy();
@@ -64,14 +64,14 @@ test.describe("Sky-haven seed page tariff slider", () => {
     expect(url.searchParams.get("modpackId")).toBeTruthy();
   });
 
-  test("calculator root carries promocode + discount data attributes", async () => {
+  test("корень калькулятора несёт data-атрибуты promocode и discount", async () => {
     const meta = await seed.readCalculatorMeta();
     console.log(`[INFO] seed meta:`, meta);
     expect(meta.promocode).toBeTruthy();
     expect(Number(meta.discount)).toBeGreaterThan(0);
   });
 
-  test("Host-Now submit button is visible and enabled", async () => {
+  test("кнопка Host Now видима и активна", async () => {
     const btn = seed.hostNowSubmit();
     await expect(btn).toBeVisible();
     await expect(btn).toBeEnabled();

@@ -41,7 +41,7 @@ test.beforeAll(async ({ browser }) => {
 // ---------------- TESTS ----------------
 
 for (const game of gamesToTest) {
-  test(`Valid promocode for: ${game.name}`, async ({ browser }) => {
+  test(`Промокод активен для игры: ${game.name}`, async ({ browser }) => {
     test.setTimeout(60000);
 
     const gameName = game.name;
@@ -56,7 +56,7 @@ for (const game of gamesToTest) {
 
     const page = await context.newPage();
 
-    // 🔴 ВАЖНО: копим ошибки
+    // Копим невалидные промокоды — упадём в конце со списком всех проблем
     const invalidPromos: string[] = [];
 
     try {
@@ -141,7 +141,7 @@ for (const game of gamesToTest) {
       for (let i = 0; i < validTariffs.length; i++) {
         const { btn, title } = validTariffs[i];
 
-        await test.step(`Tariff "${title}"`, async () => {
+        await test.step(`Тариф «${title}»`, async () => {
           console.log(`\n[TARIFF] ${title}`);
 
           await btn.scrollIntoViewIfNeeded();

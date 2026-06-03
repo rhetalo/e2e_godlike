@@ -41,7 +41,7 @@ test.beforeAll(async ({ browser }) => {
 // ---------------- TESTS ----------------
 
 for (const game of gamesToTest) {
-  test(`Invalid promocode for: ${game.name}`, async ({ browser }) => {
+  test(`Промокод НЕ активируется для игры: ${game.name}`, async ({ browser }) => {
     test.setTimeout(60000);
 
     const gameName = game.name;
@@ -141,7 +141,7 @@ for (const game of gamesToTest) {
       for (let i = 0; i < validTariffs.length; i++) {
         const { btn, title } = validTariffs[i];
 
-        await test.step(`Tariff "${title}"`, async () => {
+        await test.step(`Тариф «${title}»`, async () => {
           console.log(`\n[TARIFF] ${title}`);
 
           await btn.scrollIntoViewIfNeeded();

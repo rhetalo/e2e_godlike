@@ -21,7 +21,7 @@ import { test, expect } from "../../fixtures/base";
 import { ModdedHostingPage } from "../../pages/ModdedHostingPage";
 import { QuickPickModpacks } from "../../fixtures/test-data";
 
-test.describe("Modded modpack configuration", () => {
+test.describe("Modded: конфигурация модпака", () => {
   let modded: ModdedHostingPage;
 
   test.beforeEach(async ({ page }) => {
@@ -29,7 +29,7 @@ test.describe("Modded modpack configuration", () => {
     await modded.open();
   });
 
-  test("all five quick-pick modpack pills are visible", async () => {
+  test("видны все пять quick-pick модпаков", async () => {
     for (const name of QuickPickModpacks) {
       const pill = modded.quickPickButton(name);
       await expect(pill, `quick-pick "${name}" should be visible`).toBeVisible();
@@ -37,7 +37,7 @@ test.describe("Modded modpack configuration", () => {
     }
   });
 
-  test("clicking a different quick-pick changes the cart link's modpackId", async () => {
+  test("клик по другому quick-pick меняет modpackId в ссылке корзины", async () => {
     const initial = await modded.readCalculatorCartParams();
     console.log(`[INFO] initial modpackId=${initial.modpackId}`);
     expect(initial.modpackId).toBeTruthy();
@@ -66,7 +66,7 @@ test.describe("Modded modpack configuration", () => {
     expect(after.productId).toMatch(/^\d+$/);
   });
 
-  test("modpack autocomplete opens and lists at least 5 modpacks", async () => {
+  test("автокомплит модпаков открывается и показывает минимум 5", async () => {
     const options = await modded.listModpackOptions(20);
     console.log(`[INFO] visible modpack options (${options.length}): ${options.slice(0, 5).join(", ")}…`);
     expect(options.length).toBeGreaterThanOrEqual(5);
@@ -75,13 +75,13 @@ test.describe("Modded modpack configuration", () => {
     }
   });
 
-  test("modpack version field exists alongside modpack field", async () => {
+  test("поле версии модпака есть рядом с полем модпака", async () => {
     await expect(modded.modpackInput()).toBeVisible();
     await expect(modded.modpackVersionInput()).toBeVisible();
     console.log("[INFO] both autocompletes (modpack + version) visible ✓");
   });
 
-  test("modpack grid install buttons all carry data-product-id & data-modpack-id", async () => {
+  test("кнопки Install в сетке несут data-product-id и data-modpack-id", async () => {
     const buttons = modded.installButtons();
     const count = await buttons.count();
     console.log(`[INFO] install buttons: ${count}`);

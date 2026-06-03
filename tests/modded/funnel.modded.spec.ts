@@ -80,10 +80,10 @@ async function ensurePastAuthStep(page: Page, cartPage: CartPage): Promise<void>
 
 // ─── tests ───────────────────────────────────────────────────────────────────
 
-test.describe("Modded purchase funnel (stops at payment page)", () => {
+test.describe("Воронка покупки modded (стоп на странице оплаты)", () => {
   test.setTimeout(180_000);
 
-  test("install → cart → step 2 → payment page", async ({ browser }) => {
+  test("Install → корзина → step 2 → страница оплаты", async ({ browser }) => {
     const context = await browser.newContext({
       storageState: storageStatePath,
     });
