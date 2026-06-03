@@ -11,7 +11,7 @@
  * Запуск:
  *   npx playwright test tests/slider.seed.spec.ts --project=chromium
  */
-import { test, expect } from "@playwright/test";
+import { test, expect } from "../../fixtures/base";
 import { SeedPage } from "../../pages/SeedPage";
 
 test.describe("Sky-haven seed page tariff slider", () => {

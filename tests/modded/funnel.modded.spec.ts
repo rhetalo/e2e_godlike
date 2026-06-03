@@ -22,6 +22,7 @@
  *   npx playwright test tests/funnel.modded.spec.ts --project=chromium
  */
 import { test, expect, type Browser, type Page } from "@playwright/test";
+import { pinAmplitudeExperiments } from "../../utils/amplitude";
 import { ModdedHostingPage } from "../../pages/ModdedHostingPage";
 import { CartPage } from "../../pages/CartPage";
 import { CheckoutPage } from "../../pages/CheckoutPage";
@@ -86,6 +87,8 @@ test.describe("Modded purchase funnel (stops at payment page)", () => {
     const context = await browser.newContext({
       storageState: storageStatePath,
     });
+    // Фиксируем A/B-вариант Amplitude, чтобы акционный flash-sale не мешал флоу
+    await pinAmplitudeExperiments(context);
     const page = await context.newPage();
 
     const modded = new ModdedHostingPage(page);

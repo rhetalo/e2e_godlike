@@ -29,8 +29,19 @@
  */
 import { test as base, expect, type Page, type Browser, type BrowserContext } from '@playwright/test';
 import { CookieBanner } from '../components/CookieBanner';
+import { pinAmplitudeExperiments } from '../utils/amplitude';
 
 export const test = base.extend<{ page: Page }>({
+  // Детерминированный пиннинг A/B-экспериментов Amplitude для контекста по
+  // умолчанию — фиксирует акционный flash-sale-вариант, чтобы промо-логика не
+  // меняла поведение storefront-тестов от прогона к прогону (см. utils/amplitude.ts).
+  // ВНИМАНИЕ: покрывает только фикстурный контекст. Тесты, создающие свой
+  // browser.newContext(), должны звать pinAmplitudeExperiments(context) сами.
+  context: async ({ context }, use) => {
+    await pinAmplitudeExperiments(context);
+    await use(context);
+  },
+
   page: async ({ page }, use) => {
     const banner = new CookieBanner(page);
 

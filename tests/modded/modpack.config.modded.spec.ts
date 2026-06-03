@@ -17,7 +17,7 @@
  * Запуск:
  *   npx playwright test tests/modpack.config.modded.spec.ts --project=chromium
  */
-import { test, expect } from "@playwright/test";
+import { test, expect } from "../../fixtures/base";
 import { ModdedHostingPage } from "../../pages/ModdedHostingPage";
 import { QuickPickModpacks } from "../../fixtures/test-data";
 

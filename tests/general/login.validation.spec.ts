@@ -15,7 +15,7 @@
  * Запуск:
  *   npx playwright test tests/login.validation.spec.ts --project=chromium
  */
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect, type Page } from "../../fixtures/base";
 import { CartPage } from "../../pages/CartPage";
 import { VueCartStep2Pattern } from "../../fixtures/test-data";
 

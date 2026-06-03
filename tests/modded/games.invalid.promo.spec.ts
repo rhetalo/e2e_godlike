@@ -1,5 +1,6 @@
 import { test, expect } from "../../fixtures/base";
 import gamesData from "../../fixtures/games.json";
+import { pinAmplitudeExperiments } from "../../utils/amplitude";
 
 const gamesToTest = gamesData.games;
 
@@ -51,6 +52,8 @@ for (const game of gamesToTest) {
     const context = await browser.newContext({
       storageState: storageStatePath,
     });
+    // Фиксируем A/B-вариант Amplitude, чтобы акционный flash-sale не мешал флоу
+    await pinAmplitudeExperiments(context);
 
     const page = await context.newPage();
 

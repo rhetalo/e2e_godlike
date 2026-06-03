@@ -8,6 +8,7 @@
  *   npx playwright test tests/general/valid.links.spec.ts --project=chromium
  */
 import { test, expect, BrowserContext, Page } from "@playwright/test";
+import { pinAmplitudeExperiments } from "../../utils/amplitude";
 
 test.describe("Internal links validation", () => {
   test("all internal pages should be reachable", async ({ browser }) => {
@@ -22,6 +23,8 @@ test.describe("Internal links validation", () => {
     const RETRIES = 2;
 
     const context: BrowserContext = await browser.newContext({ ignoreHTTPSErrors: true });
+    // Фиксируем A/B-вариант Amplitude, чтобы акционный flash-sale не мешал краулеру
+    await pinAmplitudeExperiments(context);
     const page: Page = await context.newPage();
 
     const visited = new Set<string>();
