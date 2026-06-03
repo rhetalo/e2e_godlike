@@ -19,7 +19,7 @@ const TEST_FOLDER = "qae2e-folder";
 
 test.describe.configure({ mode: "serial" });
 
-test.describe("@critical [game-panel] File manager", () => {
+test.describe("@critical [game-panel] Файловый менеджер", () => {
   let context: BrowserContext;
   let files: GamePanelFilesPage;
 

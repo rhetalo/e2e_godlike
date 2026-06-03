@@ -8,7 +8,7 @@ import { test, expect, type BrowserContext } from "@playwright/test";
 import { GamePanelDashboardPage } from "../../../pages/game/GamePanelDashboardPage";
 import { loginAndSaveGameSession, GAME_STORAGE_STATE_PATH } from "../../../utils/gameAuth";
 
-test.describe("@smoke [game-panel] Dashboard", () => {
+test.describe("@smoke [game-panel] Дашборд", () => {
   let context: BrowserContext;
 
   test.beforeAll(async ({ browser }) => {
@@ -23,7 +23,7 @@ test.describe("@smoke [game-panel] Dashboard", () => {
     await context.close();
   });
 
-  test("TC-GP-DASH-001 | dashboard lists at least one server with a count heading", async () => {
+  test("TC-GP-DASH-001 | дашборд показывает минимум один сервер с заголовком-счётчиком", async () => {
     const page = await context.newPage();
     const dash = new GamePanelDashboardPage(page);
     await dash.goto();
@@ -40,7 +40,7 @@ test.describe("@smoke [game-panel] Dashboard", () => {
     }
   });
 
-  test("TC-GP-DASH-002 | global sidebar exposes the key destinations", async () => {
+  test("TC-GP-DASH-002 | глобальный сайдбар содержит ключевые разделы", async () => {
     const page = await context.newPage();
     const dash = new GamePanelDashboardPage(page);
     await dash.goto();

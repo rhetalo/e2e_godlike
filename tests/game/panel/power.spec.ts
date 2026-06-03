@@ -21,7 +21,7 @@ import {
 
 test.describe.configure({ mode: "serial" });
 
-test.describe("@critical [game-panel] Power lifecycle", () => {
+test.describe("@critical [game-panel] Жизненный цикл питания", () => {
   let context: BrowserContext;
   let srv: GamePanelServerPage;
 

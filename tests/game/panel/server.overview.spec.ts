@@ -15,7 +15,7 @@ import {
 } from "../../../utils/gameAuth";
 import { GAME_PANEL_TABS } from "../../../utils/selectors";
 
-test.describe("@smoke [game-panel] Server overview", () => {
+test.describe("@smoke [game-panel] Обзор сервера", () => {
   let context: BrowserContext;
 
   test.beforeAll(async ({ browser }) => {
@@ -30,27 +30,27 @@ test.describe("@smoke [game-panel] Server overview", () => {
     await context.close();
   });
 
-  test("TC-GP-SRV-001 | overview shows server name, status and power controls", async () => {
+  test("TC-GP-SRV-001 | обзор показывает имя сервера, статус и кнопки питания", async () => {
     const page = await context.newPage();
     const srv = new GamePanelServerPage(page, GAME_SERVER_UUID);
     await srv.goto();
 
-    await test.step("server name is shown", async () => {
+    await test.step("имя сервера отображается", async () => {
       await expect(page.getByText(GAME_SERVER_NAME).first()).toBeVisible();
     });
 
-    await test.step("power controls are present", async () => {
+    await test.step("кнопки питания присутствуют", async () => {
       await expect(srv.startButton).toBeVisible();
       await expect(srv.restartButton).toBeVisible();
       await expect(srv.killButton).toBeVisible();
     });
 
-    await test.step("a known status word is rendered", async () => {
+    await test.step("отрисовано известное слово статуса", async () => {
       expect(await srv.getStatusText()).toMatch(/Online|Offline|Starting|Stopping|Installing|Suspended/i);
     });
   });
 
-  test("TC-GP-SRV-002 | all content tabs are visible", async () => {
+  test("TC-GP-SRV-002 | все вкладки контента видны", async () => {
     const page = await context.newPage();
     const srv = new GamePanelServerPage(page, GAME_SERVER_UUID);
     await srv.goto();
@@ -60,16 +60,16 @@ test.describe("@smoke [game-panel] Server overview", () => {
     }
   });
 
-  test("TC-GP-SRV-003 | server information exposes address and UUID", async () => {
+  test("TC-GP-SRV-003 | Server Information показывает адрес и UUID", async () => {
     const page = await context.newPage();
     const srv = new GamePanelServerPage(page, GAME_SERVER_UUID);
     await srv.goto();
 
-    await test.step("address srvN.godlike.club:PORT is shown", async () => {
+    await test.step("адрес srvN.godlike.club:PORT отображается", async () => {
       await expect(page.getByText(/srv\d+\.godlike\.club:\d+/i).first()).toBeVisible();
     });
 
-    await test.step("server UUID is shown in Server Information", async () => {
+    await test.step("UUID сервера показан в Server Information", async () => {
       await expect(page.getByText(GAME_SERVER_UUID).first()).toBeVisible();
     });
   });

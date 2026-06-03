@@ -17,7 +17,7 @@ import {
 
 test.describe.configure({ mode: "serial" });
 
-test.describe("@critical [game-panel] Console", () => {
+test.describe("@critical [game-panel] Консоль", () => {
   let context: BrowserContext;
   let srv: GamePanelServerPage;
 
