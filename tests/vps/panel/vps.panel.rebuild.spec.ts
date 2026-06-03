@@ -67,6 +67,11 @@ test.beforeAll(async ({ browser }: { browser: Browser }) => {
   await loginAndSaveSession(browser);
 });
 
+// Примечание: отдельный afterEach с Cancel-teardown НЕ используется — он создавал churn
+// (постоянная отмена → таймауты). Pending «Server Setup» расшибается финальным РЕАЛЬНЫМ
+// rebuild-тестом (SUITE 7 ниже), а промежуточные тесты полагаются на serverPage.goto(),
+// который сам обрабатывает «Rebuild view → Cancel Rebuild».
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 /** Navigate to server page, click Rebuild → Continue → arrive on OS selection page. */
@@ -84,10 +89,17 @@ async function openRebuildPage(browser: Browser): Promise<{
 
   await serverPage.goto();
 
+  // serverPage.goto() сам отменяет залипший "Server Setup" (клик "Cancel Rebuild") и возвращает
+  // обычный overview. Дальше — ЧИСТЫЙ Rebuild → Continue, который даёт СТАБИЛЬНУЮ страницу выбора ОС.
+  // ⚠️ НЕ делаем early-return "если уже на OS-странице (isLoaded)": это ловило transient-состояние
+  // mid-cancel, где OS-карточки видны, но аккордеоны ещё не кликабельны → expandAccordion таймаутил.
+  //
   // Find Rebuild button by its modal target — unique and immune to hidden modal buttons
-  // (data-bs-target="#reinstallServerModal" is only on the real Rebuild button in the Overview tab)
+  // (data-bs-target="#reinstallServerModal" is only on the real Rebuild button in the Overview tab).
+  // Rebuild доступна в ЛЮБОМ power-статусе, включая Stopped (подтверждено вживую) — ensureRunning НЕ нужен.
+  // Скип бывал из-за transient сразу после "Cancel Rebuild" (кнопка на миг пропадает) — ждём её дольше.
   const rebuildBtn = page.locator('button[data-bs-target="#reinstallServerModal"]').first();
-  const rebuildVisible = await rebuildBtn.isVisible().catch(() => false);
+  const rebuildVisible = await rebuildBtn.isVisible({ timeout: 15_000 }).catch(() => false);
 
   if (!rebuildVisible) {
     console.log("[INFO] Rebuild button not found — server may be stopped or button unavailable");
@@ -625,5 +637,54 @@ test.describe("VPS Panel — Rebuild: возврат на страницу се�
     console.log("[INFO] Server intact after viewing rebuild page ✓");
 
     await context.close();
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SUITE 7 — РЕАЛЬНЫЙ rebuild (ТЗ "Build"). Запускается ПОСЛЕДНИМ в файле: реально
+// переустанавливает ОС, проверяет задачу Build → Complete → Running, и тем самым
+// расшибает любое pending "Server Setup" состояние, оставляя сервер чистым.
+// ⚠️ ДЕСТРУКТИВНО — разрешено владельцем (тестовый сервер). Использует тот же
+// openRebuildPage(), что и UI-тесты выше (надёжный reach + обработка Server Setup).
+// ══════════════════════════════════════════════════════════════════════════════
+test.describe("VPS Panel — Rebuild: РЕАЛЬНЫЙ install (Build)", () => {
+  test("@critical TC-VPS-BUILD-001 реальный rebuild ОС → задача Build → Complete → Running", async ({
+    browser,
+  }) => {
+    test.setTimeout(300_000); // переустановка ОС + ожидание Complete
+
+    const { context, page, serverPage, rebuildPage, navigated } = await openRebuildPage(browser);
+    test.skip(!navigated, "Rebuild page not reachable — server may be stopped or modal unavailable");
+
+    try {
+      await test.step("выбрать ОС (AlmaLinux 8) → кнопка Install отражает выбор", async () => {
+        await rebuildPage.selectOs("AlmaLinux 8", "AlmaLinux");
+        expect(await rebuildPage.getInstallButtonText()).toContain("Install with");
+      });
+
+      await test.step("запустить РЕАЛЬНЫЙ rebuild (Install → Install Without SSH)", async () => {
+        await rebuildPage.confirmRealRebuild();
+      });
+
+      await test.step("на странице сервера: задача Build → Complete → Running", async () => {
+        // raw-навигация (без serverPage.goto(), чтобы не отменить только что запущенный rebuild)
+        await page.goto(`${PANEL_URL}/server/${TEST_SERVER_UUID}`, {
+          waitUntil: "domcontentloaded",
+          timeout: 30_000,
+        });
+        await page.waitForLoadState("networkidle").catch(() => null);
+        await expect
+          .poll(() => serverPage.getLatestTaskName(), {
+            timeout: 90_000,
+            intervals: [2_000, 3_000, 5_000],
+          })
+          .toMatch(/Build|Install/i);
+        await serverPage.waitForLatestTaskComplete(180_000);
+        await serverPage.waitForStatus("Running", 120_000);
+        console.log("[INFO] Real rebuild completed: Build → Complete → Running ✓");
+      });
+    } finally {
+      await context.close();
+    }
   });
 });

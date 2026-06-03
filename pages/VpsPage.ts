@@ -1,6 +1,7 @@
 import { type Page, type Locator } from "@playwright/test";
 import { CookieBanner } from "../components/CookieBanner";
 
+
 /**
  * VpsPage — https://godlike.host/vps-hosting/
  * WordPress SSR page. Completely different BEM structure from game server pages.

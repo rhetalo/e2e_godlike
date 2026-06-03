@@ -349,3 +349,92 @@ export const ALERTS = {
   error: '[class*="alert-danger"], [class*="alert-error"], [class*="toast-error"]',
   anyAlert: '[class*="alert"], [class*="toast"], [role="alert"]',
 } as const;
+
+/* ===== Game Panel — ultra.panel.godlike.host (Minecraft) ===== */
+// Confirmed via live recon 03-Jun-2026 (server ebb03adc, Paper 1.21.11).
+// Panel is a Vue SPA; server cards are clickable divs (no href), power
+// controls and tabs are text-labelled. An onboarding shepherd.js overlay
+// can intercept clicks — see GAME_PANEL_TOUR + components/game/ShepherdTour.
+export const GAME_PANEL_LOGIN = {
+  chooserButton: 'button:has-text("Through Login/Password")', // chooser screen before the form
+  email: 'input[type="email"]',         // placeholder "Username or Email"
+  password: 'input[type="password"]',   // placeholder "Password"
+  submit: 'button[type="submit"]:has-text("Login"), button:has-text("Login")',
+  error: '[class*="toast"], [class*="alert"], [class*="notification"], [class*="error"]',
+} as const;
+
+export const GAME_PANEL_TOUR = {
+  overlay: '.shepherd-modal-is-visible, .shepherd-modal-overlay-container, .shepherd-enabled',
+  close: 'button:has-text("Skip"), button:has-text("Close"), button:has-text("Got it"), button[aria-label="Close"]',
+} as const;
+
+export const GAME_PANEL_DASHBOARD = {
+  heading: 'h1, h2',                       // filter by /My Servers/ in the page object
+  server: '.dashboard__servers .server',
+  serverSuspended: '.dashboard__servers .server.server__suspended',
+  serverName: '.dashboard__servers .server .main1',
+  filterSuspended: 'button:has-text("Suspended")',
+  filterFree: 'button:has-text("Free")',
+} as const;
+
+export const GAME_PANEL_SERVER = {
+  editServer: 'button:has-text("Edit Server"), a:has-text("Edit Server")',
+  invitePeople: 'button:has-text("Invite People"), a:has-text("Invite People")',
+  consoleCommandInput: 'input[placeholder*="Command" i], [class*="console"] input',
+  consoleLog: ".terminal-container, .terminal", // websocket-лог сервера
+  // ВАЖНО: online-статус в панели — "Running" (не "Online"); offline — "Offline".
+  statusWord: /Running|Online|Offline|Starting|Stopping|Installing|Suspended/i,
+  addressText: /srv\d+\.godlike\.club:\d+/i,
+} as const;
+
+// Power toggle uses accessible button NAMES (exact). The primary button toggles
+// Start → Starting → Shut Down; Restart/Kill are separate and open a confirm dialog.
+// Confirmed via live DOM 03-Jun-2026.
+export const GAME_PANEL_POWER = {
+  start: "Start",
+  starting: "Starting",
+  shutDown: "Shut Down",
+  restart: "Restart",
+  kill: "Kill",
+} as const;
+
+// Vuetify confirmation / EULA dialog. Primary button = confirm
+// ("I Accept" / "Yes, Restart" / "Yes, Kill"); the other is Cancel.
+export const GAME_PANEL_DIALOG = {
+  root: ".v-card.dialog",
+  confirmBtn: "button.dialog__button-primary",
+  cancelBtn: "button.dialog__button:not(.dialog__button-primary)",
+  eulaTitle: /Accept Minecraft.*EULA/i,
+  restartTitle: /Restart the server\?/i,
+  killTitle: /Kill the server\?/i,
+} as const;
+
+// Top tab strip inside the server view (route-backed).
+export const GAME_PANEL_TABS = [
+  'Overview', 'Console', 'Files', 'Versions', 'Plugins/Mods', 'Modpacks', 'Config', 'Players',
+] as const;
+
+// Per-server left sidebar sections.
+export const GAME_PANEL_SECTIONS = [
+  'Overview', 'Sharing', 'Port & Domains', 'Backups', 'Tasks', 'Databases',
+] as const;
+
+// File manager (/server/{uuid}/files). Confirmed via live DOM 03-Jun-2026.
+// Список — v-data-table (tr.v-data-table__tr); удаление: чекбокс строки → нижний
+// Delete → confirm-диалог (.v-card.dialog → .dialog__button-primary; в Recycle Bin на 24ч).
+export const GAME_PANEL_FILES = {
+  newFolderButton: 'button:has-text("New folder")',
+  newFileButton: 'button:has-text("New file")',
+  uploadButton: 'button:has-text("Upload file")',
+  dialogTitle: ".server__file-manager__dialog-title",                      // "Create folder" / "Create file"
+  dialogNameInput: "input.v-field__input",                                // внутри диалога
+  dialogSaveButton: "button.server__file-manager__modal-button--primary", // "Save"
+  fileName: ".server__file-manager__file-list__file-name",
+  row: "tr.v-data-table__tr",
+  rowCheckbox: 'input[type="checkbox"]',
+  footerActionGroup: ".server__file-manager__action-btn-group",           // Download/Move/Duplicate/Delete
+  // confirm-диалог удаления («Delete File»): подтверждение — danger-кнопка (НЕ dialog__button-primary)
+  dialogTitleSel: ".server__file-manager__dialog-title",
+  deleteConfirmButton: "button.server__file-manager__modal-button--danger",
+  dialogCloseButton: "button.server__file-manager__dialog__btn-close",     // Cancel
+} as const;

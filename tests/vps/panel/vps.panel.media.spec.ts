@@ -78,13 +78,21 @@ test.describe("VPS Media — Boot Order", () => {
       await expect(mediaPage.bootOrderHeading).toBeVisible({ timeout: 10_000 });
     });
 
-    await test.step("HDD и CD/DVD radio присутствуют", async () => {
+    await test.step("Boot Order контрол реален: оба radio в DOM и ровно один выбран", async () => {
+      // ⚠️ radio-инпуты НАМЕРЕННО скрыты кастомным tile-UI → toBeVisible тут неприменим
+      // (упадёт легитимно). Фантом-защита: проверяем не просто наличие в DOM (toBeAttached
+      // прошёл бы и на нерендерящемся контроле), а РАБОЧЕЕ состояние — ровно один radio checked.
       await expect(mediaPage.hddRadio).toBeAttached({ timeout: 5_000 });
       await expect(mediaPage.cdDvdRadio).toBeAttached({ timeout: 5_000 });
+      const hddChecked = await mediaPage.hddRadio.isChecked();
+      const cdChecked = await mediaPage.cdDvdRadio.isChecked();
+      expect(hddChecked || cdChecked, "ровно один boot-device должен быть выбран").toBe(true);
+      expect(hddChecked && cdChecked, "не оба сразу").toBe(false);
     });
 
-    await test.step("Apply кнопка видна", async () => {
+    await test.step("Apply кнопка видна и активна (контрол интерактивен, не фантом)", async () => {
       await expect(mediaPage.applyButton).toBeVisible({ timeout: 5_000 });
+      await expect(mediaPage.applyButton).toBeEnabled({ timeout: 5_000 });
     });
 
     await test.step("Текущее устройство определено", () => {

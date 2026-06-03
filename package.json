@@ -10,6 +10,7 @@
     "test:vps": "npx playwright test tests/vps/ --project=chromium",
     "test:modded": "npx playwright test tests/modded/ --project=chromium",
     "test:general": "npx playwright test tests/general/ --project=chromium",
+    "test:game": "npx playwright test tests/game/ --project=chromium",
     "test:smoke": "npx playwright test --grep @smoke --project=chromium",
     "test:critical": "npx playwright test --grep @critical --project=chromium",
     "test:regression": "npx playwright test --grep @regression --project=chromium",

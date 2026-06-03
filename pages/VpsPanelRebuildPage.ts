@@ -207,7 +207,9 @@ export class VpsPanelRebuildPage {
    *   — Text changes to reflect the selected OS name
    */
   get finalInstallButton(): Locator {
-    return this.page.locator("button.btn-primary.btn-lg").filter({ hasText: /Install with/ });
+    // Rebuild→Continue: btn-primary.btn-lg; "Server Setup": другой класс.
+    // Текст "Install with {OS}" уникален (≠ "Install Without" в SSH-модалке).
+    return this.page.locator("button").filter({ hasText: /Install with/ }).first();
   }
 
   /** Text inside the Install button span (e.g. "Install with Debian 11 (Bullseye) Minimal") */
@@ -247,5 +249,33 @@ export class VpsPanelRebuildPage {
   /** Returns count of all OS cards (including inside collapsed accordions) */
   async getTotalOsCount(): Promise<number> {
     return this.allOsCards.count();
+  }
+
+  // ── REAL rebuild (destructive — выбор ОС + запуск install). ───────────────────
+  // Reach до страницы выбора ОС делает openRebuildPage() в vps.panel.rebuild.spec.ts.
+
+  /** Select an OS card (expanding its accordion family first if provided). */
+  async selectOs(name: string, family?: string): Promise<void> {
+    if (family) await this.expandAccordion(family);
+    const card = this.osCardByName(name);
+    await card.scrollIntoViewIfNeeded().catch(() => {});
+    await card.click();
+    await expect(this.finalInstallButton).toBeVisible({ timeout: 8_000 });
+  }
+
+  /**
+   * ⚠️ EXECUTES A REAL REBUILD. Clicks "Install with {OS}" and confirms the
+   * "without any SSH keys" danger modal (we do not add an SSH key).
+   * SSH modal confirmed: .modal.show → button.btn-danger "Install Without".
+   * Use ONLY in the dedicated real-rebuild test on a disposable test server.
+   */
+  async confirmRealRebuild(): Promise<void> {
+    await this.finalInstallButton.click();
+    const modal = this.page.locator(".modal.show").filter({ hasText: /SSH keys/i }).first();
+    await modal.waitFor({ state: "visible", timeout: 8_000 });
+    await modal
+      .locator('button.btn-danger:has-text("Install Without"), button:has-text("Install Without")')
+      .first()
+      .click();
   }
 }
