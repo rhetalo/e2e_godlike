@@ -11,7 +11,7 @@ test.use({
   deviceScaleFactor: 1,
 });
 
-test("test Stripe and PayPal", async ({ page }) => {
+test("оплата Stripe и PayPal", async ({ page }) => {
   await page.goto("https://godlike.host");
 
   await page

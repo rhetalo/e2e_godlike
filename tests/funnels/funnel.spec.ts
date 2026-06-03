@@ -9,7 +9,7 @@ test.use({
 
 })
 
-test('test base funnel', async ({page}) => {
+test('базовая воронка покупки', async ({page}) => {
     await page.goto('https://godlike.host');
 
     await page
@@ -86,7 +86,7 @@ test('test base funnel', async ({page}) => {
 });
 
 
-test('check old funnel redirect', async ({page}) => {
+test('старая ссылка воронки редиректит на главную', async ({page}) => {
     await page.goto('https://godlike.host/clientarea/cart.php?a=add&pid=341&billingcycle=monthly&currency=1&language=english&promocode=VANILLA20');
 
 

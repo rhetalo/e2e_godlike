@@ -55,7 +55,7 @@ test.afterAll(async () => {
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 1 — Навигация
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — Network Tab: навигация", () => {
+test.describe("VPS-панель — вкладка Network: навигация", () => {
   test("вкладка Network присутствует на странице сервера", async () => {
     await expect(serverPage.tab("Network")).toBeVisible({ timeout: 10_000 });
   });
@@ -70,7 +70,7 @@ test.describe("VPS Panel — Network Tab: навигация", () => {
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 2 — Карточка Primary Network
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — Network Tab: Primary Network", () => {
+test.describe("VPS-панель — вкладка Network: Primary Network", () => {
   test("заголовок 'Primary Network' (h2) виден в таб-панели", async () => {
     await expect(networkPage.primaryNetworkHeading).toBeVisible({ timeout: 10_000 });
   });
@@ -84,7 +84,7 @@ test.describe("VPS Panel — Network Tab: Primary Network", () => {
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 3 — Statistics (трафик-чарты)
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — Network Tab: Statistics", () => {
+test.describe("VPS-панель — вкладка Network: статистика", () => {
   test("кнопка Statistics видна в карточке Primary Network", async () => {
     await expect(networkPage.statisticsButton).toBeVisible({ timeout: 10_000 });
   });
@@ -104,7 +104,7 @@ test.describe("VPS Panel — Network Tab: Statistics", () => {
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 4 — Reverse DNS модал
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — Network Tab: Reverse DNS", () => {
+test.describe("VPS-панель — вкладка Network: Reverse DNS", () => {
   test("кнопка Reverse DNS видна в таб-панели", async () => {
     await expect(networkPage.reverseDnsButton).toBeVisible({ timeout: 10_000 });
   });
@@ -134,7 +134,7 @@ test.describe("VPS Panel — Network Tab: Reverse DNS", () => {
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 5 — DNS Resolver (multiselect)
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — Network Tab: DNS Resolvers", () => {
+test.describe("VPS-панель — вкладка Network: DNS Resolvers", () => {
   test("Cloudflare DNS resolver отображён в multiselect", async () => {
     await expect(networkPage.primaryDnsResolverLabel).toBeVisible({ timeout: 10_000 });
   });

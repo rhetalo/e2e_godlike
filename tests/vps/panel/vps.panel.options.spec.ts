@@ -62,7 +62,7 @@ async function gotoSubTab(name: "VNC" | "Rescue" | "Password" | "Settings"): Pro
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 1 — Навигация: Options tab + под-табы
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — Options: навигация", () => {
+test.describe("VPS-панель — Options: навигация", () => {
   test("вкладка Options присутствует и кликабельна", async () => {
     await serverPage.goto();
     await expect(serverPage.tab("Options")).toBeVisible({ timeout: 15_000 });
@@ -92,7 +92,7 @@ test.describe("VPS Panel — Options: навигация", () => {
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 2 — VNC под-таб
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — Options: VNC (vlang[168])", () => {
+test.describe("VPS-панель — Options: VNC (vlang[168])", () => {
   test.beforeEach(async () => { await gotoOptions(); });
 
   test("заголовок секции 'Virtual Network Computing (VNC)' виден", async () => {
@@ -130,7 +130,7 @@ test.describe("VPS Panel — Options: VNC (vlang[168])", () => {
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 3 — Password под-таб: Reset Password
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — Options: Reset Password (vlang[102])", () => {
+test.describe("VPS-панель — Options: Reset Password (vlang[102])", () => {
   test.beforeEach(async () => {
     await gotoOptions();
     await gotoSubTab("Password");
@@ -174,7 +174,7 @@ test.describe("VPS Panel — Options: Reset Password (vlang[102])", () => {
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 4 — Settings под-таб: Boot Type
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — Options: Settings / Boot Type (vlang[354–356])", () => {
+test.describe("VPS-панель — Options: Settings / Boot Type (vlang[354–356])", () => {
   test.beforeEach(async () => {
     await gotoOptions();
     await gotoSubTab("Settings");

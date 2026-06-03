@@ -33,7 +33,7 @@ test.beforeAll(async ({ browser }: { browser: Browser }) => {
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 1 — Login Page Structure
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — Login Page Structure", () => {
+test.describe("VPS-панель — структура страницы логина", () => {
   test("страница /login загружается и содержит форму", async ({ browser }) => {
     const page = await browser.newPage();
     const loginPage = new VpsPanelLoginPage(page);
@@ -82,7 +82,7 @@ test.describe("VPS Panel — Login Page Structure", () => {
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 2 — Successful Login
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — Successful Login", () => {
+test.describe("VPS-панель — успешный логин", () => {
   test("логин с валидными кредами → редирект на /dashboard", async ({ browser }) => {
     const page = await browser.newPage();
     const loginPage = new VpsPanelLoginPage(page);
@@ -135,7 +135,7 @@ test.describe("VPS Panel — Successful Login", () => {
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 3 — Invalid Credentials
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — Invalid Credentials", () => {
+test.describe("VPS-панель — неверные креды", () => {
   test("неверный пароль → остаёмся на /login", async ({ browser }) => {
     const page = await browser.newPage();
     const loginPage = new VpsPanelLoginPage(page);
@@ -182,7 +182,7 @@ test.describe("VPS Panel — Invalid Credentials", () => {
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 4 — Protected Routes (unauthenticated)
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — Protected Routes", () => {
+test.describe("VPS-панель — защищённые маршруты", () => {
   test("незалогиненный пользователь: /dashboard → редиректит на /login", async ({ browser }) => {
     const page = await browser.newPage();
 

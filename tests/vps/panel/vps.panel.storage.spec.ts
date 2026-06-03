@@ -52,7 +52,7 @@ test.afterAll(async () => {
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE — Storage Tab
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — Storage Tab", () => {
+test.describe("VPS-панель — вкладка Storage", () => {
   test("вкладка Storage присутствует на странице сервера", async () => {
     await expect(serverPage.tab("Storage")).toBeVisible({ timeout: 15_000 });
   });

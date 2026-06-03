@@ -67,7 +67,7 @@ test.afterAll(async () => {
 // SUITE 1 — Boot Order: переключение устройства загрузки
 // ══════════════════════════════════════════════════════════════════════════════
 
-test.describe("VPS Media — Boot Order", () => {
+test.describe("VPS-медиа — Boot Order", () => {
 
   test("@smoke 1.1 вкладка Media открыта, Boot Order секция видна, устройство определено", async () => {
     await test.step("Проверяем URL сервера", () => {

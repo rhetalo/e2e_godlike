@@ -55,7 +55,7 @@ test.beforeAll(async ({ browser }: { browser: Browser }) => {
 // ============================
 // Тесты мобильной воронки
 // ============================
-test.describe("Mobile Cart Funnel", () => {
+test.describe("Мобильная воронка корзины", () => {
   test("страница загружается с основными элементами", async ({ browser }) => {
     const context = await browser.newContext({
       storageState: storageStatePath,

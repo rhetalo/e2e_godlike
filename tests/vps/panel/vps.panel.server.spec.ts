@@ -53,7 +53,7 @@ test.afterAll(async () => {
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 1 — Dashboard Navigation
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — Dashboard & Navigation", () => {
+test.describe("VPS-панель — Dashboard и навигация", () => {
   test("dashboard загружается после логина", async () => {
     const page = sharedContext.pages()[0];
     const dashboard = new VpsPanelDashboardPage(page);
@@ -119,7 +119,7 @@ test.describe("VPS Panel — Dashboard & Navigation", () => {
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 2 — Server Detail Page Structure
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — Server Page Structure", () => {
+test.describe("VPS-панель — структура страницы сервера", () => {
   test.beforeEach(async () => {
     await serverPage.goto();
   });
@@ -156,7 +156,7 @@ test.describe("VPS Panel — Server Page Structure", () => {
 // SUITE 3 — Power Controls (smoke)
 // Детальные проверки состояний и модалов — в vps.panel.power.actions.spec.ts
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — Power Controls", () => {
+test.describe("VPS-панель — управление питанием", () => {
   test("кнопки управления питанием присутствуют на странице сервера", async () => {
     await serverPage.goto();
 
@@ -170,7 +170,7 @@ test.describe("VPS Panel — Power Controls", () => {
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 4 — Tab Navigation
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — Tab Navigation", () => {
+test.describe("VPS-панель — навигация по вкладкам", () => {
   const tabLabels = ["Overview", "Media", "Options", "Network", "Storage", "Sharing"] as const;
 
   test("все 6 вкладок присутствуют на странице сервера", async () => {
@@ -205,7 +205,7 @@ test.describe("VPS Panel — Tab Navigation", () => {
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 5 — Servers List (/servers)
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Panel — Servers List (/servers)", () => {
+test.describe("VPS-панель — список серверов (/servers)", () => {
   test.beforeEach(async () => {
     const page = sharedContext.pages()[0];
     await page.goto(`${PANEL_URL}/servers`, { waitUntil: "domcontentloaded", timeout: 30_000 });

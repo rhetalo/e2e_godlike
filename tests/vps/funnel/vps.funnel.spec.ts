@@ -119,7 +119,7 @@ test.beforeAll(async ({ browser }: { browser: Browser }) => {
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 1 — VPS Landing Page
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Landing — /vps-hosting/", () => {
+test.describe("VPS-лендинг — /vps-hosting/", () => {
   test("страница загружается, кнопки Deploy Now видны", async ({ browser }) => {
     const context = await newPinnedContext(browser);
     const page = await context.newPage();
@@ -162,7 +162,7 @@ test.describe("VPS Landing — /vps-hosting/", () => {
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 2 — Billing Cycle Step (/cart-vps/)
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Funnel — Billing Cycle Step", () => {
+test.describe("VPS-воронка — шаг Billing Cycle", () => {
   test("шаг биллинга загружается — 4 периода видны", async ({ browser }) => {
     const context = await newPinnedContext(browser);
     const page = await context.newPage();
@@ -333,7 +333,7 @@ test.describe("VPS Funnel — Billing Cycle Step", () => {
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 3 — Configure Your Server (step=3)
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Funnel — Configure Your Server", () => {
+test.describe("VPS-воронка — Configure Your Server", () => {
   // ── Location tests (existing) ─────────────────────────────────────────────
 
   test("шаг конфигурации загружается — локации видны", async ({ browser }) => {
@@ -638,7 +638,7 @@ test.describe("VPS Funnel — Configure Your Server", () => {
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 4 — Full Happy Path
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS Funnel — Full Happy Path", () => {
+test.describe("VPS-воронка — полный happy path", () => {
   test("Deploy Now → Billing → Configure (OS + Location) → WHMCS checkout", async ({
     browser,
   }) => {
