@@ -56,3 +56,6 @@ credentials.csv
 # Артефакты запусков
 debug-output.txt
 results.json
+
+# Разовые диагностические скрипты (live-проба, удаляются после)
+tmp-*
