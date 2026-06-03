@@ -37,6 +37,11 @@
   сохранены). Менялись только строки — логика, флоу и stateful-восстановление panel
   не тронуты.
 - **`CookieBanner`**: в дисмисс добавлен липкий `.flash-sale-banner` (перехватывал клики).
+- **`vps.panel.rebuild.spec.ts`**: в `openRebuildPage` добавлен reload+retry поиска кнопки
+  Rebuild. Диагноз скипов: НЕ регрессия — навигация Rebuild→Continue→OS работает (23/23
+  `loaded:true`); редкий транзиент после «Cancel Rebuild» (кнопка на миг пропадает) давал
+  флоки-skip. Retry это восстанавливает. Проверено: **23 passed / 0 skipped** (real rebuild
+  SUITE 7 зелёный). «Много скипов» = неудачный/медленный прогон, не поломка.
 
 ---
 

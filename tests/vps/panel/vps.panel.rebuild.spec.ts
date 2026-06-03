@@ -99,7 +99,17 @@ async function openRebuildPage(browser: Browser): Promise<{
   // Rebuild доступна в ЛЮБОМ power-статусе, включая Stopped (подтверждено вживую) — ensureRunning НЕ нужен.
   // Скип бывал из-за transient сразу после "Cancel Rebuild" (кнопка на миг пропадает) — ждём её дольше.
   const rebuildBtn = page.locator('button[data-bs-target="#reinstallServerModal"]').first();
-  const rebuildVisible = await rebuildBtn.isVisible({ timeout: 15_000 }).catch(() => false);
+  let rebuildVisible = await rebuildBtn.isVisible({ timeout: 15_000 }).catch(() => false);
+
+  // Транзиент сразу после "Cancel Rebuild" (churn между recon-тестами): кнопка Rebuild
+  // может на миг пропасть и не успеть появиться за 15с → раньше это давало флоки-skip.
+  // Одна попытка восстановления — перезагрузить overview (goto снова гасит pending setup)
+  // и поискать кнопку ещё раз. Снижает редкие транзиентные скипы.
+  if (!rebuildVisible) {
+    console.log("[INFO] Rebuild button not found on first try — reloading overview and retrying once");
+    await serverPage.goto();
+    rebuildVisible = await rebuildBtn.isVisible({ timeout: 15_000 }).catch(() => false);
+  }
 
   if (!rebuildVisible) {
     console.log("[INFO] Rebuild button not found — server may be stopped or button unavailable");
