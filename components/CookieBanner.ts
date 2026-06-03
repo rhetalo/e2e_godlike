@@ -60,6 +60,10 @@ const PROMO_BANNER_SELECTORS: readonly string[] = [
   // ── Confirmed (May 2026) ──────────────────────────────────────────────────
   ".flash-sale-modal",
   ".flash-sale-modal__wrapper",
+  // Липкий flash-sale-баннер ($1/$2 per GB) — присутствует на /vps-hosting/
+  // всегда (A/B Amplitude), может перехватывать клики Deploy Now / Next Step.
+  // Подтверждено на live 03-Jun-2026.
+  ".flash-sale-banner",
 
   // ── Generic patterns — catches most campaign banners ─────────────────────
   '[class*="promo-modal"]',
@@ -109,7 +113,7 @@ const PROMO_CLOSE_SELECTORS: readonly string[] = [
  * Prevents re-appearance without reloading the page.
  */
 const PROMO_HIDE_CSS = `
-  .flash-sale-modal, .flash-sale-modal__wrapper,
+  .flash-sale-modal, .flash-sale-modal__wrapper, .flash-sale-banner,
   [class*="promo-modal"], [class*="sale-modal"],
   [class*="promo-banner"], [class*="sale-banner"],
   [class*="promo-overlay"], [id*="promo-modal"],

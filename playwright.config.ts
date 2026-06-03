@@ -44,6 +44,12 @@ export default defineConfig({
     use: {
       ...devices['Desktop Chrome'],
 
+      // Тесты бегут в фоне (без окон браузера). Переопределить разово:
+      // npm run test:headed  /  npx playwright test --headed
+      // В расширении Playwright для VS Code режим headed включает галочка
+      // "Show browser" в панели Testing — этот флаг её НЕ перебивает, сними её там.
+      headless: true,
+
       baseURL: 'https://godlike.host',
 
       actionTimeout: 15_000,

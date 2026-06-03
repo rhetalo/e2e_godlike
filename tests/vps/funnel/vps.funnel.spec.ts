@@ -24,11 +24,18 @@
  *   npx playwright test tests/vps.funnel.spec.ts --project=chromium
  *   npx playwright test tests/vps.funnel.spec.ts --project=chromium --headed
  */
-import { test, expect, type Browser, type Page } from "@playwright/test";
+import {
+  test,
+  expect,
+  type Browser,
+  type BrowserContext,
+  type Page,
+} from "@playwright/test";
 import { VpsPage } from "../../../pages/VpsPage";
 import { VpsConfigPage } from "../../../pages/VpsConfigPage";
 import { CartBillingPage } from "../../../pages/CartBillingPage";
 import { BASE_URL, Credentials } from "../../../fixtures/test-data";
+import { pinAmplitudeExperiments } from "../../../utils/amplitude";
 
 test.use({
   viewport: { width: 1800, height: 900 },
@@ -38,6 +45,21 @@ test.use({
 const storageStatePath = "storageState.vps.json";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
+
+/**
+ * Контекст с авторизацией + детерминированным пиннингом A/B Amplitude.
+ * Пиннинг убирает плавающую форму URL корзины и flash-sale-баннер (см.
+ * utils/amplitude.ts). viewport фиксируем под desktop-вёрстку воронки,
+ * т.к. browser.newContext() не наследует test.use({ viewport }).
+ */
+async function newPinnedContext(browser: Browser): Promise<BrowserContext> {
+  const context = await browser.newContext({
+    storageState: storageStatePath,
+    viewport: { width: 1800, height: 900 },
+  });
+  await pinAmplitudeExperiments(context);
+  return context;
+}
 
 function parsePrice(str: string): number {
   const normalized = str.replace(",", ".");
@@ -99,9 +121,7 @@ test.beforeAll(async ({ browser }: { browser: Browser }) => {
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS Landing — /vps-hosting/", () => {
   test("страница загружается, кнопки Deploy Now видны", async ({ browser }) => {
-    const context = await browser.newContext({
-      storageState: storageStatePath,
-    });
+    const context = await newPinnedContext(browser);
     const page = await context.newPage();
     const vps = new VpsPage(page);
 
@@ -114,46 +134,25 @@ test.describe("VPS Landing — /vps-hosting/", () => {
     await context.close();
   });
 
-  test("у каждой кнопки Deploy Now есть корректный href с productId", async ({
-    browser,
-  }) => {
-    const context = await browser.newContext({
-      storageState: storageStatePath,
-    });
-    const page = await context.newPage();
-    const vps = new VpsPage(page);
-
-    await vps.goto();
-
-    const buttons = page.locator('a.deploy-btn[href*="productId="]');
-    const count = await buttons.count();
-
-    console.log(`[INFO] Deploy Now buttons: ${count}`);
-
-    for (let i = 0; i < count; i++) {
-      const href = await buttons.nth(i).getAttribute("href");
-
-      console.log(`[INFO] Button ${i + 1} href FULL:`, href);
-
-      expect(href).not.toBeNull();
-      expect(href!).toMatch(/productId=\d+/);
-      expect(href!).toMatch(/\/cart-vps/);
-    }
-
-    await context.close();
-  });
+  // NOTE: тест «у каждой кнопки Deploy Now есть корректный href с productId»
+  // удалён 03-Jun-2026: кнопки Deploy Now — это <a href="javascript:void(0)">
+  // с JS-роутингом (productId уходит в URL корзины только ПОСЛЕ клика), поэтому
+  // селектор a.deploy-btn[href*="productId="] всегда давал 0 совпадений и тест
+  // проходил вхолостую (ни одного expect). Покрытие клик→/cart-vps обеспечивают
+  // тест ниже и Full Happy Path (SUITE 4).
 
   test("клик Deploy Now ведёт в /cart-vps/ и монтирует Vue SPA", async ({
     browser,
   }) => {
-    const context = await browser.newContext({
-      storageState: storageStatePath,
-    });
+    const context = await newPinnedContext(browser);
     const page = await context.newPage();
 
     await deployFirstPlan(page);
 
+    // productId уходит в URL корзины именно после клика (кнопки — javascript:void(0)).
+    // /\/cart-vps/ ловит обе формы URL, которые даёт A/B (.../cart-vps?... и .../cart-vps/?...).
     expect(page.url()).toMatch(/\/cart-vps/);
+    expect(page.url()).toMatch(/productId=\d+/);
     await expect(page.locator("[data-v-app]")).toBeVisible();
 
     await context.close();
@@ -165,9 +164,7 @@ test.describe("VPS Landing — /vps-hosting/", () => {
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS Funnel — Billing Cycle Step", () => {
   test("шаг биллинга загружается — 4 периода видны", async ({ browser }) => {
-    const context = await browser.newContext({
-      storageState: storageStatePath,
-    });
+    const context = await newPinnedContext(browser);
     const page = await context.newPage();
     const cartBilling = new CartBillingPage(page);
 
@@ -189,9 +186,7 @@ test.describe("VPS Funnel — Billing Cycle Step", () => {
   test("у каждого периода есть дисконтированная цена (.period__price-primary_amount)", async ({
     browser,
   }) => {
-    const context = await browser.newContext({
-      storageState: storageStatePath,
-    });
+    const context = await newPinnedContext(browser);
     const page = await context.newPage();
     const cartBilling = new CartBillingPage(page);
 
@@ -230,9 +225,7 @@ test.describe("VPS Funnel — Billing Cycle Step", () => {
   test("у каждого периода есть badge скидки (.period__discount)", async ({
     browser,
   }) => {
-    const context = await browser.newContext({
-      storageState: storageStatePath,
-    });
+    const context = await newPinnedContext(browser);
     const page = await context.newPage();
     const cartBilling = new CartBillingPage(page);
 
@@ -258,9 +251,7 @@ test.describe("VPS Funnel — Billing Cycle Step", () => {
   test("клик по периоду обновляет Billing cycle в order summary", async ({
     browser,
   }) => {
-    const context = await browser.newContext({
-      storageState: storageStatePath,
-    });
+    const context = await newPinnedContext(browser);
     const page = await context.newPage();
     const cartBilling = new CartBillingPage(page);
 
@@ -290,9 +281,7 @@ test.describe("VPS Funnel — Billing Cycle Step", () => {
   test("общая стоимость (.order__pricing-price) — ненулевая, меняется при смене периода", async ({
     browser,
   }) => {
-    const context = await browser.newContext({
-      storageState: storageStatePath,
-    });
+    const context = await newPinnedContext(browser);
     const page = await context.newPage();
     const cartBilling = new CartBillingPage(page);
 
@@ -324,9 +313,7 @@ test.describe("VPS Funnel — Billing Cycle Step", () => {
   });
 
   test("кнопка NEXT STEP видна и активна", async ({ browser }) => {
-    const context = await browser.newContext({
-      storageState: storageStatePath,
-    });
+    const context = await newPinnedContext(browser);
     const page = await context.newPage();
 
     await deployFirstPlan(page);
@@ -350,9 +337,7 @@ test.describe("VPS Funnel — Configure Your Server", () => {
   // ── Location tests (existing) ─────────────────────────────────────────────
 
   test("шаг конфигурации загружается — локации видны", async ({ browser }) => {
-    const context = await browser.newContext({
-      storageState: storageStatePath,
-    });
+    const context = await newPinnedContext(browser);
     const page = await context.newPage();
     const config = new VpsConfigPage(page);
 
@@ -367,9 +352,7 @@ test.describe("VPS Funnel — Configure Your Server", () => {
   });
 
   test("доступны локации USA и Europe", async ({ browser }) => {
-    const context = await browser.newContext({
-      storageState: storageStatePath,
-    });
+    const context = await newPinnedContext(browser);
     const page = await context.newPage();
     const config = new VpsConfigPage(page);
 
@@ -387,9 +370,7 @@ test.describe("VPS Funnel — Configure Your Server", () => {
   });
 
   test("одна из локаций активна по умолчанию", async ({ browser }) => {
-    const context = await browser.newContext({
-      storageState: storageStatePath,
-    });
+    const context = await newPinnedContext(browser);
     const page = await context.newPage();
     const config = new VpsConfigPage(page);
 
@@ -405,9 +386,7 @@ test.describe("VPS Funnel — Configure Your Server", () => {
   test("клик по другой локации меняет активный элемент", async ({
     browser,
   }) => {
-    const context = await browser.newContext({
-      storageState: storageStatePath,
-    });
+    const context = await newPinnedContext(browser);
     const page = await context.newPage();
     const config = new VpsConfigPage(page);
 
@@ -430,9 +409,7 @@ test.describe("VPS Funnel — Configure Your Server", () => {
   test("оба варианта локации кликабельны и меняют активный", async ({
     browser,
   }) => {
-    const context = await browser.newContext({
-      storageState: storageStatePath,
-    });
+    const context = await newPinnedContext(browser);
     const page = await context.newPage();
     const config = new VpsConfigPage(page);
 
@@ -454,9 +431,7 @@ test.describe("VPS Funnel — Configure Your Server", () => {
   test("смена локации обновляет Location в order summary", async ({
     browser,
   }) => {
-    const context = await browser.newContext({
-      storageState: storageStatePath,
-    });
+    const context = await newPinnedContext(browser);
     const page = await context.newPage();
     const config = new VpsConfigPage(page);
 
@@ -478,9 +453,7 @@ test.describe("VPS Funnel — Configure Your Server", () => {
   });
 
   test("кнопка NEXT STEP видна на шаге конфигурации", async ({ browser }) => {
-    const context = await browser.newContext({
-      storageState: storageStatePath,
-    });
+    const context = await newPinnedContext(browser);
     const page = await context.newPage();
     const config = new VpsConfigPage(page);
 
@@ -496,9 +469,7 @@ test.describe("VPS Funnel — Configure Your Server", () => {
   // ── OS / Pre-installation tests (new) ─────────────────────────────────────
 
   test("блок Choose your OS видим — типы ОС загружены", async ({ browser }) => {
-    const context = await browser.newContext({
-      storageState: storageStatePath,
-    });
+    const context = await newPinnedContext(browser);
     const page = await context.newPage();
     const config = new VpsConfigPage(page);
 
@@ -520,9 +491,7 @@ test.describe("VPS Funnel — Configure Your Server", () => {
   test("по умолчанию активна ОС Games, в summary есть Server type", async ({
     browser,
   }) => {
-    const context = await browser.newContext({
-      storageState: storageStatePath,
-    });
+    const context = await newPinnedContext(browser);
     const page = await context.newPage();
     const config = new VpsConfigPage(page);
 
@@ -547,9 +516,7 @@ test.describe("VPS Funnel — Configure Your Server", () => {
   test("выбор типа Ubuntu меняет активный тип и показывает дропдаун версий", async ({
     browser,
   }) => {
-    const context = await browser.newContext({
-      storageState: storageStatePath,
-    });
+    const context = await newPinnedContext(browser);
     const page = await context.newPage();
     const config = new VpsConfigPage(page);
 
@@ -578,9 +545,7 @@ test.describe("VPS Funnel — Configure Your Server", () => {
   test("выбор версии из дропдауна обновляет Summary 'Server type'", async ({
     browser,
   }) => {
-    const context = await browser.newContext({
-      storageState: storageStatePath,
-    });
+    const context = await newPinnedContext(browser);
     const page = await context.newPage();
     const config = new VpsConfigPage(page);
 
@@ -616,9 +581,7 @@ test.describe("VPS Funnel — Configure Your Server", () => {
   });
 
   test("смена типа ОС обновляет Summary 'Server type'", async ({ browser }) => {
-    const context = await browser.newContext({
-      storageState: storageStatePath,
-    });
+    const context = await newPinnedContext(browser);
     const page = await context.newPage();
     const config = new VpsConfigPage(page);
 
@@ -650,9 +613,7 @@ test.describe("VPS Funnel — Configure Your Server", () => {
   test("WordPress on Ubuntu — нет дропдауна версий (одиночный вариант)", async ({
     browser,
   }) => {
-    const context = await browser.newContext({
-      storageState: storageStatePath,
-    });
+    const context = await newPinnedContext(browser);
     const page = await context.newPage();
     const config = new VpsConfigPage(page);
 
@@ -681,9 +642,7 @@ test.describe("VPS Funnel — Full Happy Path", () => {
   test("Deploy Now → Billing → Configure (OS + Location) → WHMCS checkout", async ({
     browser,
   }) => {
-    const context = await browser.newContext({
-      storageState: storageStatePath,
-    });
+    const context = await newPinnedContext(browser);
     const page = await context.newPage();
     const cartBilling = new CartBillingPage(page);
     const config = new VpsConfigPage(page);
