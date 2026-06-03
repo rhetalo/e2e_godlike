@@ -19,8 +19,8 @@ import { ModdedHostingPage } from "../../pages/ModdedHostingPage";
 import { SeedPage } from "../../pages/SeedPage";
 import { Urls } from "../../fixtures/test-data";
 
-test.describe("@smoke godlike.host pages load", () => {
-  test("home loads and has 'godlike' in <title>", async ({ page }) => {
+test.describe("@smoke страницы godlike.host загружаются", () => {
+  test("главная грузится и содержит 'godlike' в <title>", async ({ page }) => {
     const resp = await page.goto(Urls.home, { waitUntil: "domcontentloaded" });
     expect(resp?.ok()).toBeTruthy();
     const title = await page.title();
@@ -28,7 +28,7 @@ test.describe("@smoke godlike.host pages load", () => {
     expect(title).toMatch(/godlike/i);
   });
 
-  test("modded hosting page loads and calculator mounts", async ({ page }) => {
+  test("страница modded-хостинга грузится и монтирует калькулятор", async ({ page }) => {
     const modded = new ModdedHostingPage(page);
     await modded.open();
     await expect(page).toHaveURL(/modded-minecraft-server-hosting/);
@@ -43,7 +43,7 @@ test.describe("@smoke godlike.host pages load", () => {
     expect(installCount).toBeGreaterThanOrEqual(1);
   });
 
-  test("seed page loads and seed-calculator mounts", async ({ page }) => {
+  test("сид-страница грузится и монтирует seed-калькулятор", async ({ page }) => {
     const seed = new SeedPage(page);
     await seed.open();
     await expect(page).toHaveURL(/sky-haven-island-atm-10-seed/);

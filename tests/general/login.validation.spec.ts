@@ -34,8 +34,8 @@ async function gotoCart(page: Page): Promise<CartPage> {
   return cart;
 }
 
-test.describe("Login validation (cart auth-block)", () => {
-  test("empty submit does NOT advance the cart to step 2", async ({ page }) => {
+test.describe("Валидация логина (auth-block в корзине)", () => {
+  test("пустая отправка НЕ переводит корзину на step 2", async ({ page }) => {
     const cart = await gotoCart(page);
 
     // Click submit with empty inputs. HTML5 validation should block it; even
@@ -51,7 +51,7 @@ test.describe("Login validation (cart auth-block)", () => {
     expect(page.url()).not.toMatch(VueCartStep2Pattern);
   });
 
-  test("invalid credentials do NOT advance the cart to step 2", async ({
+  test("неверные данные НЕ переводят корзину на step 2", async ({
     page,
   }) => {
     const cart = await gotoCart(page);
@@ -69,7 +69,7 @@ test.describe("Login validation (cart auth-block)", () => {
     expect(page.url()).not.toMatch(VueCartStep2Pattern);
   });
 
-  test("login form fields have the expected types & placeholders", async ({
+  test("поля формы логина имеют корректные type и placeholder", async ({
     page,
   }) => {
     const cart = await gotoCart(page);

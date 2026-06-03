@@ -1,17 +1,17 @@
 import { test, expect, Page } from '../../fixtures/base';
 import { generateCredentials, saveCredentials } from '../../utils/credentials';
 
-test.describe('Registration flow from tariff', () => {
-    test('User can register from tariff checkout',{tag: '@fast'}, async ({ page }: { page: Page }) => {
+test.describe('Регистрация из тарифа', () => {
+    test('Пользователь может зарегистрироваться при оформлении тарифа',{tag: '@fast'}, async ({ page }: { page: Page }) => {
     test.setTimeout(60000);
     await page.setViewportSize({ width: 1920, height: 1080 });
 
-    /* ---------- OPEN SITE ---------- */
+    /* ---------- Открыть сайт ---------- */
     await page.goto('https://godlike.host/', {
         waitUntil: 'domcontentloaded'
     });
 
-    /* ---------- VIEW ALL PLANS ---------- */
+    /* ---------- Перейти к списку тарифов ---------- */
     const viewAllPlans = page.locator(
         `a[href*="minecraft-java-servers-hosting"], a:has-text("View all plans")`
     ).first();
@@ -19,7 +19,7 @@ test.describe('Registration flow from tariff', () => {
     await viewAllPlans.waitFor({ state: 'visible' });
     await viewAllPlans.click();
 
-    /* ---------- ADD FIRST TARIFF TO CART ---------- */
+    /* ---------- Добавить первый тариф в корзину ---------- */
     const addToCart = page
         .locator('a.storefront__tariff-action__cart')
         .first();
@@ -27,10 +27,10 @@ test.describe('Registration flow from tariff', () => {
     await addToCart.waitFor({ state: 'visible' });
     await addToCart.click();
 
-    /* ---------- GENERATE CREDENTIALS ---------- */
+    /* ---------- Сгенерировать учётные данные ---------- */
     const { login, password, email } = generateCredentials();
 
-    /* ---------- REGISTRATION FORM ---------- */
+    /* ---------- Форма регистрации ---------- */
     await page.locator('input[type="email"]').fill(email);
     await page
         .locator('input[name="username"], input[type="text"]')
@@ -42,7 +42,7 @@ test.describe('Registration flow from tariff', () => {
 
     await page.locator('button[type="submit"]').click();
 
-    /* ---------- ACCEPT TERMS ---------- */
+    /* ---------- Принять условия ---------- */
     const acceptTerms = page.locator(
         'button.terms-modal__actions-accept'
     );
@@ -50,7 +50,7 @@ test.describe('Registration flow from tariff', () => {
     await acceptTerms.waitFor({ state: 'visible' });
     await acceptTerms.click();
 
-    /* ---------- ORDER STEPS ---------- */
+    /* ---------- Шаги оформления заказа ---------- */
     const nextStep = page.locator(
         'button:has-text("Next step")'
     );
@@ -59,13 +59,13 @@ test.describe('Registration flow from tariff', () => {
     await nextStep.first().click();
     await nextStep.first().click();
 
-    /* ---------- SAVE CREDS ---------- */
+    /* ---------- Сохранить учётные данные ---------- */
     saveCredentials(login, password, email);
 
     console.log('Registration complete');
     console.log(login, password, email);
 
-    /* ---------- BASIC ASSERT ---------- */
+    /* ---------- Базовая проверка ---------- */
     await expect(page).not.toHaveURL(/login/i);
     });
 });
