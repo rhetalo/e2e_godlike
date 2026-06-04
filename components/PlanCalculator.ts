@@ -4,8 +4,12 @@
  *   - /minecraft-seeds/<slug>/         (#seed-calculator)
  *
  * Both bundles render a Vuetify v-slider whose ARIA-compliant thumb has
- * aria-valuemin=0 / aria-valuemax=100 and steps in 12.5 increments. Pressing
- * ArrowRight on the thumb increments aria-valuenow by exactly one tick (12.5).
+ * aria-valuemin=0 / aria-valuemax=100 and steps in uniform ticks. Pressing
+ * ArrowRight on the thumb increments aria-valuenow by exactly one tick.
+ *
+ * ⚠️ Число делений (тиров) задаётся страницей и МЕНЯЕТСЯ: наблюдалось 8 шагов
+ * (шаг 12.5), затем 6 шагов (шаг 16.667 = 100/6). Поэтому размер шага НЕ
+ * хардкодим — вычисляем из DOM через stepSize().
  *
  * The modded calculator additionally exposes a Vuetify v-autocomplete for the
  * modpack and modpack version, plus a row of quick-pick "rounded-pill" buttons
@@ -104,6 +108,19 @@ export class PlanCalculator {
     }
   }
 
+  /**
+   * Размер одного шага слайдера (один ArrowRight), вычисленный из DOM —
+   * без хардкода, т.к. число тарифных делений на странице меняется.
+   * Побочный эффект: оставляет слайдер на (min + 1 шаг).
+   */
+  async stepSize(): Promise<number> {
+    await this.toMin();
+    const a = (await this.readSlider()).value;
+    await this.stepRight(1);
+    const b = (await this.readSlider()).value;
+    return b - a;
+  }
+
   /** Move slider to its rightmost position. */
   async toMax(): Promise<void> {
     await this.sliderThumb().focus();
@@ -122,11 +139,11 @@ export class PlanCalculator {
     if (fraction < 0 || fraction > 1) {
       throw new Error(`fraction must be in [0,1], got ${fraction}`);
     }
+    const step = await this.stepSize(); // вычисляем из DOM, не хардкодим
     await this.toMin();
     const { max } = await this.readSlider();
     const target = max * fraction;
-    const stepSize = 12.5;
-    const stepsNeeded = Math.round(target / stepSize);
+    const stepsNeeded = step > 0 ? Math.round(target / step) : 0;
     if (stepsNeeded > 0) await this.stepRight(stepsNeeded);
   }
 }
