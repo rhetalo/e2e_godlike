@@ -384,7 +384,7 @@ function registerGameTests(game: GameConfig): void {
       page,
     }) => {
       const blocks = await helper.getSliderBlocks();
-      if (blocks[0].options.length < 2) return; // only 1 option — skip
+      test.skip(blocks[0].options.length < 2, "у Slots одна опция — менять нечего");
       const midIdx = Math.floor(blocks[0].options.length / 2);
       const midOption = blocks[0].options[midIdx];
       await helper.clickOption(0, midOption);
@@ -400,8 +400,10 @@ function registerGameTests(game: GameConfig): void {
       // Skip when all slot options share the same value (e.g. Valheim: ["10","10","10"]).
       // In that case clickOption() always resolves to index 0 by DOM query, so we cannot
       // reliably test index-based sync.
-      if (blocks[0].options.every((opt) => opt === blocks[0].options[0]))
-        return;
+      test.skip(
+        blocks[0].options.every((opt) => opt === blocks[0].options[0]),
+        "все опции Slots одинаковы (напр. Valheim) — index-based проверка невозможна",
+      );
       const lastIdx = blocks[0].options.length - 1;
       const lastSlotOption = blocks[0].options[lastIdx];
       const expectedRam = blocks[1].options[lastIdx];
@@ -417,9 +419,11 @@ function registerGameTests(game: GameConfig): void {
     }) => {
       const blocks = await helper.getSliderBlocks();
       // Need at least 3 unique options to have a meaningful middle
-      if (blocks[0].options.length < 3) return;
-      if (blocks[0].options.every((opt) => opt === blocks[0].options[0]))
-        return;
+      test.skip(blocks[0].options.length < 3, "нет средней опции (опций < 3)");
+      test.skip(
+        blocks[0].options.every((opt) => opt === blocks[0].options[0]),
+        "все опции Slots одинаковы — средняя совпадает с краями",
+      );
       const midIdx = Math.floor(blocks[0].options.length / 2);
       await helper.clickOption(0, blocks[0].options[midIdx]);
       expect(await helper.getCurrentValue(0)).toBe(blocks[0].options[midIdx]);
@@ -475,7 +479,7 @@ function registerGameTests(game: GameConfig): void {
       const firstRam = blocks[1].options[0];
       const lastRam = blocks[1].options[blocks[1].options.length - 1];
       // Only meaningful if the RAM tiers have different pricing
-      if (firstRam === lastRam) return;
+      test.skip(firstRam === lastRam, "RAM-тиры с одинаковой ценой — цена не изменится");
       const priceAtFirst = await helper.getCustomizedPrice();
       await helper.clickOption(1, lastRam);
       const priceAtLast = await helper.getCustomizedPrice();
@@ -489,7 +493,7 @@ function registerGameTests(game: GameConfig): void {
       const firstRam = blocks[1].options[0];
       const lastRam = blocks[1].options[blocks[1].options.length - 1];
       // Skip if all RAM options share the same value (handle won't shift)
-      if (firstRam === lastRam) return;
+      test.skip(firstRam === lastRam, "все опции RAM одинаковы — ползунок не сдвинется");
       const initialLeft = await helper.getHandleLeft(1);
       await helper.clickOption(1, lastRam);
       const updatedLeft = await helper.getHandleLeft(1);
@@ -547,7 +551,10 @@ function registerGameTests(game: GameConfig): void {
       const lastOption = blocks[0].options[blocks[0].options.length - 1];
       // Skip if there is only 1 option or all options have the same value
       // (e.g. Valheim where slots are always 10 — only RAM tier differs)
-      if (blocks[0].options.length < 2 || firstOption === lastOption) return;
+      test.skip(
+        blocks[0].options.length < 2 || firstOption === lastOption,
+        "у Slots одна опция или все одинаковы — цена не изменится",
+      );
       const priceAtFirst = await helper.getCustomizedPrice();
       await helper.clickOption(0, lastOption);
       const priceAtLast = await helper.getCustomizedPrice();
@@ -583,7 +590,10 @@ function registerGameTests(game: GameConfig): void {
       const lastOption = blocks[0].options[blocks[0].options.length - 1];
       // Skip if there is only 1 option or all options have the same value
       // (e.g. Valheim where all slot options equal "10" — handle won't visually shift)
-      if (blocks[0].options.length < 2 || firstOption === lastOption) return;
+      test.skip(
+        blocks[0].options.length < 2 || firstOption === lastOption,
+        "у Slots одна опция или все одинаковы — ползунок не сдвинется",
+      );
       const initialLeft = await helper.getHandleLeft(0);
       await helper.clickOption(0, lastOption);
       const updatedLeft = await helper.getHandleLeft(0);
