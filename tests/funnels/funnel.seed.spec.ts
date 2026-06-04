@@ -20,6 +20,7 @@ import { test, expect, type Browser, type Page } from "@playwright/test";
 import { SeedPage } from "../../pages/SeedPage";
 import { CartPage } from "../../pages/CartPage";
 import { CheckoutPage } from "../../pages/CheckoutPage";
+import { pinAmplitudeExperiments } from "../../utils/amplitude";
 import {
   BASE_URL,
   Credentials,
@@ -75,6 +76,9 @@ test.describe("Воронка покупки сида (стоп на стран�
     const context = await browser.newContext({
       storageState: storageStatePath,
     });
+    // §9.10: фиксируем A/B Amplitude ДО первой страницы — иначе случайный вариант
+    // показывает flash-sale-баннер, который перехватывает клик BUY (источник флоки).
+    await pinAmplitudeExperiments(context);
     const page = await context.newPage();
 
     const seed = new SeedPage(page);
@@ -91,9 +95,16 @@ test.describe("Воронка покупки сида (стоп на стран�
       expect(cartUrl, "BUY-A-SERVER button must expose a data-url").toBeTruthy();
 
       // ─── Step 2: BUY → Vue cart ──────────────────────────────────────
+      // Дать инлайн-скрипту навесить обработчик BUY (читает data-url → редирект):
+      // ждём успокоения сети. Кликаем БЕЗ force — Playwright дождётся, что кнопка
+      // видима, стабильна и не перекрыта (раньше force бил мимо и ловил reload).
+      await page.waitForLoadState("networkidle", { timeout: 10_000 }).catch(() => {});
+      const buyButton = seed.buyServerButton();
+      await expect(buyButton).toBeVisible({ timeout: 15_000 });
+      await buyButton.scrollIntoViewIfNeeded();
       await Promise.all([
         page.waitForURL(/\/cart\/?\?[^#]*productId=/, { timeout: 30_000 }),
-        seed.buyServerButton().click({ force: true }),
+        buyButton.click(),
       ]);
       await cartPage.cookieBanner.dismissAll();
       console.log(`[STEP 2] Cart URL: ${page.url()}`);
