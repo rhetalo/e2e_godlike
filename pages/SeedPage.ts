@@ -10,7 +10,7 @@
  *     [data-promocode="SEED"] [data-discount="40"]
  *
  *     #fieldPlayersCount                            ← hidden numeric input
- *     [role="slider"]                               ← v-slider thumb (0..100, step 12.5)
+ *     [role="slider"]                               ← v-slider thumb (0..100, равномерные тики; шаг задаётся страницей)
  *     button[type="submit"].seed-calculator__btn    ← "Host Now" CTA inside the calc
  *
  *   button.single-seed-card__button                 ← "BUY A SERVER" card CTA

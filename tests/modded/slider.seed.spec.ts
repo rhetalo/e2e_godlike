@@ -4,7 +4,8 @@
  * Tariff slider on /minecraft-seeds/sky-haven-island-atm-10-seed/.
  *
  * The seed calculator uses the same Vuetify v-slider widget as the modded
- * calculator (0..100, step 12.5). Its hidden input is `#fieldPlayersCount`.
+ * calculator (0..100, равномерные тики; число делений задаётся страницей —
+ * наблюдалось 8 шагов→12.5, затем 6 шагов→16.667). Hidden input: `#fieldPlayersCount`.
  * The "Host Now" button submits a form, so we verify the cart-link metadata
  * via the BUY-A-SERVER card's data-url and the calculator's data-* attrs.
  *
@@ -29,14 +30,23 @@ test.describe("Сид-страница Sky-haven: слайдер тарифа", 
     expect(state.max).toBe(100);
   });
 
-  test("ArrowRight увеличивает aria-valuenow на один шаг (12.5)", async () => {
-    const before = await seed.calculator.readSlider();
+  test("ArrowRight двигает слайдер на один равномерный шаг", async () => {
+    // Не хардкодим размер шага: число делений задаётся страницей и меняется
+    // (8 шагов→12.5, затем 6→16.667). Проверяем контракт: один ArrowRight = один
+    // равномерный тик, увеличивающий значение, и тик делит диапазон 0..100 нацело.
+    await seed.calculator.toMin();
+    const v0 = (await seed.calculator.readSlider()).value;
     await seed.calculator.stepRight(1);
-    const after = await seed.calculator.readSlider();
-    console.log(
-      `[INFO] before=${before.value} after ArrowRight=${after.value}`,
-    );
-    expect(after.value - before.value).toBeCloseTo(12.5, 1);
+    const v1 = (await seed.calculator.readSlider()).value;
+    await seed.calculator.stepRight(1);
+    const v2 = (await seed.calculator.readSlider()).value;
+    const step = v1 - v0;
+    console.log(`[INFO] seed slider step=${step} (v0=${v0} v1=${v1} v2=${v2})`);
+
+    expect(step).toBeGreaterThan(0); // ArrowRight увеличивает
+    expect(v2 - v1).toBeCloseTo(step, 1); // шаги равномерны (1 ArrowRight = 1 тик)
+    const ticks = 100 / step;
+    expect(ticks).toBeCloseTo(Math.round(ticks), 1); // шаг делит диапазон нацело
   });
 
   test("скрытый #fieldPlayersCount повторяет значение слайдера", async () => {

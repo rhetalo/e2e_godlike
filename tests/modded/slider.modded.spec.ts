@@ -39,15 +39,23 @@ test.describe("Modded-хостинг: слайдер тарифа", () => {
     expect(state.value).toBeLessThanOrEqual(state.max);
   });
 
-  test("ArrowRight увеличивает aria-valuenow на один шаг (12.5)", async () => {
-    const before = await modded.calculator.readSlider();
-    console.log(`[INFO] before: aria-valuenow=${before.value}`);
+  test("ArrowRight двигает слайдер на один равномерный шаг", async () => {
+    // Размер шага не хардкодим (число делений задаётся страницей и меняется).
+    // Контракт: один ArrowRight = один равномерный тик, увеличивающий значение,
+    // и тик делит диапазон 0..100 нацело.
+    await modded.calculator.toMin();
+    const v0 = (await modded.calculator.readSlider()).value;
     await modded.calculator.stepRight(1);
-    const after = await modded.calculator.readSlider();
-    console.log(`[INFO] after ArrowRight: aria-valuenow=${after.value}`);
+    const v1 = (await modded.calculator.readSlider()).value;
+    await modded.calculator.stepRight(1);
+    const v2 = (await modded.calculator.readSlider()).value;
+    const step = v1 - v0;
+    console.log(`[INFO] modded slider step=${step} (v0=${v0} v1=${v1} v2=${v2})`);
 
-    expect(after.value).toBeGreaterThan(before.value);
-    expect(after.value - before.value).toBeCloseTo(12.5, 1);
+    expect(step).toBeGreaterThan(0); // ArrowRight увеличивает
+    expect(v2 - v1).toBeCloseTo(step, 1); // шаги равномерны (1 ArrowRight = 1 тик)
+    const ticks = 100 / step;
+    expect(ticks).toBeCloseTo(Math.round(ticks), 1); // шаг делит диапазон нацело
   });
 
   test("скрытый input игроков повторяет значение слайдера", async () => {
