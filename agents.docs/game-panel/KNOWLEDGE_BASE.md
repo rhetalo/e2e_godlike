@@ -116,6 +116,27 @@ Restart/Kill — отдельные кнопки, открывают Vuetify-д�
 - Page object: `GamePanelFilesPage` (`createFolder`, `deleteEntry`, `deleteEntryIfPresent`, `hasEntry`).
 - ⚠️ **Databases — создание не работает** (см. TEST_PLAN: 400 / Connection refused; план Double = 0 слотов).
 
+## 5c. Config tab — server.properties (подтверждено DOM 04-Jun-2026)
+
+`/server/{uuid}/config`. Это **редактор `server.properties`** в виде Vuetify-формы.
+Сервер Online **не требуется** (форма доступна в любом статусе).
+
+- **Каждое свойство — строка `.server__config-switch`**: текст строки начинается с имени
+  свойства (`motd`, `difficulty`, `max-players`, `level-name`, `server-port`, `pvp`, …) +
+  краткое описание; внутри — контрол (`input.v-field__input`, `select`, или switch-чекбокс).
+- ⚠️ **Save-кнопки НЕТ** — форма **автосейвит** при изменении поля (PATCH на blur). Есть
+  только кнопки **Reset**. Персист проверяется **перезагрузкой** страницы + чтением значения.
+- ⚠️ **id инпутов динамические** (`input-v-131`, `switch-v-109`) — между перезагрузками
+  меняются, как селекторы **непригодны**. Якорь — имя свойства в тексте строки.
+- ⚠️ **`networkidle` не наступает** и здесь (websocket жив) — ждать ограниченно + `.catch`
+  (см. `GamePanelConfigPage.setValue`, таймаут 8с).
+- Доступные ключи (recon): gamemode/difficulty (select), level-name/level-seed, max-players,
+  online-mode, white-list, spawn-protection, allow-flight, pvp, hardcore, motd, view/simulation-
+  distance, server-port (26150), server-ip, enable-rcon/query, op-permission-level, и блок
+  Docker/Java (version `1.21.11`, `server.jar`, JVM-флаги Aikar — последние два **Readonly**).
+- Page object: `GamePanelConfigPage` (`row`, `input`, `getValue`, `setValue`, `hasField`).
+- В тестах безопасно меняем только `motd` (косметическая строка) с обязательным откатом.
+
 ## 6. Статус миграции из browseruse
 
 - Канонический набор доки (`QA_test_docs/ultra.panel/00..10`) — основа; уникальные детали фич

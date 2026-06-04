@@ -438,3 +438,15 @@ export const GAME_PANEL_FILES = {
   deleteConfirmButton: "button.server__file-manager__modal-button--danger",
   dialogCloseButton: "button.server__file-manager__dialog__btn-close",     // Cancel
 } as const;
+
+// Config tab (/server/{uuid}/config). Confirmed via live DOM 04-Jun-2026 (recon).
+// Редактор server.properties: каждая строка — .server__config-switch, внутри Vuetify-инпут
+// (input.v-field__input) + лейбл-имя свойства (motd/difficulty/max-players/level-name/...).
+// ⚠️ Save-кнопки НЕТ — форма автосейвит при изменении поля; персист проверяем через reload.
+// id инпутов динамические (input-v-NNN) — НЕ использовать; якорь — имя свойства в тексте строки.
+export const GAME_PANEL_CONFIG = {
+  row: ".server__config-switch",          // одна строка-свойство (текст начинается с имени свойства)
+  input: "input.v-field__input",          // текстовый инпут внутри строки
+  // примеры ключей server.properties (для структурных проверок)
+  keys: ["motd", "difficulty", "max-players", "level-name"],
+} as const;
