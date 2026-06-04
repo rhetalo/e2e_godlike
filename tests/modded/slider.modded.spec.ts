@@ -30,7 +30,7 @@ test.describe("Modded-хостинг: слайдер тарифа", () => {
     await modded.open();
   });
 
-  test("слайдер отдаёт ARIA-диапазон и стартует внутри [min, max]", async () => {
+  test("@regression слайдер отдаёт ARIA-диапазон и стартует внутри [min, max]", async () => {
     const state = await modded.calculator.readSlider();
     console.log(`[INFO] slider state:`, state);
     expect(state.min).toBe(0);
@@ -39,7 +39,7 @@ test.describe("Modded-хостинг: слайдер тарифа", () => {
     expect(state.value).toBeLessThanOrEqual(state.max);
   });
 
-  test("ArrowRight двигает слайдер на один равномерный шаг", async () => {
+  test("@regression ArrowRight двигает слайдер на один равномерный шаг", async () => {
     // Размер шага не хардкодим (число делений задаётся страницей и меняется).
     // Контракт: один ArrowRight = один равномерный тик, увеличивающий значение,
     // и тик делит диапазон 0..100 нацело.
@@ -58,7 +58,7 @@ test.describe("Modded-хостинг: слайдер тарифа", () => {
     expect(ticks).toBeCloseTo(Math.round(ticks), 1); // шаг делит диапазон нацело
   });
 
-  test("скрытый input игроков повторяет значение слайдера", async () => {
+  test("@regression скрытый input игроков повторяет значение слайдера", async () => {
     await modded.calculator.toMin();
     const minHidden = Number(
       (await modded.playersHiddenInput().inputValue()) || "0",
@@ -75,7 +75,7 @@ test.describe("Modded-хостинг: слайдер тарифа", () => {
     expect(stepped).toBeGreaterThanOrEqual(1);
   });
 
-  test("сдвиг слайдера меняет productId в ссылке корзины", async ({
+  test("@critical сдвиг слайдера меняет productId в ссылке корзины", async ({
     page,
   }) => {
     await modded.calculator.toMin();
@@ -104,7 +104,7 @@ test.describe("Modded-хостинг: слайдер тарифа", () => {
     void page;
   });
 
-  test("End/Home переводят слайдер в крайние значения", async () => {
+  test("@regression End/Home переводят слайдер в крайние значения", async () => {
     await modded.calculator.toMax();
     const atMax = (await modded.calculator.readSlider()).value;
     console.log(`[INFO] End → aria-valuenow=${atMax}`);

@@ -23,14 +23,14 @@ test.describe("Сид-страница Sky-haven: слайдер тарифа", 
     await seed.open();
   });
 
-  test("слайдер отдаёт ARIA-диапазон", async () => {
+  test("@regression слайдер отдаёт ARIA-диапазон", async () => {
     const state = await seed.calculator.readSlider();
     console.log(`[INFO] seed slider:`, state);
     expect(state.min).toBe(0);
     expect(state.max).toBe(100);
   });
 
-  test("ArrowRight двигает слайдер на один равномерный шаг", async () => {
+  test("@regression ArrowRight двигает слайдер на один равномерный шаг", async () => {
     // Не хардкодим размер шага: число делений задаётся страницей и меняется
     // (8 шагов→12.5, затем 6→16.667). Проверяем контракт: один ArrowRight = один
     // равномерный тик, увеличивающий значение, и тик делит диапазон 0..100 нацело.
@@ -49,7 +49,7 @@ test.describe("Сид-страница Sky-haven: слайдер тарифа", 
     expect(ticks).toBeCloseTo(Math.round(ticks), 1); // шаг делит диапазон нацело
   });
 
-  test("скрытый #fieldPlayersCount повторяет значение слайдера", async () => {
+  test("@regression скрытый #fieldPlayersCount повторяет значение слайдера", async () => {
     await seed.calculator.toMin();
     const lo = Number(await seed.calculator.hiddenPlayerInput().inputValue());
     console.log(`[INFO] at min: hidden=${lo}`);
@@ -61,7 +61,7 @@ test.describe("Сид-страница Sky-haven: слайдер тарифа", 
     expect(hi).toBeGreaterThan(lo);
   });
 
-  test("кнопка BUY-A-SERVER ведёт на корзину с productId и promo", async () => {
+  test("@regression кнопка BUY-A-SERVER ведёт на корзину с productId и promo", async () => {
     const cartUrl = await seed.buyServerCartUrl();
     console.log(`[INFO] BUY data-url: ${cartUrl}`);
     expect(cartUrl).toBeTruthy();
@@ -74,14 +74,14 @@ test.describe("Сид-страница Sky-haven: слайдер тарифа", 
     expect(url.searchParams.get("modpackId")).toBeTruthy();
   });
 
-  test("корень калькулятора несёт data-атрибуты promocode и discount", async () => {
+  test("@regression корень калькулятора несёт data-атрибуты promocode и discount", async () => {
     const meta = await seed.readCalculatorMeta();
     console.log(`[INFO] seed meta:`, meta);
     expect(meta.promocode).toBeTruthy();
     expect(Number(meta.discount)).toBeGreaterThan(0);
   });
 
-  test("кнопка Host Now видима и активна", async () => {
+  test("@regression кнопка Host Now видима и активна", async () => {
     const btn = seed.hostNowSubmit();
     await expect(btn).toBeVisible();
     await expect(btn).toBeEnabled();

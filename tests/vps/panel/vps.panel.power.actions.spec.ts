@@ -111,7 +111,7 @@ test.afterAll(async () => {
 // SUITE 1 — Shutdown: Running → Stopped
 // ══════════════════════════════════════════════════════════════════════════════
 
-test.describe("VPS-питание — Shutdown: Running → Stopped", () => {
+test.describe("@critical VPS-питание — Shutdown: Running → Stopped", () => {
   test("1.1 нормализация: сервер должен быть Running", async () => {
     await serverPage.goto();
     await serverPage.ensureRunning(60_000);
@@ -214,7 +214,7 @@ test.describe("VPS-питание — Shutdown: Running → Stopped", () => {
 // SUITE 2 — Boot: Stopped → Running
 // ══════════════════════════════════════════════════════════════════════════════
 
-test.describe("VPS-питание — Boot: Stopped → Running", () => {
+test.describe("@critical VPS-питание — Boot: Stopped → Running", () => {
   test("2.1 нормализация: сервер должен быть Stopped", async () => {
     const status = await serverPage.getStatusText();
     console.log(`[T2.1] Status before Boot: "${status}"`);
@@ -268,7 +268,7 @@ test.describe("VPS-питание — Boot: Stopped → Running", () => {
 // SUITE 3 — Power Off: Running → Stopped
 // ══════════════════════════════════════════════════════════════════════════════
 
-test.describe("VPS-питание — Power Off: Running → Stopped", () => {
+test.describe("@critical VPS-питание — Power Off: Running → Stopped", () => {
   test("3.1 нормализация: сервер должен быть Running", async () => {
     await serverPage.ensureRunning(60_000);
     const status = await serverPage.getStatusText();
@@ -329,7 +329,7 @@ test.describe("VPS-питание — Power Off: Running → Stopped", () => {
 // SUITE 4 — Restart: Running → Running
 // ══════════════════════════════════════════════════════════════════════════════
 
-test.describe("VPS-питание — Restart: Running → Running", () => {
+test.describe("@critical VPS-питание — Restart: Running → Running", () => {
   test("4.1 нормализация: сервер должен быть Running", async () => {
     await serverPage.ensureRunning(60_000);
     const status = await serverPage.getStatusText();
@@ -379,7 +379,7 @@ test.describe("VPS-питание — Restart: Running → Running", () => {
 // SUITE 5 — Activity table: проверка записей после всех действий
 // ══════════════════════════════════════════════════════════════════════════════
 
-test.describe("VPS-питание — Activity table после всех операций", () => {
+test.describe("@regression VPS-питание — Activity table после всех операций", () => {
   test("5.1 в таблице есть записи Boot, Shutdown, Poweroff от этого запуска", async () => {
     await expect(serverPage.activityTable).toBeVisible({ timeout: 10_000 });
 
@@ -434,7 +434,7 @@ test.describe("VPS-питание — Activity table после всех опе�
 // SUITE 6 — Модалы: структура и содержимое (без выполнения действий)
 // ══════════════════════════════════════════════════════════════════════════════
 
-test.describe("VPS-питание — структура модалов подтверждения", () => {
+test.describe("@regression VPS-питание — структура модалов подтверждения", () => {
   test("6.1 нормализация: сервер Running для проверки модалов", async () => {
     await serverPage.ensureRunning(60_000);
     const status = await serverPage.getStatusText();

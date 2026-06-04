@@ -34,7 +34,7 @@ test.beforeAll(async ({ browser }: { browser: Browser }) => {
 // SUITE 1 — Login Page Structure
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS-панель — структура страницы логина", () => {
-  test("страница /login загружается и содержит форму", async ({ browser }) => {
+  test("@regression страница /login загружается и содержит форму", async ({ browser }) => {
     const page = await browser.newPage();
     const loginPage = new VpsPanelLoginPage(page);
 
@@ -51,7 +51,7 @@ test.describe("VPS-панель — структура страницы логи
     await page.close();
   });
 
-  test("заголовок страницы присутствует (Welcome back или аналог)", async ({ browser }) => {
+  test("@regression заголовок страницы присутствует (Welcome back или аналог)", async ({ browser }) => {
     const page = await browser.newPage();
     const loginPage = new VpsPanelLoginPage(page);
 
@@ -66,7 +66,7 @@ test.describe("VPS-панель — структура страницы логи
     await page.close();
   });
 
-  test("кнопка Login видна и неактивна", async ({ browser }) => {
+  test("@regression кнопка Login видна и неактивна", async ({ browser }) => {
     const page = await browser.newPage();
     const loginPage = new VpsPanelLoginPage(page);
 
@@ -82,7 +82,7 @@ test.describe("VPS-панель — структура страницы логи
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 2 — Successful Login
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS-панель — успешный логин", () => {
+test.describe("@critical VPS-панель — успешный логин", () => {
   test("логин с валидными кредами → редирект на /dashboard", async ({ browser }) => {
     const page = await browser.newPage();
     const loginPage = new VpsPanelLoginPage(page);
@@ -135,7 +135,7 @@ test.describe("VPS-панель — успешный логин", () => {
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 3 — Invalid Credentials
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS-панель — неверные креды", () => {
+test.describe("@critical VPS-панель — неверные креды", () => {
   test("неверный пароль → остаёмся на /login", async ({ browser }) => {
     const page = await browser.newPage();
     const loginPage = new VpsPanelLoginPage(page);
@@ -182,7 +182,7 @@ test.describe("VPS-панель — неверные креды", () => {
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 4 — Protected Routes (unauthenticated)
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS-панель — защищённые маршруты", () => {
+test.describe("@critical VPS-панель — защищённые маршруты", () => {
   test("незалогиненный пользователь: /dashboard → редиректит на /login", async ({ browser }) => {
     const page = await browser.newPage();
 

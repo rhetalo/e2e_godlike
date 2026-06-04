@@ -156,7 +156,7 @@ async function goBackToServer(page: Page): Promise<void> {
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 1 — Навигация на страницу выбора ОС
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS-панель — Rebuild: навигация на страницу выбора ОС", () => {
+test.describe("@regression VPS-панель — Rebuild: навигация на страницу выбора ОС", () => {
   test("Rebuild → Continue → переходим на страницу выбора ОС (URL не меняется)", async ({
     browser,
   }) => {
@@ -192,7 +192,7 @@ test.describe("VPS-панель — Rebuild: навигация на стран�
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 2 — Структура OS карточек
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS-панель — Rebuild: структура OS карточек", () => {
+test.describe("@regression VPS-панель — Rebuild: структура OS карточек", () => {
   test("карточки ОС имеют название в h5.mb-1", async ({ browser }) => {
     const { context, page, rebuildPage, navigated } = await openRebuildPage(browser);
     test.skip(!navigated, "Rebuild page not reachable — server may be stopped or modal unavailable");
@@ -244,7 +244,7 @@ test.describe("VPS-панель — Rebuild: структура OS карточ�
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 3 — Аккордеон групп ОС
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS-панель — Rebuild: аккордеон групп ОС", () => {
+test.describe("@regression VPS-панель — Rebuild: аккордеон групп ОС", () => {
   test("присутствуют 6 групп ОС в Bootstrap-аккордеоне (heading-0..heading-5)", async ({
     browser,
   }) => {
@@ -410,7 +410,7 @@ test.describe("VPS-панель — Rebuild: аккордеон групп ОС"
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 4 — Выбор OS карточки (безопасно — без финального Install)
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS-панель — Rebuild: выбор ОС (Install не нажимаем)", () => {
+test.describe("@regression VPS-панель — Rebuild: выбор ОС (Install не нажимаем)", () => {
   test("клик по карточке AlmaLinux — карточка получает .selected-card и .border-success", async ({
     browser,
   }) => {
@@ -506,7 +506,7 @@ test.describe("VPS-панель — Rebuild: выбор ОС (Install не на�
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 5 — Кнопка Install: поведение до и после выбора ОС
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS-панель — Rebuild: кнопка Install (не нажимаем)", () => {
+test.describe("@regression VPS-панель — Rebuild: кнопка Install (не нажимаем)", () => {
   test("до выбора ОС — кнопка 'Install with ...' отсутствует в DOM", async ({ browser }) => {
     const { context, page, rebuildPage, navigated } = await openRebuildPage(browser);
     test.skip(!navigated, "Rebuild page not reachable — server may be stopped or modal unavailable");
@@ -609,7 +609,7 @@ test.describe("VPS-панель — Rebuild: кнопка Install (не нажи
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 6 — Возврат на страницу сервера
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS-панель — Rebuild: возврат на страницу сервера", () => {
+test.describe("@regression VPS-панель — Rebuild: возврат на страницу сервера", () => {
   test("после выбора ОС без Install — навигация назад к серверу работает", async ({
     browser,
   }) => {

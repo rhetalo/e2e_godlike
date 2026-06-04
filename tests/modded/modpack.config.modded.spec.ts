@@ -29,7 +29,7 @@ test.describe("Modded: конфигурация модпака", () => {
     await modded.open();
   });
 
-  test("видны все пять quick-pick модпаков", async () => {
+  test("@regression видны все пять quick-pick модпаков", async () => {
     for (const name of QuickPickModpacks) {
       const pill = modded.quickPickButton(name);
       await expect(pill, `quick-pick "${name}" should be visible`).toBeVisible();
@@ -37,7 +37,7 @@ test.describe("Modded: конфигурация модпака", () => {
     }
   });
 
-  test("клик по другому quick-pick меняет modpackId в ссылке корзины", async () => {
+  test("@critical клик по другому quick-pick меняет modpackId в ссылке корзины", async () => {
     const initial = await modded.readCalculatorCartParams();
     console.log(`[INFO] initial modpackId=${initial.modpackId}`);
     expect(initial.modpackId).toBeTruthy();
@@ -66,7 +66,7 @@ test.describe("Modded: конфигурация модпака", () => {
     expect(after.productId).toMatch(/^\d+$/);
   });
 
-  test("автокомплит модпаков открывается и показывает минимум 5", async () => {
+  test("@regression автокомплит модпаков открывается и показывает минимум 5", async () => {
     const options = await modded.listModpackOptions(20);
     console.log(`[INFO] visible modpack options (${options.length}): ${options.slice(0, 5).join(", ")}…`);
     expect(options.length).toBeGreaterThanOrEqual(5);
@@ -75,13 +75,13 @@ test.describe("Modded: конфигурация модпака", () => {
     }
   });
 
-  test("поле версии модпака есть рядом с полем модпака", async () => {
+  test("@regression поле версии модпака есть рядом с полем модпака", async () => {
     await expect(modded.modpackInput()).toBeVisible();
     await expect(modded.modpackVersionInput()).toBeVisible();
     console.log("[INFO] both autocompletes (modpack + version) visible ✓");
   });
 
-  test("кнопки Install в сетке несут data-product-id и data-modpack-id", async () => {
+  test("@regression кнопки Install в сетке несут data-product-id и data-modpack-id", async () => {
     const buttons = modded.installButtons();
     const count = await buttons.count();
     console.log(`[INFO] install buttons: ${count}`);

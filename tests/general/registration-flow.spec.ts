@@ -2,7 +2,7 @@ import { test, expect, Page } from '../../fixtures/base';
 import { generateCredentials, saveCredentials } from '../../utils/credentials';
 
 test.describe('Регистрация из тарифа', () => {
-    test('Пользователь может зарегистрироваться при оформлении тарифа',{tag: '@fast'}, async ({ page }: { page: Page }) => {
+    test('@critical Пользователь может зарегистрироваться при оформлении тарифа', async ({ page }: { page: Page }) => {
     test.setTimeout(60000);
     await page.setViewportSize({ width: 1920, height: 1080 });
 

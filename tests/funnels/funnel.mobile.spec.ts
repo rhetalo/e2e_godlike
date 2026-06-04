@@ -57,7 +57,7 @@ test.beforeAll(async ({ browser }: { browser: Browser }) => {
 // Тесты мобильной воронки
 // ============================
 test.describe("Мобильная воронка корзины", () => {
-  test("страница загружается с основными элементами", async ({ browser }) => {
+  test("@regression страница загружается с основными элементами", async ({ browser }) => {
     const context = await browser.newContext({
       storageState: storageStatePath,
     });
@@ -81,7 +81,7 @@ test.describe("Мобильная воронка корзины", () => {
     await context.close();
   });
 
-  test("Select your plan — выбор игры из выпадающего списка", async ({
+  test("@regression Select your plan — выбор игры из выпадающего списка", async ({
     browser,
   }) => {
     const context = await browser.newContext({
@@ -107,7 +107,7 @@ test.describe("Мобильная воронка корзины", () => {
     await context.close();
   });
 
-  test("Game chips — выбор игры из быстрых кнопок", async ({ browser }) => {
+  test("@regression Game chips — выбор игры из быстрых кнопок", async ({ browser }) => {
     const context = await browser.newContext({
       storageState: storageStatePath,
     });
@@ -132,7 +132,7 @@ test.describe("Мобильная воронка корзины", () => {
     await context.close();
   });
 
-  test("Billing Period — смена периода меняет цену", async ({ browser }) => {
+  test("@critical Billing Period — смена периода меняет цену", async ({ browser }) => {
     const context = await browser.newContext({
       storageState: storageStatePath,
     });
@@ -183,7 +183,7 @@ expect(quarterlyPrice).toBeGreaterThan(monthlyPrice);
     await context.close();
   });
 
-  test("RAM (Plan) — смена тарифа меняет цену", async ({ browser }) => {
+  test("@critical RAM (Plan) — смена тарифа меняет цену", async ({ browser }) => {
   const context = await browser.newContext({
     storageState: storageStatePath,
   });
@@ -228,7 +228,7 @@ expect(quarterlyPrice).toBeGreaterThan(monthlyPrice);
   await context.close();
 });
 
-  test("Location — выбор локации из списка", async ({ browser }) => {
+  test("@regression Location — выбор локации из списка", async ({ browser }) => {
     const context = await browser.newContext({
       storageState: storageStatePath,
     });
@@ -262,7 +262,7 @@ expect(quarterlyPrice).toBeGreaterThan(monthlyPrice);
     await context.close();
   });
 
-  test("Promocode — поле открывается по клику", async ({ browser }) => {
+  test("@regression Promocode — поле открывается по клику", async ({ browser }) => {
     const context = await browser.newContext({
       storageState: storageStatePath,
     });
@@ -289,7 +289,7 @@ expect(quarterlyPrice).toBeGreaterThan(monthlyPrice);
     await context.close();
   });
 
-  test("Promocode — невалидный промокод показывает ошибку", async ({
+  test("@critical Promocode — невалидный промокод показывает ошибку", async ({
     browser,
   }) => {
     const context = await browser.newContext({

@@ -41,7 +41,7 @@ test.beforeAll(async ({ browser }) => {
 // ---------------- TESTS ----------------
 
 for (const game of gamesToTest) {
-  test(`Промокод активен для игры: ${game.name}`, async ({ browser }) => {
+  test(`@critical Промокод активен для игры: ${game.name}`, async ({ browser }) => {
     test.setTimeout(60000);
 
     const gameName = game.name;
