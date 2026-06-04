@@ -63,17 +63,17 @@ async function gotoSubTab(name: "VNC" | "Rescue" | "Password" | "Settings"): Pro
 // SUITE 1 — Навигация: Options tab + под-табы
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS-панель — Options: навигация", () => {
-  test("вкладка Options присутствует и кликабельна", async () => {
+  test("@regression вкладка Options присутствует и кликабельна", async () => {
     await serverPage.goto();
     await expect(serverPage.tab("Options")).toBeVisible({ timeout: 15_000 });
   });
 
-  test("клик по Options — URL содержит UUID сервера", async () => {
+  test("@regression клик по Options — URL содержит UUID сервера", async () => {
     await gotoOptions();
     expect(serverPage.page.url()).toContain(TEST_SERVER_UUID);
   });
 
-  test("все 4 под-таба видны: VNC, Rescue, Password, Settings", async () => {
+  test("@regression все 4 под-таба видны: VNC, Rescue, Password, Settings", async () => {
     await gotoOptions();
     const page = serverPage.page;
     for (const id of ["#pills-options-vnc-tab", "#pills-options-rescue-tab",
@@ -82,7 +82,7 @@ test.describe("VPS-панель — Options: навигация", () => {
     }
   });
 
-  test("VNC является активным под-табом по умолчанию", async () => {
+  test("@regression VNC является активным под-табом по умолчанию", async () => {
     await gotoOptions();
     const vncTab = serverPage.page.locator("#pills-options-vnc-tab");
     await expect(vncTab).toHaveClass(/active/, { timeout: 5_000 });
@@ -95,15 +95,15 @@ test.describe("VPS-панель — Options: навигация", () => {
 test.describe("VPS-панель — Options: VNC (vlang[168])", () => {
   test.beforeEach(async () => { await gotoOptions(); });
 
-  test("заголовок секции 'Virtual Network Computing (VNC)' виден", async () => {
+  test("@regression заголовок секции 'Virtual Network Computing (VNC)' виден", async () => {
     await expect(optionsPage.vncSectionTitle).toBeVisible({ timeout: 10_000 });
   });
 
-  test("кнопка Enable/Disable VNC Access присутствует", async () => {
+  test("@regression кнопка Enable/Disable VNC Access присутствует", async () => {
     await expect(optionsPage.vncToggleButton).toBeVisible({ timeout: 10_000 });
   });
 
-  test("VNC toggle: клик меняет состояние и задача появляется в activity table", async () => {
+  test("@critical VNC toggle: клик меняет состояние и задача появляется в activity table", async () => {
     const toggleBtn = optionsPage.vncToggleButton;
     await expect(toggleBtn).toBeVisible({ timeout: 10_000 });
 
@@ -136,11 +136,11 @@ test.describe("VPS-панель — Options: Reset Password (vlang[102])", () =>
     await gotoSubTab("Password");
   });
 
-  test("кнопка 'Reset Password' присутствует в Password под-табе", async () => {
+  test("@regression кнопка 'Reset Password' присутствует в Password под-табе", async () => {
     await expect(optionsPage.resetPasswordButton).toBeVisible({ timeout: 10_000 });
   });
 
-  test("'Reset Password' → модал открывается → содержит текст о email → Cancel закрывает", async () => {
+  test("@regression 'Reset Password' → модал открывается → содержит текст о email → Cancel закрывает", async () => {
     const isEnabled = await optionsPage.resetPasswordButton.isEnabled().catch(() => false);
     test.skip(!isEnabled, "Reset Password недоступен — сервер остановлен или функция отключена");
 
@@ -157,7 +157,7 @@ test.describe("VPS-панель — Options: Reset Password (vlang[102])", () =>
     await expect(optionsPage.activeModal).not.toBeVisible({ timeout: 5_000 });
   });
 
-  test("после закрытия модала кнопка 'Reset Password' снова доступна", async () => {
+  test("@regression после закрытия модала кнопка 'Reset Password' снова доступна", async () => {
     const isEnabled = await optionsPage.resetPasswordButton.isEnabled().catch(() => false);
     test.skip(!isEnabled, "Reset Password недоступен — сервер остановлен или функция отключена");
 
@@ -180,11 +180,11 @@ test.describe("VPS-панель — Options: Settings / Boot Type (vlang[354–3
     await gotoSubTab("Settings");
   });
 
-  test("секция 'Boot Type' (vlang[354]) видна в Settings", async () => {
+  test("@regression секция 'Boot Type' (vlang[354]) видна в Settings", async () => {
     await expect(optionsPage.bootTypeLabel).toBeVisible({ timeout: 10_000 });
   });
 
-  test("опции 'BIOS (Legacy Mode)' и 'UEFI' присутствуют в Settings", async () => {
+  test("@regression опции 'BIOS (Legacy Mode)' и 'UEFI' присутствуют в Settings", async () => {
     const settingsPane = serverPage.page.locator("#pills-options-settings");
     await expect(settingsPane.getByText("BIOS (Legacy Mode)", { exact: false }).first()).toBeVisible({ timeout: 8_000 });
     await expect(settingsPane.getByText("UEFI", { exact: false }).first()).toBeVisible({ timeout: 8_000 });

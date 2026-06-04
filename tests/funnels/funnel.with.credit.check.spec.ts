@@ -73,7 +73,7 @@ test.use({
  * npx playwright test tests/funnel.spec.ts:test base funnel
  * или просто: npx playwright test (запустит все тесты)
  */
-test("оформление заказа с кредитным балансом", async ({ page }) => {
+test("@critical оформление заказа с кредитным балансом", async ({ page }) => {
   // ШАГ 1: Открытие главной страницы сайта godlike.host
   // page.goto() - метод для перехода по указанному URL
   // 'https://godlike.host' - адрес тестируемого сайта (хостинг-провайдер для игровых серверов)

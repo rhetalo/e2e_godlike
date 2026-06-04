@@ -71,7 +71,7 @@ async function ensurePastAuthStep(page: Page, cartPage: CartPage): Promise<void>
 test.describe("Воронка покупки сида (стоп на странице оплаты)", () => {
   test.setTimeout(180_000);
 
-  test("BUY → корзина → step 2 → страница оплаты", async ({ browser }) => {
+  test("@critical BUY → корзина → step 2 → страница оплаты", async ({ browser }) => {
     const context = await browser.newContext({
       storageState: storageStatePath,
     });

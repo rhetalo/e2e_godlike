@@ -54,7 +54,7 @@ test.afterAll(async () => {
 // SUITE 1 — Dashboard Navigation
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS-панель — Dashboard и навигация", () => {
-  test("dashboard загружается после логина", async () => {
+  test("@smoke dashboard загружается после логина", async () => {
     const page = sharedContext.pages()[0];
     const dashboard = new VpsPanelDashboardPage(page);
 
@@ -65,7 +65,7 @@ test.describe("VPS-панель — Dashboard и навигация", () => {
     });
   });
 
-  test("навигация: ссылки Dashboard и Servers видны", async () => {
+  test("@regression навигация: ссылки Dashboard и Servers видны", async () => {
     const page = sharedContext.pages()[0];
     const dashboard = new VpsPanelDashboardPage(page);
 
@@ -79,7 +79,7 @@ test.describe("VPS-панель — Dashboard и навигация", () => {
     });
   });
 
-  test("клик по Servers в навигации → /servers", async () => {
+  test("@regression клик по Servers в навигации → /servers", async () => {
     const page = sharedContext.pages()[0];
     const dashboard = new VpsPanelDashboardPage(page);
 
@@ -91,7 +91,7 @@ test.describe("VPS-панель — Dashboard и навигация", () => {
     });
   });
 
-  test("страница /servers — кнопка Manage видна для тестового сервера", async () => {
+  test("@regression страница /servers — кнопка Manage видна для тестового сервера", async () => {
     const page = sharedContext.pages()[0];
 
     await page.goto(`${PANEL_URL}/servers`, { waitUntil: "domcontentloaded", timeout: 30_000 });
@@ -103,7 +103,7 @@ test.describe("VPS-панель — Dashboard и навигация", () => {
     });
   });
 
-  test("клик Manage на /servers → открывается страница /server/", async () => {
+  test("@regression клик Manage на /servers → открывается страница /server/", async () => {
     const page = sharedContext.pages()[0];
     const dashboard = new VpsPanelDashboardPage(page);
 
@@ -124,7 +124,7 @@ test.describe("VPS-панель — структура страницы серв
     await serverPage.goto();
   });
 
-  test("прямой переход на /server/{UUID} загружается", async () => {
+  test("@regression прямой переход на /server/{UUID} загружается", async () => {
     const page = sharedContext.pages()[0];
 
     await test.step("URL содержит TEST_SERVER_UUID", async () => {
@@ -132,7 +132,7 @@ test.describe("VPS-панель — структура страницы серв
     });
   });
 
-  test("имя сервера видно на странице", async () => {
+  test("@regression имя сервера видно на странице", async () => {
     const page = sharedContext.pages()[0];
 
     await test.step(`Имя "${TEST_SERVER_NAME}" присутствует`, async () => {
@@ -141,7 +141,7 @@ test.describe("VPS-панель — структура страницы серв
     });
   });
 
-  test("статус сервера отображается (Running / Stopped / Paused)", async () => {
+  test("@regression статус сервера отображается (Running / Stopped / Paused)", async () => {
     const statusText = await serverPage.getStatusText();
 
     await test.step("Статус-элемент содержит валидное значение", async () => {
@@ -157,7 +157,7 @@ test.describe("VPS-панель — структура страницы серв
 // Детальные проверки состояний и модалов — в vps.panel.power.actions.spec.ts
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS-панель — управление питанием", () => {
-  test("кнопки управления питанием присутствуют на странице сервера", async () => {
+  test("@regression кнопки управления питанием присутствуют на странице сервера", async () => {
     await serverPage.goto();
 
     // allPowerButtons исключает data-bs-dismiss="modal" — только реальные кнопки в хедере
@@ -173,7 +173,7 @@ test.describe("VPS-панель — управление питанием", () =
 test.describe("VPS-панель — навигация по вкладкам", () => {
   const tabLabels = ["Overview", "Media", "Options", "Network", "Storage", "Sharing"] as const;
 
-  test("все 6 вкладок присутствуют на странице сервера", async () => {
+  test("@regression все 6 вкладок присутствуют на странице сервера", async () => {
     await serverPage.goto();
 
     const found: string[] = [];
@@ -188,7 +188,7 @@ test.describe("VPS-панель — навигация по вкладкам", (
   });
 
   for (const tabLabel of tabLabels) {
-    test(`вкладка "${tabLabel}" — кликабельна, становится активной`, async () => {
+    test(`@regression вкладка "${tabLabel}" — кликабельна, становится активной`, async () => {
       await serverPage.goto();
 
       const isVisible = await serverPage.tab(tabLabel).isVisible().catch(() => false);
@@ -212,13 +212,13 @@ test.describe("VPS-панель — список серверов (/servers)", (
     await page.waitForLoadState("networkidle").catch(() => null);
   });
 
-  test("имя тестового сервера видно в списке", async () => {
+  test("@regression имя тестового сервера видно в списке", async () => {
     const page = sharedContext.pages()[0];
     const bodyText = await page.locator("body").innerText();
     expect(bodyText).toContain(TEST_SERVER_NAME);
   });
 
-  test("вкладки 'All Servers' и 'Bookmarked Servers' присутствуют", async () => {
+  test("@regression вкладки 'All Servers' и 'Bookmarked Servers' присутствуют", async () => {
     const page = sharedContext.pages()[0];
 
     const allTab = page.locator('label[for="serverListType1"]');
@@ -228,7 +228,7 @@ test.describe("VPS-панель — список серверов (/servers)", (
     await expect(bookmarkedTab).toBeVisible({ timeout: 10_000 });
   });
 
-  test("клик 'Bookmarked Servers' переключает вкладку", async () => {
+  test("@regression клик 'Bookmarked Servers' переключает вкладку", async () => {
     const page = sharedContext.pages()[0];
 
     const bookmarkedTab = page.locator('label[for="serverListType2"]');
@@ -242,7 +242,7 @@ test.describe("VPS-панель — список серверов (/servers)", (
     await page.locator('label[for="serverListType1"]').click();
   });
 
-  test("у сервера есть bookmark-иконка", async () => {
+  test("@regression у сервера есть bookmark-иконка", async () => {
     const page = sharedContext.pages()[0];
 
     const bookmarkIcon = page.locator('[tt="Bookmark"], [tt="Remove bookmark"]').first();

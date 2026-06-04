@@ -11,7 +11,7 @@ import { test, expect, BrowserContext, Page } from "@playwright/test";
 import { pinAmplitudeExperiments } from "../../utils/amplitude";
 
 test.describe("Проверка внутренних ссылок", () => {
-  test("все внутренние страницы доступны", async ({ browser }) => {
+  test("@regression все внутренние страницы доступны", async ({ browser }) => {
     test.setTimeout(10 * 60 * 1000); // 10 минут — реальный максимум при 100 страницах
 
     const BASE_URL = "https://godlike.host/";
