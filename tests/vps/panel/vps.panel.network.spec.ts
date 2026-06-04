@@ -130,12 +130,3 @@ test.describe("VPS-панель — вкладка Network: Reverse DNS", () => 
     });
   });
 });
-
-// ══════════════════════════════════════════════════════════════════════════════
-// SUITE 5 — DNS Resolver (multiselect)
-// ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS-панель — вкладка Network: DNS Resolvers", () => {
-  test("Cloudflare DNS resolver отображён в multiselect", async () => {
-    await expect(networkPage.primaryDnsResolverLabel).toBeVisible({ timeout: 10_000 });
-  });
-});

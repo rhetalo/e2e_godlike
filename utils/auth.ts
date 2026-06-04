@@ -16,7 +16,7 @@ export const STORAGE_STATE_PATH = path.join(__dirname, "..", "storageState.panel
  * The "redirect" I saw earlier was just Node.js not carrying cookies properly.
  * In Playwright (real browser), the URL opens correctly after login.
  */
-export const TEST_SERVER_UUID = "c13d2e04-2544-41fc-afff-9ae5c49aca93";
+export const TEST_SERVER_UUID = "666b12fd-e40b-4e26-a9ee-f41d11df7d6f";
 export const TEST_SERVER_NAME = "srv-433986";
 export const TEST_SERVER_URL = `${PANEL_URL}/server/${TEST_SERVER_UUID}`;
 
