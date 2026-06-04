@@ -25,7 +25,7 @@ already encode hard-won knowledge and override anything generic:
 - `agents.docs/AGENT_HANDOFF.md` — auth flows, storageState files, server gotchas, roadmap
 - `agents.docs/CODE_REVIEW.md` — log of past fixes and why
 - `agents.docs/vps-panel/` — VPS (vf-panel/VirtFusion) audit, Install/Build/Delete plan, **HANDOFF.md** (continue here)
-- `agents.docs/game-panel/` — game panel (ultra.panel) knowledge base + test plan (15 tests; currently paused)
+- `agents.docs/game-panel/` — game panel (ultra.panel) knowledge base + test plan (17 tests; Phase 3 в работе, next — Players)
 
 ## Implementation workflow
 
@@ -40,6 +40,18 @@ Do NOT jump straight into editing 20 files. Follow this loop for any non-trivial
 5. **Implement** — smallest change that fits the existing architecture.
 6. **Run tests** — the affected spec(s), then `npx tsc --noEmit`.
 7. **Report changes** — what changed, what you reused, test results, anything skipped.
+
+## Effort — подстройка под сложность задачи
+
+Подстраивай уровень усилий (глубину рассуждений / Effort) под реальную сложность задачи и
+**проговаривай это**:
+- Механические/текстовые правки (переименования, комментарии, перевод названий тестов на
+  русский, форматирование) — **низкий Effort**. Не жги ресурсы зря.
+- Recon живого DOM, мутирующие/stateful-тесты, отладка флоки, архитектурные решения —
+  **выше**.
+- В начале нетривиального хода одной строкой обозначь выбранный уровень и предложи
+  **понизить** (если задача проще, чем кажется) или **повысить** (если сложнее). Лимиты
+  расходуются — это важно владельцу.
 
 ## Before implementing any test
 
