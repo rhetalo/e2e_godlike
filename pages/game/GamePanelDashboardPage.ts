@@ -45,6 +45,16 @@ export class GamePanelDashboardPage extends GamePanelBasePage {
     return match ? Number(match[1]) : null;
   }
 
+  /** Карточка сервера по имени (имя в span.main1 внутри .server). */
+  serverByName(name: string): Locator {
+    return this.servers.filter({ hasText: name }).first();
+  }
+
+  /** Виден ли сервер с данным именем в списке «My Servers». */
+  async hasServer(name: string): Promise<boolean> {
+    return this.serverByName(name).isVisible({ timeout: 5_000 }).catch(() => false);
+  }
+
   /** Ссылка глобального сайдбара по названию (Billing, Support Tickets, ...). */
   sidebarLink(name: string): Locator {
     return this.page.getByRole("link", { name, exact: false }).first();
