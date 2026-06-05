@@ -154,6 +154,24 @@ Restart/Kill — отдельные кнопки, открывают Vuetify-д�
   `waitForConsoleReady` **360с**, `test.setTimeout` ~480с. Иначе флоки-таймаут в `beforeAll`.
 - Page object: `GamePanelPlayersPage` (`area`, `cardTitle`, `hasCard`).
 
+## 5e. Sharing section (подтверждено DOM 05-Jun-2026)
+
+`/server/{uuid}/sharing` (сайдбар-раздел Sharing). Работает и offline. Карточки:
+**Invite User** (форма + Send Invite), **Pending Invites**, **Roles** (Owner/Co-owner/
+Moderator/Member + счётчики), **Members**, **Audit Log**.
+
+- BEM-классы: `.sharing__card` / `.sharing__card-header-title`, `.sharing__invite-form`
+  (`input[type="email"]` placeholder «Email» + role-select), `.sharing__invite-form-submit`
+  («Send Invite», **disabled** пока не заполнены email+role), `.sharing__invite-list` / `__invite-row`.
+- На 05-Jun **2-й аккаунт `GAME_INVITEE_EMAIL` (dan.ica…@gmail.com) уже Co-owner** в Members
+  (есть и pending-инвайт на другой адрес).
+- ⚠️ В тестах **НЕ жмём Send Invite** (шлёт реальный email). Покрываем структуру + что
+  приглашённый виден в Members (доступ предоставлен). Мутацию invite — только с владельцем.
+- На Sharing может всплыть отдельный шаг shepherd-тура (`goto` гасит его ещё раз).
+- Page object: `GamePanelSharingPage` (`inviteForm`, `inviteEmail`, `sendInviteButton`, `card`, `hasUser`).
+- Для invitee-логина (мульти-актёр) нужен рабочий `GAME_PANEL_INVITEE_PASSWORD` (fallback=email
+  не проверен) + generic-хелпер логина в `gameAuth` — пока не сделано.
+
 ## 6. Статус миграции из browseruse
 
 - Канонический набор доки (`QA_test_docs/ultra.panel/00..10`) — основа; уникальные детали фич
