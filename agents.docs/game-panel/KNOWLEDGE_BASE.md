@@ -174,6 +174,16 @@ Moderator/Member + счётчики), **Members**, **Audit Log**.
   Invitee (Co-owner) видит `test_e2e` в своём дашборде и открывает `/server/{uuid}` — покрыто
   TC-GP-SHR-003/004.
 
+## 5f. Port & Domains (подтверждено DOM 05-Jun-2026)
+
+`/server/{uuid}/network` (сайдбар-раздел «Port & Domains»). Работает и offline. Два блока:
+- **Subdomain** (`.server__subdomain-block`): домен-селект (`.domainselect-field`) + кнопки
+  «Update Subdomain» / «Copy subdomain».
+- **Network Ports** (`.server__network-ports`): карточки портов (`.server__network-ports__port`,
+  `__port-port` — номер) + кнопка «Add Additional Port».
+- ⚠️ В тестах **НЕ мутируем** (Update Subdomain / Add Port меняют сетевые настройки) —
+  только структурные проверки. Page object: `GamePanelNetworkPage`.
+
 ## 6. Статус миграции из browseruse
 
 - Канонический набор доки (`QA_test_docs/ultra.panel/00..10`) — основа; уникальные детали фич

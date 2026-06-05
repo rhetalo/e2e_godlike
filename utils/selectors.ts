@@ -473,3 +473,15 @@ export const GAME_PANEL_SHARING = {
   list: ".sharing__invite-list",                                           // таблица invites/members
   row: ".sharing__invite-row",
 } as const;
+
+// Port & Domains (/server/{uuid}/network). Confirmed via live DOM 05-Jun-2026 (recon).
+// Subdomain-блок (домен-селект + Update/Copy) + Network Ports (карточки портов + Add Port).
+// Работает и offline. В тестах НЕ мутируем (Update Subdomain / Add Port) — структурные проверки.
+export const GAME_PANEL_NETWORK = {
+  subdomainBlock: ".server__subdomain-block",
+  updateSubdomainButton: 'button:has-text("Update Subdomain")',
+  portsSection: ".server__network-ports",
+  portCard: ".server__network-ports__port",
+  portValue: ".server__network-ports__port-port",
+  addPortButton: 'button:has-text("Add Additional Port")',
+} as const;
