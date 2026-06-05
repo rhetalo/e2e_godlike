@@ -25,7 +25,7 @@ already encode hard-won knowledge and override anything generic:
 - `agents.docs/AGENT_HANDOFF.md` — auth flows, storageState files, server gotchas, roadmap
 - `agents.docs/CODE_REVIEW.md` — log of past fixes and why
 - `agents.docs/vps-panel/` — VPS (vf-panel/VirtFusion) audit, Install/Build/Delete plan, **HANDOFF.md** (continue here)
-- `agents.docs/game-panel/` — game panel (ultra.panel) knowledge base + test plan (19 tests; Phase 3 soft-mutations done, next — Phase 4 Sharing)
+- `agents.docs/game-panel/` — game panel (ultra.panel) knowledge base + test plan (21 tests; Phase 4 Sharing structural+access done, next — invitee multi-actor / Port&Domains)
 
 ## Implementation workflow
 

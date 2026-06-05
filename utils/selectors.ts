@@ -459,3 +459,17 @@ export const GAME_PANEL_PLAYERS = {
   area: ".server__players",                     // корневой блок таба Players
   cardTitle: ".server__players-card__title",    // заголовок карточки (напр. "Server Administrators")
 } as const;
+
+// Sharing section (/server/{uuid}/sharing). Confirmed via live DOM 05-Jun-2026 (recon).
+// Карточки Invite User / Pending Invites / Roles / Members / Audit Log. Работает и offline.
+// Кнопка Send Invite disabled, пока не заполнены email+role. В тестах НЕ инвайтим
+// (шлёт реальный email) — проверяем структуру + что уже приглашённый виден в Members.
+export const GAME_PANEL_SHARING = {
+  card: ".sharing__card",                                                  // карточка-секция
+  cardTitle: ".sharing__card-header-title",                                // заголовок карточки
+  inviteForm: ".sharing__invite-form",
+  inviteEmail: '.sharing__invite-form input[type="email"]',                // поле email (placeholder "Email")
+  sendInviteButton: '.sharing__invite-form-submit, button:has-text("Send Invite")',
+  list: ".sharing__invite-list",                                           // таблица invites/members
+  row: ".sharing__invite-row",
+} as const;
