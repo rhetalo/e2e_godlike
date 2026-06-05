@@ -28,6 +28,7 @@ export const GAME_INVITEE_EMAIL =
   process.env.GAME_PANEL_INVITEE_EMAIL ?? "dan.ica.althe.i.aa@gmail.com";
 export const GAME_INVITEE_PASSWORD =
   process.env.GAME_PANEL_INVITEE_PASSWORD ?? "dan.ica.althe.i.aa@gmail.com";
+export const GAME_INVITEE_STORAGE_STATE_PATH = path.join(__dirname, "..", "storageState.game.invitee.json");
 
 /**
  * Логин в game-панель и сохранение сессии в storageState.game.json.
@@ -39,7 +40,12 @@ export const GAME_INVITEE_PASSWORD =
  *  - submit: кнопка "Login"
  *  - после успеха SPA уводит с /login на /?page=1 (Dashboard)
  */
-export async function loginAndSaveGameSession(browser: Browser): Promise<void> {
+async function loginGameUser(
+  browser: Browser,
+  email: string,
+  password: string,
+  statePath: string,
+): Promise<void> {
   const page = await browser.newPage();
   try {
     await page.goto(`${GAME_PANEL_URL}/login`, {
@@ -48,17 +54,17 @@ export async function loginAndSaveGameSession(browser: Browser): Promise<void> {
     });
     await page.waitForLoadState("networkidle", { timeout: 8_000 }).catch(() => {});
 
-    const email = page.locator('input[type="email"]').first();
-    if (!(await email.isVisible({ timeout: 3_000 }).catch(() => false))) {
+    const emailInput = page.locator('input[type="email"]').first();
+    if (!(await emailInput.isVisible({ timeout: 3_000 }).catch(() => false))) {
       await page
         .locator('button:has-text("Through Login/Password")')
         .first()
         .click()
         .catch(() => {});
     }
-    await email.waitFor({ state: "visible", timeout: 15_000 });
-    await email.fill(GAME_EMAIL);
-    await page.locator('input[type="password"]').first().fill(GAME_PASSWORD);
+    await emailInput.waitFor({ state: "visible", timeout: 15_000 });
+    await emailInput.fill(email);
+    await page.locator('input[type="password"]').first().fill(password);
     await page
       .locator('button[type="submit"]:has-text("Login"), button:has-text("Login")')
       .first()
@@ -69,9 +75,19 @@ export async function loginAndSaveGameSession(browser: Browser): Promise<void> {
       waitUntil: "domcontentloaded",
     });
 
-    await page.context().storageState({ path: GAME_STORAGE_STATE_PATH });
-    console.log("[INFO] Game panel login OK → storageState.game.json saved");
+    await page.context().storageState({ path: statePath });
+    console.log(`[INFO] Game panel login OK (${email}) → ${statePath}`);
   } finally {
     await page.close();
   }
+}
+
+/** Логин основного аккаунта → storageState.game.json. */
+export async function loginAndSaveGameSession(browser: Browser): Promise<void> {
+  await loginGameUser(browser, GAME_EMAIL, GAME_PASSWORD, GAME_STORAGE_STATE_PATH);
+}
+
+/** Логин 2-го аккаунта (invitee — шеринг/роли) → storageState.game.invitee.json. */
+export async function loginInviteeAndSaveSession(browser: Browser): Promise<void> {
+  await loginGameUser(browser, GAME_INVITEE_EMAIL, GAME_INVITEE_PASSWORD, GAME_INVITEE_STORAGE_STATE_PATH);
 }

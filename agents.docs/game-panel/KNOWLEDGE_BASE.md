@@ -169,8 +169,10 @@ Moderator/Member + счётчики), **Members**, **Audit Log**.
   приглашённый виден в Members (доступ предоставлен). Мутацию invite — только с владельцем.
 - На Sharing может всплыть отдельный шаг shepherd-тура (`goto` гасит его ещё раз).
 - Page object: `GamePanelSharingPage` (`inviteForm`, `inviteEmail`, `sendInviteButton`, `card`, `hasUser`).
-- Для invitee-логина (мульти-актёр) нужен рабочий `GAME_PANEL_INVITEE_PASSWORD` (fallback=email
-  не проверен) + generic-хелпер логина в `gameAuth` — пока не сделано.
+- **Мульти-актёр работает:** `loginInviteeAndSaveSession` (gameAuth) логинит 2-й аккаунт
+  (login==password==email, подтверждено владельцем), сессия в `storageState.game.invitee.json`.
+  Invitee (Co-owner) видит `test_e2e` в своём дашборде и открывает `/server/{uuid}` — покрыто
+  TC-GP-SHR-003/004.
 
 ## 6. Статус миграции из browseruse
 

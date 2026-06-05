@@ -13,7 +13,7 @@
 | 2b. Console (live) | стрим лога + поле команд; безопасная команда `list` → отклик | read-only команда (serial, поднимает Online) | P1 | ✅ done (2 теста) |
 | 3. Stateful (мягкие) | **Files ✅ (2)**, **Config ✅ (2)**, **Players: whitelist через консоль ✅ (2)**; Databases — заблокировано (баг ноды) | мутации, self-cleaning | P2 | ✅ done (soft) |
 | 3b. Stateful (тяжёлые) | Backups (create→restore→delete); смена версии (Versions); установка плагинов/модпаков | мутации, перезапуск сервера | P2 — позже | parked |
-| 4. Access / multi-actor | **Sharing: структура + доступ приглашённого ✅ (2)**; invite-мутация / роли / invitee-логин — todo; Port & Domains; Tasks | мутации, 2-й аккаунт | P3 | 🔄 in progress |
+| 4. Access / multi-actor | **Sharing: структура + доступ + invitee-логин ✅ (4)**; роли / Port & Domains / Tasks — todo | мутации, 2-й аккаунт | P3 | 🔄 in progress |
 | 5. Негатив / security | IDOR (подмена UUID), XSS/SQLi в инпутах (console/имена файлов/config), валидация | смешанно | P3 | todo |
 
 ## Phase 1 — реализовано
@@ -89,11 +89,13 @@
 |----|----------|
 | TC-GP-SHR-001 (`@regression`) | Sharing рендерит форму инвайта (Send Invite + email) + владелец в участниках |
 | TC-GP-SHR-002 (`@critical`) | приглашённый аккаунт (`GAME_INVITEE_EMAIL`) виден в Sharing → доступ предоставлен |
+| TC-GP-SHR-003 (`@critical`) | **invitee** (2-й аккаунт) видит расшаренный сервер `test_e2e` в своём дашборде |
+| TC-GP-SHR-004 (`@critical`) | **invitee** открывает страницу расшаренного сервера (`/server/{uuid}`) — доступ есть |
 
-Инвайты НЕ отправляем (Send Invite шлёт реальный email). Детали — `KNOWLEDGE_BASE.md` §5e.
-**Осталось по Phase 4:** invitee-логин 2-м аккаунтом («видит расшаренный сервер» — нужен рабочий
-`GAME_PANEL_INVITEE_PASSWORD`), invite-мутация (invite→pending→cancel, шлёт email — с владельцем),
-enforcement ролей, Port & Domains, Tasks.
+Инвайты НЕ отправляем (Send Invite шлёт реальный email; invite-мутация проделана владельцем вручную).
+Мульти-актёр: 2-й аккаунт логинится через `loginInviteeAndSaveSession` (login==password==email),
+сессия в `storageState.game.invitee.json`. Детали — `KNOWLEDGE_BASE.md` §5e.
+**Осталось по Phase 4:** enforcement ролей (что invitee-Co-owner может/не может), Port & Domains, Tasks.
 
 ## Phase 2 — что ещё можно добить
 
@@ -114,10 +116,10 @@ enforcement ролей, Port & Domains, Tasks.
 
 ## ▶ Продолжаем здесь (resume point, 05-Jun-2026)
 
-Реализовано: **21 тест** — Phase 1 (8) + Phase 2 power (3) + console (2) + Phase 3 files (2) + config (2) + players (2) + Phase 4 sharing (2). `npx tsc --noEmit` чистый, все зелёные.
+Реализовано: **23 теста** — Phase 1 (8) + Phase 2 power (3) + console (2) + Phase 3 files (2) + config (2) + players (2) + Phase 4 sharing (4: owner 2 + invitee 2). `npx tsc --noEmit` чистый, все зелёные.
 
 Следующее:
-1. **Phase 4 — добить:** invitee-логин 2-м аккаунтом (видит расшаренный сервер) — нужен рабочий `GAME_PANEL_INVITEE_PASSWORD` (fallback=email не проверен → уточнить у владельца); invite-мутация (шлёт email — с владельцем); роли; Port & Domains; Tasks.
+1. **Phase 4 — добить:** enforcement ролей (что Co-owner invitee может/не может — позитив/негатив), Port & Domains, Tasks. (invitee-логин и доступ — ✅; invite-мутация шлёт email и проделана вручную — авто-тест не делаем.)
 2. Тяжёлые Phase 3b (Backups restore / смена версии / установка плагинов) — **по согласованию с владельцем** (могут ломать/пересобирать сервер).
 3. Phase 5 — негатив/security.
 
