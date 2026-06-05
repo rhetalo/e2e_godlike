@@ -21,7 +21,7 @@ export const GAME_STORAGE_STATE_PATH = path.join(__dirname, "..", "storageState.
 export const GAME_SERVER_UUID =
   process.env.GAME_PANEL_SERVER_UUID ?? "ebb03adc-48bf-46f1-95dd-a45d07f0d23d";
 export const GAME_SERVER_NAME =
-  process.env.GAME_PANEL_SERVER_NAME ?? "Fcz3VN5n_439772";
+  process.env.GAME_PANEL_SERVER_NAME ?? "test_e2e";
 
 /** Второй аккаунт для тестов шеринга/ролей (Фаза 4). Приглашён на GAME_SERVER_UUID. */
 export const GAME_INVITEE_EMAIL =

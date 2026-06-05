@@ -32,7 +32,7 @@
 |---|---|
 | Основной аккаунт | `test@testmail.com` / `test@testmail.com` (пароль = email) |
 | Серверов на аккаунте | ~26 (часть `Suspended`, часть `Free`) |
-| Текущий тестовый сервер | `ebb03adc-48bf-46f1-95dd-a45d07f0d23d` (`Fcz3VN5n_439772`) |
+| Текущий тестовый сервер | `ebb03adc-48bf-46f1-95dd-a45d07f0d23d` (`test_e2e`, переименован 05-Jun) |
 | Игра/тип | Minecraft, Paper 1.21.11, план Double, 2 GiB RAM, 5-10 slots |
 | Адрес | `srv6.godlike.club:26150`, локация West, America |
 | Состояние | Offline (startable, не suspended) |
