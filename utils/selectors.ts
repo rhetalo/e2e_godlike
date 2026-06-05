@@ -472,6 +472,11 @@ export const GAME_PANEL_SHARING = {
   sendInviteButton: '.sharing__invite-form-submit, button:has-text("Send Invite")',
   list: ".sharing__invite-list",                                           // таблица invites/members
   row: ".sharing__invite-row",
+  // Смена роли участника (только у не-owner): Vuetify v-select Co-owner/Moderator/Member.
+  // ⚠️ in-place selection-text обновляется НЕ сразу — персист/проверка через reload.
+  memberRoleSelect: ".sharing__members-column-role-select",
+  roleSelectionText: ".v-select__selection-text",
+  roleOption: '[role="option"], .v-overlay .v-list-item',
 } as const;
 
 // Port & Domains (/server/{uuid}/network). Confirmed via live DOM 05-Jun-2026 (recon).

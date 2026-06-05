@@ -173,6 +173,12 @@ Moderator/Member + счётчики), **Members**, **Audit Log**.
   (login==password==email, подтверждено владельцем), сессия в `storageState.game.invitee.json`.
   Invitee (Co-owner) видит `test_e2e` в своём дашборде и открывает `/server/{uuid}` — покрыто
   TC-GP-SHR-003/004.
+- **Смена роли участника** (мутация, покрыто SHR-005): у не-owner участника в Members есть
+  Vuetify v-select `.sharing__members-column-role-select` (Co-owner/Moderator/Member). Клик →
+  опция (`[role="option"]`) → **автосейв**. ⚠️ in-place `.v-select__selection-text` обновляется
+  НЕ сразу → роль проверять **через reload**. Кнопка-корзина `.sharing__members-column-action-btn`
+  УДАЛЯЕТ участника — НЕ трогаем (remove необратим без повторного инвайта/email). Хелперы:
+  `GamePanelSharingPage.setMemberRole`/`getMemberRole`; self-cleaning (возврат в Co-owner).
 
 ## 5f. Port & Domains (подтверждено DOM 05-Jun-2026)
 
