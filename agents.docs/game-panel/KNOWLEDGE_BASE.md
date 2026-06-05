@@ -184,6 +184,16 @@ Moderator/Member + счётчики), **Members**, **Audit Log**.
 - ⚠️ В тестах **НЕ мутируем** (Update Subdomain / Add Port меняют сетевые настройки) —
   только структурные проверки. Page object: `GamePanelNetworkPage`.
 
+## 5g. Tasks (подтверждено DOM 05-Jun-2026)
+
+`/server/{uuid}/tasks` (сайдбар-раздел «Tasks»). Работает и offline. Два блока:
+- **All Tasks** (`.server__tasks__panel`): табы «Your Tasks»/«Default Tasks»; дефолтные задачи-шаблоны
+  (`.server__tasks__task` / `__task-title`): **«Send command»**, **«Send power action»** — у каждой
+  кнопки **Configure** / **Run**.
+- **Scheduled Tasks**: список запланированных (по умолчанию пусто — «You have no scheduled tasks yet»).
+- ⚠️ В тестах **НЕ жмём Run/Configure** (Run выполняет задачу = мутация, напр. power-action) —
+  только структурные проверки. Page object: `GamePanelTasksPage`.
+
 ## 6. Статус миграции из browseruse
 
 - Канонический набор доки (`QA_test_docs/ultra.panel/00..10`) — основа; уникальные детали фич
