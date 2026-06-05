@@ -450,3 +450,12 @@ export const GAME_PANEL_CONFIG = {
   // примеры ключей server.properties (для структурных проверок)
   keys: ["motd", "difficulty", "max-players", "level-name"],
 } as const;
+
+// Players tab (/server/{uuid}/players). Confirmed via live DOM 05-Jun-2026 (recon).
+// Управление игроками (whitelist/op) требует Online-сервера; в тестах делаем через
+// консоль (источник правды): whitelist add/list/remove (см. GamePanelServerPage).
+// Сам таб рендерит блок .server__players с карточками (offline тоже виден).
+export const GAME_PANEL_PLAYERS = {
+  area: ".server__players",                     // корневой блок таба Players
+  cardTitle: ".server__players-card__title",    // заголовок карточки (напр. "Server Administrators")
+} as const;

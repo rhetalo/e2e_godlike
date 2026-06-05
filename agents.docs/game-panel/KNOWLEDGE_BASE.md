@@ -137,6 +137,23 @@ Restart/Kill — отдельные кнопки, открывают Vuetify-д�
 - Page object: `GamePanelConfigPage` (`row`, `input`, `getValue`, `setValue`, `hasField`).
 - В тестах безопасно меняем только `motd` (косметическая строка) с обязательным откатом.
 
+## 5d. Players tab (подтверждено DOM 05-Jun-2026)
+
+`/server/{uuid}/players`. Рендерит блок `.server__players` с карточками
+(`.server__players-card__title`, напр. **«Server Administrators»**) — сам таб виден и offline.
+
+- ⚠️ **Управление игроками требует Online-сервера** (offline есть hint «нужен запуск»,
+  action-кнопок нет). В тестах делаем через **консоль** (источник правды), а не UI.
+- Консольные команды whitelist (подтверждённые ответы):
+  - `whitelist add <Name>` → `Added <Name> to the whitelist`
+  - `whitelist list` → `There are N whitelisted player(s): <Name>, …`
+  - `whitelist remove <Name>` → `Removed <Name> from the whitelist`
+  - `<Name>` должен резолвиться (online-mode) — берём реальный аккаунт (`Notch`); всегда `remove` в откат.
+- ⚠️ **Сервер `ebb03adc` СИЛЬНО модовый** (terralith / pixelmon / neoforge / tectonic …) →
+  боот до маркера «Done» долгий и плавающий. Для онлайн-тестов: `ensureOnline` 300с +
+  `waitForConsoleReady` **360с**, `test.setTimeout` ~480с. Иначе флоки-таймаут в `beforeAll`.
+- Page object: `GamePanelPlayersPage` (`area`, `cardTitle`, `hasCard`).
+
 ## 6. Статус миграции из browseruse
 
 - Канонический набор доки (`QA_test_docs/ultra.panel/00..10`) — основа; уникальные детали фич

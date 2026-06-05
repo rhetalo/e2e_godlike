@@ -11,7 +11,7 @@
 | 1. Smoke / структурный | Login, Dashboard, Server overview | read-only | P1 | ✅ done (8 тестов) |
 | 2. Power lifecycle | Start (+EULA) → Online; Restart (полный цикл); Kill → Offline | мутации (serial + teardown) | **P1 — ядро** | ✅ done (3 теста) |
 | 2b. Console (live) | стрим лога + поле команд; безопасная команда `list` → отклик | read-only команда (serial, поднимает Online) | P1 | ✅ done (2 теста) |
-| 3. Stateful (мягкие) | **Files ✅ (2)**, **Config: motd edit→verify→revert ✅ (2)**; Players (whitelist/op) — todo; Databases — заблокировано (баг ноды) | мутации, self-cleaning | P2 | 🔄 in progress |
+| 3. Stateful (мягкие) | **Files ✅ (2)**, **Config ✅ (2)**, **Players: whitelist через консоль ✅ (2)**; Databases — заблокировано (баг ноды) | мутации, self-cleaning | P2 | ✅ done (soft) |
 | 3b. Stateful (тяжёлые) | Backups (create→restore→delete); смена версии (Versions); установка плагинов/модпаков | мутации, перезапуск сервера | P2 — позже | parked |
 | 4. Access / multi-actor | Sharing: invite → invitee видит сервер → enforcement ролей; Port & Domains; Tasks | мутации, 2-й аккаунт | P3 | unlocked |
 | 5. Негатив / security | IDOR (подмена UUID), XSS/SQLi в инпутах (console/имена файлов/config), валидация | смешанно | P3 | todo |
@@ -71,6 +71,16 @@
 
 Детали Config-таба (автосейв без Save-кнопки, динамические id, локаторы) — `KNOWLEDGE_BASE.md` §5c.
 
+`tests/game/panel/players.spec.ts` (serial, self-cleaning):
+
+| TC | Проверка |
+|----|----------|
+| TC-GP-PLR-001 (`@regression`) | таб `/players` рендерит `.server__players` + карточку «Server Administrators» (offline-ok) |
+| TC-GP-PLR-002 (`@critical`) | whitelist add → list → remove игрока (`Notch`) через консоль; ответы «Added/Removed … whitelist» (online, обязательный откат) |
+
+Управление игроками требует Online-сервера → делаем через консоль (источник правды).
+⚠️ Сервер сильно модовый — боот до готовности консоли долгий (`waitForConsoleReady` 360с). Детали — `KNOWLEDGE_BASE.md` §5d.
+
 ## Phase 2 — что ещё можно добить
 
 - **Boost** — поведение кнопки Boost (промо-апгрейд? — осторожно, проверить, что не списывает лишнего).
@@ -88,13 +98,13 @@
 - A/B-промо Amplitude бьёт по storefront-воронке, **не** по панели (см. основной CLAUDE.md).
 - Phase 3b (restore/версии) делаем после стабилизации мягких мутаций.
 
-## ▶ Продолжаем здесь (resume point, 04-Jun-2026)
+## ▶ Продолжаем здесь (resume point, 05-Jun-2026)
 
-Реализовано: **17 тестов** — Phase 1 (8) + Phase 2 power (3) + Phase 2b console (2) + Phase 3 files (2) + Phase 3 config (2). `npx tsc --noEmit` чистый, оба config-теста зелёные.
+Реализовано: **19 тестов** — Phase 1 (8) + Phase 2 power (3) + Phase 2b console (2) + Phase 3 files (2) + config (2) + players (2). `npx tsc --noEmit` чистый, все зелёные.
 
-Следующее по плану:
-1. **Players** (Phase 3) — whitelist / op. Требует recon таба Players (UI vs команды через консоль). Сервер, вероятно, Online; обязательно откат (un-whitelist / deop). Консольный путь уже есть: `GamePanelServerPage.sendConsoleCommand`.
-2. Databases — **остаются запаркованы** (баг ноды, 400/Connection refused).
-3. Потом Phase 4 (Sharing/мульти-актор, 2-й аккаунт) → Phase 5 (негатив/security).
+Phase 3 «мягкие мутации» — по сути закрыта (Files/Config/Players ✅; Databases запаркована). Следующее:
+1. **Phase 4 — Sharing / мульти-актор** (2-й аккаунт `GAME_PANEL_INVITEE_*`): invite → invitee видит сервер → enforcement ролей. Также Port & Domains, Tasks.
+2. Тяжёлые Phase 3b (Backups restore / смена версии / установка плагинов) — **по согласованию с владельцем** (могут ломать/пересобирать сервер).
+3. Phase 5 — негатив/security.
 
-> Перед написанием: прочитать `KNOWLEDGE_BASE.md` (§5c — Config уже задокументирован), проверить что `GAME_PANEL_SERVER_UUID` в `.env` указывает на живой сервер и он не suspended.
+> Перед написанием: `KNOWLEDGE_BASE.md` (§5c Config, §5d Players — задокументированы), проверить `GAME_PANEL_SERVER_UUID` живой/не suspended. Онлайн-тесты модового сервера — **щедрые таймауты готовности** (боот долгий).
