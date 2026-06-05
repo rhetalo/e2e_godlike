@@ -13,7 +13,7 @@
 | 2b. Console (live) | стрим лога + поле команд; безопасная команда `list` → отклик | read-only команда (serial, поднимает Online) | P1 | ✅ done (2 теста) |
 | 3. Stateful (мягкие) | **Files ✅ (2)**, **Config ✅ (2)**, **Players: whitelist через консоль ✅ (2)**; Databases — заблокировано (баг ноды) | мутации, self-cleaning | P2 | ✅ done (soft) |
 | 3b. Stateful (тяжёлые) | Backups (create→restore→delete); смена версии (Versions); установка плагинов/модпаков | мутации, перезапуск сервера | P2 — позже | parked |
-| 4. Access / multi-actor | **Sharing ✅ (4)**, **Port & Domains ✅ (2)**, **Tasks ✅ (2)**; роли / смена роли invitee — todo (мутации) | мутации, 2-й аккаунт | P3 | 🔄 in progress |
+| 4. Access / multi-actor | **Sharing ✅ (5, вкл. смену роли)**, **Port & Domains ✅ (2)**, **Tasks ✅ (2)**; enforcement ролей — todo | мутации, 2-й аккаунт | P3 | 🔄 in progress |
 | 5. Негатив / security | IDOR (подмена UUID), XSS/SQLi в инпутах (console/имена файлов/config), валидация | смешанно | P3 | todo |
 
 ## Phase 1 — реализовано
@@ -91,6 +91,7 @@
 | TC-GP-SHR-002 (`@critical`) | приглашённый аккаунт (`GAME_INVITEE_EMAIL`) виден в Sharing → доступ предоставлен |
 | TC-GP-SHR-003 (`@critical`) | **invitee** (2-й аккаунт) видит расшаренный сервер `test_e2e` в своём дашборде |
 | TC-GP-SHR-004 (`@critical`) | **invitee** открывает страницу расшаренного сервера (`/server/{uuid}`) — доступ есть |
+| TC-GP-SHR-005 (`@critical`) | **смена роли** участника: Co-owner → Moderator → reload → откат (мутация, self-cleaning) |
 
 Инвайты НЕ отправляем (Send Invite шлёт реальный email; invite-мутация проделана владельцем вручную).
 Мульти-актёр: 2-й аккаунт логинится через `loginInviteeAndSaveSession` (login==password==email),
@@ -114,8 +115,8 @@ Update Subdomain / Add Port НЕ жмём (меняют сетевые наст�
 
 Run/Configure НЕ жмём (Run выполняет задачу = мутация). Детали — `KNOWLEDGE_BASE.md` §5g.
 
-**Осталось по Phase 4:** enforcement ролей (что invitee-Co-owner может/не может — позитив/негатив);
-**смена роли invitee + проверка доступов под новой ролью** (parked, по согласованию — invitee выполняет действия).
+**Осталось по Phase 4:** enforcement ролей — что invitee под ролью Co-owner/Moderator/Member
+**может/не может** (позитив/негатив; invitee выполняет действия). Смена роли — ✅ (SHR-005).
 
 ## Phase 2 — что ещё можно добить
 
@@ -136,14 +137,12 @@ Run/Configure НЕ жмём (Run выполняет задачу = мутаци�
 
 ## ▶ Продолжаем здесь (resume point, 05-Jun-2026)
 
-Реализовано: **27 тестов** — Phase 1 (8) + Phase 2 power (3) + console (2) + Phase 3 files (2) + config (2) + players (2) + Phase 4: sharing (4) + Port & Domains (2) + Tasks (2). `npx tsc --noEmit` чистый, все зелёные.
+Реализовано: **28 тестов** — Phase 1 (8) + Phase 2 power (3) + console (2) + Phase 3 files (2) + config (2) + players (2) + Phase 4: sharing (5, вкл. смену роли) + Port & Domains (2) + Tasks (2). `npx tsc --noEmit` чистый, все зелёные.
 
-Структурное/read-only покрытие Phase 4 закрыто (Sharing/Port&Domains/Tasks + invitee-доступ). Следующее (требует согласования — мутации/2-й аккаунт):
-1. **enforcement ролей** — что Co-owner invitee может/не может (позитив/негатив; invitee выполняет действия).
-2. **смена роли invitee + проверка доступов под новой ролью** (parked).
-3. Либо переключиться на **Phase 5 — негатив/security** (IDOR подменой UUID, XSS/SQLi в инпутах, валидация) — частично безопасно/read-only.
-4. Phase 3b (backups restore/версии/плагины) — только с согласия владельца.
-2. Тяжёлые Phase 3b (Backups restore / смена версии / установка плагинов) — **по согласованию с владельцем** (могут ломать/пересобирать сервер).
-3. Phase 5 — негатив/security.
+Владелец дал карт-бланш на мутации на тест-сервере (главное — понимать ЧТО мутирует и КАК откатить; всегда self-cleaning). Следующее:
+1. **Backups** — create → проверить в списке → delete (без restore). Одобрено. Нужен recon UI.
+2. **enforcement ролей** — что invitee под Co-owner/Moderator/Member может/не может (позитив/негатив; invitee выполняет действия). Смена роли — ✅ (SHR-005, §5e).
+3. **Phase 5 — негатив/security** (IDOR подменой UUID, XSS/SQLi в инпутах).
+4. Phase 3b тяжёлые (version change / установка плагинов / backups restore) — аккуратно.
 
 > Перед написанием: `KNOWLEDGE_BASE.md` (§5c Config, §5d Players — задокументированы), проверить `GAME_PANEL_SERVER_UUID` живой/не suspended. Онлайн-тесты модового сервера — **щедрые таймауты готовности** (боот долгий).

@@ -51,4 +51,31 @@ export class GamePanelSharingPage extends GamePanelBasePage {
       .isVisible({ timeout: 5_000 })
       .catch(() => false);
   }
+
+  /** v-select роли участника (есть только у не-owner; на тест-сервере — один, у invitee). */
+  get memberRoleSelect(): Locator {
+    return this.page.locator(GAME_PANEL_SHARING.memberRoleSelect).first();
+  }
+
+  /** Текущая роль участника. ⚠️ Читать ПОСЛЕ reload — in-place текст лагает после смены. */
+  async getMemberRole(): Promise<string> {
+    return (
+      (await this.memberRoleSelect.locator(GAME_PANEL_SHARING.roleSelectionText).innerText().catch(() => "")) ?? ""
+    ).trim();
+  }
+
+  /** Сменить роль участника через v-select. Автосейв; проверять через goto() + getMemberRole(). */
+  async setMemberRole(role: string): Promise<void> {
+    await this.page
+      .locator(`${GAME_PANEL_SHARING.memberRoleSelect} .v-field, ${GAME_PANEL_SHARING.memberRoleSelect} [role="combobox"]`)
+      .first()
+      .click();
+    const opt = this.page
+      .locator(GAME_PANEL_SHARING.roleOption)
+      .filter({ hasText: new RegExp(`^${role}$`, "i") })
+      .first();
+    await opt.waitFor({ state: "visible", timeout: 6_000 });
+    await opt.click();
+    await this.page.waitForLoadState("networkidle", { timeout: 6_000 }).catch(() => {});
+  }
 }
