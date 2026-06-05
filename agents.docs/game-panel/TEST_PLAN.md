@@ -13,7 +13,7 @@
 | 2b. Console (live) | стрим лога + поле команд; безопасная команда `list` → отклик | read-only команда (serial, поднимает Online) | P1 | ✅ done (2 теста) |
 | 3. Stateful (мягкие) | **Files ✅ (2)**, **Config ✅ (2)**, **Players: whitelist через консоль ✅ (2)**; Databases — заблокировано (баг ноды) | мутации, self-cleaning | P2 | ✅ done (soft) |
 | 3b. Stateful (тяжёлые) | Backups (create→restore→delete); смена версии (Versions); установка плагинов/модпаков | мутации, перезапуск сервера | P2 — позже | parked |
-| 4. Access / multi-actor | **Sharing ✅ (4)**, **Port & Domains ✅ (2)**; Tasks / роли / смена роли invitee — todo | мутации, 2-й аккаунт | P3 | 🔄 in progress |
+| 4. Access / multi-actor | **Sharing ✅ (4)**, **Port & Domains ✅ (2)**, **Tasks ✅ (2)**; роли / смена роли invitee — todo (мутации) | мутации, 2-й аккаунт | P3 | 🔄 in progress |
 | 5. Негатив / security | IDOR (подмена UUID), XSS/SQLi в инпутах (console/имена файлов/config), валидация | смешанно | P3 | todo |
 
 ## Phase 1 — реализовано
@@ -105,8 +105,17 @@
 
 Update Subdomain / Add Port НЕ жмём (меняют сетевые настройки). Детали — `KNOWLEDGE_BASE.md` §5f.
 
-**Осталось по Phase 4:** Tasks (сайдбар); enforcement ролей (что invitee-Co-owner может/не может —
-позитив/негатив); **смена роли invitee + проверка доступов под новой ролью** (parked, по согласованию).
+`tests/game/panel/tasks.spec.ts` (Tasks, offline-ok, без мутаций):
+
+| TC | Проверка |
+|----|----------|
+| TC-GP-TASK-001 (`@regression`) | All Tasks: дефолтные задачи «Send command» и «Send power action» отрендерены |
+| TC-GP-TASK-002 (`@regression`) | секция Scheduled Tasks присутствует (пустое состояние «no scheduled tasks») |
+
+Run/Configure НЕ жмём (Run выполняет задачу = мутация). Детали — `KNOWLEDGE_BASE.md` §5g.
+
+**Осталось по Phase 4:** enforcement ролей (что invitee-Co-owner может/не может — позитив/негатив);
+**смена роли invitee + проверка доступов под новой ролью** (parked, по согласованию — invitee выполняет действия).
 
 ## Phase 2 — что ещё можно добить
 
@@ -127,10 +136,13 @@ Update Subdomain / Add Port НЕ жмём (меняют сетевые наст�
 
 ## ▶ Продолжаем здесь (resume point, 05-Jun-2026)
 
-Реализовано: **25 тестов** — Phase 1 (8) + Phase 2 power (3) + console (2) + Phase 3 files (2) + config (2) + players (2) + Phase 4 sharing (4) + Port & Domains (2). `npx tsc --noEmit` чистый, все зелёные.
+Реализовано: **27 тестов** — Phase 1 (8) + Phase 2 power (3) + console (2) + Phase 3 files (2) + config (2) + players (2) + Phase 4: sharing (4) + Port & Domains (2) + Tasks (2). `npx tsc --noEmit` чистый, все зелёные.
 
-Следующее:
-1. **Phase 4 — добить:** **Tasks** (сайдбар — recon + структурные, безопасно, следующее по очереди); затем enforcement ролей (что Co-owner invitee может/не может — позитив/негатив) и **смена роли invitee + проверка доступов** (parked, по согласованию — invitee выполняет действия/мутации). invitee-логин/доступ и Port & Domains — ✅; invite-мутация — вручную, авто не делаем.
+Структурное/read-only покрытие Phase 4 закрыто (Sharing/Port&Domains/Tasks + invitee-доступ). Следующее (требует согласования — мутации/2-й аккаунт):
+1. **enforcement ролей** — что Co-owner invitee может/не может (позитив/негатив; invitee выполняет действия).
+2. **смена роли invitee + проверка доступов под новой ролью** (parked).
+3. Либо переключиться на **Phase 5 — негатив/security** (IDOR подменой UUID, XSS/SQLi в инпутах, валидация) — частично безопасно/read-only.
+4. Phase 3b (backups restore/версии/плагины) — только с согласия владельца.
 2. Тяжёлые Phase 3b (Backups restore / смена версии / установка плагинов) — **по согласованию с владельцем** (могут ломать/пересобирать сервер).
 3. Phase 5 — негатив/security.
 

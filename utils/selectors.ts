@@ -485,3 +485,15 @@ export const GAME_PANEL_NETWORK = {
   portValue: ".server__network-ports__port-port",
   addPortButton: 'button:has-text("Add Additional Port")',
 } as const;
+
+// Tasks (/server/{uuid}/tasks). Confirmed via live DOM 05-Jun-2026 (recon).
+// All Tasks (табы Your/Default + дефолтные задачи Send command / Send power action,
+// у каждой Configure/Run) + Scheduled Tasks (список запланированных, по умолчанию пусто).
+// Работает offline. ⚠️ В тестах НЕ жмём Run/Configure (Run выполняет задачу = мутация).
+export const GAME_PANEL_TASKS = {
+  panel: ".server__tasks__panel",
+  title: ".server__tasks__title",
+  taskItem: ".server__tasks__task",
+  taskTitle: ".server__tasks__task-title",
+  tabsButton: ".server__tasks__all-tasks__tabs-btn",
+} as const;
