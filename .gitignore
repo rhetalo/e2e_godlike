@@ -59,3 +59,6 @@ results.json
 
 # Разовые диагностические скрипты (live-проба, удаляются после)
 tmp-*
+
+# Артефакты Playwright MCP-сессий (snapshot/console дампы) — не коммитить
+.playwright-mcp/

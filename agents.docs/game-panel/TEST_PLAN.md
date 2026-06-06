@@ -186,3 +186,56 @@ IDOR — read-only. XSS — мутации (свой бэкап/папка, уд
 3. Phase 2 Boost (промо-апгрейд — осторожно, не списать лишнего).
 
 > Перед написанием: `KNOWLEDGE_BASE.md` (§5c Config, §5d Players, §5h Backups, §5i Roles, §5j Security — задокументированы), проверить `GAME_PANEL_SERVER_UUID` живой/не suspended. Бэкапы: статус НЕ обновляется без reload (`expect.poll`+`refresh()`). Смена роли: персист через reload+poll; всегда откат в Co-owner. IDOR-сигнал: `notFoundError` + `hasPowerControls()` (не слово «error» в body). Онлайн-тесты модового сервера — **щедрые таймауты**.
+
+---
+
+## ▶▶ Live-recon 06-Jun-2026 (Playwright MCP) — пробелы, кандидаты, блокеры
+
+> Разведка через MCP по всем экранам сервера + дашборд + Referral. Детали структуры/селекторов —
+> `KNOWLEDGE_BASE.md` §7. Ниже — что покрывать дальше и чем это рискованно.
+
+### 🔴 БЛОКЕР: `test_e2e` крашится на старте (06-Jun)
+При нажатии **Start** сервер (`neoforge 1.21.1`, build 21.1.200) **падает в процессе инициализации**
+и daemon глушит авто-рестарт: `[Pterodactyl Daemon]: Detected server process in a crashed state!
+Exit code: 0, Out of memory: false. Aborting automatic restart`. Stack обрывается на
+`net.minecraft.Util.blockUntilDone` → `server.Main.main` (типично для падения мода/датапака при загрузке).
+- **Следствие:** все онлайн-зависимые тесты на этом сервере СЕЙЧАС бы падали в `beforeAll`/`ensureOnline`:
+  **TC-GP-PWR-001/002** (Start/Restart→Online), **TC-GP-CON-001/002** (консоль), **TC-GP-PLR-002** (whitelist).
+- **Действия:** (1) проверить причину (вкладка/блок **Mod Conflict** в консоли; убрать конфликтный мод
+  или сменить версию/план RAM); (2) до починки — онлайн-тесты держать в карантине либо переключить
+  `GAME_PANEL_SERVER_UUID` на здоровый Minecraft-сервер аккаунта (их много, см. дашборд). Кандидат в баг-репорт.
+- Offline-тесты (структура, Config, Sharing, Backups, Network, Tasks, Security-IDOR/XSS) — **не затронуты**.
+
+### Кандидатные тесты по непокрытым экранам (status: TODO)
+
+| TC ID | Экран / флоу | Тип | Тег | Prod-safety |
+|---|---|---|---|---|
+| TC-GP-VER-001 | **Versions**: шапка «Currently running …» + сетка семейств (Vanilla…NeoForge) + drill-down `?type=` со списком версий | структурный | @regression | read-only; **install НЕ жать** (rebuild) |
+| TC-GP-EXT-001 | **Plugins/Mods + Modpacks** (один компонент `server__extensions`): фильтры Mods/Plugins/All/Installed, поиск/Category/Author, наличие Install | структурный | @regression | read-only; **Install НЕ жать** |
+| TC-GP-UPG-001 | **Boost/Upgrade**: клик Boost → `/upgrade`, рендер `current-plan-card` + `simple-plan-card`, цены/категории | структурный | @regression | ⚠️ ПЛАТЁЖНЫЙ — план НЕ выбирать, checkout НЕ проходить |
+| TC-GP-EDIT-001 | **Edit Server — rename** (self-cleaning): Edit server → сменить Server Name → Save → проверить → откатить `test_e2e` | мутация | @critical | ⚠️ **Reinstall Server НЕ жать** (затрёт сервер) |
+| TC-GP-TASK-003 | **Tasks Configure → create** (self-cleaning): Configure «Send command» → имя+payload → Save → видно в «Your Tasks» → удалить | мутация | @regression | **Run НЕ жать**; обязателен teardown задачи |
+| TC-GP-REF-001 | **Referral** `/referral`: реф-ссылка, баланс, How It Works, Analytics | структурный | @regression | ⚠️ **Request Withdrawal НЕ жать** (вывод средств) |
+| TC-GP-DB-001 | **Databases create** | мутация | — | ⛔ ПАРКИНГ: баг прода (PUT/POST `/databases/` падает, 0 remaining) — до починки не писать |
+
+### Матрица покрытия (после recon)
+
+- **Покрыто (~28 тестов, всё зелёное на 06-Jun):** Login, Dashboard, Server Overview, Power, Console,
+  Files, Config, Players, Backups, Sharing (+invitee), Network, Tasks (структура), Role enforcement, Security (IDOR/XSS).
+- **Пробелы (по приоритету):**
+  1. **Версии/каталоги/Referral/Upgrade** — структурные смоук-тесты, низкий риск, средне-низкий приоритет (TC-VER/EXT/UPG/REF-001).
+  2. **Edit Server rename** — полезный self-cleaning кейс, но рядом деструктивный Reinstall (аккуратно) — средний приоритет.
+  3. **Tasks create (Configure→Save)** — мутация с teardown — средний приоритет.
+  4. **Остаток Phase 5** — XSS/SQLi в console/config motd (console требует Online ⇒ сейчас блокер).
+  5. **Phase 3b остаток** — version change / install плагина/модпака / backups **restore** — деструктивно, низкий приоритет.
+  6. **Databases** — заблокировано багом прода.
+- **Селекторная заметка:** power-кнопки имеют стабильные классы `button.server-button-start /
+  -restart` (использовать вместо `:has-text("Start")`, который ловит и «Restart»). Каталог —
+  `server__extensions__*`; Upgrade — `current-plan-card__* / simple-plan-card__*`; Edit Server —
+  `edit__server-block__dialog`; Tasks-диалог — `server__dialogs__action-dialog`. Все — в §7 KB,
+  при написании тестов завести в `utils/selectors.ts` (`GAME_PANEL_*`).
+
+### Resume point обновлён (06-Jun, после MCP-recon)
+Следующий разумный шаг — **починить/обойти блокер сервера** (иначе онлайн-тесты красные), затем взять
+дешёвые структурные смоуки (TC-VER/EXT/UPG/REF-001) — они offline-safe и не плодят риск. Edit-rename и
+Tasks-create — когда дойдут руки до мутаций с teardown.

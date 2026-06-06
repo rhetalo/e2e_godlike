@@ -293,3 +293,119 @@ Moderator/Member + счётчики), **Members**, **Audit Log**.
   (SFTP, recycle bin, bulk-операции с файлами) из `Ultra_Panel_Description` дополняют функционал.
 - Прежние page objects browseruse (плоские, текстовые локаторы) **не переносятся** — заменены
   на `pages/game/*` с локаторами из `selectors.ts`. Прежний проект можно удалять после переноса доки.
+
+## 7. Live-recon 06-Jun-2026 (Playwright MCP) — новые экраны, дрейф, API
+
+> Прогон через Playwright MCP по всем экранам сервера + глобальному сайдбару. Read-only +
+> одна self-cleaning проба (папка create→delete). Новые экраны раньше были только «видны»
+> (smoke TC-GP-SRV-002), теперь сняты структурно. Кандидатные тесты — в `TEST_PLAN.md`.
+
+### 7.0 Дрейф vs то, что записано выше
+- **Дашборд:** заголовок теперь **«My Servers (30)»** (в §3 было ~26). Бейджи карточек:
+  `Suspended` и **`Free`** (новый). Карточки серверов — по-прежнему `div` с router-переходом.
+- **Тест-сервер `test_e2e`/`ebb03adc`** теперь раннит **`neoforge 1.21.1` (build 21.1.200)**, не
+  «paper 1.21.11» (§3 устарел). Адрес/план прежние: `srv6.godlike.club:26150`, Double, 5-10
+  slots, 2 GiB, storage ~321 MiB, статус Offline. ⚠️ В диалоге **Edit Server** «Server Type» =
+  `PC-Paper` (внутренний лейбл расходится с фактическим neoforge — не пугаться).
+- **Shepherd-тур = 6 шагов** и всплывает на КАЖДОЙ навигации (Step 1 «Your server» на дашборде,
+  Step 2 «Main Menu» на сервере, …). Кнопка гашения — **«Skip for now»**.
+- **Чузер логина** — текст «Through login/password» (нижний регистр); рядом OAuth-ссылка
+  **«Authorization»** → `panel.godlike.host/api/v2/whmcs/login` (вне scope). `gameAuth` уже
+  целится через case-insensitive `:has-text`.
+
+### 7a. Versions `/server/{uuid}/minecraft/versions` (НЕ покрыто)
+- Шапка: «Currently running NeoForge» + «Installed Minecraft Version: 1.21.1» + «Installed Build:
+  21.1.200».
+- Сетка кликабельных карточек server-software (h4): **Vanilla, Paper, Pufferfish, Spigot, Folia,
+  Purpur, Waterfall, Velocity, Fabric, BungeeCord, Quilt, Forge, NeoForge, Mohist, Arclight,
+  Sponge, Leaves, Canvas** — у каждой «N Minecraft versions / N Builds».
+- Клик по семейству → URL `?type=NEOFORGE` → drill-down: **Go Back**, тогл **Show Snapshot
+  Versions**, список версий-карточек («1.21.1 RELEASE / 230 Build(s)» …). Дальше: версия → билд →
+  **install**. ⚠️ Смена версии = **деструктивный rebuild** сервера → тест только структурный
+  (не жать install).
+
+### 7b. Plugins/Mods `/extensions` + Modpacks `/modpacks` (НЕ покрыто) — ОДИН компонент
+- Оба экрана — один Vuetify-компонент **`server__extensions__*`** (даже `document.title` =
+  «Extensions»); отличаются контентом. Заголовок `h1.server__extensions__header-title`
+  («Mods» / «Modpacks»).
+- Контролы: фильтр-кнопки **Mods / Plugins / All / Installed**
+  (`server__extensions__extension-type__button`), поиск
+  (`server__extensions__extension-search__input`), **Category** + **Author**
+  (`server__extensions__filter-item`), **sort-by** (`server__extensions__sort-by`), тело
+  (`server__extensions__body`) + футер с пагинацией (`server__extensions__footer`). Кнопки
+  **Help / Tutorial**. У каждого элемента каталога — кнопка **Install** (`v-btn--slim`).
+- ⚠️ Install = мутация (добавляет мод/плагин; обратимо через uninstall, но тяжело). Тест —
+  структурный; install/uninstall — отдельный self-cleaning кейс с осторожностью.
+
+### 7c. Boost / Upgrade `/server/{uuid}/upgrade?promocode=UPGRADE50F` (НЕ покрыто) — ПЛАТЁЖНЫЙ ФЛОУ
+- Кнопка **«Boost my server»** (overview, `current__tariff-button`) ведёт сюда с промокодом.
+- Контент: карточка текущего плана **`current-plan-card__*`** + карточки планов на выбор
+  **`simple-plan-card__*`** (есть `simple-plan-card__select-btn-disabled`), категории **Budget /
+  Premium**, кнопки **See all plans**, **See Premium benefits**, блок-квиз `quiz-suggestion__*`
+  («Not sure what you need? → Go to quiz»). Корень `server__upgrade`, кнопка назад
+  `server__upgrade__btn-back`.
+- **Реальные цены** (напр. `€ 6.29 / 1 Month`). Выбор плана → checkout/оплата. ⚠️ КАК
+  storefront-воронка: тест **только структурный**, НИКОГДА не выбирать план/не доходить до оплаты.
+
+### 7d. Databases `/database` — баг создания подтверждён 06-Jun (запаркован)
+- Структура: `h3` «Databases», `h4` «**0 databases remaining**», кнопка **Create Database**,
+  таблица колонок **NAME / ENDPOINT / USERNAME / PASSWORD / TYPE / ADMIN LINK** + action-кол,
+  пустое состояние «No databases found / No available databases for this server», футер «Showing 0
+  database».
+- **Create-диалог:** заголовок «Create Database», одно поле **Tag** (`Enter an optional database
+  tag`, опциональное) + кнопки **Close** / **Create Database**.
+- ⚠️ Жмём Create → `POST …/databases/` → диалог **остаётся открыт**, «0 databases remaining» не
+  меняется, таблица пуста → **база не создаётся** (баг воспроизведён; точный 400 SQLSTATE
+  «Connection refused (CREATE DATABASE)» — см. `TEST_PLAN.md`). Тесты Databases остаются
+  запаркованы. Кандидат в баг-репорт.
+
+### 7e. Tasks → Configure-диалог (дополнение к §5g)
+- У дефолтной задачи кнопка **Configure** открывает диалог **`server__dialogs__action-dialog`**
+  («Configure your task», подпись «Fill in the required fields to save this task.»):
+  - «Send command»: поле **Task name** (`Enter a name...`) + **Payload** (textarea `Command`);
+  - «Send power action»: **Task name** + **Power action** (select);
+  - кнопки **Cancel** / **Save**; закрытие — `server__dialogs__action-dialog__btn-close`.
+- ⚠️ **Save** создаёт запись в «Your Tasks» (мутация) → возможен self-cleaning кейс (создать →
+  проверить во вкладке «Your Tasks» → удалить). Run по-прежнему не жать.
+
+### 7f. Edit Server-диалог `edit__server-block__dialog` (overview, НЕ покрыто)
+- Открывается кнопкой **Edit server** (overview). Блок **General information**: **Server Name**
+  (input, тек. `test_e2e`), **Game/Platform** (select + «Minecraft»), **Server Type** (select +
+  «PC-Paper»). Блок **SERVER ACTIONS**: **Import Server**, **Reinstall Server**, кнопки **Cancel**
+  / **Save Changes**. BEM: `edit__server-block`, `dialog__title/text/block-title/button/actions`,
+  `app-text-field__label`, `app-select-field__label`.
+- ⚠️ **Reinstall Server = деструктив** (переустановка/затирание) — НИКОГДА не жать. Хороший
+  self-cleaning кейс — **rename**: сменить Server Name → Save → проверить (заголовок/дашборд) →
+  **вернуть `test_e2e`**.
+
+### 7g. Referral `/referral` (глобальный сайдбар, НЕ покрыто)
+- Глобальная страница (`default_layout__wrapper`). Секции: **Referral Program** (`referral-page__*`),
+  **Share with Friends** (`share-card__*` + read-only реф-ссылка `link-card__input` вида
+  `affiliate.godlike.host/ref/<code>`, кнопка **Copy Link**), баланс/выплата
+  (`balance-card__*` + кнопка **Request Withdrawal**), соц-кнопки (`social-share__*`),
+  «How It Works?» (3 шага), «Referrals Analytics».
+- ⚠️ **Request Withdrawal** = вывод средств — не жать. Покрываемо структурным смоуком (low prio).
+- Прочий сайдбар — **внешние** ссылки на `godlike.host` (Billing → `/clientarea`, Support Tickets,
+  Knowledge Base, Main Site) → вне scope панели.
+
+### 7h. Overview — доп. селекторы (дополнение к §4)
+- Промо **«Free Premium»** с обратным отсчётом — блок `premium__block*` (структурный ассерт, не текст).
+- Power-тогл — `shut_down__button` / `__button-outline` / `__button-outline__text` (online ⇒ виден
+  Shut Down). Бейдж версии + «Refresh version» — `minecraft-version-badge__refresh-btn`.
+- Таб-чипы контента (Overview…Players) — `server-chips-navigation__chip`. Карточка плана —
+  `current__tariff*`. Заголовок-имя — `server__overview-title`.
+- Карточка «Java & Minecraft Version Notice» со ссылками «To minecraft versions» / «To Java
+  versions» (= `/config`).
+
+### 7i. Сетевой слой / API (для понимания async-флоу)
+- База: **`panel.godlike.host/api/v2/servers/{uuid}/…`**, заголовок `Authorization: Bearer ptlc_*`
+  (Pterodactyl client token). ⚠️ Токен в доки/логи/коммиты НЕ копировать.
+- Файлы: список `GET …/files?dir=/`; создание папки `POST …/files/folder` (→200); удаление
+  `POST …/files/trash` (→200) — **удаление = перемещение в Recycle Bin** (подтверждает §5b «24ч»,
+  не permanent). После мутации фронт **перезапрашивает** список (объясняет реактивное появление
+  строки и при этом — нереактивность статусов у бэкапов: там джоба асинхронна).
+- Базы: `GET …/databases`; create `POST …/databases/` (падает, см. 7d).
+- Консольные ошибки страниц — почти всё **сторонний шум** (ipapi.co CORS, redtrack 409, GTM,
+  chat-виджет 429, FB-pixel ORB-blocked). Единственная first-party — `400` на
+  `…/api/v2/auth/current?locale=en` (похоже на пре-авторизационный probe; логин при этом успешен).
+- `networkidle` на страницах сервера не наступает (websocket-консоль + чат-виджет) — подтверждено.
