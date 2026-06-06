@@ -293,6 +293,13 @@ install-confirm)**: install деструктивен (rebuild), доходить
   по тексту валюты; checkout НЕ проходим), TC-GP-PREM-001 (Free Premium модалка + CTA, не покупаем).
   Page object `GamePanelUpgradePage` (вход через `a[href*="/upgrade"]`), компонент `FreePremiumDialog`,
   селекторы `GAME_PANEL_UPGRADE` / `GAME_PANEL_PREMIUM`.
-- **Итог реализации (эта сессия):** **7 новых тестов** (VER×2, EXT×2, REF×1, UPG×1, PREM×1) зелёные, `tsc` = 0.
-- **Следующие на очереди:** диалоги NET-003 / SFTP-001 / CF-001, FILE-003 (row-меню), затем мутационные
-  self-cleaning (FILE-004 rename, EDIT-001 rename, TASK-003) и онлайн-набор (CON/PLR с устойчивым ensureOnline).
+- **`network.spec.ts` (+NET-003)** — Add Additional Port диалог (поле Name + Add Port; закрываем без
+  добавления). Расширен `GamePanelNetworkPage` (`openAddPortDialog`/`addPortNameInput`/`addPortConfirm`/`closeDialog`).
+- **`files.structure.spec.ts`** — FILE-003 (per-row «...» меню: Rename/Delete/Copy path и др.),
+  SFTP-001 (SFTP Connect диалог: Host/Username + Open SFTP/Generate), CF-001 (CurseForge upload:
+  Browse/Proceed). Расширен `GamePanelFilesPage` (`openAnyRowMenu`/`openSftpDialog`/`openCurseForgeDialog`/
+  `activeDialog`/`closeOverlay`). Ничего не сабмитим.
+- **Итог реализации (эта сессия):** **11 новых тестов** (VER×2, EXT×2, REF×1, UPG×1, PREM×1, NET-003,
+  FILE-003, SFTP-001, CF-001) зелёные, `tsc` = 0, всё offline/read-only.
+- **Следующие на очереди:** мутационные self-cleaning (FILE-004 rename, EDIT-001 rename сервера,
+  TASK-003 create+delete) и онлайн-набор (CON/PLR — сервер сейчас поднят, нужен устойчивый ensureOnline).

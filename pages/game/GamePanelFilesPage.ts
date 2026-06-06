@@ -85,6 +85,62 @@ export class GamePanelFilesPage extends GamePanelBasePage {
       await this.deleteEntry(name).catch(() => {});
     }
   }
+
+  // --- Структурные диалоги/меню (read-only; submit/Generate/Proceed НЕ жмём) ---
+
+  get activeDialog(): Locator {
+    return this.page.locator(".v-overlay--active").first();
+  }
+  get sftpButton(): Locator {
+    return this.page.locator(GAME_PANEL_FILES.sftpButton).first();
+  }
+  get curseForgeButton(): Locator {
+    return this.page.locator(GAME_PANEL_FILES.curseForgeButton).first();
+  }
+
+  /** Открыть SFTP Connect диалог. ⚠️ Generate/Save НЕ жмём. */
+  async openSftpDialog(): Promise<void> {
+    await this.sftpButton.click();
+    await this.page
+      .locator(GAME_PANEL_FILES.sftpForm)
+      .first()
+      .waitFor({ state: "visible", timeout: 10_000 })
+      .catch(() => {});
+  }
+
+  /** Открыть CurseForge upload-модпак диалог. ⚠️ Proceed НЕ жмём. */
+  async openCurseForgeDialog(): Promise<void> {
+    await this.curseForgeButton.click();
+    await this.activeDialog.waitFor({ state: "visible", timeout: 10_000 }).catch(() => {});
+  }
+
+  /** Открыть per-row "..." меню действий для записи по имени. */
+  async openRowMenu(name: string): Promise<void> {
+    await this.fileRow(name).locator(GAME_PANEL_FILES.rowActionsBtn).first().click();
+    await this.rowMenuItems().first().waitFor({ state: "visible", timeout: 10_000 }).catch(() => {});
+  }
+
+  /** Открыть "..." меню первой строки, у которой есть кнопка действий (без привязки к имени). */
+  async openAnyRowMenu(): Promise<void> {
+    const row = this.page
+      .locator(GAME_PANEL_FILES.row)
+      .filter({ has: this.page.locator(GAME_PANEL_FILES.rowActionsBtn) })
+      .first();
+    await row.locator(GAME_PANEL_FILES.rowActionsBtn).first().click();
+    await this.rowMenuItems().first().waitFor({ state: "visible", timeout: 10_000 }).catch(() => {});
+  }
+  rowMenuItems(): Locator {
+    return this.page.locator(GAME_PANEL_FILES.rowActionsItem);
+  }
+  rowMenuItem(text: string): Locator {
+    return this.page.locator(GAME_PANEL_FILES.rowActionsItem, { hasText: text }).first();
+  }
+
+  /** Закрыть открытый overlay/меню (Escape) — без выполнения действия. */
+  async closeOverlay(): Promise<void> {
+    await this.page.keyboard.press("Escape");
+    await this.activeDialog.waitFor({ state: "hidden", timeout: 8_000 }).catch(() => {});
+  }
 }
 
 function escapeRegExp(s: string): string {

@@ -437,6 +437,15 @@ export const GAME_PANEL_FILES = {
   dialogTitleSel: ".server__file-manager__dialog-title",
   deleteConfirmButton: "button.server__file-manager__modal-button--danger",
   dialogCloseButton: "button.server__file-manager__dialog__btn-close",     // Cancel
+  // SFTP Connect диалог (структурный; ⚠️ Generate/Save НЕ жать — меняют SFTP-пароль)
+  sftpButton: 'button:has-text("SFTP Connect")',
+  sftpForm: ".server__file-manager__sftp-form",
+  // CurseForge upload-модпак диалог (структурный; ⚠️ не загружать)
+  curseForgeButton: 'button:has-text("Upload custom modpack")',
+  curseForgeDialog: ".curseforge-dialog__content, [class*='curseforge-dialog']",
+  // per-row "..." меню действий (Open/Pin/Copy×3/Rename/Move/Archive/Duplicate/Download/Delete)
+  rowActionsBtn: ".server__file-manager__file-list-item__actions-btn",
+  rowActionsItem: ".v-overlay--active .v-list-item",                        // пункт открытого меню
 } as const;
 
 // Config tab (/server/{uuid}/config). Confirmed via live DOM 04-Jun-2026 (recon).
@@ -489,6 +498,9 @@ export const GAME_PANEL_NETWORK = {
   portCard: ".server__network-ports__port",
   portValue: ".server__network-ports__port-port",
   addPortButton: 'button:has-text("Add Additional Port")',
+  // Add Additional Port диалог (структурный; ⚠️ "Add Port" НЕ жать — добавит порт)
+  addPortNameInput: '.v-overlay--active input[placeholder="Enter a descriptive name..."]',
+  addPortConfirm: '.v-overlay--active button:has-text("Add Port")',
 } as const;
 
 // Tasks (/server/{uuid}/tasks). Confirmed via live DOM 05-Jun-2026 (recon).
