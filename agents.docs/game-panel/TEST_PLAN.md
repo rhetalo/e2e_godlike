@@ -14,7 +14,7 @@
 | 3. Stateful (мягкие) | **Files ✅ (2)**, **Config ✅ (2)**, **Players: whitelist через консоль ✅ (2)**; Databases — заблокировано (баг ноды) | мутации, self-cleaning | P2 | ✅ done (soft) |
 | 3b. Stateful (тяжёлые) | **Backups create→COMPLETED→delete ✅ (2)**; смена версии (Versions); установка плагинов/модпаков | мутации, self-cleaning | P2 | 🔄 in progress |
 | 4. Access / multi-actor | **Sharing ✅ (5)**, **Port & Domains ✅ (2)**, **Tasks ✅ (2)**, **enforcement ролей ✅ (2)** | мутации, 2-й аккаунт | P3 | ✅ done |
-| 5. Негатив / security | IDOR (подмена UUID), XSS/SQLi в инпутах (console/имена файлов/config), валидация | смешанно | P3 | todo |
+| 5. Негатив / security | **IDOR ✅ + stored XSS в имени бэкапа ✅ (2)**; XSS/SQLi в др. инпутах (console/config/имена файлов) — todo | смешанно | P3 | 🔄 in progress |
 
 ## Phase 1 — реализовано
 
@@ -142,6 +142,18 @@ Enforcement — через присутствие/отсутствие конт�
 участниками (role-select/trash). Роль invitee ВСЕГДА откатывается в Co-owner. Матрица — `KNOWLEDGE_BASE.md` §5i.
 Moderator (промежуточная роль) — todo.
 
+## Phase 5 — реализовано (Security / негатив)
+
+`tests/game/panel/security.spec.ts` (offline-ok):
+
+| TC | Проверка |
+|----|----------|
+| TC-GP-SEC-001 (`@critical`) | **IDOR**: чужой/несуществующий UUID сервера → «resource does not exist» + нет power-контролов; свой сервер (baseline) → контролы есть. Read-only |
+| TC-GP-SEC-002 (`@critical`) | **stored XSS** в имени бэкапа (`<img onerror>`) НЕ исполняется (нет нативного диалога) и экранируется (рендер как текст); self-cleaning (создать→дождаться→удалить) |
+
+IDOR — read-only. XSS — мутация (свой бэкап, удаляется). Детали и сигналы — `KNOWLEDGE_BASE.md` §5j.
+Остаток Phase 5: XSS/SQLi в других инпутах (console / config motd / имена файлов).
+
 ## Phase 2 — что ещё можно добить
 
 - **Boost** — поведение кнопки Boost (промо-апгрейд? — осторожно, проверить, что не списывает лишнего).
@@ -161,15 +173,15 @@ Moderator (промежуточная роль) — todo.
 
 ## ▶ Продолжаем здесь (resume point, 06-Jun-2026)
 
-Реализовано: **32 теста** — Phase 1 (8) + Phase 2 power (3) + console (2) + Phase 3 files (2) + config (2) + players (2) + Phase 3b backups (2) + Phase 4: sharing (5) + Port & Domains (2) + Tasks (2) + **role enforcement (2)**. `npx tsc --noEmit` чистый.
+Реализовано: **34 теста** — Phase 1 (8) + Phase 2 power (3) + console (2) + Phase 3 files (2) + config (2) + players (2) + Phase 3b backups (2) + Phase 4: sharing (5) + Port & Domains (2) + Tasks (2) + role enforcement (2) + **Phase 5 security (2)**. `npx tsc --noEmit` чистый.
 
-✅ **Backups + Role enforcement завершены (06-Jun), зелёные:** `backups.spec.ts` (create→COMPLETED→delete, self-cleaning)
-и `role.enforcement.spec.ts` (Member лишён Restart/Kill/консоли + управления бэкапами vs Co-owner; мутация роли,
-откат в Co-owner). Recon — `KNOWLEDGE_BASE.md` §5h/§5i. Прод чист.
+✅ **Backups + Role enforcement + Security (IDOR/XSS) завершены (06-Jun), зелёные:** `backups.spec.ts`
+(create→COMPLETED→delete), `role.enforcement.spec.ts` (Member vs Co-owner), `security.spec.ts`
+(SEC-001 IDOR чужой UUID; SEC-002 stored XSS в имени бэкапа не исполняется/экранируется). Recon — KB §5h/§5i/§5j. Прод чист.
 
 Владелец дал карт-бланш на мутации на тест-сервере (понимать ЧТО мутирует и КАК откатить; всегда self-cleaning). Дальше:
-1. **Phase 5 — негатив/security** (IDOR подменой UUID, XSS/SQLi в инпутах console/имена файлов/config).
+1. **Phase 5 остаток** — XSS/SQLi в других инпутах (console / config motd / имена файлов; всё реверсивно/self-cleaning).
 2. **Role enforcement — Moderator** (промежуточная роль: что доступно vs Member/Co-owner) — нужен recon-флип Moderator.
 3. Phase 3b остаток (version change / установка плагинов / backups **restore** — restore деструктивный, аккуратно).
 
-> Перед написанием: `KNOWLEDGE_BASE.md` (§5c Config, §5d Players, §5h Backups, §5i Roles — задокументированы), проверить `GAME_PANEL_SERVER_UUID` живой/не suspended. Бэкапы: статус НЕ обновляется без reload (`expect.poll`+`refresh()`). Смена роли: персист через reload+poll; всегда откат в Co-owner. Онлайн-тесты модового сервера — **щедрые таймауты**.
+> Перед написанием: `KNOWLEDGE_BASE.md` (§5c Config, §5d Players, §5h Backups, §5i Roles, §5j Security — задокументированы), проверить `GAME_PANEL_SERVER_UUID` живой/не suspended. Бэкапы: статус НЕ обновляется без reload (`expect.poll`+`refresh()`). Смена роли: персист через reload+poll; всегда откат в Co-owner. IDOR-сигнал: `notFoundError` + `hasPowerControls()` (не слово «error» в body). Онлайн-тесты модового сервера — **щедрые таймауты**.

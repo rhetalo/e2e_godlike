@@ -181,4 +181,18 @@ export class GamePanelServerPage extends GamePanelBasePage {
     const el = this.page.getByText(GAME_PANEL_SERVER.addressText).first();
     return ((await el.textContent().catch(() => null)) ?? "").trim() || null;
   }
+
+  // ── Access control (Phase 5 / IDOR) ───────────────────────────
+  /** Сообщение отказа доступа к чужому/несуществующему серверу. */
+  get notFoundError(): Locator {
+    return this.page.getByText(/requested resource does not exist/i).first();
+  }
+  /** Видны ли power-контролы = доступ к серверу предоставлен (Start/Shut Down/Restart). */
+  async hasPowerControls(): Promise<boolean> {
+    return (
+      (await this.startButton.isVisible({ timeout: 1_500 }).catch(() => false)) ||
+      (await this.shutDownButton.isVisible({ timeout: 500 }).catch(() => false)) ||
+      (await this.restartButton.isVisible({ timeout: 500 }).catch(() => false))
+    );
+  }
 }

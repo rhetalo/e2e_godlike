@@ -265,6 +265,25 @@ Moderator/Member + счётчики), **Members**, **Audit Log**.
 - Тест: `role.enforcement.spec.ts` (ROLE-001 power/console, ROLE-002 backups-management; serial, 2 контекста, self-cleaning).
 - Moderator (промежуточная роль) — пока НЕ снимали (todo).
 
+## 5j. Security / негатив (подтверждено DOM 06-Jun-2026)
+
+Тест: `security.spec.ts` (Phase 5). Сервер Online не нужен.
+
+- **IDOR / broken access control (`/server/{uuid}`):** по UUID, который аккаунту не принадлежит
+  (несуществующий ИЛИ подменённый префикс реального), панель НЕ даёт доступа — рендерит
+  **«The requested resource does not exist on this server.»** и **не показывает power-контролы**.
+  ⚠️ Ответ ОДИНАКОВ для несуществующего и чужого UUID (нет enumeration-утечки forbidden/not-found — это хорошо).
+  - Надёжные сигналы: `GamePanelServerPage.hasPowerControls()` (доступ) и `notFoundError`
+    (`getByText(/requested resource does not exist/i)` — отказ). НЕ полагаться на слово «error» в body
+    (есть в промо/скриптах страницы → ложные срабатывания).
+- **Stored XSS в имени бэкапа:** поле `Enter backup name` принимает `<` и payload как есть (НЕ стрипает на вводе).
+  Создание бэкапа с именем `<img src=x onerror=alert(1)>` → имя **экранируется** (рендерится как текст,
+  строка находится по литеральному тексту payload) и **alert НЕ срабатывает** → stored-XSS НЕТ. Проверка:
+  слушатель `page.on("dialog")` (любой нативный диалог = сработавший XSS) + `backupRow(payload)` виден.
+  Self-cleaning: бэкап дожидается COMPLETED и удаляется (имя ≤ 38 символов).
+- ⚠️ IDOR-тест делит общий `page`; после навигаций на чужие сервера **вернуть на нужную страницу**
+  (`backups.goto()`) перед действиями — `createBackup` сам goto НЕ делает.
+
 ## 6. Статус миграции из browseruse
 
 - Канонический набор доки (`QA_test_docs/ultra.panel/00..10`) — основа; уникальные детали фич
