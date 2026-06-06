@@ -239,3 +239,19 @@ Exit code: 0, Out of memory: false. Aborting automatic restart`. Stack обры�
 Следующий разумный шаг — **починить/обойти блокер сервера** (иначе онлайн-тесты красные), затем взять
 дешёвые структурные смоуки (TC-VER/EXT/UPG/REF-001) — они offline-safe и не плодят риск. Edit-rename и
 Tasks-create — когда дойдут руки до мутаций с teardown.
+
+### Round-2 кандидаты (суб-флоу, MCP 06-Jun; детали — KB §8)
+
+| TC ID | Флоу | Тип | Тег | Prod-safety |
+|---|---|---|---|---|
+| TC-GP-CON-003 | **Console «Commands»-палитра**: открыть → поиск/A-Z → выбрать команду → инпут заполнился шаблоном | структурный | @regression | offline-safe; команду НЕ отправлять |
+| TC-GP-FILE-003 | **File row «...» меню**: полный набор (Open/Pin/Copy×3/Rename/Move/Archive/Duplicate/Delete) рендерится | структурный | @regression | read-only (меню не выполнять) |
+| TC-GP-FILE-004 | **File Rename** (self-cleaning): Rename папки → проверить → вернуть имя | мутация | @regression | обязателен откат |
+| TC-GP-SFTP-001 | **SFTP Connect** диалог: Host/Port/Username/Password + Open SFTP/Generate/Save видны | структурный | @regression | ⚠️ Generate/Save НЕ жать (меняет пароль) |
+| TC-GP-CF-001 | **CurseForge** диалог: file-input + Browse/Cancel/Proceed | структурный | @regression | ⚠️ не загружать |
+| TC-GP-AUTH-004 | **Logout**: user-меню → Log Out → редирект `/login` | флоу | @smoke | изолировать контекст (убивает сессию) |
+| TC-GP-BKP-003 | **Scheduled backup**: Schedule Backup → Set interval → create→verify→delete | мутация | @regression | квота 3 слота; чужой «111» не трогать; self-cleaning |
+
+**Ещё не разведано (следующий заход):** Network add-port / subdomain-select диалоги, Sharing invite-role
+опции + Audit Log контент, файловый CodeMirror-редактор (Open текстового файла), «What is a Free Premium?»
+модалка, Versions 3-й уровень (build) + «Show Snapshot Versions», Recycle Bin (Restore/Clear).

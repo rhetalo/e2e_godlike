@@ -409,3 +409,49 @@ Moderator/Member + счётчики), **Members**, **Audit Log**.
   chat-виджет 429, FB-pixel ORB-blocked). Единственная first-party — `400` на
   `…/api/v2/auth/current?locale=en` (похоже на пре-авторизационный probe; логин при этом успешен).
 - `networkidle` на страницах сервера не наступает (websocket-консоль + чат-виджет) — подтверждено.
+
+## 8. Round-2 sub-flows (MCP, 06-Jun-2026) — непокрытые суб-флоу внутри вкладок
+
+> Раскрытие вложенных меню/диалогов (open → capture → cancel). Всё offline-safe. Мутации — где
+> помечено; в тестах — self-cleaning, опасные пункты не жать.
+
+### 8a. Console — палитра «Commands» (`/console`, НЕ покрыто)
+Полная страница консоли — `server__console-full*`; командный инпут `server__console-full-actions__field`
+(placeholder «Enter a command»), кнопки **Help** и **Commands** (`server__console-full-actions__button--long`).
+- **Commands** открывает диалог-палитру: поиск **«Search command...»**, сортировка **A-Z**, список
+  команд `command-item__title` + `command-item__subtitle` (ban/deop/difficulty/gamemode/gamerule/help/
+  kick/list/op/pardon/save-all/save-off/save-on/say/seed/setworldspawn/spawnpoint/stop/tell/tellraw/
+  time/version/weather/whitelist add …). Клик по пункту — вставка шаблона команды в инпут.
+- Тест-кандидат: открыть палитру → отфильтровать → выбрать → **проверить, что инпут заполнился**
+  (offline-safe, команду НЕ отправлять).
+
+### 8b. File manager — per-row «...» меню + диалоги (дополнение к §5b)
+- **Полное «...» меню файла** (`i.mdi-dots-horizontal`): **Open, Download, Pin, Copy name, Copy path,
+  Copy link, Duplicate, Rename, Move, Archive, Delete** (шире, чем фигурировало в §5b). Не-мутирующие:
+  Open / Copy name|path|link / Pin (тогл). Мутации: Duplicate / Rename / Move / Archive / Delete.
+- **SFTP Connect** (кнопка `SFTP Connect`): диалог **«Connect with SFTP»** — поля **Host / Port /
+  Username / Password**, кнопки **Open SFTP**, **Generate** (пароль), **Save**. BEM
+  `server__file-manager__sftp-dialog__title|info`, `server__file-manager__sftp-form`, `__btn-copy`.
+  ⚠️ Generate/Save меняют SFTP-пароль → тест только структурный.
+- **CurseForge** (кнопка `Upload custom modpack`): диалог `curseforge-dialog__*` — `input[type=file]`,
+  кнопки **Browse file / Cancel / Proceed**. Загрузка кастомного модпака из zip. ⚠️ Не загружать → структурный.
+- Прочее на странице: **Recycle Bin** (строка-кнопка), **Search** (`textbox`), **Download SFTP Client**,
+  bulk-бар (Download/Move/Duplicate/Delete/Zip/Unzip). Файловый редактор (CodeMirror `.cm-content`) —
+  открывается по Open текстового файла (§5b).
+
+### 8c. Header / глобальное (НЕ покрыто)
+- Кнопка-аккаунт **«test@testmail.com»** → меню: **Knowledgebase**, **Edit Account** (внешний WHMCS?),
+  **Log Out**. Тест-кандидат: **Logout** → редирект на `/login` (smoke). Рядом — селект языка (**EN**,
+  combobox) и колокольчик уведомлений с `v-badge__badge` (счётчик «0»).
+- ⚠️ Log Out убивает сессию текущего `storageState` — в авто-тестах изолировать (отдельный контекст),
+  иначе уронит соседние тесты.
+
+### 8d. Backups — форма создания богаче §5h (НЕ покрыто полностью)
+Кроме задокументированного (табы **Server/Database/Folder**, Server-select, Name 0/38, Create Backup,
+Locked, Schedule):
+- **Ignored Files & Directories** (`backups__ignored-files-btn`) — настройка исключений (новое).
+- **Schedule Backup** (`backups__checkbox`) → раскрывает **Set interval** (`backups__form-*`) =
+  **запланированные бэкапы** (целый непокрытый флоу; раздел «Scheduled» по умолчанию пуст).
+- **Locked** — `backups__locked-toggle` / `backups__locked-title` / `__locked-description`.
+- Тест-кандидаты: (1) структурный — все контролы формы; (2) scheduled-backup create→verify→delete
+  (мутация, self-cleaning, осторожно с квотой 3 слота и чужим бэкапом «111»).
