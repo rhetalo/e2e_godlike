@@ -569,3 +569,40 @@ export const GAME_PANEL_EXTENSIONS = {
   body: ".server__extensions__body",
   installButton: 'button:has-text("Install")',      // per-item (НЕ жать)
 } as const;
+
+// Referral (/referral). Глобальная страница (default_layout), не server-scoped.
+// Confirmed via live DOM 06-Jun-2026 (MCP recon). Реф-ссылка (readonly) + Copy Link, баланс +
+// Request Withdrawal, How It Works (3 шага), соц-кнопки, Referrals Analytics.
+// ⚠️ В тестах НЕ жмём Request Withdrawal (вывод средств) — структурные проверки.
+export const GAME_PANEL_REFERRAL = {
+  title: ".referral-page__title",
+  refLink: ".link-card__input-wrapper input, .link-card__input", // readonly реф-ссылка
+  copyLinkButton: ".link-card__btn",
+  withdrawButton: ".balance-card__btn",              // ⚠️ Request Withdrawal — НЕ жать
+  howItWorks: ".how-it-works__title",
+  socialShare: ".social-share__buttons",
+} as const;
+
+// Boost / Upgrade (/server/{uuid}/upgrade). Confirmed via live DOM 06-Jun-2026 (MCP recon).
+// Вход — ссылка "Boost my server" (a[href*="/upgrade"], с промокодом). Карточка текущего плана
+// + карточки планов на выбор + цены + Budget/Premium + квиз. ⚠️ ПЛАТЁЖНЫЙ ФЛОУ: план НЕ выбирать,
+// checkout НЕ проходить — только структурные проверки.
+export const GAME_PANEL_UPGRADE = {
+  boostLink: 'a[href*="/upgrade"]',                  // "Boost my server" (вход; промокод в href)
+  root: ".server__upgrade",
+  currentPlanCard: ".current-plan-card__wrapper",
+  planCard: ".simple-plan-card__wrapper",
+  // цену проверяем по тексту валюты в корне (классы цены грузятся async / варьируются)
+  priceText: /[€$]\s?\d/,
+  backButton: ".server__upgrade__btn-back",
+} as const;
+
+// Free Premium модалка. Кнопка "What is a Free Premium?" (на страницах сервера) → premium__dialog
+// со списком премиум-фич + CTA "Get Premium (3-Days Trial)". Confirmed via MCP recon 06-Jun-2026.
+// ⚠️ CTA = конверсия/триал (ведёт к апгрейду) — НЕ жать; только структура.
+export const GAME_PANEL_PREMIUM = {
+  openButton: 'button:has-text("What is a Free Premium?")',
+  dialog: ".premium__dialog",
+  dialogTitle: ".premium__dialog-title",
+  ctaButton: ".premium__dialog-button",              // "Get Premium (3-Days Trial)" — ⚠️ НЕ жать
+} as const;
