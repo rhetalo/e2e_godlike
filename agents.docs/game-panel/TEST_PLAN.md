@@ -12,7 +12,7 @@
 | 2. Power lifecycle | Start (+EULA) → Online; Restart (полный цикл); Kill → Offline | мутации (serial + teardown) | **P1 — ядро** | ✅ done (3 теста) |
 | 2b. Console (live) | стрим лога + поле команд; безопасная команда `list` → отклик | read-only команда (serial, поднимает Online) | P1 | ✅ done (2 теста) |
 | 3. Stateful (мягкие) | **Files ✅ (2)**, **Config ✅ (2)**, **Players: whitelist через консоль ✅ (2)**; Databases — заблокировано (баг ноды) | мутации, self-cleaning | P2 | ✅ done (soft) |
-| 3b. Stateful (тяжёлые) | Backups (create→restore→delete); смена версии (Versions); установка плагинов/модпаков | мутации, перезапуск сервера | P2 — позже | parked |
+| 3b. Stateful (тяжёлые) | **Backups create→COMPLETED→delete ✅ (2, ждёт фин. прогона)**; смена версии (Versions); установка плагинов/модпаков | мутации, self-cleaning | P2 | 🔄 in progress |
 | 4. Access / multi-actor | **Sharing ✅ (5, вкл. смену роли)**, **Port & Domains ✅ (2)**, **Tasks ✅ (2)**; enforcement ролей — todo | мутации, 2-й аккаунт | P3 | 🔄 in progress |
 | 5. Негатив / security | IDOR (подмена UUID), XSS/SQLi в инпутах (console/имена файлов/config), валидация | смешанно | P3 | todo |
 
@@ -81,6 +81,23 @@
 Управление игроками требует Online-сервера → делаем через консоль (источник правды).
 ⚠️ Сервер сильно модовый — боот до готовности консоли долгий (`waitForConsoleReady` 360с). Детали — `KNOWLEDGE_BASE.md` §5d.
 
+## Phase 3b — реализовано (Backups)
+
+`tests/game/panel/backups.spec.ts` (serial, self-cleaning; работает offline):
+
+| TC | Проверка |
+|----|----------|
+| TC-GP-BKP-001 (`@critical`) | создать серверный бэкап (выбор сервера + имя) → строка в списке → дождаться `COMPLETED` → **удалить** → строки нет (мутация, self-cleaning) |
+| TC-GP-BKP-002 (`@regression`) | структура: форма create (имя + Create Backup + табы типа), список с квотой `N/3 slots used`, секция Scheduled |
+
+⚠️ **Статус бэкапа НЕ обновляется без reload** → ждём `COMPLETED` через `expect.poll` + `backups.refresh()`
+(не реактивный `toBeVisible`). НЕ жмём **Restore** (перезапишет сервер) и не трогаем чужой бэкап «111».
+Квота — 3 слота. Create — медленная async-джоба (`test.setTimeout` ~600с, poll ~9 мин). Детали — `KNOWLEDGE_BASE.md` §5h.
+
+> ⚠️ BKP-001 ещё **не прошёл финальный полный зелёный прогон** с reload-логикой (части провалидированы по
+> отдельности: create, появление `--completed` после reload, delete через `.delete-dialog__confirm`).
+> Первым делом в след. сессии — прогнать `backups.spec.ts` целиком, убедиться в зелёном и self-cleaning.
+
 ## Phase 4 — реализовано (Sharing + Port & Domains)
 
 `tests/game/panel/sharing.spec.ts` (offline-ok, без мутаций):
@@ -135,14 +152,19 @@ Run/Configure НЕ жмём (Run выполняет задачу = мутаци�
 - A/B-промо Amplitude бьёт по storefront-воронке, **не** по панели (см. основной CLAUDE.md).
 - Phase 3b (restore/версии) делаем после стабилизации мягких мутаций.
 
-## ▶ Продолжаем здесь (resume point, 05-Jun-2026)
+## ▶ Продолжаем здесь (resume point, 06-Jun-2026)
 
-Реализовано: **28 тестов** — Phase 1 (8) + Phase 2 power (3) + console (2) + Phase 3 files (2) + config (2) + players (2) + Phase 4: sharing (5, вкл. смену роли) + Port & Domains (2) + Tasks (2). `npx tsc --noEmit` чистый, все зелёные.
+Реализовано: **30 тестов** — Phase 1 (8) + Phase 2 power (3) + console (2) + Phase 3 files (2) + config (2) + players (2) + Phase 3b backups (2) + Phase 4: sharing (5, вкл. смену роли) + Port & Domains (2) + Tasks (2). `npx tsc --noEmit` чистый.
 
-Владелец дал карт-бланш на мутации на тест-сервере (главное — понимать ЧТО мутирует и КАК откатить; всегда self-cleaning). Следующее:
-1. **Backups** — create → проверить в списке → delete (без restore). Одобрено. Нужен recon UI.
-2. **enforcement ролей** — что invitee под Co-owner/Moderator/Member может/не может (позитив/негатив; invitee выполняет действия). Смена роли — ✅ (SHR-005, §5e).
-3. **Phase 5 — негатив/security** (IDOR подменой UUID, XSS/SQLi в инпутах).
-4. Phase 3b тяжёлые (version change / установка плагинов / backups restore) — аккуратно.
+⚠️ **СНАЧАЛА в этой сессии:** прогнать `tests/game/panel/backups.spec.ts` целиком и убедиться, что
+**BKP-001 зелёный и self-cleaning**. Это единственный незавершённый хвост: тест дописан и провалидирован
+по частям (create работает; `--completed` появляется ПОСЛЕ reload; delete через `.delete-dialog__confirm`
+работает; leftover подчищается), но полный E2E-прогон с reload-поллингом ещё не гонялся (остановлен из-за
+лимитов). Backups recon полностью задокументирован — `KNOWLEDGE_BASE.md` §5h. Прод оставлен чистым (1/3 слота, «111»).
 
-> Перед написанием: `KNOWLEDGE_BASE.md` (§5c Config, §5d Players — задокументированы), проверить `GAME_PANEL_SERVER_UUID` живой/не suspended. Онлайн-тесты модового сервера — **щедрые таймауты готовности** (боот долгий).
+Владелец дал карт-бланш на мутации на тест-сервере (понимать ЧТО мутирует и КАК откатить; всегда self-cleaning). Дальше:
+1. **enforcement ролей** — что invitee под Co-owner/Moderator/Member может/не может (позитив/негатив; invitee выполняет действия). Смена роли — ✅ (SHR-005, §5e).
+2. **Phase 5 — негатив/security** (IDOR подменой UUID, XSS/SQLi в инпутах).
+3. Phase 3b остаток (version change / установка плагинов / backups **restore** — restore деструктивный, аккуратно).
+
+> Перед написанием: `KNOWLEDGE_BASE.md` (§5c Config, §5d Players, §5h Backups — задокументированы), проверить `GAME_PANEL_SERVER_UUID` живой/не suspended. Бэкапы: статус НЕ обновляется без reload (ждать через `expect.poll`+`refresh()`); онлайн-тесты модового сервера — **щедрые таймауты** (боот/джобы долгие).

@@ -200,6 +200,43 @@ Moderator/Member + счётчики), **Members**, **Audit Log**.
 - ⚠️ В тестах **НЕ жмём Run/Configure** (Run выполняет задачу = мутация, напр. power-action) —
   только структурные проверки. Page object: `GamePanelTasksPage`.
 
+## 5h. Backups (подтверждено DOM 05-Jun-2026)
+
+`/server/{uuid}/backups` (сайдбар-раздел «Backups»). **Работает и offline** (запуск сервера НЕ требуется).
+Две зоны: **форма создания** (`.backups`) + **список** (`.backups-list`) + секция **Scheduled** (`.scheduled-backups`).
+
+- **Создание — INLINE-форма, НЕ модалка.** Шаги для серверного бэкапа:
+  1. таб типа `.backups__tab` (**Server** / Database / Folder; Server выбран по умолчанию);
+  2. выбрать **сервер** в v-select: клик по `.backups__form-select .v-field` (первый) → опция
+     `.v-overlay--active .v-list-item` с именем сервера (**«test_e2e»**);
+  3. ввести **имя** в `input[placeholder="Enter backup name"]` (макс **38** символов, счётчик `0/38`);
+  4. кнопка **«Create Backup»** (`button.gradient-button`) — **disabled, пока не заданы сервер+имя**
+     (только имени НЕ хватает — нужен и сервер). После — click авто-дожидается enabled.
+  - Доп. контролы формы: свитч **Locked** (`.backups__switch`, выкл по умолч. → бэкап удаляем; вкл —
+    «нельзя удалить, пока не разлочишь»), чекбокс **Schedule Backup** (выкл → разовый). В тестах не трогаем.
+- ⚠️ **Create — async-джоба + статус НЕ обновляется реактивно.** Свежая строка появляется в списке
+  быстро (реактивно), но **чип STATUS не переходит в `COMPLETED` без перезагрузки страницы** (подтверждено
+  владельцем 05-Jun + наблюдением: бэкап реально готов, а в списке висит промежуточный статус). Аналог
+  гоч Config/Sharing — «проверять через reload». Поэтому готовность ждать **поллингом с reload**
+  (`expect.poll` → `backups.refresh()` (=`goto()`) + `backups.isCompleted()`), НЕ реактивным
+  `expect(...).toBeVisible()`. Сам бэкап (на `ebb03adc` ~292 MB вышло) готовится за пару-тройку минут;
+  в тесте держим запас: `poll` timeout ~9 мин, `test.setTimeout` ~600с.
+- **Список** `.backups-list__table`: строки `.backups-list__row`; колонки NAME/DATE/SIZE/**STATUS**/TYPE/ACTIONS
+  (`.backups-list__name-cell`, `__status-cell`, …). **Статус-чип** `.backups-list__status`; готовый —
+  модификатор **`.backups-list__status--completed`** (текст «COMPLETED»). Якорь «бэкап готов» — этот класс.
+- **Квота:** `.backups-list__subtitle` → «**N/3 slots used**», футер `.backups-list__footer` → «Showing N
+  backups. M remaining.» На тест-сервере **3 слота** (на 05-Jun занят 1 — реальный бэкап «111», 721 MB).
+- **Действия строки:** `.backups-list__download-btn` (Download) + меню **«...»** `.backups-list__more-btn` →
+  `.backups-list__action-menu` с пунктами `.backups-list__menu-item`: **Restore / Rename / Lock / Delete**.
+  ⚠️ Delete фильтровать СТРОГО по тексту (`/^Delete$/i`) — рядом **Restore** (деструктивный, перезапишет
+  сервер — НЕ трогаем).
+- **Удаление (МУТАЦИЯ):** пункт «Delete» → confirm-диалог **`.delete-dialog`** («Delete Backup … This action
+  is permanent and cannot be undone») → danger-кнопка **`.delete-dialog__confirm`** (Cancel — `.delete-dialog__cancel`).
+- ⚠️ **Удаление IN-PROGRESS бэкапа ненадёжно** — сначала дождись COMPLETED, потом удаляй (иначе teardown
+  может оставить мусор и съесть слот). Тест **обязан** быть self-cleaning (precondition + afterAll чистят своё имя).
+- Page object: `GamePanelBackupsPage` (`createBackup`, `backupRow`, `completedStatusOf`, `deleteBackup`,
+  `deleteIfPresent`, `quota`, `scheduledSection`). Создаём/удаляем ТОЛЬКО свой бэкап; чужой «111» не трогаем.
+
 ## 6. Статус миграции из browseruse
 
 - Канонический набор доки (`QA_test_docs/ultra.panel/00..10`) — основа; уникальные детали фич

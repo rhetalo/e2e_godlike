@@ -502,3 +502,38 @@ export const GAME_PANEL_TASKS = {
   taskTitle: ".server__tasks__task-title",
   tabsButton: ".server__tasks__all-tasks__tabs-btn",
 } as const;
+
+// Backups (/server/{uuid}/backups). Confirmed via live DOM 05-Jun-2026 (recon).
+// Работает и offline. Create — INLINE-форма (не модалка): таб типа (Server/Database/Folder),
+// для Server нужно выбрать сервер в v-select + ввести имя → кнопка "Create Backup"
+// (.gradient-button) включается. Список .backups-list (NAME/DATE/SIZE/STATUS/TYPE/ACTIONS),
+// статус-чип .backups-list__status (--completed когда готов = async-джоба). Действия строки —
+// меню "..." .backups-list__more-btn → .backups-list__action-menu (Restore/Rename/Lock/Delete).
+// Квота: .backups-list__subtitle "N/3 slots used". ⚠️ Restore — деструктивный, НЕ трогаем.
+export const GAME_PANEL_BACKUPS = {
+  root: ".backups",
+  tab: ".backups__tab",                                   // Server / Database / Folder
+  form: ".backups__form",
+  serverSelectField: ".backups__form-select .v-field",    // первый — v-select выбора сервера
+  nameInput: 'input[placeholder="Enter backup name"]',    // имя бэкапа (макс 38)
+  createButton: 'button.gradient-button:has-text("Create Backup")', // disabled пока нет сервера+имени
+  overlayOption: ".v-overlay--active .v-list-item",        // опция открытого v-select (фильтр по имени сервера)
+  // список существующих бэкапов
+  list: ".backups-list",
+  row: ".backups-list__row",
+  nameCell: ".backups-list__name-cell",
+  status: ".backups-list__status",                         // чип статуса в строке
+  statusCompleted: ".backups-list__status--completed",     // модификатор "готов"
+  quota: ".backups-list__subtitle",                        // "N/3 slots used"
+  footer: ".backups-list__footer",                         // "Showing N backups. M remaining."
+  refreshBtn: ".backups-list__refresh-btn",
+  moreBtn: ".backups-list__more-btn",                      // меню "..." строки
+  actionMenu: ".backups-list__action-menu",
+  menuItem: ".backups-list__menu-item",                    // Restore / Rename / Lock / Delete
+  // confirm-диалог удаления (.delete-dialog): "Delete Backup … permanent and cannot be undone"
+  deleteConfirmButton: ".delete-dialog__confirm",          // danger-кнопка "Delete" (bg-error)
+  deleteCancelButton: ".delete-dialog__cancel",
+  // запланированные бэкапы
+  scheduled: ".scheduled-backups",
+  scheduledEmpty: ".scheduled-backups__empty",
+} as const;
