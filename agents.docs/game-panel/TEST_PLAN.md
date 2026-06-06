@@ -252,6 +252,16 @@ Tasks-create — когда дойдут руки до мутаций с teardow
 | TC-GP-AUTH-004 | **Logout**: user-меню → Log Out → редирект `/login` | флоу | @smoke | изолировать контекст (убивает сессию) |
 | TC-GP-BKP-003 | **Scheduled backup**: Schedule Backup → Set interval → create→verify→delete | мутация | @regression | квота 3 слота; чужой «111» не трогать; self-cleaning |
 
-**Ещё не разведано (следующий заход):** Network add-port / subdomain-select диалоги, Sharing invite-role
-опции + Audit Log контент, файловый CodeMirror-редактор (Open текстового файла), «What is a Free Premium?»
-модалка, Versions 3-й уровень (build) + «Show Snapshot Versions», Recycle Bin (Restore/Clear).
+### Round-3 кандидаты (бэклог разведан, MCP 06-Jun; детали — KB §9)
+
+| TC ID | Флоу | Тип | Тег | Prod-safety |
+|---|---|---|---|---|
+| TC-GP-NET-003 | **Add Additional Port** диалог: поле Name + Cancel/Add Port | структурный | @regression | ⚠️ Add Port не жать (мутация) |
+| TC-GP-SHR-006 | **Audit Log** пишет действие: совершить разрешённое → проверить запись по ключу (`server:power.*`) | флоу | @regression | действие должно быть безопасным/обратимым |
+| TC-GP-FILE-005 | **CodeMirror-редактор**: открыть текстовый файл → контент в `.cm-content` → Cancel/Save видны | структурный | @regression | ждать async-монтаж; правку (если) откатывать |
+| TC-GP-FILE-006 | **Recycle Bin**: удалить → перейти в `.trash` → строка видна (+ Restore/Clear контролы) | мутация | @regression | self-cleaning (Restore или Clear) |
+| TC-GP-PREM-001 | **Free Premium** модалка: открывается, список фич + CTA | структурный | @regression | ⚠️ «Get Premium» CTA не жать |
+
+**Полностью разведано (round 1–3):** все вкладки/разделы сервера, их диалоги/меню, глобальный сайдбар,
+header-меню. Осталась единственная не до конца снятая деталь — **Versions 3-й уровень (выбор build →
+install-confirm)**: install деструктивен (rebuild), доходить в тесте не нужно, поэтому низкий приоритет.

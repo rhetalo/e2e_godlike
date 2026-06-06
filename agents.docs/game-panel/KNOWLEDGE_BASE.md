@@ -455,3 +455,41 @@ Locked, Schedule):
 - **Locked** — `backups__locked-toggle` / `backups__locked-title` / `__locked-description`.
 - Тест-кандидаты: (1) структурный — все контролы формы; (2) scheduled-backup create→verify→delete
   (мутация, self-cleaning, осторожно с квотой 3 слота и чужим бэкапом «111»).
+
+## 9. Round-3 sub-flows (MCP, 06-Jun-2026)
+
+### 9a. Network — Add Additional Port диалог (`/network`)
+Страница: **Update Subdomain** (Copy subdomain / Update Subdomain) + **Server Ports** (главный `26150`,
+Copy Port & IP) + **Additional Ports** (Add Additional Port). BEM `server__subdomain-block`,
+`server__network-ports__port*`.
+- **Add Additional Port** → диалог `dialog__*`: поле **Name** («Enter a descriptive name...») + кнопки
+  **Cancel / Add Port**. ⚠️ Add Port = мутация (новый порт) → тест структурный (открыть+проверить+cancel).
+
+### 9b. Sharing — Audit Log + опции роли (дополнение к §5e)
+- **Invite role-select** (`.sharing__invite-form-select`) опции: **Co-owner / Moderator / Member**
+  (Owner через инвайт НЕ выдаётся — соответствует модели §5i).
+- **Audit Log** реально пишет действия: строка = actor (`test@testmail.com`) + время + **ключ-действие**
+  (подтверждено: `server:power.start` от старта, что я делал ранее). Тест-кандидат: совершить
+  разрешённое действие → проверить новую запись в Audit Log по ключу (`server:power.*` и т.п.).
+- Карты раскрываются кнопкой `sharing__card-show-btn` («Show more»). Счётчики ролей в
+  `sharing__overview-block` (Owner/Co-owner/Moderator/Member + числа).
+
+### 9c. File manager — CodeMirror-редактор + Recycle Bin
+- **Открытие текстового файла** (клик по имени или «...»→Open) → URL `?dir=/&file=<name>`, монтируется
+  **CodeMirror** (`.cm-editor` / `.cm-content` / `.cm-gutters`), контент редактируемый (напр. `eula=true`),
+  кнопки **Cancel / Save**. ⚠️ Редактор монтируется **асинхронно** — ждать `.cm-content`, не сразу.
+  Тест-кандидат: открыть файл → проверить контент в `.cm-content` → (опц. self-cleaning) правка→Save→revert.
+- **Recycle Bin** (кнопка `.server__file-manager__file-list__recycle-bin`) → URL `?dir=/.trash-<shortid>`,
+  breadcrumb «root/Recycle Bin». Bulk-бар добавляет **Restore** (+ Download/Move/Duplicate/Delete=permanent);
+  отдельная кнопка **Clear Recycle Bin** (disabled при пустой корзине). Подтверждает §5b: удаление → trash → 24ч.
+
+### 9d. Free Premium модалка (`premium__dialog`)
+Кнопка **«What is a Free Premium?»** (на каждой странице сервера) → модалка `premium__dialog*` со списком
+премиум-фич (Personal Support, Top Node Hosting, Pre-made Server Setups, Extended Deletion Time, Unlimited
+SSD/CPU, Server Setup by Support, Dedicated SysAdmin) + CTA **«Get Premium (3-Days Trial)»**.
+⚠️ CTA = конверсия/триал (ведёт к апгрейду) — НЕ жать; тест структурный.
+
+### 9e. Versions — drill-down (дополнение к §7a)
+Список версий семейства (`?type=NEOFORGE`) содержит тогл **«Show Snapshot Versions»** (показать snapshot-
+сборки) и **«Go Back»**. Клик по версии → уровень билдов → выбор → install. ⚠️ Клик по версии капризен
+к селектору (карточка — `div`-контейнер, не текст); install = деструктивный rebuild — в тестах не доходить.
