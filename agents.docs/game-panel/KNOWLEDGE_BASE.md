@@ -493,3 +493,21 @@ SSD/CPU, Server Setup by Support, Dedicated SysAdmin) + CTA **«Get Premium (3-D
 Список версий семейства (`?type=NEOFORGE`) содержит тогл **«Show Snapshot Versions»** (показать snapshot-
 сборки) и **«Go Back»**. Клик по версии → уровень билдов → выбор → install. ⚠️ Клик по версии капризен
 к селектору (карточка — `div`-контейнер, не текст); install = деструктивный rebuild — в тестах не доходить.
+
+## 10. Online-проверка post-reinstall (MCP, 06-Jun-2026)
+
+Владелец **переустановил** `test_e2e` (старый крашился из-за несовместимой конфигурации). После реинсталла —
+свежий и стабильный: статус **online** (тогл «Shut Down»), **20 слотов** (`0/20`), RAM ~834 MiB/2 GiB,
+storage ~247 MiB, neoforge 1.21.1. Онлайн-флоу, ранее заблокированные крашем, теперь работают:
+
+- **Живая консоль (`/console`):** стримит boot-лог до next-steps-баннера. **Command roundtrip подтверждён:**
+  ввод `list` в `input[placeholder="Enter a command"]` (+ Enter) → в `.terminal` появляется
+  **«There are 0 of a max of 20 players online:»**. То есть CON-001/002/003 снова реальны.
+- **Players-онлайн (`/players`):** при онлайне карты `server__players-card` (`__players-card__title`):
+  **Server Administrators**, **Players List** (счётчик `server__players-count` «Players: 0 / 20»),
+  **Whitelist** («Only players from the list will be able to join…»), **Ban List**; у карт — **Search**-инпуты,
+  кнопки `server__players-primary-btn`, пустые состояния `server__players-none*`. ⚠️ Players-таб догоняет
+  онлайн-статус через свой websocket с лагом (мелькает хинт «currently offline») — в тестах ждать веб-сокет/
+  использовать консоль как источник правды (§5d).
+- ⚠️ **Каверза (со слов владельца):** смена версии / несовместимые настройки могут снова уронить старт.
+  Онлайн-тесты — щедрый `ensureOnline`-таймаут + понятный фейл с диагностикой, а не вечное ожидание.
