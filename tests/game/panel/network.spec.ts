@@ -46,4 +46,17 @@ test.describe("@regression [game-panel] Port & Domains", () => {
       await expect(net.addPortButton).toBeVisible();
     });
   });
+
+  test("TC-GP-NET-003 | Add Additional Port диалог: поле Name + Add Port (без добавления)", async () => {
+    await net.openAddPortDialog();
+    await test.step("диалог с полем имени и кнопкой Add Port виден", async () => {
+      await expect(net.activeDialog).toBeVisible();
+      await expect(net.addPortNameInput).toBeVisible();
+      await expect(net.addPortConfirm).toBeVisible();
+    });
+    await test.step("закрываем без добавления порта", async () => {
+      await net.closeDialog();
+      await expect(net.activeDialog).toBeHidden();
+    });
+  });
 });

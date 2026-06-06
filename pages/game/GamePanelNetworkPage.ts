@@ -36,4 +36,26 @@ export class GamePanelNetworkPage extends GamePanelBasePage {
   portCards(): Locator {
     return this.page.locator(GAME_PANEL_NETWORK.portCard);
   }
+
+  // --- Add Additional Port диалог (структурный; ⚠️ "Add Port" НЕ жмём — добавит порт) ---
+
+  get activeDialog(): Locator {
+    return this.page.locator(".v-overlay--active").first();
+  }
+  /** Открыть диалог добавления порта. */
+  async openAddPortDialog(): Promise<void> {
+    await this.addPortButton.click();
+    await this.activeDialog.waitFor({ state: "visible", timeout: 10_000 }).catch(() => {});
+  }
+  get addPortNameInput(): Locator {
+    return this.page.locator(GAME_PANEL_NETWORK.addPortNameInput).first();
+  }
+  get addPortConfirm(): Locator {
+    return this.page.locator(GAME_PANEL_NETWORK.addPortConfirm).first();
+  }
+  /** Закрыть диалог (Escape) — без добавления порта. */
+  async closeDialog(): Promise<void> {
+    await this.page.keyboard.press("Escape");
+    await this.activeDialog.waitFor({ state: "hidden", timeout: 8_000 }).catch(() => {});
+  }
 }
