@@ -287,6 +287,12 @@ install-confirm)**: install деструктивен (rebuild), доходить
 - **`extensions.spec.ts`** — TC-GP-EXT-001 (Plugins/Mods: заголовок Mods + фильтры + поиск),
   TC-GP-EXT-002 (Modpacks: тот же компонент, заголовок Modpacks). Page object `GamePanelExtensionsPage`,
   селекторы `GAME_PANEL_EXTENSIONS`.
-- **Следующие на очереди** (offline-safe структурные): UPG-001 (Boost/Upgrade), REF-001 (Referral),
-  PREM-001 (Free Premium), NET-003/SFTP-001/CF-001 (диалоги), FILE-003 (row-меню). Затем мутационные
-  self-cleaning (EDIT-001 rename, TASK-003, FILE-004/006) и онлайн-набор (CON/PLR с устойчивым ensureOnline).
+- **`referral.spec.ts`** — TC-GP-REF-001 (заголовок + readonly реф-ссылка + Copy Link + How It Works;
+  Request Withdrawal НЕ жмём). Page object `GamePanelReferralPage` (глобальная, без uuid), `GAME_PANEL_REFERRAL`.
+- **`promo.spec.ts`** — TC-GP-UPG-001 (Boost → /upgrade: карточка текущего плана + карточки планов + цена
+  по тексту валюты; checkout НЕ проходим), TC-GP-PREM-001 (Free Premium модалка + CTA, не покупаем).
+  Page object `GamePanelUpgradePage` (вход через `a[href*="/upgrade"]`), компонент `FreePremiumDialog`,
+  селекторы `GAME_PANEL_UPGRADE` / `GAME_PANEL_PREMIUM`.
+- **Итог реализации (эта сессия):** **7 новых тестов** (VER×2, EXT×2, REF×1, UPG×1, PREM×1) зелёные, `tsc` = 0.
+- **Следующие на очереди:** диалоги NET-003 / SFTP-001 / CF-001, FILE-003 (row-меню), затем мутационные
+  self-cleaning (FILE-004 rename, EDIT-001 rename, TASK-003) и онлайн-набор (CON/PLR с устойчивым ensureOnline).
