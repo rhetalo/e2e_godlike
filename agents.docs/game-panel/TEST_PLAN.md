@@ -13,7 +13,7 @@
 | 2b. Console (live) | стрим лога + поле команд; безопасная команда `list` → отклик | read-only команда (serial, поднимает Online) | P1 | ✅ done (2 теста) |
 | 3. Stateful (мягкие) | **Files ✅ (2)**, **Config ✅ (2)**, **Players: whitelist через консоль ✅ (2)**; Databases — заблокировано (баг ноды) | мутации, self-cleaning | P2 | ✅ done (soft) |
 | 3b. Stateful (тяжёлые) | **Backups create→COMPLETED→delete ✅ (2)**; смена версии (Versions); установка плагинов/модпаков | мутации, self-cleaning | P2 | 🔄 in progress |
-| 4. Access / multi-actor | **Sharing ✅ (5, вкл. смену роли)**, **Port & Domains ✅ (2)**, **Tasks ✅ (2)**; enforcement ролей — todo | мутации, 2-й аккаунт | P3 | 🔄 in progress |
+| 4. Access / multi-actor | **Sharing ✅ (5)**, **Port & Domains ✅ (2)**, **Tasks ✅ (2)**, **enforcement ролей ✅ (2)** | мутации, 2-й аккаунт | P3 | ✅ done |
 | 5. Негатив / security | IDOR (подмена UUID), XSS/SQLi в инпутах (console/имена файлов/config), валидация | смешанно | P3 | todo |
 
 ## Phase 1 — реализовано
@@ -131,8 +131,16 @@ Update Subdomain / Add Port НЕ жмём (меняют сетевые наст�
 
 Run/Configure НЕ жмём (Run выполняет задачу = мутация). Детали — `KNOWLEDGE_BASE.md` §5g.
 
-**Осталось по Phase 4:** enforcement ролей — что invitee под ролью Co-owner/Moderator/Member
-**может/не может** (позитив/негатив; invitee выполняет действия). Смена роли — ✅ (SHR-005).
+`tests/game/panel/role.enforcement.spec.ts` (multi-actor, мутация роли, self-cleaning):
+
+| TC | Проверка |
+|----|----------|
+| TC-GP-ROLE-001 (`@critical`) | invitee-**Member лишён Restart/Kill и поля консоли** (у Co-owner они есть); owner понижает роль → invitee теряет контролы → откат в Co-owner возвращает их |
+| TC-GP-ROLE-002 (`@critical`) | invitee-**Member не управляет бэкапами** (меню «...» скрыто, список пуст); Co-owner — видит строки + управление; откат self-cleaning |
+
+Enforcement — через присутствие/отсутствие контролов в DOM (Vue убирает по роли). Owner-only — управление
+участниками (role-select/trash). Роль invitee ВСЕГДА откатывается в Co-owner. Матрица — `KNOWLEDGE_BASE.md` §5i.
+Moderator (промежуточная роль) — todo.
 
 ## Phase 2 — что ещё можно добить
 
@@ -153,14 +161,15 @@ Run/Configure НЕ жмём (Run выполняет задачу = мутаци�
 
 ## ▶ Продолжаем здесь (resume point, 06-Jun-2026)
 
-Реализовано: **30 тестов** — Phase 1 (8) + Phase 2 power (3) + console (2) + Phase 3 files (2) + config (2) + players (2) + **Phase 3b backups (2, зелёные, в main)** + Phase 4: sharing (5, вкл. смену роли) + Port & Domains (2) + Tasks (2). `npx tsc --noEmit` чистый, всё в `main`.
+Реализовано: **32 теста** — Phase 1 (8) + Phase 2 power (3) + console (2) + Phase 3 files (2) + config (2) + players (2) + Phase 3b backups (2) + Phase 4: sharing (5) + Port & Domains (2) + Tasks (2) + **role enforcement (2)**. `npx tsc --noEmit` чистый.
 
-✅ **Backups завершены (06-Jun):** `backups.spec.ts` прогнан целиком — оба теста зелёные (39.9с),
-self-cleaning подтверждён, смержено в `main`. Recon — `KNOWLEDGE_BASE.md` §5h. Прод чист (1/3 слота, «111»).
+✅ **Backups + Role enforcement завершены (06-Jun), зелёные:** `backups.spec.ts` (create→COMPLETED→delete, self-cleaning)
+и `role.enforcement.spec.ts` (Member лишён Restart/Kill/консоли + управления бэкапами vs Co-owner; мутация роли,
+откат в Co-owner). Recon — `KNOWLEDGE_BASE.md` §5h/§5i. Прод чист.
 
 Владелец дал карт-бланш на мутации на тест-сервере (понимать ЧТО мутирует и КАК откатить; всегда self-cleaning). Дальше:
-1. **enforcement ролей** — что invitee под Co-owner/Moderator/Member может/не может (позитив/негатив; invitee выполняет действия). Смена роли — ✅ (SHR-005, §5e).
-2. **Phase 5 — негатив/security** (IDOR подменой UUID, XSS/SQLi в инпутах).
+1. **Phase 5 — негатив/security** (IDOR подменой UUID, XSS/SQLi в инпутах console/имена файлов/config).
+2. **Role enforcement — Moderator** (промежуточная роль: что доступно vs Member/Co-owner) — нужен recon-флип Moderator.
 3. Phase 3b остаток (version change / установка плагинов / backups **restore** — restore деструктивный, аккуратно).
 
-> Перед написанием: `KNOWLEDGE_BASE.md` (§5c Config, §5d Players, §5h Backups — задокументированы), проверить `GAME_PANEL_SERVER_UUID` живой/не suspended. Бэкапы: статус НЕ обновляется без reload (ждать через `expect.poll`+`refresh()`); онлайн-тесты модового сервера — **щедрые таймауты** (боот/джобы долгие).
+> Перед написанием: `KNOWLEDGE_BASE.md` (§5c Config, §5d Players, §5h Backups, §5i Roles — задокументированы), проверить `GAME_PANEL_SERVER_UUID` живой/не suspended. Бэкапы: статус НЕ обновляется без reload (`expect.poll`+`refresh()`). Смена роли: персист через reload+poll; всегда откат в Co-owner. Онлайн-тесты модового сервера — **щедрые таймауты**.

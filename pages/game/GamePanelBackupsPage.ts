@@ -70,6 +70,17 @@ export class GamePanelBackupsPage extends GamePanelBasePage {
   get quota(): Locator {
     return this.page.locator(GAME_PANEL_BACKUPS.quota).first();
   }
+  /** Все строки списка бэкапов. */
+  rows(): Locator {
+    return this.page.locator(GAME_PANEL_BACKUPS.row);
+  }
+  /**
+   * Кнопка «...» (управление бэкапом: Restore/Rename/Lock/Delete) первой строки.
+   * Отсутствует у ролей без прав на управление бэкапами (напр. Member) — см. role enforcement.
+   */
+  get anyManageMenuButton(): Locator {
+    return this.page.locator(GAME_PANEL_BACKUPS.moreBtn).first();
+  }
 
   /** Строка бэкапа по имени (в колонке NAME). */
   backupRow(name: string): Locator {

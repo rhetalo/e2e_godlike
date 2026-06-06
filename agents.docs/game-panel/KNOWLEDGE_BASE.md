@@ -237,6 +237,34 @@ Moderator/Member + счётчики), **Members**, **Audit Log**.
 - Page object: `GamePanelBackupsPage` (`createBackup`, `backupRow`, `completedStatusOf`, `deleteBackup`,
   `deleteIfPresent`, `quota`, `scheduledSection`). Создаём/удаляем ТОЛЬКО свой бэкап; чужой «111» не трогаем.
 
+## 5i. Role enforcement (подтверждено DOM 06-Jun-2026)
+
+Роли участника: **Owner / Co-owner / Moderator / Member**. Owner раздаёт роли; смена роли участника — §5e
+(SHR-005, `setMemberRole`/`getMemberRole`). Enforcement реализован **через присутствие/отсутствие контролов
+в DOM** (Vue убирает их по роли), НЕ через `disabled`.
+
+Матрица прав глазами invitee (подтверждено флипом роли Co-owner ↔ Member):
+
+| Контрол | Co-owner | Member |
+|---|---|---|
+| Start | ✅ | ✅ |
+| **Restart / Kill** | ✅ видны | ❌ скрыты |
+| **Поле консоли** (`consoleCommandInput`) | ✅ | ❌ скрыто |
+| Edit Server | ✅ | ✅ |
+| Config (motd) editable | ✅ | ✅ |
+| Backups: create-форма (имя + Create) | ✅ | ✅ |
+| **Backups: список существующих + меню «...»** | ✅ (строки + управление) | ❌ список пуст, меню «...» нет |
+| **Sharing: управление участниками** (role-select, trash) | ❌ (только Owner) | ❌ |
+
+- ⚠️ **Owner-only:** управление ролями/удаление участников (role-select `.sharing__members-column-role-select`,
+  trash `.sharing__members-column-action-btn`) — даже Co-owner их не видит.
+- ⚠️ Member **не видит сами строки бэкапов** (список пуст) — проверять отсутствие управления через
+  `backups.anyManageMenuButton` (`.backups-list__more-btn`) `toBeHidden`, не через число строк.
+- Смена роли (owner-side) → персист подтверждать reload + poll (in-place текст лагает, §5e). Invitee видит
+  новую роль после reload своей страницы (`srv.goto()`/`backups.goto()`). **Мутацию роли всегда откатывать в Co-owner.**
+- Тест: `role.enforcement.spec.ts` (ROLE-001 power/console, ROLE-002 backups-management; serial, 2 контекста, self-cleaning).
+- Moderator (промежуточная роль) — пока НЕ снимали (todo).
+
 ## 6. Статус миграции из browseruse
 
 - Канонический набор доки (`QA_test_docs/ultra.panel/00..10`) — основа; уникальные детали фич
