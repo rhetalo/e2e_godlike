@@ -13,7 +13,7 @@
 | 2b. Console (live) | стрим лога + поле команд; безопасная команда `list` → отклик | read-only команда (serial, поднимает Online) | P1 | ✅ done (2 теста) |
 | 3. Stateful (мягкие) | **Files ✅ (2)**, **Config ✅ (2)**, **Players: whitelist через консоль ✅ (2)**; Databases — заблокировано (баг ноды) | мутации, self-cleaning | P2 | ✅ done (soft) |
 | 3b. Stateful (тяжёлые) | **Backups create→COMPLETED→delete ✅ (2)**; смена версии (Versions); установка плагинов/модпаков | мутации, self-cleaning | P2 | 🔄 in progress |
-| 4. Access / multi-actor | **Sharing ✅ (5)**, **Port & Domains ✅ (2)**, **Tasks ✅ (2)**, **enforcement ролей ✅ (2)** | мутации, 2-й аккаунт | P3 | ✅ done |
+| 4. Access / multi-actor | **Sharing ✅ (5)**, **Port & Domains ✅ (2)**, **Tasks ✅ (2)**, **enforcement ролей ✅ (3: Member+Moderator)** | мутации, 2-й аккаунт | P3 | ✅ done |
 | 5. Негатив / security | **IDOR ✅ + stored XSS (имя бэкапа, имя папки) ✅ (3)**; XSS/SQLi в др. инпутах (console/config motd) — todo | смешанно | P3 | 🔄 in progress |
 
 ## Phase 1 — реализовано
@@ -137,10 +137,10 @@ Run/Configure НЕ жмём (Run выполняет задачу = мутаци�
 |----|----------|
 | TC-GP-ROLE-001 (`@critical`) | invitee-**Member лишён Restart/Kill и поля консоли** (у Co-owner они есть); owner понижает роль → invitee теряет контролы → откат в Co-owner возвращает их |
 | TC-GP-ROLE-002 (`@critical`) | invitee-**Member не управляет бэкапами** (меню «...» скрыто, список пуст); Co-owner — видит строки + управление; откат self-cleaning |
+| TC-GP-ROLE-003 (`@critical`) | **Moderator — посередине**: без Restart/Kill (как Member), но с полем консоли и управлением бэкапами (как Co-owner); откат в Co-owner |
 
 Enforcement — через присутствие/отсутствие контролов в DOM (Vue убирает по роли). Owner-only — управление
-участниками (role-select/trash). Роль invitee ВСЕГДА откатывается в Co-owner. Матрица — `KNOWLEDGE_BASE.md` §5i.
-Moderator (промежуточная роль) — todo.
+участниками (role-select/trash). Роль invitee ВСЕГДА откатывается в Co-owner. Матрица 3 ролей — `KNOWLEDGE_BASE.md` §5i.
 
 ## Phase 5 — реализовано (Security / негатив)
 
@@ -174,15 +174,15 @@ IDOR — read-only. XSS — мутации (свой бэкап/папка, уд
 
 ## ▶ Продолжаем здесь (resume point, 06-Jun-2026)
 
-Реализовано: **35 тестов** — Phase 1 (8) + Phase 2 power (3) + console (2) + Phase 3 files (2) + config (2) + players (2) + Phase 3b backups (2) + Phase 4: sharing (5) + Port & Domains (2) + Tasks (2) + role enforcement (2) + **Phase 5 security (3)**. `npx tsc --noEmit` чистый.
+Реализовано: **36 тестов** — Phase 1 (8) + Phase 2 power (3) + console (2) + Phase 3 files (2) + config (2) + players (2) + Phase 3b backups (2) + Phase 4: sharing (5) + Port & Domains (2) + Tasks (2) + role enforcement (3: Member+Moderator) + **Phase 5 security (3)**. `npx tsc --noEmit` чистый.
 
-✅ **Backups + Role enforcement + Security (IDOR/XSS) завершены (06-Jun), зелёные:** `backups.spec.ts`
-(create→COMPLETED→delete), `role.enforcement.spec.ts` (Member vs Co-owner), `security.spec.ts`
-(SEC-001 IDOR; SEC-002 XSS имя бэкапа; SEC-003 XSS имя папки — не исполняются/экранируются). Recon — KB §5h/§5i/§5j. Прод чист.
+✅ **Backups + Role enforcement (3 роли) + Security (IDOR/XSS) завершены (06-Jun), зелёные:** `backups.spec.ts`
+(create→COMPLETED→delete), `role.enforcement.spec.ts` (Member + Moderator vs Co-owner), `security.spec.ts`
+(SEC-001 IDOR; SEC-002 XSS имя бэкапа; SEC-003 XSS имя папки). Recon — KB §5h/§5i/§5j. Прод чист.
 
 Владелец дал карт-бланш на мутации на тест-сервере (понимать ЧТО мутирует и КАК откатить; всегда self-cleaning). Дальше:
-1. **Phase 5 остаток** — XSS/SQLi в console / config motd (config автосейвит → откат обязателен; console требует Online).
-2. **Role enforcement — Moderator** (промежуточная роль: что доступно vs Member/Co-owner) — нужен recon-флип Moderator.
-3. Phase 3b остаток (version change / установка плагинов / backups **restore** — restore деструктивный, аккуратно).
+1. **Phase 5 остаток** — XSS/SQLi в console (требует Online — медленный boot модового сервера) / config motd (автосейв → откат обязателен; слабый sink — значение в `<input>`).
+2. Phase 3b остаток (version change / установка плагинов / backups **restore** — restore деструктивный, аккуратно).
+3. Phase 2 Boost (промо-апгрейд — осторожно, не списать лишнего).
 
 > Перед написанием: `KNOWLEDGE_BASE.md` (§5c Config, §5d Players, §5h Backups, §5i Roles, §5j Security — задокументированы), проверить `GAME_PANEL_SERVER_UUID` живой/не suspended. Бэкапы: статус НЕ обновляется без reload (`expect.poll`+`refresh()`). Смена роли: персист через reload+poll; всегда откат в Co-owner. IDOR-сигнал: `notFoundError` + `hasPowerControls()` (не слово «error» в body). Онлайн-тесты модового сервера — **щедрые таймауты**.

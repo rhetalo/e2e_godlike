@@ -121,4 +121,28 @@ test.describe("[game-panel] Role enforcement — Member vs Co-owner", () => {
       await expect(backups.anyManageMenuButton).toBeVisible({ timeout: 10_000 });
     });
   });
+
+  test("@critical TC-GP-ROLE-003 | Moderator — посередине: без Restart/Kill, но с консолью и управлением бэкапами", async () => {
+    test.setTimeout(150_000);
+
+    await test.step("owner ставит роль Moderator", async () => {
+      await setInviteeRole("Moderator");
+    });
+
+    await test.step("сервер: Restart/Kill скрыты (как Member), но поле консоли есть (как Co-owner)", async () => {
+      await srv.goto();
+      await expect(srv.restartButton).toBeHidden({ timeout: 10_000 });
+      await expect(srv.killButton).toBeHidden();
+      await expect(srv.consoleCommandInput).toBeVisible();
+    });
+
+    await test.step("бэкапы: управление доступно (меню «...» видно) — в отличие от Member", async () => {
+      await backups.goto();
+      await expect(backups.anyManageMenuButton).toBeVisible({ timeout: 10_000 });
+    });
+
+    await test.step("откат в Co-owner", async () => {
+      await setInviteeRole("Co-owner");
+    });
+  });
 });
