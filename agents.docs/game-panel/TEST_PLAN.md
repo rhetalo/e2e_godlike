@@ -277,3 +277,16 @@ Tasks-create — когда дойдут руки до мутаций с teardow
 **Полностью разведано (round 1–3):** все вкладки/разделы сервера, их диалоги/меню, глобальный сайдбар,
 header-меню. Осталась единственная не до конца снятая деталь — **Versions 3-й уровень (выбор build →
 install-confirm)**: install деструктивен (rebuild), доходить в тесте не нужно, поэтому низкий приоритет.
+
+### ✅ Реализовано из матрицы (код, 06-Jun-2026)
+
+Первый срез структурных тестов из round-1 матрицы — **зелёный (4 теста, 40.2s), `tsc` чистый, offline-safe:**
+- **`versions.spec.ts`** — TC-GP-VER-001 (шапка «Currently running» + сетка семейств Vanilla/Paper/NeoForge),
+  TC-GP-VER-002 (drill-down семейства → Go Back + Show Snapshot Versions; install НЕ жмём).
+  Page object `GamePanelVersionsPage`, селекторы `GAME_PANEL_VERSIONS`.
+- **`extensions.spec.ts`** — TC-GP-EXT-001 (Plugins/Mods: заголовок Mods + фильтры + поиск),
+  TC-GP-EXT-002 (Modpacks: тот же компонент, заголовок Modpacks). Page object `GamePanelExtensionsPage`,
+  селекторы `GAME_PANEL_EXTENSIONS`.
+- **Следующие на очереди** (offline-safe структурные): UPG-001 (Boost/Upgrade), REF-001 (Referral),
+  PREM-001 (Free Premium), NET-003/SFTP-001/CF-001 (диалоги), FILE-003 (row-меню). Затем мутационные
+  self-cleaning (EDIT-001 rename, TASK-003, FILE-004/006) и онлайн-набор (CON/PLR с устойчивым ensureOnline).
