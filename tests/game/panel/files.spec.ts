@@ -16,6 +16,8 @@ import {
 } from "../../../utils/gameAuth";
 
 const TEST_FOLDER = "qae2e-folder";
+const RENAME_FROM = "qae2e-rename-from";
+const RENAME_TO = "qae2e-rename-to";
 
 test.describe.configure({ mode: "serial" });
 
@@ -29,12 +31,17 @@ test.describe("@critical [game-panel] Файловый менеджер", () => 
     const page = await context.newPage();
     files = new GamePanelFilesPage(page, GAME_SERVER_UUID);
     await files.goto();
-    await files.deleteEntryIfPresent(TEST_FOLDER); // на случай мусора от прошлого упавшего прогона
+    // на случай мусора от прошлого упавшего прогона
+    await files.deleteEntryIfPresent(TEST_FOLDER);
+    await files.deleteEntryIfPresent(RENAME_FROM);
+    await files.deleteEntryIfPresent(RENAME_TO);
   });
 
   test.afterAll(async () => {
     try {
       await files.deleteEntryIfPresent(TEST_FOLDER);
+      await files.deleteEntryIfPresent(RENAME_FROM);
+      await files.deleteEntryIfPresent(RENAME_TO);
     } catch {
       /* best-effort teardown */
     }
@@ -53,5 +60,21 @@ test.describe("@critical [game-panel] Файловый менеджер", () => 
     }
     await files.deleteEntry(TEST_FOLDER);
     await expect(files.fileEntry(TEST_FOLDER)).toBeHidden();
+  });
+
+  test("TC-GP-FILE-004 | переименование папки: имя меняется (self-cleaning)", async () => {
+    // precondition: исходная папка есть, целевого имени нет
+    await files.deleteEntryIfPresent(RENAME_TO);
+    if (!(await files.hasEntry(RENAME_FROM))) {
+      await files.createFolder(RENAME_FROM);
+    }
+    await files.renameEntry(RENAME_FROM, RENAME_TO);
+    await test.step("новое имя видно, старое исчезло", async () => {
+      await expect(files.fileEntry(RENAME_TO)).toBeVisible();
+      await expect(files.fileEntry(RENAME_FROM)).toBeHidden();
+    });
+    // self-cleaning: удаляем переименованную папку
+    await files.deleteEntry(RENAME_TO);
+    await expect(files.fileEntry(RENAME_TO)).toBeHidden();
   });
 });
