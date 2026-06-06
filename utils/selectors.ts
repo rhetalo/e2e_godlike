@@ -537,3 +537,35 @@ export const GAME_PANEL_BACKUPS = {
   scheduled: ".scheduled-backups",
   scheduledEmpty: ".scheduled-backups__empty",
 } as const;
+
+// Versions (/server/{uuid}/minecraft/versions). Confirmed via live DOM 06-Jun-2026 (MCP recon).
+// Шапка "Currently running ..." (.server__version) + сетка семейств server-software
+// (.server__versions-type: Vanilla/Paper/NeoForge/Fabric/...). Клик по семейству → ?type=NAME
+// со списком версий (Go Back + тогл Show Snapshot Versions). ⚠️ install = деструктивный rebuild —
+// в тестах до установки НЕ доходим, только структура + drill-down.
+export const GAME_PANEL_VERSIONS = {
+  root: ".server__versions",                       // сетка семейств
+  installedBlock: ".server__version",              // карточка "Currently running ..."
+  installedTitle: ".server__version-title",        // заголовок установленной версии
+  familyCard: ".server__versions-type",            // карточка семейства (клик → список версий)
+  familyTitle: ".server__versions-type__title",    // имя семейства (Vanilla/Paper/NeoForge/...)
+  goBack: 'text="Go Back"',                         // в drill-down списке версий (вернуться к семействам)
+  snapshotToggle: 'text="Show Snapshot Versions"',  // тогл snapshot-сборок в drill-down
+} as const;
+
+// Plugins/Mods (/server/{uuid}/extensions) + Modpacks (/server/{uuid}/modpacks).
+// Confirmed via live DOM 06-Jun-2026 (MCP recon). ⚠️ ОДИН компонент .server__extensions для обоих
+// (отличаются контентом; document.title у modpacks тоже "Extensions"). Заголовок h1.__header-title
+// = "Mods" / "Modpacks". Фильтр-кнопки Mods/Plugins/All/Installed (.__extension-type__button),
+// поиск (.__extension-search__input), Category/Author (.__filter-item), sort-by. У элемента — Install.
+// ⚠️ В тестах Install НЕ жмём (установка мода/плагина = мутация) — структурные проверки.
+export const GAME_PANEL_EXTENSIONS = {
+  root: ".server__extensions",
+  headerTitle: ".server__extensions__header-title", // "Mods" / "Modpacks"
+  typeButton: ".server__extensions__extension-type__button", // Mods / Plugins / All / Installed
+  searchInput: ".server__extensions__extension-search__input",
+  filterItem: ".server__extensions__filter-item",   // Category / Author
+  sortBy: ".server__extensions__sort-by",
+  body: ".server__extensions__body",
+  installButton: 'button:has-text("Install")',      // per-item (НЕ жать)
+} as const;
