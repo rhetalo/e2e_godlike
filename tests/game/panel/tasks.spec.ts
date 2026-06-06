@@ -15,6 +15,8 @@ import {
   GAME_SERVER_UUID,
 } from "../../../utils/gameAuth";
 
+const TASK_NAME = "qae2e-task";
+
 test.describe.configure({ mode: "serial" });
 
 test.describe("@regression [game-panel] Tasks", () => {
@@ -29,6 +31,11 @@ test.describe("@regression [game-panel] Tasks", () => {
   });
 
   test.afterAll(async () => {
+    try {
+      await tasks.removeYourTaskIfPresent(TASK_NAME);
+    } catch {
+      /* best-effort teardown */
+    }
     await context.close();
   });
 
@@ -45,5 +52,19 @@ test.describe("@regression [game-panel] Tasks", () => {
   test("TC-GP-TASK-002 | секция Scheduled Tasks присутствует (с пустым состоянием)", async () => {
     await expect(tasks.scheduledTitle).toBeVisible();
     await expect(tasks.scheduledEmptyState).toBeVisible();
+  });
+
+  test("TC-GP-TASK-003 | создание и удаление задачи Send command (self-cleaning)", async () => {
+    await tasks.removeYourTaskIfPresent(TASK_NAME); // precondition: убрать мусор от прошлого прогона
+    await tasks.goto(); // вернуться к Default Tasks (там Configure у Send command)
+    await test.step("создать задачу через Configure → Save", async () => {
+      await tasks.configureSendCommand(TASK_NAME, "list");
+      await tasks.openYourTasks();
+      await expect(tasks.yourTask(TASK_NAME)).toBeVisible();
+    });
+    await test.step("удалить задачу (self-cleaning) — исчезает из списка", async () => {
+      await tasks.removeYourTask(TASK_NAME);
+      await expect(tasks.yourTask(TASK_NAME)).toBeHidden();
+    });
   });
 });
