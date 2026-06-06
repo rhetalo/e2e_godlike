@@ -446,6 +446,9 @@ export const GAME_PANEL_FILES = {
   // per-row "..." меню действий (Open/Pin/Copy×3/Rename/Move/Archive/Duplicate/Download/Delete)
   rowActionsBtn: ".server__file-manager__file-list-item__actions-btn",
   rowActionsItem: ".v-overlay--active .v-list-item",                        // пункт открытого меню
+  // Rename-диалог (из "..."→Rename): инпут предзаполнен текущим именем, confirm-кнопка "Rename"
+  // (класс .server__file-manager__modal-button; заголовок диалога шарится с "Move file").
+  renameConfirm: '.v-overlay--active button.server__file-manager__modal-button:has-text("Rename")',
 } as const;
 
 // Config tab (/server/{uuid}/config). Confirmed via live DOM 04-Jun-2026 (recon).

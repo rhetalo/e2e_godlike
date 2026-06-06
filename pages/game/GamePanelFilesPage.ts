@@ -141,6 +141,18 @@ export class GamePanelFilesPage extends GamePanelBasePage {
     await this.page.keyboard.press("Escape");
     await this.activeDialog.waitFor({ state: "hidden", timeout: 8_000 }).catch(() => {});
   }
+
+  /** Переименовать запись (МУТАЦИЯ): "..."→Rename → новое имя → confirm. Self-cleaning в спеке. */
+  async renameEntry(oldName: string, newName: string): Promise<void> {
+    await this.openRowMenu(oldName);
+    await this.rowMenuItem("Rename").click();
+    // открылся rename-диалог (новый active overlay) с предзаполненным именем
+    const input = this.activeDialog.locator(GAME_PANEL_FILES.dialogNameInput).first();
+    await input.waitFor({ state: "visible", timeout: 8_000 });
+    await input.fill(newName);
+    await this.page.locator(GAME_PANEL_FILES.renameConfirm).first().click();
+    await this.fileEntry(newName).waitFor({ state: "visible", timeout: 10_000 });
+  }
 }
 
 function escapeRegExp(s: string): string {

@@ -299,7 +299,11 @@ install-confirm)**: install деструктивен (rebuild), доходить
   SFTP-001 (SFTP Connect диалог: Host/Username + Open SFTP/Generate), CF-001 (CurseForge upload:
   Browse/Proceed). Расширен `GamePanelFilesPage` (`openAnyRowMenu`/`openSftpDialog`/`openCurseForgeDialog`/
   `activeDialog`/`closeOverlay`). Ничего не сабмитим.
-- **Итог реализации (эта сессия):** **11 новых тестов** (VER×2, EXT×2, REF×1, UPG×1, PREM×1, NET-003,
-  FILE-003, SFTP-001, CF-001) зелёные, `tsc` = 0, всё offline/read-only.
-- **Следующие на очереди:** мутационные self-cleaning (FILE-004 rename, EDIT-001 rename сервера,
-  TASK-003 create+delete) и онлайн-набор (CON/PLR — сервер сейчас поднят, нужен устойчивый ensureOnline).
+- **`files.spec.ts` (+FILE-004)** — переименование папки (create→rename→verify→delete, **self-cleaning**,
+  первая мутация из новых). Метод `GamePanelFilesPage.renameEntry`; селектор `renameConfirm`
+  (rename-диалог: инпут предзаполнен, confirm-кнопка «Rename», заголовок шарится с «Move file»).
+- **Итог реализации (эта сессия):** **12 новых тестов** (VER×2, EXT×2, REF×1, UPG×1, PREM×1, NET-003,
+  FILE-003, SFTP-001, CF-001, FILE-004) зелёные, `tsc` = 0. 11 offline-read-only + 1 self-cleaning мутация.
+- **Следующие на очереди:** EDIT-001 (rename сервера, self-cleaning — затрагивает реальное имя; рядом
+  деструктивный Reinstall), TASK-003 (create+delete задачи), онлайн-набор CON/PLR (сервер поднят; нужен
+  устойчивый `ensureOnline` + понятный фейл, т.к. возможен повторный краш после смены версии/настроек).
