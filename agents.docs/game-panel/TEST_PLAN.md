@@ -172,18 +172,19 @@ IDOR — read-only. XSS — мутации (свой бэкап/папка, уд
 - A/B-промо Amplitude бьёт по storefront-воронке, **не** по панели (см. основной CLAUDE.md).
 - Phase 3b (restore/версии) делаем после стабилизации мягких мутаций.
 
-## ▶ Продолжаем здесь (resume point, 06-Jun-2026)
+## ▶ Продолжаем здесь (resume point, 07-Jun-2026)
 
-Реализовано: **36 тестов** — Phase 1 (8) + Phase 2 power (3) + console (2) + Phase 3 files (2) + config (2) + players (2) + Phase 3b backups (2) + Phase 4: sharing (5) + Port & Domains (2) + Tasks (2) + role enforcement (3: Member+Moderator) + **Phase 5 security (3)**. `npx tsc --noEmit` чистый.
+Реализовано: **~51 тест**. База (36): Phase 1 (8) + power (3) + console (2) + files (2) + config (2) + players (2) + backups (2) + sharing (5) + Port&Domains (2) + Tasks (2) + role enforcement (3) + security (3).
+**07-Jun (MCP-сессия, +15 тестов):** VER×2, EXT×2, REF, UPG, PREM, NET-003, FILE-003, SFTP-001, CF-001, FILE-004, CON-003, TASK-003, EDIT-001 — детали в секциях ниже («Live-recon Round-1/2/3 (MCP)» + «Реализовано из матрицы»). Онлайн-набор (PWR/CON/PLR) **пере-подтверждён зелёным** после реинсталла сервера. `npx tsc --noEmit` чистый. Сравнение Playwright MCP vs наш код-формат — `agents.docs/MCP_RECON_VS_CODE.md`.
 
 ✅ **Backups + Role enforcement (3 роли) + Security (IDOR/XSS) завершены (06-Jun), зелёные:** `backups.spec.ts`
 (create→COMPLETED→delete), `role.enforcement.spec.ts` (Member + Moderator vs Co-owner), `security.spec.ts`
 (SEC-001 IDOR; SEC-002 XSS имя бэкапа; SEC-003 XSS имя папки). Recon — KB §5h/§5i/§5j. Прод чист.
 
-Владелец дал карт-бланш на мутации на тест-сервере (понимать ЧТО мутирует и КАК откатить; всегда self-cleaning). Дальше:
-1. **Phase 5 остаток** — XSS/SQLi в console (требует Online — медленный boot модового сервера) / config motd (автосейв → откат обязателен; слабый sink — значение в `<input>`).
-2. Phase 3b остаток (version change / установка плагинов / backups **restore** — restore деструктивный, аккуратно).
-3. Phase 2 Boost (промо-апгрейд — осторожно, не списать лишнего).
+Владелец дал карт-бланш на мутации на тест-сервере (всегда self-cleaning). Дальше (низкий приоритет, деструктив — отдельной сессией):
+1. **Phase 5 остаток** — XSS/SQLi в console / config motd (автосейв → откат обязателен; слабый sink — значение в `<input>`).
+2. Phase 3b остаток — version change (rebuild) / установка плагина-модпака / backups **restore** (деструктивный).
+(Boost-апгрейд закрыт структурно — UPG-001.)
 
 > Перед написанием: `KNOWLEDGE_BASE.md` (§5c Config, §5d Players, §5h Backups, §5i Roles, §5j Security — задокументированы), проверить `GAME_PANEL_SERVER_UUID` живой/не suspended. Бэкапы: статус НЕ обновляется без reload (`expect.poll`+`refresh()`). Смена роли: персист через reload+poll; всегда откат в Co-owner. IDOR-сигнал: `notFoundError` + `hasPowerControls()` (не слово «error» в body). Онлайн-тесты модового сервера — **щедрые таймауты**.
 

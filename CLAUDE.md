@@ -25,7 +25,8 @@ already encode hard-won knowledge and override anything generic:
 - `agents.docs/AGENT_HANDOFF.md` — auth flows, storageState files, server gotchas, roadmap
 - `agents.docs/CODE_REVIEW.md` — log of past fixes and why
 - `agents.docs/vps-panel/` — VPS (vf-panel/VirtFusion) audit, Install/Build/Delete plan, **HANDOFF.md** (continue here)
-- `agents.docs/game-panel/` — game panel (ultra.panel) knowledge base + test plan (28 tests; Phase 4 Sharing/roles/Port&Domains/Tasks done, next — Backups / role enforcement)
+- `agents.docs/game-panel/` — game panel (ultra.panel) knowledge base + test plan (~51 tests; Phase 1–5 done + структурные/мутационные из матрицы: Versions/Extensions/Referral/Upgrade/Premium/Edit-rename/Task-create/Console-palette; онлайн-набор PWR/CON/PLR зелёный. Next — деструктивный остаток: version change / restore / XSS-в-console)
+- `agents.docs/MCP_RECON_VS_CODE.md` — сравнение Playwright MCP vs наш код-формат (когда что применять)
 
 ## Implementation workflow
 
