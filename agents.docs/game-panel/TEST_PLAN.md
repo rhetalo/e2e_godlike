@@ -12,7 +12,7 @@
 | 2. Power lifecycle | Start (+EULA) → Online; Restart (полный цикл); Kill → Offline | мутации (serial + teardown) | **P1 — ядро** | ✅ done (3 теста) |
 | 2b. Console (live) | стрим лога + поле команд; безопасная команда `list` → отклик | read-only команда (serial, поднимает Online) | P1 | ✅ done (2 теста) |
 | 3. Stateful (мягкие) | **Files ✅ (2)**, **Config ✅ (2)**, **Players: whitelist через консоль ✅ (2)**; Databases — заблокировано (баг ноды) | мутации, self-cleaning | P2 | ✅ done (soft) |
-| 3b. Stateful (тяжёлые) | **Backups create→COMPLETED→delete ✅ (2, ждёт фин. прогона)**; смена версии (Versions); установка плагинов/модпаков | мутации, self-cleaning | P2 | 🔄 in progress |
+| 3b. Stateful (тяжёлые) | **Backups create→COMPLETED→delete ✅ (2)**; смена версии (Versions); установка плагинов/модпаков | мутации, self-cleaning | P2 | 🔄 in progress |
 | 4. Access / multi-actor | **Sharing ✅ (5, вкл. смену роли)**, **Port & Domains ✅ (2)**, **Tasks ✅ (2)**; enforcement ролей — todo | мутации, 2-й аккаунт | P3 | 🔄 in progress |
 | 5. Негатив / security | IDOR (подмена UUID), XSS/SQLi в инпутах (console/имена файлов/config), валидация | смешанно | P3 | todo |
 
@@ -92,11 +92,10 @@
 
 ⚠️ **Статус бэкапа НЕ обновляется без reload** → ждём `COMPLETED` через `expect.poll` + `backups.refresh()`
 (не реактивный `toBeVisible`). НЕ жмём **Restore** (перезапишет сервер) и не трогаем чужой бэкап «111».
-Квота — 3 слота. Create — медленная async-джоба (`test.setTimeout` ~600с, poll ~9 мин). Детали — `KNOWLEDGE_BASE.md` §5h.
+Квота — 3 слота. Create — async-джоба (`test.setTimeout` ~600с, poll ~9 мин запас; по факту бэкап ~292 MB
+готов за пару минут). Детали — `KNOWLEDGE_BASE.md` §5h.
 
-> ⚠️ BKP-001 ещё **не прошёл финальный полный зелёный прогон** с reload-логикой (части провалидированы по
-> отдельности: create, появление `--completed` после reload, delete через `.delete-dialog__confirm`).
-> Первым делом в след. сессии — прогнать `backups.spec.ts` целиком, убедиться в зелёном и self-cleaning.
+✅ **Прогнан целиком 06-Jun: оба теста зелёные (39.9с), self-cleaning подтверждён, в `main`.**
 
 ## Phase 4 — реализовано (Sharing + Port & Domains)
 
@@ -154,13 +153,10 @@ Run/Configure НЕ жмём (Run выполняет задачу = мутаци�
 
 ## ▶ Продолжаем здесь (resume point, 06-Jun-2026)
 
-Реализовано: **30 тестов** — Phase 1 (8) + Phase 2 power (3) + console (2) + Phase 3 files (2) + config (2) + players (2) + Phase 3b backups (2) + Phase 4: sharing (5, вкл. смену роли) + Port & Domains (2) + Tasks (2). `npx tsc --noEmit` чистый.
+Реализовано: **30 тестов** — Phase 1 (8) + Phase 2 power (3) + console (2) + Phase 3 files (2) + config (2) + players (2) + **Phase 3b backups (2, зелёные, в main)** + Phase 4: sharing (5, вкл. смену роли) + Port & Domains (2) + Tasks (2). `npx tsc --noEmit` чистый, всё в `main`.
 
-⚠️ **СНАЧАЛА в этой сессии:** прогнать `tests/game/panel/backups.spec.ts` целиком и убедиться, что
-**BKP-001 зелёный и self-cleaning**. Это единственный незавершённый хвост: тест дописан и провалидирован
-по частям (create работает; `--completed` появляется ПОСЛЕ reload; delete через `.delete-dialog__confirm`
-работает; leftover подчищается), но полный E2E-прогон с reload-поллингом ещё не гонялся (остановлен из-за
-лимитов). Backups recon полностью задокументирован — `KNOWLEDGE_BASE.md` §5h. Прод оставлен чистым (1/3 слота, «111»).
+✅ **Backups завершены (06-Jun):** `backups.spec.ts` прогнан целиком — оба теста зелёные (39.9с),
+self-cleaning подтверждён, смержено в `main`. Recon — `KNOWLEDGE_BASE.md` §5h. Прод чист (1/3 слота, «111»).
 
 Владелец дал карт-бланш на мутации на тест-сервере (понимать ЧТО мутирует и КАК откатить; всегда self-cleaning). Дальше:
 1. **enforcement ролей** — что invitee под Co-owner/Moderator/Member может/не может (позитив/негатив; invitee выполняет действия). Смена роли — ✅ (SHR-005, §5e).
