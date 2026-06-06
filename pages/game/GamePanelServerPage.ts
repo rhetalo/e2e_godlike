@@ -195,4 +195,58 @@ export class GamePanelServerPage extends GamePanelBasePage {
       (await this.restartButton.isVisible({ timeout: 500 }).catch(() => false))
     );
   }
+
+  // ── Edit Server / rename (МУТАЦИЯ — self-cleaning в спеке) ─────
+  /** Заголовок-имя сервера (h2). Обновляется реактивно после "Save Changes". */
+  get overviewTitle(): Locator {
+    return this.page.locator(GAME_PANEL_SERVER.overviewTitle).first();
+  }
+  async openEditServer(): Promise<void> {
+    await this.editServerButton.click();
+    await this.page
+      .locator(GAME_PANEL_SERVER.editDialog)
+      .first()
+      .waitFor({ state: "visible", timeout: 10_000 });
+  }
+  /**
+   * Переименовать сервер: Edit Server → имя → Save Changes. Диалог закрывается, заголовок
+   * обновляется реактивно. ⚠️ "Reinstall Server" в этом диалоге НЕ трогаем (деструктив).
+   */
+  async setServerName(name: string): Promise<void> {
+    await this.openEditServer();
+    const input = this.page.locator(GAME_PANEL_SERVER.editNameInput).first();
+    await input.waitFor({ state: "visible", timeout: 10_000 });
+    // ⚠️ Диалог асинхронно ДОЗАГРУЖАЕТ текущее имя уже после открытия. Если заполнить раньше,
+    // ответ fetch затирает нашу модель и Save шлёт старое имя (в MCP с задержками populate
+    // успевал ДО ввода — потому баг и не воспроизводился вручную). Поэтому сначала ждём, пока
+    // значение поля СТАБИЛИЗИРУЕТСЯ (непустое и неизменное ~1.2с = populate завершён), потом fill.
+    await this.page
+      .waitForFunction(
+        (sel) => {
+          const el = document.querySelector(sel) as HTMLInputElement | null;
+          const w = window as unknown as { __nv?: string; __nc?: number };
+          if (!el || !el.value) {
+            w.__nc = 0;
+            return false;
+          }
+          if (w.__nv === el.value) {
+            w.__nc = (w.__nc ?? 0) + 1;
+          } else {
+            w.__nv = el.value;
+            w.__nc = 0;
+          }
+          return (w.__nc ?? 0) >= 3;
+        },
+        GAME_PANEL_SERVER.editNameInput,
+        { timeout: 8_000, polling: 400 },
+      )
+      .catch(() => {});
+    await input.fill(name);
+    await this.page.locator(GAME_PANEL_SERVER.editSaveButton).first().click();
+    await this.page
+      .locator(GAME_PANEL_SERVER.editDialog)
+      .first()
+      .waitFor({ state: "hidden", timeout: 10_000 })
+      .catch(() => {});
+  }
 }

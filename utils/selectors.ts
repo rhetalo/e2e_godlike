@@ -385,6 +385,12 @@ export const GAME_PANEL_SERVER = {
   // ВАЖНО: online-статус в панели — "Running" (не "Online"); offline — "Offline".
   statusWord: /Running|Online|Offline|Starting|Stopping|Installing|Suspended/i,
   addressText: /srv\d+\.godlike\.club:\d+/i,
+  // Edit Server диалог (rename + Game/Platform/Type). ⚠️ "Reinstall Server" НЕ жать (деструктив).
+  // После "Save Changes" диалог закрывается и заголовок обновляется РЕАКТИВНО (без reload).
+  editDialog: ".edit__server-block__dialog",
+  editNameInput: ".edit__server-block__dialog input.v-field__input", // первый v-field__input = Server Name
+  editSaveButton: '.edit__server-block__dialog button:has-text("Save Changes")',
+  overviewTitle: ".server__overview-title",                           // h2 с именем сервера
 } as const;
 
 // Power toggle uses accessible button NAMES (exact). The primary button toggles
@@ -516,6 +522,17 @@ export const GAME_PANEL_TASKS = {
   taskItem: ".server__tasks__task",
   taskTitle: ".server__tasks__task-title",
   tabsButton: ".server__tasks__all-tasks__tabs-btn",
+  // Configure-диалог задачи (.server__dialogs__action-dialog). Видна форма выбранного типа;
+  // у "Send command" — Task name + Payload(Command). ⚠️ Run НЕ жмём.
+  configureButton: 'button:has-text("Configure")',
+  dialog: ".server__dialogs__action-dialog",
+  dialogNameInput: '.v-overlay--active input[placeholder="Enter a name..."]:visible',
+  dialogPayloadInput: '.v-overlay--active textarea[placeholder="Command"]',
+  dialogSave: '.v-overlay--active button:has-text("Save")',
+  // вкладка созданных задач + меню задачи (иконка → Schedule/Edit/Remove) + confirm удаления
+  yourTasksTab: '[role="tab"]:has-text("Your Tasks")',
+  taskMenuItem: ".v-overlay--active .v-list-item",          // Remove и др.
+  deleteConfirm: '.v-overlay--active button:has-text("Delete")',
 } as const;
 
 // Backups (/server/{uuid}/backups). Confirmed via live DOM 05-Jun-2026 (recon).
@@ -620,4 +637,14 @@ export const GAME_PANEL_PREMIUM = {
   dialog: ".premium__dialog",
   dialogTitle: ".premium__dialog-title",
   ctaButton: ".premium__dialog-button",              // "Get Premium (3-Days Trial)" — ⚠️ НЕ жать
+} as const;
+
+// Console full-page (/server/{uuid}/console). Confirmed via MCP recon 06-Jun-2026.
+// Командный инпут + кнопка "Commands" → диалог-палитра (searchable справочник команд:
+// .command-item__title/__subtitle, поиск "Search command..."). Палитра — read-only (не отправляет).
+export const GAME_PANEL_CONSOLE = {
+  commandInput: 'input[placeholder="Enter a command"]',
+  commandsButton: 'button:has-text("Commands")',
+  paletteSearch: 'input[placeholder="Search command..."]',
+  paletteItem: ".command-item__title",
 } as const;

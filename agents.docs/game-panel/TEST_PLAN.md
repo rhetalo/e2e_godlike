@@ -302,8 +302,18 @@ install-confirm)**: install деструктивен (rebuild), доходить
 - **`files.spec.ts` (+FILE-004)** — переименование папки (create→rename→verify→delete, **self-cleaning**,
   первая мутация из новых). Метод `GamePanelFilesPage.renameEntry`; селектор `renameConfirm`
   (rename-диалог: инпут предзаполнен, confirm-кнопка «Rename», заголовок шарится с «Move file»).
-- **Итог реализации (эта сессия):** **12 новых тестов** (VER×2, EXT×2, REF×1, UPG×1, PREM×1, NET-003,
-  FILE-003, SFTP-001, CF-001, FILE-004) зелёные, `tsc` = 0. 11 offline-read-only + 1 self-cleaning мутация.
-- **Следующие на очереди:** EDIT-001 (rename сервера, self-cleaning — затрагивает реальное имя; рядом
-  деструктивный Reinstall), TASK-003 (create+delete задачи), онлайн-набор CON/PLR (сервер поднят; нужен
-  устойчивый `ensureOnline` + понятный фейл, т.к. возможен повторный краш после смены версии/настроек).
+- **`console.palette.spec.ts`** — CON-003 (палитра «Commands»: открытие + поиск/фильтр). Page object
+  `GamePanelConsolePage` (/console), селекторы `GAME_PANEL_CONSOLE`. Offline-safe.
+- **`tasks.spec.ts` (+TASK-003)** — создание+удаление задачи «Send command» (Configure→Save→Your Tasks→
+  иконка→Remove→confirm Delete, **self-cleaning**). Методы `configureSendCommand`/`removeYourTask`.
+- **`edit.server.spec.ts`** — EDIT-001 (rename сервера → реактивный заголовок → откат, **self-cleaning**).
+  Методы `GamePanelServerPage.setServerName`/`overviewTitle`. ⚠️ **Гоча:** Edit-диалог **дозагружает имя
+  асинхронно** после открытия — филл сразу после open затирается ответом fetch (Save шлёт старое имя).
+  Фикс: `setServerName` ждёт **стабилизации** значения поля перед fill (через MCP с задержками гонки не
+  было — потому баг проявился только в быстром прогоне). Reinstall в диалоге НЕ трогаем.
+- **Итог реализации (эта сессия):** **15 новых тестов** (VER×2, EXT×2, REF, UPG, PREM, NET-003, FILE-003,
+  SFTP-001, CF-001, FILE-004, CON-003, TASK-003, EDIT-001) зелёные, `tsc` = 0. 12 offline-структурных +
+  3 self-cleaning мутации (FILE-004 rename, TASK-003 task, EDIT-001 server rename).
+- **Следующие на очереди:** онлайн power-lifecycle — существующие CON-001/002, PLR-002, PWR-001/002 были
+  заблокированы крашем, теперь сервер поднят → прогнать и подтвердить зелёные (с щедрым `ensureOnline`,
+  т.к. возможен повторный краш после смены версии/настроек). Это уже написанный код — нужен только ре-ран.
