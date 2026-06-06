@@ -14,7 +14,7 @@
 | 3. Stateful (мягкие) | **Files ✅ (2)**, **Config ✅ (2)**, **Players: whitelist через консоль ✅ (2)**; Databases — заблокировано (баг ноды) | мутации, self-cleaning | P2 | ✅ done (soft) |
 | 3b. Stateful (тяжёлые) | **Backups create→COMPLETED→delete ✅ (2)**; смена версии (Versions); установка плагинов/модпаков | мутации, self-cleaning | P2 | 🔄 in progress |
 | 4. Access / multi-actor | **Sharing ✅ (5)**, **Port & Domains ✅ (2)**, **Tasks ✅ (2)**, **enforcement ролей ✅ (2)** | мутации, 2-й аккаунт | P3 | ✅ done |
-| 5. Негатив / security | **IDOR ✅ + stored XSS в имени бэкапа ✅ (2)**; XSS/SQLi в др. инпутах (console/config/имена файлов) — todo | смешанно | P3 | 🔄 in progress |
+| 5. Негатив / security | **IDOR ✅ + stored XSS (имя бэкапа, имя папки) ✅ (3)**; XSS/SQLi в др. инпутах (console/config motd) — todo | смешанно | P3 | 🔄 in progress |
 
 ## Phase 1 — реализовано
 
@@ -150,9 +150,10 @@ Moderator (промежуточная роль) — todo.
 |----|----------|
 | TC-GP-SEC-001 (`@critical`) | **IDOR**: чужой/несуществующий UUID сервера → «resource does not exist» + нет power-контролов; свой сервер (baseline) → контролы есть. Read-only |
 | TC-GP-SEC-002 (`@critical`) | **stored XSS** в имени бэкапа (`<img onerror>`) НЕ исполняется (нет нативного диалога) и экранируется (рендер как текст); self-cleaning (создать→дождаться→удалить) |
+| TC-GP-SEC-003 (`@critical`) | **stored XSS** в имени папки (файл-менеджер) НЕ исполняется и экранируется; self-cleaning (создать→удалить). Быстрее SEC-002 (без async-джобы) |
 
-IDOR — read-only. XSS — мутация (свой бэкап, удаляется). Детали и сигналы — `KNOWLEDGE_BASE.md` §5j.
-Остаток Phase 5: XSS/SQLi в других инпутах (console / config motd / имена файлов).
+IDOR — read-only. XSS — мутации (свой бэкап/папка, удаляются). Детали и сигналы — `KNOWLEDGE_BASE.md` §5j.
+Остаток Phase 5: XSS/SQLi в других инпутах (console / config motd).
 
 ## Phase 2 — что ещё можно добить
 
@@ -173,14 +174,14 @@ IDOR — read-only. XSS — мутация (свой бэкап, удаляет�
 
 ## ▶ Продолжаем здесь (resume point, 06-Jun-2026)
 
-Реализовано: **34 теста** — Phase 1 (8) + Phase 2 power (3) + console (2) + Phase 3 files (2) + config (2) + players (2) + Phase 3b backups (2) + Phase 4: sharing (5) + Port & Domains (2) + Tasks (2) + role enforcement (2) + **Phase 5 security (2)**. `npx tsc --noEmit` чистый.
+Реализовано: **35 тестов** — Phase 1 (8) + Phase 2 power (3) + console (2) + Phase 3 files (2) + config (2) + players (2) + Phase 3b backups (2) + Phase 4: sharing (5) + Port & Domains (2) + Tasks (2) + role enforcement (2) + **Phase 5 security (3)**. `npx tsc --noEmit` чистый.
 
 ✅ **Backups + Role enforcement + Security (IDOR/XSS) завершены (06-Jun), зелёные:** `backups.spec.ts`
 (create→COMPLETED→delete), `role.enforcement.spec.ts` (Member vs Co-owner), `security.spec.ts`
-(SEC-001 IDOR чужой UUID; SEC-002 stored XSS в имени бэкапа не исполняется/экранируется). Recon — KB §5h/§5i/§5j. Прод чист.
+(SEC-001 IDOR; SEC-002 XSS имя бэкапа; SEC-003 XSS имя папки — не исполняются/экранируются). Recon — KB §5h/§5i/§5j. Прод чист.
 
 Владелец дал карт-бланш на мутации на тест-сервере (понимать ЧТО мутирует и КАК откатить; всегда self-cleaning). Дальше:
-1. **Phase 5 остаток** — XSS/SQLi в других инпутах (console / config motd / имена файлов; всё реверсивно/self-cleaning).
+1. **Phase 5 остаток** — XSS/SQLi в console / config motd (config автосейвит → откат обязателен; console требует Online).
 2. **Role enforcement — Moderator** (промежуточная роль: что доступно vs Member/Co-owner) — нужен recon-флип Moderator.
 3. Phase 3b остаток (version change / установка плагинов / backups **restore** — restore деструктивный, аккуратно).
 

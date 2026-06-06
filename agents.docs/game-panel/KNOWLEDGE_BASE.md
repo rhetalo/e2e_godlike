@@ -276,13 +276,14 @@ Moderator/Member + счётчики), **Members**, **Audit Log**.
   - Надёжные сигналы: `GamePanelServerPage.hasPowerControls()` (доступ) и `notFoundError`
     (`getByText(/requested resource does not exist/i)` — отказ). НЕ полагаться на слово «error» в body
     (есть в промо/скриптах страницы → ложные срабатывания).
-- **Stored XSS в имени бэкапа:** поле `Enter backup name` принимает `<` и payload как есть (НЕ стрипает на вводе).
-  Создание бэкапа с именем `<img src=x onerror=alert(1)>` → имя **экранируется** (рендерится как текст,
-  строка находится по литеральному тексту payload) и **alert НЕ срабатывает** → stored-XSS НЕТ. Проверка:
-  слушатель `page.on("dialog")` (любой нативный диалог = сработавший XSS) + `backupRow(payload)` виден.
-  Self-cleaning: бэкап дожидается COMPLETED и удаляется (имя ≤ 38 символов).
+- **Stored XSS в имени бэкапа / имени папки:** поля `Enter backup name` (≤38) и `Folder name` принимают
+  `<` и payload как есть (НЕ стрипают). Создание с именем `<img src=x onerror=alert(N)>` → имя **экранируется**
+  (рендерится как текст; строка/запись находится по литеральному тексту payload) и **alert НЕ срабатывает**
+  → stored-XSS НЕТ ни там, ни там. Проверка: слушатель `page.on("dialog")` (любой нативный диалог =
+  сработавший XSS) + `backupRow(payload)`/`fileEntry(payload)` виден. Self-cleaning: бэкап (дождаться COMPLETED)
+  и папка удаляются. Имя папки в файл-менеджере — реальный HTML-sink в ячейке списка, но БЫСТРО (без async-джобы).
 - ⚠️ IDOR-тест делит общий `page`; после навигаций на чужие сервера **вернуть на нужную страницу**
-  (`backups.goto()`) перед действиями — `createBackup` сам goto НЕ делает.
+  (`backups.goto()`/`files.goto()`) перед действиями — `createBackup`/`createFolder` сами goto НЕ делают.
 
 ## 6. Статус миграции из browseruse
 

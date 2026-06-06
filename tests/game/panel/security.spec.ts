@@ -13,6 +13,7 @@
 import { test, expect, type BrowserContext, type Page } from "@playwright/test";
 import { GamePanelServerPage } from "../../../pages/game/GamePanelServerPage";
 import { GamePanelBackupsPage } from "../../../pages/game/GamePanelBackupsPage";
+import { GamePanelFilesPage } from "../../../pages/game/GamePanelFilesPage";
 import {
   loginAndSaveGameSession,
   GAME_STORAGE_STATE_PATH,
@@ -25,7 +26,8 @@ const FOREIGN_UUIDS = [
   "00000000-0000-0000-0000-000000000000", // несуществующий
   "aaaaaaaa-48bf-46f1-95dd-a45d07f0d23d", // реальный UUID с подменённым префиксом
 ];
-const XSS_NAME = "<img src=x onerror=alert(1)>"; // 28 символов (лимит имени — 38)
+const XSS_NAME = "<img src=x onerror=alert(1)>"; // имя бэкапа (лимит 38)
+const XSS_FOLDER = "<img src=x onerror=alert(2)>"; // имя папки в файловом менеджере
 
 test.describe.configure({ mode: "serial" });
 
@@ -33,6 +35,7 @@ test.describe("[game-panel] Security — IDOR + input validation", () => {
   let context: BrowserContext;
   let page: Page;
   let backups: GamePanelBackupsPage;
+  let files: GamePanelFilesPage;
   let dialogFired = false;
 
   test.beforeAll(async ({ browser }) => {
@@ -46,14 +49,19 @@ test.describe("[game-panel] Security — IDOR + input validation", () => {
       await d.dismiss().catch(() => {});
     });
     backups = new GamePanelBackupsPage(page, GAME_SERVER_UUID, GAME_SERVER_NAME);
+    files = new GamePanelFilesPage(page, GAME_SERVER_UUID);
     await backups.goto();
     await backups.deleteIfPresent(XSS_NAME); // мусор от прошлого упавшего прогона
+    await files.goto();
+    await files.deleteEntryIfPresent(XSS_FOLDER);
   });
 
   test.afterAll(async () => {
     try {
       await backups.goto();
       await backups.deleteIfPresent(XSS_NAME);
+      await files.goto();
+      await files.deleteEntryIfPresent(XSS_FOLDER);
     } catch {
       /* best-effort teardown */
     }
@@ -104,6 +112,27 @@ test.describe("[game-panel] Security — IDOR + input validation", () => {
       expect(dialogFired).toBe(false); // и после рендера готовой строки — тоже без диалога
       await backups.deleteBackup(XSS_NAME);
       await expect(backups.backupRow(XSS_NAME)).toBeHidden();
+    });
+  });
+
+  test("@critical TC-GP-SEC-003 | stored XSS в имени папки (файл-менеджер) не исполняется и экранируется", async () => {
+    test.setTimeout(120_000);
+    dialogFired = false;
+
+    await test.step("создаём папку с XSS-именем → появляется в списке (имя как текст)", async () => {
+      await files.goto(); // вернуться на файл-менеджер (общий page мог уйти)
+      await files.createFolder(XSS_FOLDER);
+      // запись нашлась по ЛИТЕРАЛЬНОМУ имени → отрендерено как текст, не как HTML
+      await expect(files.fileEntry(XSS_FOLDER)).toBeVisible();
+    });
+
+    await test.step("XSS не исполнился: нативный диалог не появлялся", async () => {
+      expect(dialogFired).toBe(false);
+    });
+
+    await test.step("удаляем папку (self-cleaning)", async () => {
+      await files.deleteEntry(XSS_FOLDER);
+      await expect(files.fileEntry(XSS_FOLDER)).toBeHidden();
     });
   });
 });
