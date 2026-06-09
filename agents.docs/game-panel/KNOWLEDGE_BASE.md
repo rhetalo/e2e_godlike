@@ -284,6 +284,13 @@ Moderator/Member + счётчики), **Members**, **Audit Log**.
   → stored-XSS НЕТ ни там, ни там. Проверка: слушатель `page.on("dialog")` (любой нативный диалог =
   сработавший XSS) + `backupRow(payload)`/`fileEntry(payload)` виден. Self-cleaning: бэкап (дождаться COMPLETED)
   и папка удаляются. Имя папки в файл-менеджере — реальный HTML-sink в ячейке списка, но БЫСТРО (без async-джобы).
+- **XSS/SQLi в config `motd` (SEC-004, `@regression`, 09-Jun):** motd (server.properties) — **слабый sink**
+  (значение `<input>`). Payload `<img src=x onerror=alert(7)>` и SQLi-строка `'; DROP TABLE servers;-- e2e`
+  **принимаются, автосейвятся и round-trip'ятся ДОСЛОВНО как текст** (нет strip/escape-поломки, БД цела),
+  нативный диалог НЕ срабатывает → инъекции нет. Переиспользует `GamePanelConfigPage.setValue/getValue`
+  (§5c) + `page.on("dialog")`. Self-cleaning: **motd обязательно откатывается** (capture оригинала в `beforeAll`
+  + revert в `afterAll`; самолечение от поизоненного baseline через regex `onerror=alert|DROP TABLE`).
+  ⚠️ Покрывает только config-инпут; рендер motd на overview / в списке серверов отдельно не проверялся.
 - ⚠️ IDOR-тест делит общий `page`; после навигаций на чужие сервера **вернуть на нужную страницу**
   (`backups.goto()`/`files.goto()`) перед действиями — `createBackup`/`createFolder` сами goto НЕ делают.
 
