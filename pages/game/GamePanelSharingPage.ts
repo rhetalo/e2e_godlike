@@ -78,4 +78,17 @@ export class GamePanelSharingPage extends GamePanelBasePage {
     await opt.click();
     await this.page.waitForLoadState("networkidle", { timeout: 6_000 }).catch(() => {});
   }
+
+  // --- Audit Log (читатели; история действий участников) ---
+
+  get auditList(): Locator {
+    return this.page.locator(GAME_PANEL_SHARING.auditList).first();
+  }
+  auditRows(): Locator {
+    return this.page.locator(GAME_PANEL_SHARING.auditRow);
+  }
+  /** Текст всей таблицы Audit Log (для проверки ключа действия/актора). ⚠️ обновляется через reload. */
+  async getAuditText(): Promise<string> {
+    return (await this.auditList.innerText().catch(() => "")) ?? "";
+  }
 }

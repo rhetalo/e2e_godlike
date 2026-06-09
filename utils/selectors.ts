@@ -515,6 +515,10 @@ export const GAME_PANEL_SHARING = {
   memberRoleSelect: ".sharing__members-column-role-select",
   roleSelectionText: ".v-select__selection-text",
   roleOption: '[role="option"], .v-overlay .v-list-item',
+  // Audit Log (карточка "Audit Log"): таблица действий участников. Confirmed live-recon 09-Jun-2026:
+  // строка .sharing__audit-row = actor (email) + timestamp + ключ действия (server:power.start/stop, ...).
+  auditList: ".sharing__audit-list",
+  auditRow: ".sharing__audit-row",
 } as const;
 
 // Port & Domains (/server/{uuid}/network). Confirmed via live DOM 05-Jun-2026 (recon).
