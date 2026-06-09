@@ -291,6 +291,12 @@ Moderator/Member + счётчики), **Members**, **Audit Log**.
   (§5c) + `page.on("dialog")`. Self-cleaning: **motd обязательно откатывается** (capture оригинала в `beforeAll`
   + revert в `afterAll`; самолечение от поизоненного baseline через regex `onerror=alert|DROP TABLE`).
   ⚠️ Покрывает только config-инпут; рендер motd на overview / в списке серверов отдельно не проверялся.
+- **XSS в выводе консоли (SEC-005, `@regression`, online, 09-Jun):** через безопасную `say <img onerror>`
+  сервер эхо-печатает payload в `.terminal`; панель рендерит строку **как ТЕКСТ** (`getConsoleText` содержит
+  `onerror=alert`), нативный диалог НЕ срабатывает → reflected/stored XSS в консоли нет. SQLi неприменима
+  (командный инпут → stdin игрового сервера, не БД). Переиспользует online-setup `GamePanelServerPage`
+  (`ensureOnline`/`waitForConsoleReady`/`sendConsoleCommand`/`getConsoleText`) из `console.spec.ts` +
+  `page.on("dialog")`. Recovery: `say` ничего не персистит, сервер гасится в afterAll. **✅ Phase 5 закрыта.**
 - ⚠️ IDOR-тест делит общий `page`; после навигаций на чужие сервера **вернуть на нужную страницу**
   (`backups.goto()`/`files.goto()`) перед действиями — `createBackup`/`createFolder` сами goto НЕ делают.
 
