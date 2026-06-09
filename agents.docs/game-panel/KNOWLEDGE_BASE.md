@@ -485,9 +485,12 @@ Copy Port & IP) + **Additional Ports** (Add Additional Port). BEM `server__subdo
 ### 9b. Sharing — Audit Log + опции роли (дополнение к §5e)
 - **Invite role-select** (`.sharing__invite-form-select`) опции: **Co-owner / Moderator / Member**
   (Owner через инвайт НЕ выдаётся — соответствует модели §5i).
-- **Audit Log** реально пишет действия: строка = actor (`test@testmail.com`) + время + **ключ-действие**
-  (подтверждено: `server:power.start` от старта, что я делал ранее). Тест-кандидат: совершить
-  разрешённое действие → проверить новую запись в Audit Log по ключу (`server:power.*` и т.п.).
+- **Audit Log** реально пишет действия: таблица `.sharing__audit-list`, строка **`.sharing__audit-row`** =
+  actor (`test@testmail.com`) + время + **ключ-действие** (`server:power.start` / `server:power.stop` / ...).
+  ✅ **Покрыто SHR-006** (`sharing.audit.spec.ts`, `@regression`, online): baseline Offline → Start (=действие
+  `server:power.start`) → Audit Log показывает запись от владельца. Ридеры `GamePanelSharingPage.auditList/
+  auditRows/getAuditText`, селекторы `GAME_PANEL_SHARING.auditList/auditRow`. Обновляется через reload
+  (poll + `goto()`, как роли §5e). Recovery: `ensureOffline` в afterAll.
 - Карты раскрываются кнопкой `sharing__card-show-btn` («Show more»). Счётчики ролей в
   `sharing__overview-block` (Owner/Co-owner/Moderator/Member + числа).
 
