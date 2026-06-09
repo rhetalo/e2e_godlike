@@ -154,4 +154,23 @@ export class GamePanelBackupsPage extends GamePanelBasePage {
   get scheduledEmptyState(): Locator {
     return this.page.locator(GAME_PANEL_BACKUPS.scheduledEmpty).first();
   }
+
+  // scheduled-backup форма (структурно; НЕ сабмитим — расписание не создаём)
+  get scheduleToggleLabel(): Locator {
+    return this.page.locator(GAME_PANEL_BACKUPS.scheduleLabel).first();
+  }
+  get setIntervalLabel(): Locator {
+    return this.page.locator(GAME_PANEL_BACKUPS.setIntervalLabel).first();
+  }
+  /** v-checkbox строки "Schedule Backup" (для чтения checked-состояния). */
+  private scheduleCheckboxRow(): Locator {
+    return this.page.locator(GAME_PANEL_BACKUPS.scheduleCheckbox).filter({ hasText: "Schedule Backup" }).first();
+  }
+  /** Включить "Schedule Backup" — локальный UI-тоггл; НИЧЕГО не сабмитим. */
+  async enableSchedule(): Promise<void> {
+    await this.scheduleToggleLabel.click();
+  }
+  async isScheduleChecked(): Promise<boolean> {
+    return this.scheduleCheckboxRow().locator('input[type="checkbox"]').first().isChecked().catch(() => false);
+  }
 }

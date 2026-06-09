@@ -470,8 +470,15 @@ Locked, Schedule):
 - **Schedule Backup** (`backups__checkbox`) → раскрывает **Set interval** (`backups__form-*`) =
   **запланированные бэкапы** (целый непокрытый флоу; раздел «Scheduled» по умолчанию пуст).
 - **Locked** — `backups__locked-toggle` / `backups__locked-title` / `__locked-description`.
-- Тест-кандидаты: (1) структурный — все контролы формы; (2) scheduled-backup create→verify→delete
-  (мутация, self-cleaning, осторожно с квотой 3 слота и чужим бэкапом «111»).
+- ✅ **Покрыто структурно BKP-003** (`backups.spec.ts`, `@regression`, 09-Jun): чекбокс «Schedule Backup»
+  (`GAME_PANEL_BACKUPS.scheduleLabel`) включается → появляется под-опция **«Set interval»**
+  (`setIntervalLabel`) → секция Scheduled пуста («No scheduled backups found»). Методы
+  `GamePanelBackupsPage.enableSchedule/isScheduleChecked`. **БЕЗ сабмита.**
+- ⚠️ **Мутация scheduled create→delete ОТЛОЖЕНА (live-recon 09-Jun):** «Schedule Backup» создаёт
+  **рекуррентное расписание (cron)**, а не разовый бэкап — оно само спавнит бэкапы по интервалу и ест
+  квоту (3 слота, 1 занят «111»). Контрол удаления расписания НЕ разведать без создания живого cron
+  (секция Scheduled пуста) → на shared-проде это необратимый-до-проверки риск. Делать только с явным
+  подтверждением владельца + известным способом удаления расписания.
 
 ## 9. Round-3 sub-flows (MCP, 06-Jun-2026)
 
