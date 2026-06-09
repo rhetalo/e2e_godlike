@@ -14,7 +14,7 @@
 | 3. Stateful (мягкие) | **Files ✅ (2)**, **Config ✅ (2)**, **Players: whitelist через консоль ✅ (2)**; Databases — заблокировано (баг ноды) | мутации, self-cleaning | P2 | ✅ done (soft) |
 | 3b. Stateful (тяжёлые) | **Backups create→COMPLETED→delete ✅ (2)**; смена версии (Versions); установка плагинов/модпаков | мутации, self-cleaning | P2 | 🔄 in progress |
 | 4. Access / multi-actor | **Sharing ✅ (5)**, **Port & Domains ✅ (2)**, **Tasks ✅ (2)**, **enforcement ролей ✅ (3: Member+Moderator)** | мутации, 2-й аккаунт | P3 | ✅ done |
-| 5. Негатив / security | **IDOR ✅ + stored XSS (бэкап, папка, config motd) + SQLi (motd) ✅ (4)**; XSS/SQLi в console — todo (online) | смешанно | P3 | 🔄 in progress |
+| 5. Негатив / security | **IDOR ✅ + XSS (бэкап, папка, config motd, console) + SQLi (motd) ✅ (5)** | смешанно | P3 | ✅ done |
 
 ## Phase 1 — реализовано
 
@@ -152,9 +152,10 @@ Enforcement — через присутствие/отсутствие конт�
 | TC-GP-SEC-002 (`@critical`) | **stored XSS** в имени бэкапа (`<img onerror>`) НЕ исполняется (нет нативного диалога) и экранируется (рендер как текст); self-cleaning (создать→дождаться→удалить) |
 | TC-GP-SEC-003 (`@critical`) | **stored XSS** в имени папки (файл-менеджер) НЕ исполняется и экранируется; self-cleaning (создать→удалить). Быстрее SEC-002 (без async-джобы) |
 | TC-GP-SEC-004 (`@regression`) | **XSS + SQLi в config `motd`**: payload `<img onerror>` и `'; DROP TABLE…` автосейвятся и round-trip'ятся **как текст** (нет исполнения/инъекции), нативный диалог не срабатывает; self-cleaning (откат motd к оригиналу). Offline. Закрывает config-инпут Phase 5 |
+| TC-GP-SEC-005 (`@regression`, online) | **XSS в выводе консоли**: `say <img onerror>` → сервер эхо-печатает в `.terminal` → payload виден **как текст** (`onerror=alert` в логе), нативный диалог не срабатывает → XSS нет. SQLi для консоли N/A (stdin игры, не БД). Recovery: `ensureOffline`. **Завершает Phase 5** |
 
 IDOR — read-only. XSS — мутации (свой бэкап/папка, удаляются). Детали и сигналы — `KNOWLEDGE_BASE.md` §5j.
-Остаток Phase 5: XSS/SQLi в **console** (требует online-сервера; config motd закрыт SEC-004).
+✅ **Phase 5 закрыта (09-Jun):** XSS во всех инпут-sink'ах (имя бэкапа/папки, config motd, **вывод консоли**) экранируется и не исполняется; IDOR/broken-access закрыт (SEC-001..005).
 
 ## Phase 2 — что ещё можно добить
 
@@ -177,7 +178,7 @@ IDOR — read-only. XSS — мутации (свой бэкап/папка, уд
 
 Реализовано: **~51 тест**. База (36): Phase 1 (8) + power (3) + console (2) + files (2) + config (2) + players (2) + backups (2) + sharing (5) + Port&Domains (2) + Tasks (2) + role enforcement (3) + security (3).
 **07-Jun (MCP-сессия, +15 тестов):** VER×2, EXT×2, REF, UPG, PREM, NET-003, FILE-003, SFTP-001, CF-001, FILE-004, CON-003, TASK-003, EDIT-001 — детали в секциях ниже («Live-recon Round-1/2/3 (MCP)» + «Реализовано из матрицы»). Онлайн-набор (PWR/CON/PLR) **пере-подтверждён зелёным** после реинсталла сервера. `npx tsc --noEmit` чистый. Сравнение Playwright MCP vs наш код-формат — `agents.docs/MCP_RECON_VS_CODE.md`.
-**09-Jun (+4 теста, ~55 всего):** FILE-005 (CodeMirror-редактор: open `server.properties` через «...»→Open → `.cm-content` непуст → выход без сохранения, read-only) + FILE-006 (Recycle Bin: delete→trash→**Restore**→root→delete, self-cleaning) + **SEC-004** (XSS/SQLi в config `motd`: автосейв→round-trip как текст→откат; закрывает config-инпут Phase 5) + **AUTH-004** (`@smoke`: Log Out из аккаунт-меню → редирект `/login`, изолированный контекст; закрывает дыру в smoke-срезе). Зелёные, `tsc`=0. ⚠️ Recon-гоча (KB §9c): в корзине **Restore — ОТДЕЛЬНАЯ кнопка** (`button:has-text("Restore")`, вне `action-btn-group` с Download/Move/Duplicate/Delete; disabled до выбора строки). Дубли тест-папок копятся в корзине между прогонами — авто-очистка 24ч.
+**09-Jun (+5 тестов, ~56 всего):** FILE-005 (CodeMirror-редактор: open `server.properties` через «...»→Open → `.cm-content` непуст → выход без сохранения, read-only) + FILE-006 (Recycle Bin: delete→trash→**Restore**→root→delete, self-cleaning) + **SEC-004** (XSS/SQLi в config `motd`: автосейв→round-trip как текст→откат; закрывает config-инпут Phase 5) + **AUTH-004** (`@smoke`: Log Out из аккаунт-меню → редирект `/login`, изолированный контекст; закрывает дыру в smoke-срезе) + **SEC-005** (`@regression`, online: XSS в выводе консоли через `say` → эхо как текст, без диалога; **закрывает Phase 5**). Зелёные, `tsc`=0. ⚠️ Recon-гоча (KB §9c): в корзине **Restore — ОТДЕЛЬНАЯ кнопка** (`button:has-text("Restore")`, вне `action-btn-group` с Download/Move/Duplicate/Delete; disabled до выбора строки). Дубли тест-папок копятся в корзине между прогонами — авто-очистка 24ч.
 
 ✅ **Backups + Role enforcement (3 роли) + Security (IDOR/XSS) завершены (06-Jun), зелёные:** `backups.spec.ts`
 (create→COMPLETED→delete), `role.enforcement.spec.ts` (Member + Moderator vs Co-owner), `security.spec.ts`
