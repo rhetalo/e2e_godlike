@@ -592,6 +592,11 @@ export const GAME_PANEL_BACKUPS = {
   // запланированные бэкапы
   scheduled: ".scheduled-backups",
   scheduledEmpty: ".scheduled-backups__empty",
+  // scheduled-backup форма (структурно): чекбокс "Schedule Backup" + под-опция "Set interval".
+  // ⚠️ Создание расписания = рекуррентный cron (спавнит бэкапы/ест квоту); в тестах НЕ сабмитим. §8d.
+  scheduleCheckbox: ".backups__checkbox",                  // v-checkbox (фильтр по label: Schedule Backup / Set interval)
+  scheduleLabel: 'label.v-label--clickable:has-text("Schedule Backup")',
+  setIntervalLabel: 'label.v-label--clickable:has-text("Set interval")',
 } as const;
 
 // Versions (/server/{uuid}/minecraft/versions). Confirmed via live DOM 06-Jun-2026 (MCP recon).

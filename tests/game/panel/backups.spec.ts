@@ -87,4 +87,25 @@ test.describe("[game-panel] Backups", () => {
       await expect(backups.scheduledSection).toBeVisible();
     });
   });
+
+  test("TC-GP-BKP-003 @regression | scheduled-backup форма: Schedule Backup + Set interval + секция Scheduled", async () => {
+    // ⚠️ СТРУКТУРНО, БЕЗ САБМИТА: создание расписания = рекуррентный cron на shared-проде
+    // (сам спавнит бэкапы/ест квоту, контрол удаления не разведан) — намеренно НЕ создаём. См. §8d.
+    await backups.goto();
+
+    await test.step("чекбокс 'Schedule Backup' включается", async () => {
+      await expect(backups.scheduleToggleLabel).toBeVisible();
+      await backups.enableSchedule();
+      expect(await backups.isScheduleChecked()).toBe(true);
+    });
+
+    await test.step("доступна под-опция 'Set interval'", async () => {
+      await expect(backups.setIntervalLabel).toBeVisible();
+    });
+
+    await test.step("секция Scheduled Backups present (пустое состояние)", async () => {
+      await expect(backups.scheduledSection).toBeVisible();
+      await expect(backups.scheduledEmptyState).toContainText(/no scheduled backups/i);
+    });
+  });
 });
