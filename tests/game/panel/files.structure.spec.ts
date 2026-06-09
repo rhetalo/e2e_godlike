@@ -16,6 +16,9 @@ import {
   GAME_SERVER_UUID,
 } from "../../../utils/gameAuth";
 
+// Ядровый текстовый файл MC — гарантированно есть на сервере (его же правит Config-таб).
+const EDITOR_FILE = "server.properties";
+
 test.describe.configure({ mode: "serial" });
 
 test.describe("@regression [game-panel] File manager — диалоги/меню", () => {
@@ -64,5 +67,15 @@ test.describe("@regression [game-panel] File manager — диалоги/меню
       await expect(files.activeDialog).toContainText(/Proceed/i);
     });
     await files.closeOverlay();
+  });
+
+  test("TC-GP-FILE-005 | CodeMirror-редактор открывает текстовый файл (read-only)", async () => {
+    await files.goto(); // к чистому списку файлов (предыдущий тест мог оставить overlay)
+    await files.openFileInEditor(EDITOR_FILE);
+    await test.step("редактор смонтирован и содержит контент файла", async () => {
+      await expect(files.editorContent).toBeVisible();
+      expect((await files.getEditorText()).length).toBeGreaterThan(0);
+    });
+    await files.leaveEditor(); // уходим без сохранения (ничего не редактировали)
   });
 });
