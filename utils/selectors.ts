@@ -455,6 +455,17 @@ export const GAME_PANEL_FILES = {
   // Rename-диалог (из "..."→Rename): инпут предзаполнен текущим именем, confirm-кнопка "Rename"
   // (класс .server__file-manager__modal-button; заголовок диалога шарится с "Move file").
   renameConfirm: '.v-overlay--active button.server__file-manager__modal-button:has-text("Rename")',
+  // CodeMirror-редактор текстового файла («...»→Open или клик по имени; URL ?dir=/&file=<name>).
+  // Монтируется АСИНХРОННО — ждать .cm-content. Confirmed live-recon §9c (06-Jun-2026).
+  editor: ".cm-editor",
+  editorContent: ".cm-content",
+  // Recycle Bin: вход (удаление = перенос в корзину на 24ч); bulk-кнопка "Restore" — в той же
+  // footerActionGroup, что и Delete. Confirmed live-recon §9c (06-Jun-2026).
+  recycleBinButton: ".server__file-manager__file-list__recycle-bin",
+  // ⚠️ В корзине "Restore" — ОТДЕЛЬНАЯ кнопка (НЕ в footerActionGroup, где Download/Move/Duplicate/
+  // Delete), рядом с "Clear Recycle Bin". disabled (DOM-атрибут) пока строка не выбрана → click сам
+  // дождётся enabled. Текст уникален на странице корзины. Confirmed live-recon §9c (09-Jun-2026).
+  recycleRestoreButton: 'button:has-text("Restore")',
 } as const;
 
 // Config tab (/server/{uuid}/config). Confirmed via live DOM 04-Jun-2026 (recon).

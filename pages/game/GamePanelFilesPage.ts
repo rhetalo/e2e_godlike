@@ -153,6 +153,51 @@ export class GamePanelFilesPage extends GamePanelBasePage {
     await this.page.locator(GAME_PANEL_FILES.renameConfirm).first().click();
     await this.fileEntry(newName).waitFor({ state: "visible", timeout: 10_000 });
   }
+
+  // --- CodeMirror-редактор (открытие текстового файла; в тестах read-only) ---
+
+  /** Контейнер с содержимым CodeMirror (.cm-content). Монтируется АСИНХРОННО. */
+  get editorContent(): Locator {
+    return this.page.locator(GAME_PANEL_FILES.editorContent).first();
+  }
+
+  /** Открыть текстовый файл в редакторе через "..."→Open и дождаться монтажа CodeMirror. */
+  async openFileInEditor(name: string): Promise<void> {
+    await this.openRowMenu(name);
+    await this.rowMenuItem("Open").click();
+    await this.editorContent.waitFor({ state: "visible", timeout: 15_000 });
+  }
+
+  /** Текст в редакторе — для проверки, что файл реально загрузился. */
+  async getEditorText(): Promise<string> {
+    return (await this.editorContent.innerText().catch(() => "")).trim();
+  }
+
+  /** Уйти из редактора без сохранения — вернуться к списку файлов. */
+  async leaveEditor(): Promise<void> {
+    await this.goto();
+  }
+
+  // --- Recycle Bin (удаление = перенос в корзину 24ч; Restore возвращает в корень) ---
+
+  get recycleBinButton(): Locator {
+    return this.page.locator(GAME_PANEL_FILES.recycleBinButton).first();
+  }
+
+  /** Перейти в Recycle Bin (URL ?dir=/.trash-<id>). */
+  async openRecycleBin(): Promise<void> {
+    await this.recycleBinButton.click();
+    await this.page.waitForURL(/\.trash/i, { timeout: 15_000 }).catch(() => {});
+  }
+
+  /** Восстановить запись из корзины: чекбокс строки → bulk "Restore". Self-cleaning в спеке. */
+  async restoreEntry(name: string): Promise<void> {
+    const row = this.fileRow(name);
+    await row.locator(GAME_PANEL_FILES.rowCheckbox).first().check({ force: true });
+    // Restore — отдельная кнопка вне footerActionGroup; .click() дождётся снятия disabled после выбора.
+    await this.page.locator(GAME_PANEL_FILES.recycleRestoreButton).first().click();
+    await this.fileEntry(name).waitFor({ state: "hidden", timeout: 10_000 }).catch(() => {});
+  }
 }
 
 function escapeRegExp(s: string): string {

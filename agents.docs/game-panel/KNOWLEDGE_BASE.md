@@ -478,10 +478,17 @@ Copy Port & IP) + **Additional Ports** (Add Additional Port). BEM `server__subdo
 - **Открытие текстового файла** (клик по имени или «...»→Open) → URL `?dir=/&file=<name>`, монтируется
   **CodeMirror** (`.cm-editor` / `.cm-content` / `.cm-gutters`), контент редактируемый (напр. `eula=true`),
   кнопки **Cancel / Save**. ⚠️ Редактор монтируется **асинхронно** — ждать `.cm-content`, не сразу.
-  Тест-кандидат: открыть файл → проверить контент в `.cm-content` → (опц. self-cleaning) правка→Save→revert.
-- **Recycle Bin** (кнопка `.server__file-manager__file-list__recycle-bin`) → URL `?dir=/.trash-<shortid>`,
-  breadcrumb «root/Recycle Bin». Bulk-бар добавляет **Restore** (+ Download/Move/Duplicate/Delete=permanent);
-  отдельная кнопка **Clear Recycle Bin** (disabled при пустой корзине). Подтверждает §5b: удаление → trash → 24ч.
+  ✅ **Покрыто FILE-005** (`files.structure.spec.ts`, read-only): `GamePanelFilesPage.openFileInEditor`
+  («...»→Open) → `editorContent`/`getEditorText` → `leaveEditor` (без Save). Открываем `server.properties`
+  (ядровый, гарантированно есть). Правку→Save→revert оставили на отдельный self-cleaning кейс.
+- **Recycle Bin** (кнопка-строка `.server__file-manager__file-list__recycle-bin` наверху списка) → URL
+  `?dir=/.trash-<shortid>`, breadcrumb «root/Recycle Bin». ⚠️ **Уточнено live-recon 09-Jun:** **Restore** —
+  это **ОТДЕЛЬНАЯ кнопка** (`button.v-btn--slim`, текст «Restore»), **НЕ внутри** `action-btn-group`
+  (там только Download/Move/Duplicate/Delete=permanent); рядом — **Clear Recycle Bin** (`v-btn--slim`,
+  disabled при пустой корзине). Обе disabled до выбора строки чекбоксом. Подтверждает §5b: удаление → trash → 24ч.
+  ✅ **Покрыто FILE-006** (`files.recycle.spec.ts`, мутация, self-cleaning): `GamePanelFilesPage.openRecycleBin`
+  + `restoreEntry` (чекбокс строки → standalone-кнопка Restore, селектор `GAME_PANEL_FILES.recycleRestoreButton`).
+  ⚠️ Тест-папки копятся дублями в корзине между прогонами (teardown чистит только корень) — авто-очистка 24ч.
 
 ### 9d. Free Premium модалка (`premium__dialog`)
 Кнопка **«What is a Free Premium?»** (на каждой странице сервера) → модалка `premium__dialog*` со списком
