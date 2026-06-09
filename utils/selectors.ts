@@ -363,6 +363,15 @@ export const GAME_PANEL_LOGIN = {
   error: '[class*="toast"], [class*="alert"], [class*="notification"], [class*="error"]',
 } as const;
 
+// Header / account menu (глобально на authed-страницах). Confirmed live-recon 09-Jun-2026:
+// аккаунт-кнопка (текст = email, generic v-btn без стабильного класса) → меню пунктов
+// .user__navigation-item (Knowledgebase / Edit Account / Log Out). Log Out — семантический
+// <a href="/logout"> → редирект на /login.
+export const GAME_PANEL_HEADER = {
+  accountButton: 'button:has-text("@")', // единственная кнопка с email на странице (page-agnostic)
+  logoutLink: 'a[href="/logout"]',        // пункт меню Log Out (.user__navigation-item)
+} as const;
+
 export const GAME_PANEL_TOUR = {
   overlay: '.shepherd-modal-is-visible, .shepherd-modal-overlay-container, .shepherd-enabled',
   close: 'button:has-text("Skip"), button:has-text("Close"), button:has-text("Got it"), button[aria-label="Close"]',

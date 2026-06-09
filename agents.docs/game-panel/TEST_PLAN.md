@@ -177,7 +177,7 @@ IDOR — read-only. XSS — мутации (свой бэкап/папка, уд
 
 Реализовано: **~51 тест**. База (36): Phase 1 (8) + power (3) + console (2) + files (2) + config (2) + players (2) + backups (2) + sharing (5) + Port&Domains (2) + Tasks (2) + role enforcement (3) + security (3).
 **07-Jun (MCP-сессия, +15 тестов):** VER×2, EXT×2, REF, UPG, PREM, NET-003, FILE-003, SFTP-001, CF-001, FILE-004, CON-003, TASK-003, EDIT-001 — детали в секциях ниже («Live-recon Round-1/2/3 (MCP)» + «Реализовано из матрицы»). Онлайн-набор (PWR/CON/PLR) **пере-подтверждён зелёным** после реинсталла сервера. `npx tsc --noEmit` чистый. Сравнение Playwright MCP vs наш код-формат — `agents.docs/MCP_RECON_VS_CODE.md`.
-**09-Jun (+3 теста, ~54 всего):** FILE-005 (CodeMirror-редактор: open `server.properties` через «...»→Open → `.cm-content` непуст → выход без сохранения, read-only) + FILE-006 (Recycle Bin: delete→trash→**Restore**→root→delete, self-cleaning) + **SEC-004** (XSS/SQLi в config `motd`: автосейв→round-trip как текст→откат; закрывает config-инпут Phase 5). Все `@regression`, зелёные, `tsc`=0. ⚠️ Recon-гоча (KB §9c): в корзине **Restore — ОТДЕЛЬНАЯ кнопка** (`button:has-text("Restore")`, вне `action-btn-group` с Download/Move/Duplicate/Delete; disabled до выбора строки). Дубли тест-папок копятся в корзине между прогонами — авто-очистка 24ч.
+**09-Jun (+4 теста, ~55 всего):** FILE-005 (CodeMirror-редактор: open `server.properties` через «...»→Open → `.cm-content` непуст → выход без сохранения, read-only) + FILE-006 (Recycle Bin: delete→trash→**Restore**→root→delete, self-cleaning) + **SEC-004** (XSS/SQLi в config `motd`: автосейв→round-trip как текст→откат; закрывает config-инпут Phase 5) + **AUTH-004** (`@smoke`: Log Out из аккаунт-меню → редирект `/login`, изолированный контекст; закрывает дыру в smoke-срезе). Зелёные, `tsc`=0. ⚠️ Recon-гоча (KB §9c): в корзине **Restore — ОТДЕЛЬНАЯ кнопка** (`button:has-text("Restore")`, вне `action-btn-group` с Download/Move/Duplicate/Delete; disabled до выбора строки). Дубли тест-папок копятся в корзине между прогонами — авто-очистка 24ч.
 
 ✅ **Backups + Role enforcement (3 роли) + Security (IDOR/XSS) завершены (06-Jun), зелёные:** `backups.spec.ts`
 (create→COMPLETED→delete), `role.enforcement.spec.ts` (Member + Moderator vs Co-owner), `security.spec.ts`
@@ -264,7 +264,7 @@ Tasks-create — когда дойдут руки до мутаций с teardow
 | TC-GP-FILE-004 | **File Rename** (self-cleaning): Rename папки → проверить → вернуть имя | мутация | @regression | обязателен откат |
 | TC-GP-SFTP-001 | **SFTP Connect** диалог: Host/Port/Username/Password + Open SFTP/Generate/Save видны | структурный | @regression | ⚠️ Generate/Save НЕ жать (меняет пароль) |
 | TC-GP-CF-001 | **CurseForge** диалог: file-input + Browse/Cancel/Proceed | структурный | @regression | ⚠️ не загружать |
-| TC-GP-AUTH-004 | **Logout**: user-меню → Log Out → редирект `/login` | флоу | @smoke | изолировать контекст (убивает сессию) |
+| TC-GP-AUTH-004 ✅ | **Logout**: user-меню → Log Out → редирект `/login` | флоу | @smoke | ✅ done 09-Jun (`auth.logout.spec.ts`, изолир. контекст) |
 | TC-GP-BKP-003 | **Scheduled backup**: Schedule Backup → Set interval → create→verify→delete | мутация | @regression | квота 3 слота; чужой «111» не трогать; self-cleaning |
 
 ### Round-3 кандидаты (бэклог разведан, MCP 06-Jun; детали — KB §9)

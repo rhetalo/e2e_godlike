@@ -6,7 +6,7 @@
  */
 import { type Locator, type Page } from "@playwright/test";
 import { GamePanelBasePage } from "./GamePanelBasePage";
-import { GAME_PANEL_DASHBOARD } from "../../utils/selectors";
+import { GAME_PANEL_DASHBOARD, GAME_PANEL_HEADER } from "../../utils/selectors";
 
 export class GamePanelDashboardPage extends GamePanelBasePage {
   constructor(page: Page) {
@@ -58,5 +58,27 @@ export class GamePanelDashboardPage extends GamePanelBasePage {
   /** Ссылка глобального сайдбара по названию (Billing, Support Tickets, ...). */
   sidebarLink(name: string): Locator {
     return this.page.getByRole("link", { name, exact: false }).first();
+  }
+
+  // --- Аккаунт-меню / Logout (хедер-глобал) ---
+
+  get accountButton(): Locator {
+    return this.page.locator(GAME_PANEL_HEADER.accountButton).first();
+  }
+  get logoutLink(): Locator {
+    return this.page.locator(GAME_PANEL_HEADER.logoutLink).first();
+  }
+
+  /** Открыть аккаунт-меню (Knowledgebase / Edit Account / Log Out). */
+  async openAccountMenu(): Promise<void> {
+    await this.accountButton.click();
+    await this.logoutLink.waitFor({ state: "visible", timeout: 10_000 });
+  }
+
+  /** Выйти: аккаунт-меню → Log Out → дождаться редиректа на /login. */
+  async logout(): Promise<void> {
+    await this.openAccountMenu();
+    await this.logoutLink.click();
+    await this.page.waitForURL(/\/login/, { timeout: 20_000 });
   }
 }

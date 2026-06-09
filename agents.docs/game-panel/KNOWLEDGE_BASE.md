@@ -448,7 +448,11 @@ Moderator/Member + счётчики), **Members**, **Audit Log**.
 
 ### 8c. Header / глобальное (НЕ покрыто)
 - Кнопка-аккаунт **«test@testmail.com»** → меню: **Knowledgebase**, **Edit Account** (внешний WHMCS?),
-  **Log Out**. Тест-кандидат: **Logout** → редирект на `/login` (smoke). Рядом — селект языка (**EN**,
+  **Log Out**. ✅ **Покрыто AUTH-004** (`auth.logout.spec.ts`, `@smoke`, 09-Jun): аккаунт-кнопка
+  `button:has-text("@")` (в `.v-navigation-drawer__append`, текст=email, стабильного класса нет) →
+  пункт **Log Out** = `<a href="/logout">` (`.user__navigation-item`) → редирект `/login`. Изолированный
+  контекст (logout убивает сессию; storageState не перезаписываем). `GamePanelDashboardPage.logout()`,
+  селекторы `GAME_PANEL_HEADER`. Рядом — селект языка (**EN**,
   combobox) и колокольчик уведомлений с `v-badge__badge` (счётчик «0»).
 - ⚠️ Log Out убивает сессию текущего `storageState` — в авто-тестах изолировать (отдельный контекст),
   иначе уронит соседние тесты.
