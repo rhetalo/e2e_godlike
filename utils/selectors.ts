@@ -24,6 +24,22 @@ export const HEADER = {
   adminPanelsButton: ".site-header__panels",
 } as const;
 
+/* ===== Language & Currency switcher (header, desktop) ===== */
+// Confirmed live-recon 10-Jun-2026: комбинированный виджет .lang_chooser_header.desktop-only.
+// Триггер .lang-selected показывает "{lang} | {CUR}" (напр. "en | EUR"); список раскрывается по hover.
+// ЯЗЫК = URL-префикс (<a href="https://godlike.host/{code}/">) → контент переводится, prefix в URL.
+// ВАЛЮТА = JS-клик по .currency-item → меняет символ/цену, БЕЗ смены URL, cookie-персист (пережил /de/).
+// Списки: 8 языков (en + ua/es/de/pl/fr/pt/it), 4 валюты (USD $, EUR €, GBP £, PLN zł). Виджет задвоен (desktop+mobile).
+export const LOCALE_SWITCHER = {
+  root: ".lang_chooser_header.desktop-only",
+  trigger: ".lang_chooser_header.desktop-only .lang-selected",            // "en | EUR" (hover раскрывает)
+  currentLang: ".lang_chooser_header.desktop-only .lang-selected__inner", // "en"
+  langItem: ".lang_chooser_header.desktop-only .lang-list-li a",          // <a href="/{code}/"> — фильтр по тексту code
+  currencyItem: ".lang_chooser_header.desktop-only .currency-item",       // <li> "$USD"/"€EUR"/... — JS-переключение
+  langListInner: ".lang_chooser_header.desktop-only .lang-list__inner",   // выпадающий список (visibility:hidden→visible по :hover)
+  samplePrice: ".main-header__games-tariff__price-discount",              // цена на главной (проверка смены валюты)
+} as const;
+
 /* ===== Storefront / Product Cards ===== */
 export const STOREFRONT = {
   hero: ".storefront__hero",
