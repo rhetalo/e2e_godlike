@@ -49,4 +49,34 @@ test.describe("@smoke [game-panel] Дашборд", () => {
       await expect(dash.sidebarLink(name), `sidebar link "${name}"`).toBeVisible();
     }
   });
+
+  test("TC-GP-DASH-003 | тоггл вида grid↔list переключает раскладку списка серверов", async () => {
+    const page = await context.newPage();
+    const dash = new GamePanelDashboardPage(page);
+    await dash.goto();
+    await expect(dash.heading).toBeVisible();
+
+    await test.step("2 кнопки вида; grid добавляет модификатор -grid контейнеру", async () => {
+      expect(await dash.viewToggleButtons.count()).toBe(2);
+      await dash.setView("grid");
+      await expect(dash.serversContainer).toHaveClass(/dashboard__servers-grid/);
+    });
+    await test.step("list снимает модификатор -grid", async () => {
+      await dash.setView("list");
+      await expect(dash.serversContainer).not.toHaveClass(/dashboard__servers-grid/);
+    });
+  });
+
+  test("TC-GP-DASH-004 | карточка сервера показывает адрес srv*.godlike.club:PORT и кнопку Copy", async () => {
+    const page = await context.newPage();
+    const dash = new GamePanelDashboardPage(page);
+    await dash.goto();
+
+    await test.step("адрес сервера в формате srv*.godlike.club:PORT", async () => {
+      await expect(dash.serverAddresses.first()).toHaveText(/srv\d+\.godlike\.club:\d+/);
+    });
+    await test.step("рядом с адресом — кнопка Copy IP", async () => {
+      await expect(dash.serverCopyButtons.first()).toBeVisible();
+    });
+  });
 });

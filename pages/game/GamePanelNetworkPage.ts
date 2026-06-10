@@ -58,4 +58,12 @@ export class GamePanelNetworkPage extends GamePanelBasePage {
     await this.page.keyboard.press("Escape");
     await this.activeDialog.waitFor({ state: "hidden", timeout: 8_000 }).catch(() => {});
   }
+
+  // --- Copy-кнопки (clipboard, read-only — проверяем присутствие) ---
+  get copySubdomainButton(): Locator {
+    return this.page.locator(GAME_PANEL_NETWORK.copySubdomainButton).first();
+  }
+  get copyPortIpButton(): Locator {
+    return this.page.locator(GAME_PANEL_NETWORK.copyPortIpButton).first();
+  }
 }

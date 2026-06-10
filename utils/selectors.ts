@@ -400,6 +400,14 @@ export const GAME_PANEL_DASHBOARD = {
   serverName: '.dashboard__servers .server .main1',
   filterSuspended: 'button:has-text("Suspended")',
   filterFree: 'button:has-text("Free")',
+  // view-режим list/grid: 2 .filter-button (активный = .filter-button__active); клик переключает
+  // раскладку контейнера .dashboard__servers (модификатор -grid в grid-режиме). nth(0)=list, nth(1)=grid.
+  // Адрес сервера + Copy IP — в карточке. Confirmed live-recon 10-Jun-2026.
+  viewToggle: ".filter-button",
+  viewToggleActive: ".filter-button__active",
+  serversContainer: ".dashboard__servers",
+  serverAddress: ".server__right-allocation_ip",          // "srv*.godlike.club:PORT"
+  serverCopyBtn: ".server__right-allocation_ip button",   // Copy IP (icon-кнопка рядом с адресом)
 } as const;
 
 export const GAME_PANEL_SERVER = {
@@ -550,6 +558,9 @@ export const GAME_PANEL_NETWORK = {
   // Add Additional Port диалог (структурный; ⚠️ "Add Port" НЕ жать — добавит порт)
   addPortNameInput: '.v-overlay--active input[placeholder="Enter a descriptive name..."]',
   addPortConfirm: '.v-overlay--active button:has-text("Add Port")',
+  // Copy-кнопки (clipboard, read-only — проверяем присутствие). Confirmed live-recon 10-Jun-2026.
+  copySubdomainButton: 'button:has-text("Copy subdomain")',
+  copyPortIpButton: 'button:has-text("Copy Port & IP")',
 } as const;
 
 // Tasks (/server/{uuid}/tasks). Confirmed via live DOM 05-Jun-2026 (recon).
