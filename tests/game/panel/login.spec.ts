@@ -9,7 +9,7 @@
  */
 import { test, expect } from "@playwright/test";
 import { GamePanelLoginPage } from "../../../pages/game/GamePanelLoginPage";
-import { GAME_EMAIL, GAME_PASSWORD } from "../../../utils/gameAuth";
+import { GAME_EMAIL, GAME_PASSWORD, GAME_PANEL_URL, GAME_SERVER_UUID } from "../../../utils/gameAuth";
 
 test.describe("@smoke [game-panel] Логин", () => {
   test("TC-GP-LOGIN-001 | чузер открывает форму email/пароль со скрытым паролем", async ({ page }) => {
@@ -53,6 +53,44 @@ test.describe("@smoke [game-panel] Логин", () => {
       await expect(
         page.locator("h1, h2").filter({ hasText: /My Servers/i }).first(),
       ).toBeVisible({ timeout: 20_000 });
+    });
+  });
+
+  test("TC-GP-LOGIN-004 | невалидный формат email не сабмитит форму", async ({ page }) => {
+    const login = new GamePanelLoginPage(page);
+    await login.goto();
+
+    await login.loginWith("notanemail", "whatever_xyz");
+
+    await test.step("форма не отправлена — остаёмся на /login, не на дашборде", async () => {
+      await expect(page).toHaveURL(/\/login/);
+      await expect(login.emailInput).toBeVisible();
+      await expect(page).not.toHaveURL(/\?page=1/);
+    });
+  });
+
+  test("TC-GP-LOGIN-005 | сессия переживает перезагрузку страницы (F5)", async ({ page }) => {
+    const login = new GamePanelLoginPage(page);
+    await login.goto();
+    await login.loginWith(GAME_EMAIL, GAME_PASSWORD);
+    await page.waitForURL((u) => !u.toString().includes("/login"), { timeout: 30_000 });
+
+    await test.step("после reload остаёмся залогинены (не редирект на /login)", async () => {
+      await page.reload();
+      await expect(page).not.toHaveURL(/\/login/);
+      await expect(
+        page.locator("h1, h2").filter({ hasText: /My Servers/i }).first(),
+      ).toBeVisible({ timeout: 20_000 });
+    });
+  });
+
+  test("TC-GP-LOGIN-006 | неавторизованный доступ к /server/{uuid} редиректит на /login", async ({ page }) => {
+    // Свежий контекст без сессии (этот page без storageState). Раздел сервера защищён —
+    // SPA должна увести на /login. Access-control smoke (URL/UUID из gameAuth, не хардкод).
+    await page.goto(`${GAME_PANEL_URL}/server/${GAME_SERVER_UUID}`, { waitUntil: "domcontentloaded" });
+
+    await test.step("без авторизации редирект на /login", async () => {
+      await expect(page).toHaveURL(/\/login/, { timeout: 20_000 });
     });
   });
 });
