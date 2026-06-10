@@ -28,6 +28,8 @@
 | TC-GP-LOGIN-006 | Неавторизованный `/server/{uuid}` → редирект на `/login` (access control) |
 | TC-GP-DASH-001 | Дэшборд: ≥1 сервер, счётчик в заголовке согласован |
 | TC-GP-DASH-002 | Глобальный сайдбар: My Servers / Billing / Support Tickets / Knowledge Base |
+| TC-GP-DASH-003 | Тоггл вида grid↔list переключает раскладку `.dashboard__servers` (модификатор -grid) |
+| TC-GP-DASH-004 | Карточка сервера: адрес `srv*.godlike.club:PORT` + кнопка Copy IP |
 | TC-GP-SRV-001 | Сервер: имя, статус-слово, power-контролы Start/Restart/Kill |
 | TC-GP-SRV-002 | Видны все табы контента (Overview…Players) |
 | TC-GP-SRV-003 | Server Information: адрес `srvN.godlike.club:PORT` + UUID |
@@ -122,6 +124,7 @@
 |----|----------|
 | TC-GP-NET-001 (`@regression`) | Subdomain-блок виден + кнопка Update Subdomain |
 | TC-GP-NET-002 (`@regression`) | Network Ports: ≥1 карточка порта + кнопка Add Additional Port |
+| TC-GP-NET-004 (`@regression`) | Кнопки Copy subdomain + Copy Port & IP присутствуют (clipboard, read-only) |
 
 Update Subdomain / Add Port НЕ жмём (меняют сетевые настройки). Детали — `KNOWLEDGE_BASE.md` §5f.
 

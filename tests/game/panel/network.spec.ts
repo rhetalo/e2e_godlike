@@ -59,4 +59,12 @@ test.describe("@regression [game-panel] Port & Domains", () => {
       await expect(net.activeDialog).toBeHidden();
     });
   });
+
+  test("TC-GP-NET-004 | кнопки Copy subdomain и Copy Port & IP присутствуют", async () => {
+    await net.goto(); // вернуться на /network (NET-003 мог оставить состояние диалога)
+    await test.step("обе clipboard-кнопки видны (read-only, не жмём)", async () => {
+      await expect(net.copySubdomainButton).toBeVisible();
+      await expect(net.copyPortIpButton).toBeVisible();
+    });
+  });
 });

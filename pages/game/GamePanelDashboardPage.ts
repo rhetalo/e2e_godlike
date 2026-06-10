@@ -60,6 +60,27 @@ export class GamePanelDashboardPage extends GamePanelBasePage {
     return this.page.getByRole("link", { name, exact: false }).first();
   }
 
+  // --- view-режим (list/grid) + адрес/Copy сервера ---
+
+  get serversContainer(): Locator {
+    return this.page.locator(GAME_PANEL_DASHBOARD.serversContainer).first();
+  }
+  get viewToggleButtons(): Locator {
+    return this.page.locator(GAME_PANEL_DASHBOARD.viewToggle);
+  }
+  /** Переключить вид списка серверов: nth(0)=list, nth(1)=grid. */
+  async setView(mode: "list" | "grid"): Promise<void> {
+    await this.viewToggleButtons.nth(mode === "grid" ? 1 : 0).click();
+  }
+  /** Адреса серверов «srv*.godlike.club:PORT» в карточках. */
+  get serverAddresses(): Locator {
+    return this.page.locator(GAME_PANEL_DASHBOARD.serverAddress);
+  }
+  /** Кнопки Copy IP рядом с адресами. */
+  get serverCopyButtons(): Locator {
+    return this.page.locator(GAME_PANEL_DASHBOARD.serverCopyBtn);
+  }
+
   // --- Аккаунт-меню / Logout (хедер-глобал) ---
 
   get accountButton(): Locator {
