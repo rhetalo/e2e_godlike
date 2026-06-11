@@ -33,8 +33,9 @@ test.describe("@critical [game-panel] Консоль", () => {
   });
 
   test.afterAll(async () => {
+    test.setTimeout(180_000); // запас хука над ensureOffline + context.close (фикс флоки teardown)
     try {
-      await srv.ensureOffline(120_000);
+      await srv.ensureOffline(90_000);
     } catch {
       /* best-effort teardown */
     }

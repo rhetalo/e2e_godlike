@@ -50,8 +50,9 @@ test.describe("@regression [game-panel] Security — инъекция в кон�
   });
 
   test.afterAll(async () => {
+    test.setTimeout(180_000); // запас хука над ensureOffline + context.close (фикс флоки teardown)
     try {
-      await srv.ensureOffline(120_000); // recovery: вернуть сервер в Offline
+      await srv.ensureOffline(90_000); // recovery: вернуть сервер в Offline
     } catch {
       /* best-effort teardown */
     }

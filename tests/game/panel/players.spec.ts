@@ -64,6 +64,7 @@ test.describe("@critical [game-panel] Players — whitelist через конс�
   });
 
   test.afterAll(async () => {
+    test.setTimeout(180_000); // запас хука над whitelist remove + ensureOffline + context.close
     // self-cleaning: гарантированно убрать игрока из whitelist + погасить сервер
     try {
       await srv.sendConsoleCommand(`whitelist remove ${TEST_PLAYER}`);
@@ -71,7 +72,7 @@ test.describe("@critical [game-panel] Players — whitelist через конс�
       /* best-effort */
     }
     try {
-      await srv.ensureOffline(120_000);
+      await srv.ensureOffline(90_000);
     } catch {
       /* best-effort */
     }
