@@ -35,6 +35,10 @@ import {
 
 const storageStatePath = "storageState.modded.json";
 
+// Host Now калькулятора ведёт на выделенную корзину /cart-modded-new (не /cart, как install-кнопка
+// грида) — это НОВЫЙ UI корзины (custom-select + "Order Now"), не классический Vue-cart. Confirmed MCP 13-Jun.
+const MODDED_NEW_CART_PRODUCT = /\/cart-modded-new\/?\?[^#]*productId=/;
+
 // ─── beforeAll: login once ───────────────────────────────────────────────────
 
 test.beforeAll(async ({ browser }: { browser: Browser }) => {
@@ -170,6 +174,58 @@ test.describe("Воронка покупки modded (стоп на страни�
         console.log("[STEP 5] Final 'Continue' button visible — NOT clicking ✓");
       }
       expect(checkoutPage.isOnPaymentStep()).toBeTruthy();
+    } finally {
+      await context.close();
+    }
+  });
+
+  test("@critical Host Now (калькулятор) → /cart-modded-new несёт выбранный тариф", async ({
+    browser,
+  }) => {
+    const context = await browser.newContext({ storageState: storageStatePath });
+    await pinAmplitudeExperiments(context);
+    const page = await context.newPage();
+
+    const modded = new ModdedHostingPage(page);
+    const cartPage = new CartPage(page);
+
+    try {
+      // ─── Step 1: калькулятор — читаем выбранный тариф (productId в href Host Now) ───
+      await modded.open();
+      const calc = await modded.readCalculatorCartParams();
+      console.log(
+        `[STEP 1] calc productId=${calc.productId} modpackId=${calc.modpackId} promo=${calc.promo}`,
+      );
+      expect(calc.productId).toMatch(/^\d+$/);
+      expect(calc.modpackId).toBeTruthy();
+
+      const price = await modded.readCalculatorPrice();
+      console.log(`[STEP 1] calc price: ${price.current} (old ${price.old})`);
+      expect(price.current).toMatch(/[€$]\s?\d/);
+
+      // ─── Step 2: Host Now → /cart-modded-new; тариф доехал = тот же productId ───
+      await Promise.all([
+        page.waitForURL(MODDED_NEW_CART_PRODUCT, { timeout: 30_000 }),
+        modded.calculatorCheckoutLink().click(),
+      ]);
+      await cartPage.cookieBanner.dismissAll();
+      const url = new URL(page.url());
+      console.log(`[STEP 2] Cart URL: ${page.url()}`);
+      expect(url.pathname).toMatch(/\/cart-modded-new/);
+      expect(url.searchParams.get("productId")).toBe(calc.productId);
+      expect(url.searchParams.get("promo")).toBeTruthy();
+
+      // ─── Step 3: новый UI корзины /cart-modded-new смонтировался ───
+      // ⚠️ /cart-modded-new — НЕ классическая Vue-корзина (CartPage с auth-block/order__button-order),
+      // а новый UI: custom-select дропдауны (план/период/локация) + кнопка "Order Now". Доезд до
+      // payment через этот UI — отдельная поверхность; классический payment уже покрыт install-тестом
+      // выше. Здесь подтверждаем, что выбранный тариф корректно открылся в воронке нового UI.
+      await page.waitForLoadState("networkidle", { timeout: 10_000 }).catch(() => {});
+      const planToggle = page.locator(".custom-select__toggle").first();
+      const orderButton = page.locator("button.form__button--primary", { hasText: "Order Now" });
+      await expect(planToggle).toBeVisible({ timeout: 15_000 });
+      await expect(orderButton).toBeVisible({ timeout: 15_000 });
+      console.log(`[STEP 3] new-cart UI смонтирован: план-тоггл="${(await planToggle.textContent())?.trim()}"`);
     } finally {
       await context.close();
     }

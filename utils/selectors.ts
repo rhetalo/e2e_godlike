@@ -148,6 +148,30 @@ export const SEEDS = {
   cardImage: ".minecraft-seeds-card__image",
 } as const;
 
+/* ===== New Seed Calculator (/minecraft-seeds/ listing page) ===== */
+// Confirmed via MCP recon 13-Jun-2026. ⚠️ ОТДЕЛЬНЫЙ виджет, НЕ Vuetify PlanCalculator:
+// кастомный кальк с нативным <input type=range> и инлайн-конфигом window.GodlikeNewSeedCalculator
+// (products[]/seeds[]/versions[], cartBaseUrl="/cart-seed", promocode="SEED", discount=40).
+// Гидрируется асинхронно и ПУСТ (план/цена "—"), пока не выбрана версия игры в #glike-sc-game-version.
+// Слайдер двигает тариф (Double→…→Godlike), меняя план/RAM/слоты/цену/игроков. CTA «Create server»
+// строит URL корзины НА КЛИК (href="#") → /cart-seed.
+export const NEW_SEED_CALCULATOR = {
+  root: ".godlike-new-seed-calculator",
+  gameVersionSelect: "#glike-sc-game-version", // <select> версий игры (Minecraft 1.18…)
+  seedSearch: "#glike-sc-seed-search",
+  customSeed: "#glike-sc-custom-seed",
+  range: ".godlike-new-seed-calculator__range", // нативный <input type=range>
+  playersValue: ".godlike-new-seed-calculator__players-value",
+  planName: ".godlike-new-seed-calculator__plan-name",
+  planRam: ".godlike-new-seed-calculator__plan-ram",
+  planSlots: ".godlike-new-seed-calculator__plan-slots",
+  priceNew: ".godlike-new-seed-calculator__price-new",
+  priceOld: ".godlike-new-seed-calculator__price-old",
+  priceCycle: ".godlike-new-seed-calculator__price-cycle",
+  summaryRow: ".godlike-new-seed-calculator__summary-row",
+  cta: "a.godlike-new-seed-calculator__cta", // «Create server» → /cart-seed (URL строится на клик)
+} as const;
+
 /* ===== Game Servers ===== */
 export const GAME_SERVERS = {
   filterTabs: '[class*="filter"]',

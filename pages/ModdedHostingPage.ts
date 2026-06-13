@@ -100,6 +100,20 @@ export class ModdedHostingPage extends BasePage {
     };
   }
 
+  /**
+   * Цена, отображаемая калькулятором (со скидкой / старая). Confirmed MCP recon 13-Jun-2026:
+   * .plan-calculator__pricing__price__value (текущая) и …--old (зачёркнутая).
+   */
+  async readCalculatorPrice(): Promise<{ current: string; old: string }> {
+    const root = this.calculator.root();
+    const text = async (sel: string) =>
+      ((await root.locator(sel).first().textContent()) ?? "").trim();
+    return {
+      current: await text(".plan-calculator__pricing__price__value"),
+      old: await text(".plan-calculator__pricing__price__value--old"),
+    };
+  }
+
   /** Open the modpack autocomplete and return the visible option titles. */
   async listModpackOptions(limit = 10): Promise<string[]> {
     await this.modpackInput().click();
