@@ -172,6 +172,23 @@ export const NEW_SEED_CALCULATOR = {
   cta: "a.godlike-new-seed-calculator__cta", // «Create server» → /cart-seed (URL строится на клик)
 } as const;
 
+/* ===== New Modded Cart (/cart-modded-new — НОВЫЙ UI воронки) ===== */
+// Confirmed via MCP/scratch recon 13-Jun-2026. ⚠️ НЕ классический Vue-cart (CartPage с
+// auth-block/order__button-order). Это конфигуратор с тремя custom-select дропдаунами
+// (План/RAM, Биллинг, Локация) + кнопка "Order Now". Дропдауны видны ТОЛЬКО залогиненным
+// (аноним → auth-стена). Опции рендерятся внутри .custom-select по клику на .custom-select__toggle.
+// Идентификация дропдаунов по содержимому: план содержит "Slots", биллинг — "Month",
+// локация — единственный без "Slots"/"Month" (.location-group рендерится лишь при открытии,
+// поэтому для закрытого дропдауна не годится). Цена: .cart__pricing__price / ...--old.
+export const CART_MODDED_NEW = {
+  customSelect: ".custom-select",
+  toggle: ".custom-select__toggle",
+  option: ".custom-select__option",
+  priceCurrent: ".cart__pricing__price",
+  priceOld: ".cart__pricing__price--old",
+  orderButton: "button.form__button--primary", // "Order Now" (⚠️ оформляет заказ — НЕ жать)
+} as const;
+
 /* ===== Game Servers ===== */
 export const GAME_SERVERS = {
   filterTabs: '[class*="filter"]',
