@@ -77,6 +77,7 @@ test.describe("Проверка внутренних ссылок", () => {
           const status = response.status();
           if (status >= 400) return { ok: false, status, reason: `HTTP ${status}` };
 
+          // eslint-disable-next-line playwright/no-wait-for-timeout -- санкционировано CLAUDE.md: дать JS догрузиться перед чтением content-type
           await page.waitForTimeout(1500); // intentional: allow page JS to finish before reading content-type
 
           const contentType = response.headers()["content-type"] || "";
@@ -91,6 +92,7 @@ test.describe("Проверка внутренних ссылок", () => {
           return { ok: true, status };
         } catch {
           if (attempt === RETRIES) return { ok: false, reason: "Navigation failed" };
+          // eslint-disable-next-line playwright/no-wait-for-timeout -- санкционировано CLAUDE.md: back-off перед ретраем навигации
           await page.waitForTimeout(5000); // intentional: retry back-off delay before next attempt
         }
       }
@@ -140,6 +142,7 @@ test.describe("Проверка внутренних ссылок", () => {
         }
       }
 
+      // eslint-disable-next-line playwright/no-wait-for-timeout -- санкционировано CLAUDE.md: rate-limiting краулера, чтобы не долбить сервер
       await page.waitForTimeout(DELAY_BETWEEN_PAGES); // intentional: crawler rate-limiting to avoid hammering the server
     }
 

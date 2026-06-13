@@ -37,10 +37,12 @@ test.describe("@regression [game-panel] Versions (server software)", () => {
       await expect(versions.installedBlock).toBeVisible();
       await expect(versions.installedBlock).toContainText(/Currently running/i);
     });
+
     await test.step("сетка семейств содержит несколько server-software", async () => {
       await expect(versions.grid).toBeVisible();
       expect(await versions.familyCards().count()).toBeGreaterThan(3);
     });
+
     await test.step("известные семейства присутствуют (Vanilla/Paper/NeoForge)", async () => {
       await expect(versions.familyByName("Vanilla").first()).toBeVisible();
       await expect(versions.familyByName("Paper").first()).toBeVisible();
@@ -50,6 +52,7 @@ test.describe("@regression [game-panel] Versions (server software)", () => {
 
   test("TC-GP-VER-002 | drill-down семейства открывает список версий (без установки)", async () => {
     await versions.openFamily("Vanilla");
+
     await test.step("в drill-down видны Go Back и тогл Show Snapshot Versions", async () => {
       await expect(versions.goBack).toBeVisible();
       await expect(versions.snapshotToggle).toBeVisible();

@@ -215,9 +215,9 @@ test.describe("@regression VPS-панель — Rebuild: структура OS �
     const { context, page, rebuildPage, navigated } = await openRebuildPage(browser);
     test.skip(!navigated, "Rebuild page not reachable — server may be stopped or modal unavailable");
 
-    const selectedCount = await rebuildPage.selectedOsCard.count();
+    const selectedCount = rebuildPage.selectedOsCard;
     console.log(`[INFO] Selected OS cards on load: ${selectedCount} (expected 0)`);
-    expect(selectedCount).toBe(0);
+    await expect(selectedCount).toHaveCount(0);
 
     const unselectedCount = await rebuildPage.unselectedOsCards.count();
     console.log(`[INFO] Unselected OS cards: ${unselectedCount}`);
@@ -451,9 +451,9 @@ test.describe("@regression VPS-панель — Rebuild: выбор ОС (Instal
     await almaCard.click();
     await page.waitForTimeout(500);
 
-    const selectedCount = await rebuildPage.selectedOsCard.count();
+    const selectedCount = rebuildPage.selectedOsCard;
     console.log(`[INFO] Selected OS cards after click: ${selectedCount} (expected 1)`);
-    expect(selectedCount).toBe(1);
+    await expect(selectedCount).toHaveCount(1);
 
     await goBackToServer(page);
     await context.close();
@@ -472,7 +472,7 @@ test.describe("@regression VPS-панель — Rebuild: выбор ОС (Instal
     await almaCard.click();
     await page.waitForTimeout(400);
 
-    expect(await rebuildPage.selectedOsCard.count()).toBe(1);
+    await expect(rebuildPage.selectedOsCard).toHaveCount(1);
     console.log("[INFO] AlmaLinux selected ✓");
 
     // Expand Debian and select Debian 12
@@ -489,9 +489,9 @@ test.describe("@regression VPS-панель — Rebuild: выбор ОС (Instal
     expect(debianClass).toContain("border-success");
 
     // Only 1 card should be selected at a time (single-select)
-    const selectedCount = await rebuildPage.selectedOsCard.count();
+    const selectedCount = rebuildPage.selectedOsCard;
     console.log(`[INFO] Total selected cards: ${selectedCount} (expected 1)`);
-    expect(selectedCount).toBe(1);
+    await expect(selectedCount).toHaveCount(1);
 
     // AlmaLinux should be deselected
     const almaClassAfter = await almaCard.evaluate((el) => el.className);

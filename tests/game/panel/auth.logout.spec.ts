@@ -34,6 +34,7 @@ test.describe("@smoke [game-panel] Logout", () => {
   test("TC-GP-AUTH-004 | Log Out из аккаунт-меню → редирект на /login", async () => {
     test.setTimeout(60_000);
     await dashboard.goto();
+
     await test.step("дашборд открыт под залогиненной сессией", async () => {
       await expect(dashboard.heading).toBeVisible();
     });

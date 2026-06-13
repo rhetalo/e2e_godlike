@@ -43,6 +43,7 @@ test.describe("@regression [game-panel] Players — структура таба"
     await test.step("блок .server__players виден", async () => {
       await expect(players.area).toBeVisible();
     });
+
     await test.step("есть карточка 'Server Administrators'", async () => {
       expect(await players.hasCard("Server Administrators")).toBe(true);
     });

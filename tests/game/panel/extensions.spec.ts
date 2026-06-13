@@ -33,10 +33,12 @@ test.describe("@regression [game-panel] Plugins/Mods + Modpacks (каталог)
 
   test("TC-GP-EXT-001 | Plugins/Mods: заголовок Mods, фильтр-кнопки и поиск рендерятся", async () => {
     await ext.gotoExtensions();
+
     await test.step("каталог и заголовок Mods видны", async () => {
       await expect(ext.root).toBeVisible();
       await expect(ext.headerTitle).toContainText(/Mods/i);
     });
+
     await test.step("фильтр-кнопки и поиск присутствуют", async () => {
       expect(await ext.typeButtons().count()).toBeGreaterThan(0);
       await expect(ext.searchInput).toBeVisible();
@@ -45,6 +47,7 @@ test.describe("@regression [game-panel] Plugins/Mods + Modpacks (каталог)
 
   test("TC-GP-EXT-002 | Modpacks: тот же компонент каталога с заголовком Modpacks", async () => {
     await ext.gotoModpacks();
+
     await test.step("каталог и заголовок Modpacks видны", async () => {
       await expect(ext.root).toBeVisible();
       await expect(ext.headerTitle).toContainText(/Modpacks/i);

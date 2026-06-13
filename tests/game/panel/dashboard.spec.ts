@@ -57,10 +57,11 @@ test.describe("@smoke [game-panel] Дашборд", () => {
     await expect(dash.heading).toBeVisible();
 
     await test.step("2 кнопки вида; grid добавляет модификатор -grid контейнеру", async () => {
-      expect(await dash.viewToggleButtons.count()).toBe(2);
+      await expect(dash.viewToggleButtons).toHaveCount(2);
       await dash.setView("grid");
       await expect(dash.serversContainer).toHaveClass(/dashboard__servers-grid/);
     });
+
     await test.step("list снимает модификатор -grid", async () => {
       await dash.setView("list");
       await expect(dash.serversContainer).not.toHaveClass(/dashboard__servers-grid/);
@@ -75,6 +76,7 @@ test.describe("@smoke [game-panel] Дашборд", () => {
     await test.step("адрес сервера в формате srv*.godlike.club:PORT", async () => {
       await expect(dash.serverAddresses.first()).toHaveText(/srv\d+\.godlike\.club:\d+/);
     });
+
     await test.step("рядом с адресом — кнопка Copy IP", async () => {
       await expect(dash.serverCopyButtons.first()).toBeVisible();
     });

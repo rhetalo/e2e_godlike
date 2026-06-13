@@ -96,8 +96,8 @@ test.describe("Мобильная воронка корзины", () => {
 
     await cart.selectGameBySearch("Rust");
 
-    const isDisabled = await page.locator(".custom-select--disabled").count();
-    expect(isDisabled).toBe(0);
+    const isDisabled = page.locator(".custom-select--disabled");
+    await expect(isDisabled).toHaveCount(0);
 
     await cart.selectPlan("Compound");
     const planText = await cart.getSelectedPlan();
@@ -279,7 +279,7 @@ expect(quarterlyPrice).toBeGreaterThan(monthlyPrice);
     const promoInput = page.locator(
       '.cart__input[placeholder="Enter your promocode"]',
     );
-    await expect(promoInput).not.toBeVisible();
+    await expect(promoInput).toBeHidden();
 
     await cart.expandPromocode();
 

@@ -42,6 +42,7 @@ test.describe("@regression [game-panel] Port & Domains", () => {
       await expect(net.portsSection).toBeVisible();
       expect(await net.portCards().count()).toBeGreaterThan(0);
     });
+
     await test.step("кнопка Add Additional Port видна", async () => {
       await expect(net.addPortButton).toBeVisible();
     });
@@ -49,11 +50,13 @@ test.describe("@regression [game-panel] Port & Domains", () => {
 
   test("TC-GP-NET-003 | Add Additional Port диалог: поле Name + Add Port (без добавления)", async () => {
     await net.openAddPortDialog();
+
     await test.step("диалог с полем имени и кнопкой Add Port виден", async () => {
       await expect(net.activeDialog).toBeVisible();
       await expect(net.addPortNameInput).toBeVisible();
       await expect(net.addPortConfirm).toBeVisible();
     });
+
     await test.step("закрываем без добавления порта", async () => {
       await net.closeDialog();
       await expect(net.activeDialog).toBeHidden();
@@ -62,6 +65,7 @@ test.describe("@regression [game-panel] Port & Domains", () => {
 
   test("TC-GP-NET-004 | кнопки Copy subdomain и Copy Port & IP присутствуют", async () => {
     await net.goto(); // вернуться на /network (NET-003 мог оставить состояние диалога)
+
     await test.step("обе clipboard-кнопки видны (read-only, не жмём)", async () => {
       await expect(net.copySubdomainButton).toBeVisible();
       await expect(net.copyPortIpButton).toBeVisible();

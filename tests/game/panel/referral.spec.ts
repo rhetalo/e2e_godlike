@@ -35,6 +35,7 @@ test.describe("@regression [game-panel] Referral", () => {
       await expect(ref.title).toBeVisible();
       await expect(ref.refLink).toBeVisible();
     });
+
     await test.step("Copy Link и блок How It Works присутствуют", async () => {
       await expect(ref.copyLinkButton).toBeVisible();
       await expect(ref.howItWorks).toBeVisible();
