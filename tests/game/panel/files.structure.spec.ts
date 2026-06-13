@@ -38,17 +38,20 @@ test.describe("@regression [game-panel] File manager — диалоги/меню
 
   test("TC-GP-FILE-003 | per-row '...' меню: набор действий рендерится", async () => {
     await files.openAnyRowMenu();
+
     await test.step("меню открыто и содержит ключевые действия", async () => {
       expect(await files.rowMenuItems().count()).toBeGreaterThan(5);
       await expect(files.rowMenuItem("Rename")).toBeVisible();
       await expect(files.rowMenuItem("Delete")).toBeVisible();
       await expect(files.rowMenuItem("Copy path")).toBeVisible();
     });
+
     await files.closeOverlay();
   });
 
   test("TC-GP-SFTP-001 | SFTP Connect диалог: поля подключения + кнопки (без Generate/Save)", async () => {
     await files.openSftpDialog();
+
     await test.step("диалог с полями Host/Username и кнопками Open SFTP/Generate виден", async () => {
       await expect(files.activeDialog).toBeVisible();
       await expect(files.activeDialog).toContainText(/Host/i);
@@ -56,26 +59,31 @@ test.describe("@regression [game-panel] File manager — диалоги/меню
       await expect(files.activeDialog).toContainText(/Open SFTP/i);
       await expect(files.activeDialog).toContainText(/Generate/i);
     });
+
     await files.closeOverlay();
   });
 
   test("TC-GP-CF-001 | CurseForge upload диалог: Browse/Proceed (без загрузки)", async () => {
     await files.openCurseForgeDialog();
+
     await test.step("диалог загрузки модпака виден", async () => {
       await expect(files.activeDialog).toBeVisible();
       await expect(files.activeDialog).toContainText(/Browse file/i);
       await expect(files.activeDialog).toContainText(/Proceed/i);
     });
+
     await files.closeOverlay();
   });
 
   test("TC-GP-FILE-005 | CodeMirror-редактор открывает текстовый файл (read-only)", async () => {
     await files.goto(); // к чистому списку файлов (предыдущий тест мог оставить overlay)
     await files.openFileInEditor(EDITOR_FILE);
+
     await test.step("редактор смонтирован и содержит контент файла", async () => {
       await expect(files.editorContent).toBeVisible();
       expect((await files.getEditorText()).length).toBeGreaterThan(0);
     });
+
     await files.leaveEditor(); // уходим без сохранения (ничего не редактировали)
   });
 });

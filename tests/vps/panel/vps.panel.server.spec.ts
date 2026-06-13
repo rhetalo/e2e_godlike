@@ -74,6 +74,7 @@ test.describe("VPS-панель — Dashboard и навигация", () => {
     await test.step("Dashboard link visible", async () => {
       await expect(dashboard.navDashboardLink).toBeVisible({ timeout: 10_000 });
     });
+
     await test.step("Servers link visible", async () => {
       await expect(dashboard.navServersLink).toBeVisible({ timeout: 10_000 });
     });

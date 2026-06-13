@@ -46,6 +46,7 @@ test.describe("@critical [game-panel] Консоль", () => {
     await test.step("в логе есть серверный вывод", async () => {
       expect(await srv.getConsoleText()).toMatch(/INFO|Done \(|Pterodactyl|Server thread/i);
     });
+
     await test.step("поле ввода команд доступно", async () => {
       await expect(srv.consoleCommandInput).toBeVisible();
       await expect(srv.consoleCommandInput).toBeEnabled();

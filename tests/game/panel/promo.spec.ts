@@ -34,10 +34,12 @@ test.describe("@regression [game-panel] Промо: Boost/Upgrade + Free Premium
 
   test("TC-GP-UPG-001 | Boost ведёт на Upgrade: карточки планов и цены (без checkout)", async () => {
     await upgrade.gotoViaBoost();
+
     await test.step("страница апгрейда и карточка текущего плана видны", async () => {
       await expect(upgrade.root).toBeVisible();
       await expect(upgrade.currentPlanCard).toBeVisible();
     });
+
     await test.step("есть карточки планов на выбор и отрендерены цены", async () => {
       expect(await upgrade.planCards().count()).toBeGreaterThan(0);
       await expect(upgrade.root).toContainText(upgrade.priceText);
@@ -46,11 +48,13 @@ test.describe("@regression [game-panel] Промо: Boost/Upgrade + Free Premium
 
   test("TC-GP-PREM-001 | Free Premium модалка открывается со списком и CTA (без покупки)", async () => {
     const premium = new FreePremiumDialog(upgrade.page);
+
     await test.step("модалка открывается и показывает CTA Get Premium", async () => {
       await premium.open();
       await expect(premium.dialog).toBeVisible();
       await expect(premium.cta).toBeVisible();
     });
+
     await premium.close();
   });
 });

@@ -43,6 +43,7 @@ test.describe("@regression [game-panel] Tasks", () => {
     await test.step("панели задач отрендерены", async () => {
       expect(await tasks.panels().count()).toBeGreaterThan(0);
     });
+
     await test.step("есть дефолтные задачи Send command / Send power action", async () => {
       expect(await tasks.hasTask("Send command")).toBe(true);
       expect(await tasks.hasTask("Send power action")).toBe(true);
@@ -57,11 +58,13 @@ test.describe("@regression [game-panel] Tasks", () => {
   test("TC-GP-TASK-003 | создание и удаление задачи Send command (self-cleaning)", async () => {
     await tasks.removeYourTaskIfPresent(TASK_NAME); // precondition: убрать мусор от прошлого прогона
     await tasks.goto(); // вернуться к Default Tasks (там Configure у Send command)
+
     await test.step("создать задачу через Configure → Save", async () => {
       await tasks.configureSendCommand(TASK_NAME, "list");
       await tasks.openYourTasks();
       await expect(tasks.yourTask(TASK_NAME)).toBeVisible();
     });
+
     await test.step("удалить задачу (self-cleaning) — исчезает из списка", async () => {
       await tasks.removeYourTask(TASK_NAME);
       await expect(tasks.yourTask(TASK_NAME)).toBeHidden();

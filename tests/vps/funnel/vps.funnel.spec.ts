@@ -627,7 +627,7 @@ test.describe("@regression VPS-воронка — Configure Your Server", () => 
     });
 
     await test.step("дропдаун версий отсутствует", async () => {
-      await expect(config.osDropdown).not.toBeVisible();
+      await expect(config.osDropdown).toBeHidden();
       console.log("[INFO] No version dropdown for WordPress on Ubuntu ✓");
     });
 

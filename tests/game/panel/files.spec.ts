@@ -69,10 +69,12 @@ test.describe("@critical [game-panel] Файловый менеджер", () => 
       await files.createFolder(RENAME_FROM);
     }
     await files.renameEntry(RENAME_FROM, RENAME_TO);
+
     await test.step("новое имя видно, старое исчезло", async () => {
       await expect(files.fileEntry(RENAME_TO)).toBeVisible();
       await expect(files.fileEntry(RENAME_FROM)).toBeHidden();
     });
+
     // self-cleaning: удаляем переименованную папку
     await files.deleteEntry(RENAME_TO);
     await expect(files.fileEntry(RENAME_TO)).toBeHidden();

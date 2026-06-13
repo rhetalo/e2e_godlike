@@ -46,6 +46,7 @@ test.describe("[game-panel] Sharing — доступ к серверу", () => {
       await expect(sharing.sendInviteButton).toBeVisible();
       await expect(sharing.inviteEmail).toBeVisible();
     });
+
     await test.step("владелец числится среди участников Sharing", async () => {
       expect(await sharing.hasUser(GAME_EMAIL)).toBe(true);
     });
@@ -81,9 +82,11 @@ test.describe("@critical [game-panel] Sharing — invitee видит расша�
   test("TC-GP-SHR-004 | invitee открывает страницу расшаренного сервера (доступ есть)", async () => {
     const srv = new GamePanelServerPage(dash.page, GAME_SERVER_UUID);
     await srv.goto();
+
     await test.step("URL — страница сервера", async () => {
       expect(srv.page.url()).toContain(GAME_SERVER_UUID);
     });
+
     await test.step("имя сервера видно (доступ предоставлен)", async () => {
       await expect(dash.page.getByText(GAME_SERVER_NAME).first()).toBeVisible();
     });
@@ -117,14 +120,17 @@ test.describe("@critical [game-panel] Sharing — смена роли участ
 
   test("TC-GP-SHR-005 | смена роли участника: Co-owner → Moderator → откат", async () => {
     test.setTimeout(120_000);
+
     await test.step("исходная роль — Co-owner", async () => {
       await expect.poll(() => sharing.getMemberRole(), { timeout: 10_000 }).toBe("Co-owner");
     });
+
     await test.step("сменить на Moderator → reload → персист подтверждён", async () => {
       await sharing.setMemberRole("Moderator");
       await sharing.goto();
       await expect.poll(() => sharing.getMemberRole(), { timeout: 10_000 }).toBe("Moderator");
     });
+
     await test.step("вернуть Co-owner → reload → откат подтверждён", async () => {
       await sharing.setMemberRole("Co-owner");
       await sharing.goto();

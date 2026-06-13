@@ -34,16 +34,19 @@ test.describe("@regression [game-panel] Console — Commands палитра", ()
   test("TC-GP-CON-003 | палитра Commands открывается, фильтруется по поиску", async () => {
     await console.openPalette();
     let total = 0;
+
     await test.step("палитра открыта и содержит много команд", async () => {
       await expect(console.paletteSearch).toBeVisible();
       total = await console.paletteItems().count();
       expect(total).toBeGreaterThan(10);
     });
+
     await test.step("поиск 'whitelist' сужает список до команды whitelist", async () => {
       await console.filterPalette("whitelist");
       await expect(console.paletteItem("whitelist")).toBeVisible();
       await expect.poll(async () => console.paletteItems().count()).toBeLessThan(total);
     });
+
     await console.closePalette();
   });
 });

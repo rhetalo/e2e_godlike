@@ -43,6 +43,7 @@ test.describe("@critical [game-panel] Edit Server — переименовани
       await server.setServerName(NEW_NAME);
       await expect(server.overviewTitle).toHaveText(NEW_NAME);
     });
+
     await test.step(`откат к ${GAME_SERVER_NAME} → заголовок вернулся`, async () => {
       await server.setServerName(GAME_SERVER_NAME);
       await expect(server.overviewTitle).toHaveText(GAME_SERVER_NAME);

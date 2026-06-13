@@ -302,6 +302,7 @@ function registerGameTests(game: GameConfig): void {
         const hasBtn = await helper.hasCustomizeButton();
         expect(hasBtn).toBe(false);
       });
+
       return;
     }
 
@@ -322,26 +323,33 @@ function registerGameTests(game: GameConfig): void {
       await test.step("показывает ровно 3 блока-слайдера", async () => {
         expect(blocks).toHaveLength(3);
       });
+
       await test.step('заголовок блока 0 содержит "Slots"', async () => {
         expect(blocks[0].title.toLowerCase()).toContain("slot");
       });
+
       await test.step('заголовок блока 1 содержит "Ram"', async () => {
         expect(blocks[1].title.toLowerCase()).toContain("ram");
       });
+
       await test.step('заголовок блока 2 содержит "Days"', async () => {
         expect(blocks[2].title.toLowerCase()).toContain("day");
       });
+
       await test.step("блок Days Runtime имеет опции [30, 90, 180, 360]", async () => {
         expect(blocks[2].options).toEqual(["30", "90", "180", "360"]);
       });
+
       await test.step("у каждого блока минимум 1 опция", async () => {
         for (const block of blocks) {
           expect(block.options.length).toBeGreaterThanOrEqual(1);
         }
       });
+
       await test.step("блоки Slots и RAM имеют одинаковое число опций (парные)", async () => {
-        expect(blocks[0].options.length).toBe(blocks[1].options.length);
+        expect(blocks[0].options).toHaveLength(blocks[1].options.length);
       });
+
       await test.step("присутствуют все 3 ползунка (.range_slider__selector)", async () => {
         const count = await page.evaluate(
           () =>
@@ -360,9 +368,11 @@ function registerGameTests(game: GameConfig): void {
       await test.step("Slots = первая опция Slots", async () => {
         expect(blocks[0].currentValue).toBe(blocks[0].options[0]);
       });
+
       await test.step("RAM = первая опция RAM", async () => {
         expect(blocks[1].currentValue).toBe(blocks[1].options[0]);
       });
+
       await test.step('Days = "30"', async () => {
         expect(blocks[2].currentValue).toBe("30");
       });

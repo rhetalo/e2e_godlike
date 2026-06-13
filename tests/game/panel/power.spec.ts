@@ -45,12 +45,15 @@ test.describe("@critical [game-panel] Жизненный цикл питания
 
   test("TC-GP-PWR-001 | Start приводит сервер в Online (и принимает Minecraft EULA)", async () => {
     test.setTimeout(360_000); // первый старт ставит файлы/конфиги
+
     await test.step("precondition: сервер Offline", async () => {
       await srv.ensureOffline(120_000);
     });
+
     await test.step("Start + EULA", async () => {
       await srv.clickStart();
     });
+
     await test.step("дожидаемся Online", async () => {
       await srv.waitForOnline(330_000);
       expect(await srv.isOnline()).toBe(true);
@@ -59,9 +62,11 @@ test.describe("@critical [game-panel] Жизненный цикл питания
 
   test("TC-GP-PWR-002 | Restart проводит сервер через полный цикл обратно в Online", async () => {
     test.setTimeout(300_000);
+
     await test.step("precondition: сервер Online", async () => {
       await srv.ensureOnline(300_000);
     });
+
     await test.step("Restart → сервер уходит из Running и возвращается Online", async () => {
       await srv.clickRestart();
       // надёжный сигнал: тоггл «Shut Down» исчезает (Stopping/Starting) → снова Online.
@@ -73,9 +78,11 @@ test.describe("@critical [game-panel] Жизненный цикл питания
 
   test("TC-GP-PWR-003 | Kill останавливает сервер (Offline)", async () => {
     test.setTimeout(180_000);
+
     await test.step("precondition: сервер Online", async () => {
       await srv.ensureOnline(300_000);
     });
+
     await test.step("Kill → подтверждение → Offline", async () => {
       await srv.clickKill();
       await srv.waitForOffline(120_000);

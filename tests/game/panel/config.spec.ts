@@ -55,6 +55,7 @@ test.describe("@critical [game-panel] Config (server.properties)", () => {
       await config.setValue("motd", probeMotd);
       await config.goto(); // reload → проверяем, что значение реально сохранилось
     });
+
     await test.step("значение сохранилось", async () => {
       expect(await config.getValue("motd")).toBe(probeMotd);
     });
@@ -63,6 +64,7 @@ test.describe("@critical [game-panel] Config (server.properties)", () => {
       await config.setValue("motd", originalMotd);
       await config.goto();
     });
+
     await test.step("откат подтверждён", async () => {
       expect(await config.getValue("motd")).toBe(originalMotd);
     });
@@ -70,12 +72,14 @@ test.describe("@critical [game-panel] Config (server.properties)", () => {
 
   test("TC-GP-CFG-002 | Config рендерит ключевые свойства server.properties", async () => {
     await config.goto();
+
     await test.step("ключевые поля присутствуют", async () => {
       expect(await config.hasField("motd")).toBe(true);
       expect(await config.hasField("difficulty")).toBe(true);
       expect(await config.hasField("max-players")).toBe(true);
       expect(await config.hasField("level-name")).toBe(true);
     });
+
     await test.step("у level-name непустое значение", async () => {
       expect((await config.getValue("level-name")).length).toBeGreaterThan(0);
     });
