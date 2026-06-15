@@ -1,4 +1,4 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices, type ReporterDescription } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
@@ -26,9 +26,26 @@ export default defineConfig({
   // локально — list (видны имена тестов). HTML-отчёт пишется всегда в
   // playwright-report/ (открыть: npm run report). Это убирает построчный флуд
   // от больших матриц вроде game-slider (сотни тестов = сотни строк).
-  reporter: process.env.CI
-    ? [['dot'], ['html', { open: 'never' }]]
-    : [['list'], ['html', { open: 'never' }]],
+  reporter: [
+    (process.env.CI ? ['dot'] : ['list']) as ReporterDescription,
+    // Markdown-лог прогона (test-logs/*.md) — только в CI, чтобы не шуметь локально.
+    ...(process.env.CI
+      ? [['./utils/MarkdownLoggerReporter.ts'] as ReporterDescription]
+      : []),
+    ['html', { open: 'never' }] as ReporterDescription,
+    // Slack-отчёт по файлам (порт с gitlab/upd). Подключён всегда, но МОЛЧИТ без
+    // SLACK_WEBHOOK_URL — env-only, без хардкода вебхука (секрет = GitLab CI/CD Variable).
+    [
+      './utils/PerFileSlackReporter.ts',
+      {
+        webhookUrl: process.env.SLACK_WEBHOOK_URL || '',
+        meta: [
+          { key: 'Branch', value: process.env.CI_COMMIT_REF_NAME || 'local' },
+          { key: 'Job URL', value: process.env.CI_JOB_URL || '' },
+        ],
+      },
+    ] as ReporterDescription,
+  ],
 
   // use: {
   //   baseURL: 'https://godlike.host',
