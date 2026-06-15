@@ -11,12 +11,14 @@ export class Header {
   readonly logo: Locator;
   readonly nav: Locator;
   readonly hostNowButton: Locator;
+  readonly mobileNav: Locator;
 
   constructor(private page: Page) {
     this.root = page.locator(HEADER.root);
     this.logo = page.locator(HEADER.logo).first();
     this.nav = page.locator(HEADER.nav);
     this.hostNowButton = page.locator(HEADER.hostNowButton);
+    this.mobileNav = page.locator(HEADER.mobileNav).first();
   }
 
   async clickHostNow(): Promise<void> {

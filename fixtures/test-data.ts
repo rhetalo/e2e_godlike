@@ -29,6 +29,18 @@ export const Urls = {
   cartCheckout: "/clientarea/cart.php?a=checkout",
 } as const;
 
+/**
+ * Ключевые публичные storefront-страницы для структурных SEO/breadth-проверок.
+ * path — относительно BASE_URL; label — для имени теста. Confirmed recon 15-Jun-2026.
+ */
+export const StorefrontPages = [
+  { path: "/", label: "Главная" },
+  { path: "/minecraft-java-servers-hosting/", label: "Minecraft Java хостинг" },
+  { path: "/vps-hosting/", label: "VPS хостинг" },
+  { path: "/modded-minecraft-server-hosting/", label: "Modded хостинг" },
+  { path: "/minecraft-seeds/", label: "Каталог сидов" },
+] as const;
+
 /** A URL is "the payment step" if it matches any of these. */
 export const PaymentUrlPatterns = [
   /\/clientarea\/cart\.php\?a=checkout/i,

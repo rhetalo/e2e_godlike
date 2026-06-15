@@ -15,4 +15,9 @@ export class Footer {
   link(text: string): Locator {
     return this.root.locator('a', { hasText: text });
   }
+
+  /** Внешние соц-ссылки футера (Discord/FB/Instagram/YouTube/TikTok) — опознаются по хосту. */
+  socialLinks(): Locator {
+    return this.root.locator(FOOTER.social);
+  }
 }

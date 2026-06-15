@@ -22,6 +22,7 @@ export const HEADER = {
   navItem: ".header-menu__item-link",
   hostNowButton: ".navigation-right__button",
   adminPanelsButton: ".site-header__panels",
+  mobileNav: ".mobile-navigation", // мобильная навигация/бургер (desktop-nav скрыт на узком вьюпорте)
 } as const;
 
 /* ===== Language & Currency switcher (header, desktop) ===== */
@@ -199,6 +200,21 @@ export const GAME_SERVERS = {
 /* ===== Shared / Layout ===== */
 export const FOOTER = {
   root: "footer",
+  // Соц-ссылки футера (внешние; часть — иконки без текста, опознаём по хосту). Confirmed recon 15-Jun.
+  social:
+    'a[href*="discord.gg"], a[href*="discord.com"], a[href*="facebook.com"], a[href*="instagram.com"], a[href*="youtube.com"], a[href*="tiktok.com"]',
+} as const;
+
+/* ===== SEO / meta (структурные head-проверки на storefront-страницах) ===== */
+// Стандартные head-теги; у всех ключевых страниц подтверждены recon'ом 15-Jun-2026
+// (title + description + canonical=URL страницы + og:title/og:image + twitter:card + один h1).
+export const SEO = {
+  description: 'meta[name="description"]',
+  canonical: 'link[rel="canonical"]',
+  ogTitle: 'meta[property="og:title"]',
+  ogImage: 'meta[property="og:image"]',
+  twitterCard: 'meta[name="twitter:card"]',
+  h1: "h1",
 } as const;
 
 export const FAQ = {
