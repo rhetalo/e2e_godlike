@@ -33,19 +33,27 @@
 - **CI/Slack-репортеры** портированы с `gitlab/upd` (Gemini): `utils/PerFileSlackReporter.ts`,
   `utils/MarkdownLoggerReporter.ts`, `.gitlab-ci.yml`, подключение в `playwright.config.ts`.
   Slack webhook ТОЛЬКО из env (хардкод не переносили). (память `ci-and-reporting`)
+- **Funnel-глубина** (`funnel.cart.paypal`): Crypto/CoinPayments + переключение методов
+  (radio по `value`; slug-классы `.panel__gateway--*` в доке `CheckoutPage` устарели) +
+  credit balance apply↔skip. Стоп до оплаты. ⚠️ Реальную оплату за кредиты намеренно тестит
+  `funnel.with.credit.check.spec.ts` (owner-sanctioned — НЕ трогать/не «обезопашивать»).
+- **Storefront breadth** (`tests/general/storefront.breadth.spec.ts`): SEO/meta ×5 страниц
+  (`StorefrontPages`), footer (legal/соц), mobile 390px. ⚠️ app-side: по 2 `og:title`/`og:image`
+  (тема+SEO-плагин) — дубли OG-тегов, передать лиду. (память `storefront-locale-coverage`)
 
 **Repo-топология:** `origin` (GitHub) = личный/локальный — ДОМ для разработки. `gitlab`
 (git.godlike.ovh) = рабочий, CI лида (daily + Slack); истории разошлись (нет общего предка) —
 **в GitLab НЕ пушим** без явного решения владельца.
 
-**Следующее — кандидаты на макс. e2e-покрытие** (подробности в отчёте сессии):
-1. **Storefront read-only**: SEO/meta-теги, footer legal/social, мобильные брейкпоинты.
-2. **Funnel-добивки**: payment-методы (Stripe/PayPal/crypto — без оплаты), промокоды
-   (apply/invalid), credit balance, структура корзины step-2.
-3. **Headed-lane** для currency-switch (работает только headed — память `storefront-locale-coverage`).
-4. **Panel read-only добивки** (см. `game-panel/TEST_PLAN.md`, `vps-panel/HANDOFF.md`).
-5. **Деструктив** (game-panel version/rebuild/restore/install; vps build) — ⚠️ нужен risk-decision.
-6. **Чистка** lint-варнингов / raw-локаторов в старых vps-спеках (legacy-fence).
+**Следующее — макс. e2e-покрытие** (item 1 funnel-глубина ✅ + item 2 storefront breadth ✅ сделаны):
+1. **▶ Headed-lane для currency-switch** (СЛЕДУЮЩИЙ, на паузе): отдельный headed-проект в
+   `playwright.config.ts` (греп `@headed`), тест поведенческой смены валюты через
+   `Header.switchCurrency` → `Header.samplePrice` меняется. ⚠️ правка конфига — спросить владельца;
+   осмыслен локально/вручную, в Linux-CI нужен xvfb (сторона лида). Память `storefront-locale-coverage`.
+2. **Funnel-остаток**: apply промокода на форме классической корзины (нужен recon, где `.promocode__input`).
+3. **Panel read-only добивки** (см. `game-panel/TEST_PLAN.md`, `vps-panel/HANDOFF.md`).
+4. **Деструктив** (game-panel version/rebuild/restore/install; vps build) — ⚠️ нужен risk-decision.
+5. **Чистка** lint-варнингов (~147) / raw-локаторов в старых vps-спеках (legacy-fence).
 
 ---
 
