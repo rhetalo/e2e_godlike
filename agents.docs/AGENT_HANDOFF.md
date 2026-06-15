@@ -1,6 +1,6 @@
 # AGENT HANDOFF — godlike.host Playwright E2E Suite
 
-> **Последнее обновление:** 03-Jun-2026
+> **Последнее обновление:** 15-Jun-2026
 > **Стек:** TypeScript · Playwright · Chromium
 > **Репо:** https://github.com/rhetalo/e2e_godlike
 
@@ -11,6 +11,41 @@
 1. `AGENT_HANDOFF.md` (этот файл) — контекст, структура, правила
 2. `TEST_GUIDELINES.md` — как писать тесты (читать перед любым изменением теста)
 3. `CODE_REVIEW.md` — текущее состояние всех файлов
+
+---
+
+## ▶ Продолжаем здесь (15-Jun-2026)
+
+**Сделано в этой сессии (всё в `main`; tsc 0 / lint 0 errors):**
+- **Флоки online-панелей** (console/players/security.console/sharing.audit): корень — таймаут
+  хука `afterAll` был равен `ensureOffline(120s)` → гонка. Фикс: `test.setTimeout(180s)` +
+  `ensureOffline(90s)`. (память `panel-teardown-hook-timeout`)
+- **ESLint 9** (flat config `eslint.config.mjs`): hard-rules CLAUDE.md = error
+  (`no-wait-for-timeout`/`expect-expect`/`no-focused-test`), legacy-fence для 8 старых
+  vps/funnel-спеков, `.history` в ignore, `valid-title` off. `npm run lint` зелёный
+  (0 err / ~147 warn = техдолг). (память `eslint-setup`)
+- **Seed-воронка** переехала `/cart` → **`/cart-seed`** — обновлены URL-паттерны (`funnel.seed`).
+- **Воронки через Host Now/калькуляторы:** `funnel.seed` (+2: одиночный сид + новый калькулятор),
+  `funnel.modded` (+1: сверка productId калькулятор↔воронка). Новые `components/NewSeedCalculator.ts`
+  + `pages/SeedListPage.ts` для `/minecraft-seeds/` (⚠️ гидрируется ТОЛЬКО на mouse-нудж — см.
+  `waitReady`). Новый `pages/CartModdedNewPage.ts` + `tests/modded/cart.modded-new.spec.ts`
+  (дропдауны план/биллинг/локация + пересчёт цены). (память `seed-modded-calculators`)
+- **CI/Slack-репортеры** портированы с `gitlab/upd` (Gemini): `utils/PerFileSlackReporter.ts`,
+  `utils/MarkdownLoggerReporter.ts`, `.gitlab-ci.yml`, подключение в `playwright.config.ts`.
+  Slack webhook ТОЛЬКО из env (хардкод не переносили). (память `ci-and-reporting`)
+
+**Repo-топология:** `origin` (GitHub) = личный/локальный — ДОМ для разработки. `gitlab`
+(git.godlike.ovh) = рабочий, CI лида (daily + Slack); истории разошлись (нет общего предка) —
+**в GitLab НЕ пушим** без явного решения владельца.
+
+**Следующее — кандидаты на макс. e2e-покрытие** (подробности в отчёте сессии):
+1. **Storefront read-only**: SEO/meta-теги, footer legal/social, мобильные брейкпоинты.
+2. **Funnel-добивки**: payment-методы (Stripe/PayPal/crypto — без оплаты), промокоды
+   (apply/invalid), credit balance, структура корзины step-2.
+3. **Headed-lane** для currency-switch (работает только headed — память `storefront-locale-coverage`).
+4. **Panel read-only добивки** (см. `game-panel/TEST_PLAN.md`, `vps-panel/HANDOFF.md`).
+5. **Деструктив** (game-panel version/rebuild/restore/install; vps build) — ⚠️ нужен risk-decision.
+6. **Чистка** lint-варнингов / raw-локаторов в старых vps-спеках (legacy-fence).
 
 ---
 
