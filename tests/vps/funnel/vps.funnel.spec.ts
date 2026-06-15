@@ -34,7 +34,8 @@ import {
 import { VpsPage } from "../../../pages/VpsPage";
 import { VpsConfigPage } from "../../../pages/VpsConfigPage";
 import { CartBillingPage } from "../../../pages/CartBillingPage";
-import { BASE_URL, Credentials } from "../../../fixtures/test-data";
+import { Credentials } from "../../../fixtures/test-data";
+import { loginClientareaAndSaveSession } from "../../../utils/clientareaAuth";
 import { pinAmplitudeExperiments } from "../../../utils/amplitude";
 
 test.use({
@@ -97,23 +98,11 @@ async function goToConfigureStep(page: Page): Promise<void> {
 // ─── beforeAll: login once ────────────────────────────────────────────────────
 
 test.beforeAll(async ({ browser }: { browser: Browser }) => {
-  const page = await browser.newPage();
-  try {
-    await page.goto(`${BASE_URL}/clientarea/login`, {
-      waitUntil: "domcontentloaded",
-      timeout: 60_000,
-    });
-    await page.fill("#inputEmail", Credentials.email);
-    await page.fill("#inputPassword", Credentials.password);
-    await Promise.all([
-      page.waitForURL("**/clientarea/clientarea.php", { timeout: 60_000 }),
-      page.click("#login"),
-    ]);
-    await page.context().storageState({ path: storageStatePath });
-    console.log("[INFO] Login OK → storageState.vps.json saved");
-  } finally {
-    await page.close();
-  }
+  await loginClientareaAndSaveSession(browser, {
+    email: Credentials.email,
+    password: Credentials.password,
+    statePath: storageStatePath,
+  });
 });
 
 // ══════════════════════════════════════════════════════════════════════════════

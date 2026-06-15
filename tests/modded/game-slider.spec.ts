@@ -111,10 +111,11 @@ class SliderPageHelper {
       timeout: 30000,
     });
     // Wait for Vue to render the tariff section instead of a fixed 3-second delay
-    await this.page.waitForSelector('[class*="storefront__tariff"]', {
-      state: 'visible',
-      timeout: 15_000,
-    }).catch(() => null);
+    await this.page
+      .locator('[class*="storefront__tariff"]')
+      .first()
+      .waitFor({ state: 'visible', timeout: 15_000 })
+      .catch(() => null);
   }
 
   /** Returns true if a "Customize server" button exists on the page. */
@@ -137,9 +138,10 @@ class SliderPageHelper {
       if (!btn) throw new Error('"Customize server" button not found in DOM');
       btn.click();
     });
-    await this.page.waitForSelector(".storefront__tariffs-customizer-block", {
-      timeout: 10000,
-    });
+    await this.page
+      .locator(".storefront__tariffs-customizer-block")
+      .first()
+      .waitFor({ state: "visible", timeout: 10000 });
   }
 
   /** Read all slider block data from the current DOM state. */
@@ -309,6 +311,9 @@ function registerGameTests(game: GameConfig): void {
     // ── shared setup ─────────────────────────────────────────────────────────
     let helper: SliderPageHelper;
 
+    // smoke-тест для игр без кастомайзера живёт ВЫШЕ в ветке `if(!hasCustomizer){…return}`;
+    // поднять хук над ним нельзя — его navigate+openCustomizer упадёт для таких игр.
+    // eslint-disable-next-line playwright/prefer-hooks-on-top
     test.beforeEach(async ({ page }) => {
       helper = new SliderPageHelper(page);
       await helper.navigate(game.url);
@@ -362,7 +367,7 @@ function registerGameTests(game: GameConfig): void {
 
     // ── initial values ───────────────────────────────────────────────────────
 
-    test("@regression стартовые значения слайдеров", async ({ page }) => {
+    test("@regression стартовые значения слайдеров", async () => {
       const blocks = await helper.getSliderBlocks();
 
       await test.step("Slots = первая опция Slots", async () => {
@@ -380,9 +385,7 @@ function registerGameTests(game: GameConfig): void {
 
     // ── Slots slider interactions ─────────────────────────────────────────────
 
-    test("@regression клик по последней опции Slots обновляет отображаемое значение Slots", async ({
-      page,
-    }) => {
+    test("@regression клик по последней опции Slots обновляет отображаемое значение Slots", async () => {
       const blocks = await helper.getSliderBlocks();
       const lastSlotOption = blocks[0].options[blocks[0].options.length - 1];
       await helper.clickOption(0, lastSlotOption);
@@ -390,9 +393,7 @@ function registerGameTests(game: GameConfig): void {
       expect(updated).toBe(lastSlotOption);
     });
 
-    test("@regression клик по средней опции Slots обновляет отображаемое значение Slots", async ({
-      page,
-    }) => {
+    test("@regression клик по средней опции Slots обновляет отображаемое значение Slots", async () => {
       const blocks = await helper.getSliderBlocks();
       test.skip(blocks[0].options.length < 2, "у Slots одна опция — менять нечего");
       const midIdx = Math.floor(blocks[0].options.length / 2);
@@ -403,9 +404,7 @@ function registerGameTests(game: GameConfig): void {
 
     // ── Slots ↔ RAM synchronisation ──────────────────────────────────────────
 
-    test("@regression выбор последней опции Slots двигает и RAM на последнюю (синхронизация)", async ({
-      page,
-    }) => {
+    test("@regression выбор последней опции Slots двигает и RAM на последнюю (синхронизация)", async () => {
       const blocks = await helper.getSliderBlocks();
       // Skip when all slot options share the same value (e.g. Valheim: ["10","10","10"]).
       // In that case clickOption() always resolves to index 0 by DOM query, so we cannot
@@ -424,9 +423,7 @@ function registerGameTests(game: GameConfig): void {
       expect(await helper.getCurrentValue(1)).toBe(expectedRam);
     });
 
-    test("@regression выбор средней опции Slots двигает RAM на парную среднюю опцию", async ({
-      page,
-    }) => {
+    test("@regression выбор средней опции Slots двигает RAM на парную среднюю опцию", async () => {
       const blocks = await helper.getSliderBlocks();
       // Need at least 3 unique options to have a meaningful middle
       test.skip(blocks[0].options.length < 3, "нет средней опции (опций < 3)");
@@ -440,9 +437,7 @@ function registerGameTests(game: GameConfig): void {
       expect(await helper.getCurrentValue(1)).toBe(blocks[1].options[midIdx]);
     });
 
-    test("@regression выбор первой опции Slots оставляет RAM на первой опции (синхронизация)", async ({
-      page,
-    }) => {
+    test("@regression выбор первой опции Slots оставляет RAM на первой опции (синхронизация)", async () => {
       const blocks = await helper.getSliderBlocks();
       // First click the last to move away from default, then go back to first.
       // When all options share the same value (Valheim), the "last" click is a no-op
@@ -462,18 +457,14 @@ function registerGameTests(game: GameConfig): void {
     // the RAM tier. For all other games these tests provide additional coverage of
     // the RAM slider behaving independently.
 
-    test("@regression прямой клик по последней опции RAM обновляет отображаемое значение RAM", async ({
-      page,
-    }) => {
+    test("@regression прямой клик по последней опции RAM обновляет отображаемое значение RAM", async () => {
       const blocks = await helper.getSliderBlocks();
       const lastRamOption = blocks[1].options[blocks[1].options.length - 1];
       await helper.clickOption(1, lastRamOption);
       expect(await helper.getCurrentValue(1)).toBe(lastRamOption);
     });
 
-    test("@regression клик по первой опции RAM после последней возвращает RAM к первому значению", async ({
-      page,
-    }) => {
+    test("@regression клик по первой опции RAM после последней возвращает RAM к первому значению", async () => {
       const blocks = await helper.getSliderBlocks();
       const firstRam = blocks[1].options[0];
       const lastRam = blocks[1].options[blocks[1].options.length - 1];
@@ -482,9 +473,7 @@ function registerGameTests(game: GameConfig): void {
       expect(await helper.getCurrentValue(1)).toBe(firstRam);
     });
 
-    test("@critical смена RAM напрямую с первой на последнюю опцию меняет цену тарифа", async ({
-      page,
-    }) => {
+    test("@critical смена RAM напрямую с первой на последнюю опцию меняет цену тарифа", async () => {
       const blocks = await helper.getSliderBlocks();
       const firstRam = blocks[1].options[0];
       const lastRam = blocks[1].options[blocks[1].options.length - 1];
@@ -496,9 +485,7 @@ function registerGameTests(game: GameConfig): void {
       expect(priceAtLast).not.toBe(priceAtFirst);
     });
 
-    test("@regression ползунок RAM двигается при прямом клике по опции", async ({
-      page,
-    }) => {
+    test("@regression ползунок RAM двигается при прямом клике по опции", async () => {
       const blocks = await helper.getSliderBlocks();
       const firstRam = blocks[1].options[0];
       const lastRam = blocks[1].options[blocks[1].options.length - 1];
@@ -512,30 +499,22 @@ function registerGameTests(game: GameConfig): void {
 
     // ── Days Runtime slider interactions ────────────────────────────────────
 
-    test('@regression клик по Days=90 обновляет отображаемое значение Days до "90"', async ({
-      page,
-    }) => {
+    test('@regression клик по Days=90 обновляет отображаемое значение Days до "90"', async () => {
       await helper.clickOption(2, "90");
       expect(await helper.getCurrentValue(2)).toBe("90");
     });
 
-    test('@regression клик по Days=180 обновляет отображаемое значение Days до "180"', async ({
-      page,
-    }) => {
+    test('@regression клик по Days=180 обновляет отображаемое значение Days до "180"', async () => {
       await helper.clickOption(2, "180");
       expect(await helper.getCurrentValue(2)).toBe("180");
     });
 
-    test('@regression клик по Days=360 обновляет отображаемое значение Days до "360"', async ({
-      page,
-    }) => {
+    test('@regression клик по Days=360 обновляет отображаемое значение Days до "360"', async () => {
       await helper.clickOption(2, "360");
       expect(await helper.getCurrentValue(2)).toBe("360");
     });
 
-    test('@regression слайдер Days возвращается к "30" при повторном выборе первой опции', async ({
-      page,
-    }) => {
+    test('@regression слайдер Days возвращается к "30" при повторном выборе первой опции', async () => {
       await helper.clickOption(2, "360");
       await helper.clickOption(2, "30");
       expect(await helper.getCurrentValue(2)).toBe("30");
@@ -543,9 +522,7 @@ function registerGameTests(game: GameConfig): void {
 
     // ── Price / billing changes ───────────────────────────────────────────────
 
-    test("@critical смена периода оплаты с 30 на 360 дней меняет цену тарифа", async ({
-      page,
-    }) => {
+    test("@critical смена периода оплаты с 30 на 360 дней меняет цену тарифа", async () => {
       const priceAt30 = await helper.getCustomizedPrice();
       await helper.clickOption(2, "360");
       const priceAt360 = await helper.getCustomizedPrice();
@@ -553,9 +530,7 @@ function registerGameTests(game: GameConfig): void {
       expect(priceAt360).not.toBe(priceAt30);
     });
 
-    test("@critical смена Slots с первой на последнюю опцию меняет цену тарифа", async ({
-      page,
-    }) => {
+    test("@critical смена Slots с первой на последнюю опцию меняет цену тарифа", async () => {
       const blocks = await helper.getSliderBlocks();
       const firstOption = blocks[0].options[0];
       const lastOption = blocks[0].options[blocks[0].options.length - 1];
@@ -574,9 +549,7 @@ function registerGameTests(game: GameConfig): void {
 
     // ── Discount badges ──────────────────────────────────────────────────────
 
-    test("@regression блок Days Runtime показывает бейджи скидок на длинных периодах", async ({
-      page,
-    }) => {
+    test("@regression блок Days Runtime показывает бейджи скидок на длинных периодах", async ({ page }) => {
       const discountCount = await page.evaluate(() => {
         const daysBlock = document.querySelectorAll(
           ".storefront__tariffs-customizer-block",
@@ -592,9 +565,7 @@ function registerGameTests(game: GameConfig): void {
 
     // ── Slider handle position ────────────────────────────────────────────────
 
-    test("@regression ползунок Slots двигается при клике по опции", async ({
-      page,
-    }) => {
+    test("@regression ползунок Slots двигается при клике по опции", async () => {
       const blocks = await helper.getSliderBlocks();
       const firstOption = blocks[0].options[0];
       const lastOption = blocks[0].options[blocks[0].options.length - 1];
@@ -610,9 +581,7 @@ function registerGameTests(game: GameConfig): void {
       expect(updatedLeft).not.toBe(initialLeft);
     });
 
-    test("@regression ползунок Days Runtime двигается при клике по опции", async ({
-      page,
-    }) => {
+    test("@regression ползунок Days Runtime двигается при клике по опции", async () => {
       const initialLeft = await helper.getHandleLeft(2);
       await helper.clickOption(2, "360");
       const updatedLeft = await helper.getHandleLeft(2);
@@ -621,9 +590,7 @@ function registerGameTests(game: GameConfig): void {
 
     // ── Full flow ─────────────────────────────────────────────────────────────
 
-    test("@regression полный флоу: выбрать последние Slots/RAM + Days=360 → все три значения обновляются", async ({
-      page,
-    }) => {
+    test("@regression полный флоу: выбрать последние Slots/RAM + Days=360 → все три значения обновляются", async () => {
       const blocks = await helper.getSliderBlocks();
       const lastIdx = blocks[0].options.length - 1;
       const allSlotsSame = blocks[0].options.every(

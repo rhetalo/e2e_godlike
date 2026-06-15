@@ -14,9 +14,44 @@
 
 ---
 
-## ▶ Продолжаем здесь (15-Jun-2026)
+## ▶ Продолжаем здесь (15-Jun-2026 · сессия «Качество + lint-долг»)
 
-**Сделано в этой сессии (всё в `main`; tsc 0 / lint 0 errors):**
+**Сделано (на ветке `chore/quality-lint`; tsc 0 / lint 0 errors; lint 165 → 97 warn):**
+- **Дедуп clientarea-логина.** Новый `utils/clientareaAuth.ts` →
+  `loginClientareaAndSaveSession(browser, {email, password, statePath})` — третий аналог к
+  `utils/auth.ts` (vf-panel) и `utils/gameAuth.ts` (game). Идентичный login-флоу воронок
+  (`page.fill("#inputEmail")` + `page.click("#login")`) был скопирован инлайном в 7 спеков —
+  вынесен в хелпер на локаторах. Переключены: `funnel.mobile/seed/modded`, `vps.funnel`,
+  `cart.modded-new`, `games.valid/invalid.promo`. Убрало 21 `prefer-locator` + дублирование.
+  `login.validation` НЕ трогал (тестит саму форму логина). ✅ live: `funnel.seed` 3/3 passed,
+  `[INFO] Clientarea login OK`.
+- **Типизация репортеров** (наш порт с gitlab): `PerFileSlackReporter.ts` (типы
+  `TestEntry`/`FileResult`/`SlackBlock` вместо 11×`any`) + `MarkdownLoggerReporter.ts`
+  (убран неиспользуемый `options: any`).
+- **Track A мелочь:** `base.ts` `(page as any)` → точный cast; promo-спеки `div/btn: any` →
+  `Locator`; unused-импорт `VpsPanelLoginPage`; мёртвая `isValidNonZeroPrice` в `funnel.mobile`;
+  19× unused `page` в `game-slider`; 2× `waitForSelector` → `locator.waitFor`; force-клики
+  (`login.validation`, `funnel.modded`) — точечный `eslint-disable` с Why; `prefer-hooks-on-top`
+  в `game-slider` подавлен (хук нельзя поднять над smoke-веткой). (память `eslint-setup`)
+
+**Остаток lint (97 warn) — осознанно отложен, это НЕ баги:** 53 `no-conditional-in-test` +
+10 `no-conditional-expect` (намеренное ветвление по живому состоянию VPS в panel-спеках);
+17 `no-wait-for-timeout` + 16 `no-networkidle` (legacy-fence timing-долг — безопасная замена
+требует stateful live-прогонов панели, отдельный заход); 1 `no-unused-locators`
+(`funnel.with.credit.check`, owner-sanctioned — не трогаем).
+
+**Следующее:** (1) Funnel-остаток — apply промокода на форме классической корзины (recon
+`.promocode__input`); (2) Качество #3 — переписать слабые `toBeVisible`-тесты от реального
+поведения (slider.seed, нужен live-recon); (3) ⚠️ Headed-lane currency-switch — правка
+`playwright.config.ts` + xvfb в CI, решение владельца; (4) timing-долг
+(`no-wait-for-timeout`/`no-networkidle`) отдельным заходом со stateful-прогонами;
+(5) ⚠️ деструктив (game-panel/vps build) — risk-decision владельца.
+
+---
+
+### Прошлая сессия (15-Jun-2026 — funnel-глубина + storefront breadth)
+
+**Сделано (всё в `main`; tsc 0 / lint 0 errors):**
 - **Флоки online-панелей** (console/players/security.console/sharing.audit): корень — таймаут
   хука `afterAll` был равен `ensureOffline(120s)` → гонка. Фикс: `test.setTimeout(180s)` +
   `ensureOffline(90s)`. (память `panel-teardown-hook-timeout`)

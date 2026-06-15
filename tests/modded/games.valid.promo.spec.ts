@@ -1,6 +1,8 @@
 import { test, expect } from "../../fixtures/base";
 import gamesData from "../../fixtures/games.json";
+import type { Locator } from "@playwright/test";
 import { pinAmplitudeExperiments } from "../../utils/amplitude";
+import { loginClientareaAndSaveSession } from "../../utils/clientareaAuth";
 
 const gamesToTest = gamesData.games;
 
@@ -15,27 +17,11 @@ const storageStatePath = "storageState.free.json";
 // ---------------- LOGIN ----------------
 
 test.beforeAll(async ({ browser }) => {
-  const page = await browser.newPage();
-
-  await page.goto(`${BASE_URL}/clientarea/login`, {
-    waitUntil: "domcontentloaded",
-    timeout: 60000,
+  await loginClientareaAndSaveSession(browser, {
+    email: EMAIL,
+    password: PASSWORD,
+    statePath: storageStatePath,
   });
-
-  await page.fill("#inputEmail", EMAIL);
-  await page.fill("#inputPassword", PASSWORD);
-
-  await Promise.all([
-    page.waitForURL("**/clientarea/clientarea.php", {
-      timeout: 60000,
-    }),
-    page.click("#login"),
-  ]);
-
-  console.log("[INFO] Login successful in beforeAll");
-
-  await page.context().storageState({ path: storageStatePath });
-  await page.close();
 });
 
 // ---------------- TESTS ----------------
@@ -99,8 +85,8 @@ for (const game of gamesToTest) {
       const allTariffs = await tariffLocator.all();
 
       const validTariffs: {
-        div: any;
-        btn: any;
+        div: Locator;
+        btn: Locator;
         title: string;
       }[] = [];
 

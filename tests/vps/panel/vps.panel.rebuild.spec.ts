@@ -613,7 +613,7 @@ test.describe("@regression VPS-панель — Rebuild: возврат на с�
   test("после выбора ОС без Install — навигация назад к серверу работает", async ({
     browser,
   }) => {
-    const { context, page, rebuildPage, navigated } = await openRebuildPage(browser);
+    const { context, page, navigated } = await openRebuildPage(browser);
     test.skip(!navigated, "Rebuild page not reachable — server may be stopped or modal unavailable");
 
     const urlOnRebuildPage = page.url();
@@ -632,7 +632,7 @@ test.describe("@regression VPS-панель — Rebuild: возврат на с�
   test("после возврата на сервер — статус сервера всё ещё виден (rebuild не запущен)", async ({
     browser,
   }) => {
-    const { context, page, serverPage, rebuildPage, navigated } = await openRebuildPage(browser);
+    const { context, serverPage, navigated } = await openRebuildPage(browser);
     test.skip(!navigated, "Rebuild page not reachable — server may be stopped or modal unavailable");
 
     // serverPage.goto() обрабатывает Cancel Rebuild если страница в rebuild-режиме

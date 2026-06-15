@@ -27,11 +27,11 @@ import { ModdedHostingPage } from "../../pages/ModdedHostingPage";
 import { CartPage } from "../../pages/CartPage";
 import { CheckoutPage } from "../../pages/CheckoutPage";
 import {
-  BASE_URL,
   Credentials,
   PaymentUrlPatterns,
   VueCartStep2Pattern,
 } from "../../fixtures/test-data";
+import { loginClientareaAndSaveSession } from "../../utils/clientareaAuth";
 
 const storageStatePath = "storageState.modded.json";
 
@@ -42,26 +42,11 @@ const MODDED_NEW_CART_PRODUCT = /\/cart-modded-new\/?\?[^#]*productId=/;
 // ─── beforeAll: login once ───────────────────────────────────────────────────
 
 test.beforeAll(async ({ browser }: { browser: Browser }) => {
-  const page = await browser.newPage();
-  try {
-    await page.goto(`${BASE_URL}/clientarea/login`, {
-      waitUntil: "domcontentloaded",
-      timeout: 60_000,
-    });
-    await page.fill("#inputEmail", Credentials.email);
-    await page.fill("#inputPassword", Credentials.password);
-    await Promise.all([
-      page.waitForURL("**/clientarea/clientarea.php", { timeout: 60_000 }),
-      page.click("#login"),
-    ]);
-    await page.context().storageState({ path: storageStatePath });
-    console.log("[INFO] Login OK → storageState.modded.json saved");
-  } catch (err) {
-    console.log(`[ERROR] beforeAll login failed: ${err}`);
-    throw err;
-  } finally {
-    await page.close();
-  }
+  await loginClientareaAndSaveSession(browser, {
+    email: Credentials.email,
+    password: Credentials.password,
+    statePath: storageStatePath,
+  });
 });
 
 // ─── helper: skip auth-block fallback ────────────────────────────────────────
@@ -116,6 +101,8 @@ test.describe("Воронка покупки modded (стоп на страни�
       // ─── Step 2: install → Vue cart ──────────────────────────────────
       await Promise.all([
         page.waitForURL(/\/cart\?[^#]*productId=/, { timeout: 30_000 }),
+        // force: install-кнопка грида — Vue-обработчик, нативный клик не всегда проходит actionability.
+        // eslint-disable-next-line playwright/no-force-option
         installBtn.click({ force: true }),
       ]);
       await cartPage.cookieBanner.dismissAll();

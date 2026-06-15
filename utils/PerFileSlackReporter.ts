@@ -5,16 +5,25 @@ import * as path from 'path';
 /**
  * Custom Playwright Reporter that sends Slack notifications for each test file individually.
  */
+interface TestEntry {
+  name: string;
+  status: string;
+  duration: number;
+  error?: string;
+}
+
+interface FileResult {
+  tests: TestEntry[];
+  passed: number;
+  failed: number;
+  skipped: number;
+}
+
+/** Slack Block Kit-блок: структура произвольная, типизируем как объект (не any). */
+type SlackBlock = Record<string, unknown>;
+
 class PerFileSlackReporter implements Reporter {
-  private fileResults = new Map<
-    string,
-    {
-      tests: { name: string; status: string; duration: number; error?: string }[];
-      passed: number;
-      failed: number;
-      skipped: number;
-    }
-  >();
+  private fileResults = new Map<string, FileResult>();
 
   private testsRemaining = new Map<string, number>();
   private webhookUrl: string;
@@ -69,7 +78,7 @@ class PerFileSlackReporter implements Reporter {
     }
   }
 
-  private async sendSlackReport(filePath: string, results: any) {
+  private async sendSlackReport(filePath: string, results: FileResult) {
     if (!this.webhookUrl) return;
 
     const fileName = path.basename(filePath);
@@ -83,13 +92,13 @@ class PerFileSlackReporter implements Reporter {
     // Calculate duration for this file
     let durationStr = 'unknown';
     if (results.tests.length > 0) {
-      const durationMs = results.tests.reduce((acc: number, t: any) => acc + t.duration, 0);
+      const durationMs = results.tests.reduce((acc: number, t: TestEntry) => acc + t.duration, 0);
       const durationMinutes = Math.floor(durationMs / 60000);
       const durationSeconds = Math.floor((durationMs % 60000) / 1000);
       durationStr = `${durationMinutes}m ${durationSeconds}s`;
     }
 
-    const allBlocks: any[] = [
+    const allBlocks: SlackBlock[] = [
       {
         type: 'header',
         text: {
@@ -113,7 +122,7 @@ class PerFileSlackReporter implements Reporter {
 
     // 1. Show summary of ALL tests in this file
     if (results.tests.length > 0) {
-      const testLines = results.tests.map((t: any) => {
+      const testLines = results.tests.map((t: TestEntry) => {
         const emoji = t.status === 'passed' ? '✅' : t.status === 'skipped' ? '⏭️' : '❌';
         return `${emoji} *${t.name}* (${(t.duration / 1000).toFixed(1)}s)`;
       });
@@ -122,9 +131,9 @@ class PerFileSlackReporter implements Reporter {
     }
 
     // 2. Failure Details (ALL failures)
-    const failures = results.tests.filter((t: any) => t.status === 'failed' || t.status === 'timedOut');
+    const failures = results.tests.filter((t: TestEntry) => t.status === 'failed' || t.status === 'timedOut');
     if (failures.length > 0) {
-      const failureLines = failures.map((f: any) => {
+      const failureLines = failures.map((f: TestEntry) => {
         const cleanError = f.error ? f.error.split('\n').slice(0, 10).join('\n') : 'Unknown error';
         return `*❌ ${f.name}*\n\`\`\`${cleanError}\`\`\``;
       });
@@ -155,8 +164,8 @@ class PerFileSlackReporter implements Reporter {
   /**
    * Chunks an array of lines into Slack section blocks, respecting the 3000 character limit per block.
    */
-  private chunkTextToBlocks(header: string, lines: string[], separator: string = '\n'): any[] {
-    const blocks: any[] = [];
+  private chunkTextToBlocks(header: string, lines: string[], separator: string = '\n'): SlackBlock[] {
+    const blocks: SlackBlock[] = [];
     let currentText = header + '\n';
 
     for (const line of lines) {
@@ -184,7 +193,7 @@ class PerFileSlackReporter implements Reporter {
   /**
    * Sends blocks in multiple messages if they exceed Slack's limits (max 50 blocks per message).
    */
-  private async sendBlocksInChunks(blocks: any[], fileName: string) {
+  private async sendBlocksInChunks(blocks: SlackBlock[], fileName: string) {
     const MAX_BLOCKS_PER_MESSAGE = 40; // Slack limit is 50, but we use 40 to be safe
     for (let i = 0; i < blocks.length; i += MAX_BLOCKS_PER_MESSAGE) {
       const chunk = blocks.slice(i, i + MAX_BLOCKS_PER_MESSAGE);
@@ -192,7 +201,7 @@ class PerFileSlackReporter implements Reporter {
     }
   }
 
-  private async postToSlack(payload: any, fileName: string) {
+  private async postToSlack(payload: { blocks: SlackBlock[] }, fileName: string) {
     if (!this.webhookUrl) return;
     const data = JSON.stringify(payload);
 
@@ -229,8 +238,9 @@ class PerFileSlackReporter implements Reporter {
         });
         req.write(data);
         req.end();
-      } catch (e: any) {
-        console.error(`[SlackReporter] Invalid Webhook URL: ${e.message}`);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        console.error(`[SlackReporter] Invalid Webhook URL: ${msg}`);
         resolve(false);
       }
     });

@@ -42,6 +42,9 @@ test.describe("Валидация логина (auth-block в корзине)", 
     // if it doesn't, the URL must not advance to step=2.
     await cart
       .loginSubmit()
+      // force: намеренно жмём сабмит с пустыми полями — проверяем, что корзина НЕ
+      // уходит на step 2 (HTML5-валидация может держать кнопку неактивной).
+      // eslint-disable-next-line playwright/no-force-option
       .click({ force: true })
       .catch(() => undefined);
 

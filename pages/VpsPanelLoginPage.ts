@@ -1,5 +1,5 @@
 import { type Page, type Locator } from "@playwright/test";
-import { PANEL_URL, EMAIL, PASSWORD, STORAGE_STATE_PATH } from "../utils/auth";
+import { PANEL_URL, EMAIL, PASSWORD } from "../utils/auth";
 
 /**
  * VpsPanelLoginPage — https://vf-panel.godlike.host/login

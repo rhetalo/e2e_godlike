@@ -23,10 +23,10 @@ import { CartPage } from "../../pages/CartPage";
 import { CheckoutPage } from "../../pages/CheckoutPage";
 import { pinAmplitudeExperiments } from "../../utils/amplitude";
 import {
-  BASE_URL,
   Credentials,
   PaymentUrlPatterns,
 } from "../../fixtures/test-data";
+import { loginClientareaAndSaveSession } from "../../utils/clientareaAuth";
 
 const storageStatePath = "storageState.seed.json";
 
@@ -39,26 +39,11 @@ const SEED_CART_STEP2 = /\/cart-seed\/?\?[^#]*step=2/i;
 // ─── beforeAll: login once ───────────────────────────────────────────────────
 
 test.beforeAll(async ({ browser }: { browser: Browser }) => {
-  const page = await browser.newPage();
-  try {
-    await page.goto(`${BASE_URL}/clientarea/login`, {
-      waitUntil: "domcontentloaded",
-      timeout: 60_000,
-    });
-    await page.fill("#inputEmail", Credentials.email);
-    await page.fill("#inputPassword", Credentials.password);
-    await Promise.all([
-      page.waitForURL("**/clientarea/clientarea.php", { timeout: 60_000 }),
-      page.click("#login"),
-    ]);
-    await page.context().storageState({ path: storageStatePath });
-    console.log("[INFO] Login OK → storageState.seed.json saved");
-  } catch (err) {
-    console.log(`[ERROR] beforeAll login failed: ${err}`);
-    throw err;
-  } finally {
-    await page.close();
-  }
+  await loginClientareaAndSaveSession(browser, {
+    email: Credentials.email,
+    password: Credentials.password,
+    statePath: storageStatePath,
+  });
 });
 
 async function ensurePastAuthStep(page: Page, cartPage: CartPage): Promise<void> {

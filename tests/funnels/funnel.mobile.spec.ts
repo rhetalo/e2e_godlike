@@ -1,6 +1,7 @@
 import { test, expect, Browser } from "@playwright/test";
 import { MobileCartPage } from "../../pages/MobileCartPage";
-import { BASE_URL, Credentials } from "../../fixtures/test-data";
+import { Credentials } from "../../fixtures/test-data";
+import { loginClientareaAndSaveSession } from "../../utils/clientareaAuth";
 import { pinAmplitudeExperiments } from "../../utils/amplitude";
 
 test.use({
@@ -22,35 +23,15 @@ function isZeroPrice(priceStr: string): boolean {
   return /0\.00/.test(priceStr);
 }
 
-// Проверяем что цена ненулевая и в правильном формате — любая валюта
-function isValidNonZeroPrice(priceStr: string): boolean {
-  return /[^\d]*\d+\.\d{2}/.test(priceStr) && !isZeroPrice(priceStr);
-}
-
 // ============================
 // Логин один раз
 // ============================
 test.beforeAll(async ({ browser }: { browser: Browser }) => {
-  const page = await browser.newPage();
-  try {
-    await page.goto(`${BASE_URL}/clientarea/login`, {
-      waitUntil: "domcontentloaded",
-      timeout: 60000,
-    });
-    await page.fill("#inputEmail", Credentials.email);
-    await page.fill("#inputPassword", Credentials.password);
-    await Promise.all([
-      page.waitForURL("**/clientarea/clientarea.php", { timeout: 60000 }),
-      page.click("#login"),
-    ]);
-    console.log("[INFO] Login successful");
-    await page.context().storageState({ path: storageStatePath });
-  } catch (error) {
-    console.log(`[ERROR] Login failed: ${error}`);
-    throw error;
-  } finally {
-    await page.close();
-  }
+  await loginClientareaAndSaveSession(browser, {
+    email: Credentials.email,
+    password: Credentials.password,
+    statePath: storageStatePath,
+  });
 });
 
 // ============================
