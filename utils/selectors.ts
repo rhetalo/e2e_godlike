@@ -742,6 +742,21 @@ export const GAME_PANEL_UPGRADE = {
   backButton: ".server__upgrade__btn-back",
 } as const;
 
+// Throttling / «Lag Detected» upgrade-модалка (вебхук CPU-троттлинга → предложение апгрейда).
+// Confirmed via live DOM 15-Jun-2026. Текст английский; число «g» в «Lag…Detected» варьируется
+// (regex Lag+). ⚠️ Minecraft-only; триггер ~1 раз в 3 дня на сервер. См. utils/throttlingWebhook.ts.
+export const GAME_PANEL_THROTTLING = {
+  dialog: ".upgrade-dialog",
+  title: ".upgrade-dialog__title", // «Laggggggg Detected»
+  subtitle: ".upgrade-dialog__subtitle", // «Your server is operating under reduced capacity.»
+  userLine: ".upgrade-dialog__user", // «{Name}, we detected server lags on your server.»
+  requiredPlan: ".upgrade__block-inner__text-bold", // «Required plan:»
+  // Keep current plan = .dialog__button БЕЗ модификатора -primary; Upgrade = -primary.
+  keepButton: ".upgrade-dialog__actions .dialog__button:not(.dialog__button-primary)",
+  upgradeButton: ".upgrade-dialog__actions .dialog__button-primary", // «Upgrade for $X»
+  titleText: /Lag+\s*Detected/i,
+} as const;
+
 // Free Premium модалка. Кнопка "What is a Free Premium?" (на страницах сервера) → premium__dialog
 // со списком премиум-фич + CTA "Get Premium (3-Days Trial)". Confirmed via MCP recon 06-Jun-2026.
 // ⚠️ CTA = конверсия/триал (ведёт к апгрейду) — НЕ жать; только структура.
