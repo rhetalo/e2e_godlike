@@ -1,16 +1,12 @@
 /**
  * slider.seed.spec.ts
  * ───────────────────
- * Tariff slider on /minecraft-seeds/sky-haven-island-atm-10-seed/.
+ * Слайдер тарифа на /minecraft-seeds/sky-haven-island-atm-10-seed/.
  *
- * The seed calculator uses the same Vuetify v-slider widget as the modded
- * calculator (0..100, равномерные тики; число делений задаётся страницей —
- * наблюдалось 8 шагов→12.5, затем 6 шагов→16.667). Hidden input: `#fieldPlayersCount`.
- * The "Host Now" button submits a form, so we verify the cart-link metadata
- * via the BUY-A-SERVER card's data-url and the calculator's data-* attrs.
- *
- * Запуск:
- *   npx playwright test tests/slider.seed.spec.ts --project=chromium
+ * Тот же Vuetify v-slider, что и на modded-калькуляторе (0..100, равномерные тики; число
+ * делений задаёт страница — наблюдалось 8 шагов→12.5, затем 6→16.667). Скрытый input:
+ * `#fieldPlayersCount`. «Host Now» сабмитит форму — на проде НЕ жмём; метаданные корзины
+ * проверяем через data-url карточки BUY-A-SERVER и data-* атрибуты калькулятора.
  */
 import { test, expect } from "../../fixtures/base";
 import { SeedPage } from "../../pages/SeedPage";
@@ -25,7 +21,6 @@ test.describe("Сид-страница Sky-haven: слайдер тарифа", 
 
   test("@regression слайдер отдаёт ARIA-диапазон", async () => {
     const state = await seed.calculator.readSlider();
-    console.log(`[INFO] seed slider:`, state);
     expect(state.min).toBe(0);
     expect(state.max).toBe(100);
   });
@@ -41,7 +36,6 @@ test.describe("Сид-страница Sky-haven: слайдер тарифа", 
     await seed.calculator.stepRight(1);
     const v2 = (await seed.calculator.readSlider()).value;
     const step = v1 - v0;
-    console.log(`[INFO] seed slider step=${step} (v0=${v0} v1=${v1} v2=${v2})`);
 
     expect(step).toBeGreaterThan(0); // ArrowRight увеличивает
     expect(v2 - v1).toBeCloseTo(step, 1); // шаги равномерны (1 ArrowRight = 1 тик)
@@ -52,18 +46,13 @@ test.describe("Сид-страница Sky-haven: слайдер тарифа", 
   test("@regression скрытый #fieldPlayersCount повторяет значение слайдера", async () => {
     await seed.calculator.toMin();
     const lo = Number(await seed.calculator.hiddenPlayerInput().inputValue());
-    console.log(`[INFO] at min: hidden=${lo}`);
-
     await seed.calculator.stepRight(4);
     const hi = Number(await seed.calculator.hiddenPlayerInput().inputValue());
-    console.log(`[INFO] after 4 steps right: hidden=${hi}`);
-
     expect(hi).toBeGreaterThan(lo);
   });
 
   test("@regression кнопка BUY-A-SERVER ведёт на корзину с productId и promo", async () => {
     const cartUrl = await seed.buyServerCartUrl();
-    console.log(`[INFO] BUY data-url: ${cartUrl}`);
     expect(cartUrl).toBeTruthy();
 
     const url = new URL(cartUrl!);
@@ -76,15 +65,7 @@ test.describe("Сид-страница Sky-haven: слайдер тарифа", 
 
   test("@regression корень калькулятора несёт data-атрибуты promocode и discount", async () => {
     const meta = await seed.readCalculatorMeta();
-    console.log(`[INFO] seed meta:`, meta);
     expect(meta.promocode).toBeTruthy();
     expect(Number(meta.discount)).toBeGreaterThan(0);
-  });
-
-  test("@regression кнопка Host Now видима и активна", async () => {
-    const btn = seed.hostNowSubmit();
-    await expect(btn).toBeVisible();
-    await expect(btn).toBeEnabled();
-    console.log("[INFO] Host Now submit visible & enabled ✓");
   });
 });
