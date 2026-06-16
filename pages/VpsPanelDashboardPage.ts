@@ -75,6 +75,34 @@ export class VpsPanelDashboardPage {
     return this.page.locator(`a[href*="/servers"]`).first();
   }
 
+  // ── Servers List (/servers) ─────────────────────────────────────────────
+  // Подтверждено DOM: переключатель типа списка — radio + label[for].
+
+  /** Вкладка "All Servers" (label радиокнопки serverListType1) */
+  get allServersTab(): Locator {
+    return this.page.locator('label[for="serverListType1"]');
+  }
+
+  /** Вкладка "Bookmarked Servers" (label радиокнопки serverListType2) */
+  get bookmarkedServersTab(): Locator {
+    return this.page.locator('label[for="serverListType2"]');
+  }
+
+  /** Скрытый radio "Bookmarked" — становится checked после клика по вкладке */
+  get bookmarkedServersRadio(): Locator {
+    return this.page.locator("input#serverListType2");
+  }
+
+  /** Иконка закладки у строки сервера */
+  get bookmarkIcon(): Locator {
+    return this.page.locator('[tt="Bookmark"], [tt="Remove bookmark"]').first();
+  }
+
+  /** Дождаться отрисовки списка серверов (по вкладке All Servers). */
+  async waitForServersList(): Promise<void> {
+    await this.allServersTab.waitFor({ state: "visible", timeout: 15_000 });
+  }
+
   // ── User Info ─────────────────────────────────────────────────────────────
 
   /** User name / email shown in header or sidebar */
