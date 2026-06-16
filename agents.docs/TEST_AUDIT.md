@@ -7,6 +7,21 @@
 
 ---
 
+## 0. Прогресс унификации (ветка `chore/test-unification`)
+
+| Домен | Статус | Коммиты |
+|---|---|---|
+| **general** | ✅ done | registration creds-leak+manual-gate, credentials.ts→JSON+ротация, StorefrontHomePage PO, DROP слабого TC, RU+test.step |
+| **modded** | ✅ done | promo dedup (GameStorefrontPage PO, −220 стр), funnel.modded test.step+PO, game-slider→GameSliderPage PO + DROP 3 style.left, modpack/seed свёртки |
+| **funnels** | 🔶 частично | funnel.spec→PO ✅; credit.check висячий локатор ✅. **Осталось:** funnel.mobile (raw-локаторы + waitForTimeout в MobileCartPage + слабые TC), funnel.seed (console/networkidle/дубль хвоста), funnel.cart.paypal (хрупкий Stripe getByText → iframe-helper) |
+| **vps/funnel** | ⏳ TODO | дробление vps.funnel 692 стр; waitForTimeout×6; raw-локаторы; MERGE/DROP структурных |
+| **vps/panel** | ⏳ TODO | ⚠️ stateful — слить SUITE power.actions в test.step; дробить rebuild (700, кроме SUITE7-деструктив); storage/network/options REWRITE/MERGE структурных; console/waitForTimeout |
+| **game/panel** | ⏳ TODO | лёгкое: tag-convention уже узаконен; вынести 2-3 raw-локатора (login `My Servers`, server.overview getByText, sharing SHR-004) в PO-геттеры; мелкие MERGE структурных |
+
+Узаконено: describe-уровневый тег (TEST_GUIDELINES §5.5). Инвариант: интент платёжных/stateful/деструктивных тестов НЕ менять — только стиль/структура.
+
+---
+
 ## 1. Итог одной строкой
 
 Набор **архитектурно здоров**: теги и анти-silent-skip уже закрыты, `game/panel/` (25 спеков)
