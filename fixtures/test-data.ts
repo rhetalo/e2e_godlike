@@ -16,6 +16,9 @@ export const Urls = {
   moddedHosting: "/modded-minecraft-server-hosting/",
   seedSkyHaven: "/minecraft-seeds/sky-haven-island-atm-10-seed/",
 
+  /** Каталог игровых серверов (game-servers) — вход для promo-проверок по играм. */
+  gameServers: "/game-servers-en/",
+
   /** Vue cart used by both modpack-grid install buttons and seed BUY buttons. */
   cart: "/cart",
 

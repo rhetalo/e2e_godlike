@@ -53,6 +53,7 @@ export const STOREFRONT = {
   tariffPrice: ".storefront__tariff-footer",
   tariffAddToCart: ".storefront__tariff-action__cart",
   viewAllPlans: 'a[href*="minecraft-java-servers-hosting"], a:has-text("View all plans")',
+  gameTitle: "a.game__title",
   discountBadge: ".storefront__tariffs-discount__percentage",
   firstPurchaseDiscount: ".storefront__tariffs-first-purchase",
 } as const;
