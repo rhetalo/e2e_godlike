@@ -24,4 +24,14 @@ export class BillingCycleSelector {
   activePeriod(): Locator {
     return this.container.locator(BILLING.periodActive);
   }
+
+  /** Дисконтированная цена конкретного периода (VPS: .period__price-primary_amount). */
+  periodPrice(label: string): Locator {
+    return this.period(label).locator(BILLING.periodPriceAmount).first();
+  }
+
+  /** Бейджи скидки по всем периодам (промо VPS20 даёт скидку на каждый). */
+  get discountBadges(): Locator {
+    return this.container.locator(BILLING.periodDiscount);
+  }
 }

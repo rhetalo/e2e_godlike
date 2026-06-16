@@ -1,4 +1,4 @@
-import { type Page, type Locator } from "@playwright/test";
+import { type Page, type Locator, expect } from "@playwright/test";
 
 /**
  * VpsConfigPage — "Configure Your Server" step in VPS cart.
@@ -35,7 +35,8 @@ export class VpsConfigPage {
       .locator(".configure-server__location")
       .filter({ hasText: name })
       .click();
-    await this.page.waitForTimeout(400);
+    // Детерминированный сигнал применения: выбранная локация стала активной.
+    await expect(this.activeLocation).toContainText(name);
   }
 
   /** Get text of the currently selected location */
@@ -79,7 +80,10 @@ export class VpsConfigPage {
         }),
       })
       .click();
-    await this.page.waitForTimeout(300);
+    // Детерминированный сигнал: выбранный тип ОС стал активным.
+    await expect(
+      this.activeOsType.locator(".configure-server__type_title"),
+    ).toHaveText(new RegExp(`^${name}$`));
   }
 
   // ── OS Version Dropdown ───────────────────────────────────────────────────
@@ -115,7 +119,8 @@ export class VpsConfigPage {
   /** Open the OS version dropdown by clicking its header */
   async openOsDropdown(): Promise<void> {
     await this.osDropdownSelected.click();
-    await this.page.waitForTimeout(300);
+    // Дропдаун открыт, когда отрисованы пункты версий.
+    await this.osDropdownItems.first().waitFor({ state: "visible", timeout: 5_000 });
   }
 
   /**
@@ -128,7 +133,8 @@ export class VpsConfigPage {
       .locator(".custom-dropdown__item")
       .filter({ hasText: version })
       .click();
-    await this.page.waitForTimeout(300);
+    // Выбор отражается в заголовке дропдауна.
+    await expect(this.osDropdownSelectedText).toContainText(version);
   }
 
   // ── Order Summary ─────────────────────────────────────────────────────────

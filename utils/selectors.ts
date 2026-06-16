@@ -83,6 +83,9 @@ export const BILLING = {
   period: ".period",
   periodTitle: ".period__title",
   periodPrice: ".period__price",
+  // VPS-воронка использует .period__price-primary_amount вместо .period__price. (подтверждено DOM 16-Jun-2026)
+  periodPriceAmount: ".period__price-primary_amount",
+  periodDiscount: ".period__discount",
   periodActive: ".period__active",
   renewInfo: ".period__renew",
 } as const;
@@ -117,6 +120,10 @@ export const ORDER_SUMMARY = {
   planName: ".order__plan-value",
   billingCycle: ".order__billing-value",
   total: ".order__total",
+  // Строки сводки заказа (Billing cycle / Location / Server type) + итоговая цена. (подтверждено DOM 16-Jun-2026)
+  detailsItem: ".order__details-item",
+  detailsCaption: ".order__details-item__caption",
+  pricingPrice: ".order__pricing-price",
 } as const;
 
 /* ===== Credit Balance (Checkout) ===== */
