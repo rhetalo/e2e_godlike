@@ -75,6 +75,32 @@ export class CartPage extends BasePage {
       .first();
   }
 
+  // ─── step 1 (auth-block — Register tab, активна по умолчанию) ──────────────
+
+  registerEmail(): Locator {
+    return this.page.locator('.auth-block input[type="email"]').first();
+  }
+
+  registerUsername(): Locator {
+    return this.page
+      .locator('.auth-block input[name="username"], .auth-block input[type="text"]')
+      .first();
+  }
+
+  /** Поля пароля Register-таба: index 0 — пароль, 1 — подтверждение. */
+  registerPassword(index: 0 | 1): Locator {
+    return this.page.locator('.auth-block input[type="password"]').nth(index);
+  }
+
+  registerSubmit(): Locator {
+    return this.page.locator('.auth-block button[type="submit"]').first();
+  }
+
+  /** Кнопка «Accept» в модалке условий — всплывает после сабмита регистрации. */
+  termsAcceptButton(): Locator {
+    return this.page.locator(".terms-modal__actions-accept").first();
+  }
+
   /**
    * Fill the embedded login form with credentials and submit.
    * Does NOT assert success — the caller decides what success looks like.

@@ -51,6 +51,10 @@ export const PaymentUrlPatterns = [
 /** A URL is "Vue cart step 2 (billing cycle)" if it matches this. */
 export const VueCartStep2Pattern = /\/cart\?[^#]*step=2/i;
 
+/** Vue-cart путь с тарифом для проверки auth-block (login.validation.spec.ts). */
+export const CartAuthValidationPath =
+  "/cart?productId=346&billingCycle=monthly&currency=1&modpackId=curseforge-925200&promo=COMMUNITY40";
+
 /**
  * Test account. Override via env vars when running locally if needed.
  * Reference project uses the same shared test@testmail.com account.

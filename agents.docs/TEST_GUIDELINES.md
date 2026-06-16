@@ -128,6 +128,17 @@ test("@smoke Пользователь логинится", async () => { ... });
 test("@critical Сервер выключается через Shutdown", async () => { ... });
 test("@regression Отмена Shutdown не меняет статус", async () => { ... });
 
+Допустимая альтернатива (узаконено 16-Jun-2026): если ВЕСЬ файл/`describe` одного класса,
+тег ставится на `describe`, а не дублируется в каждый `test()` — `--grep` ловит его через
+title-path Playwright. Смешивать в одном `describe` тесты разных тегов нельзя — тогда тег
+обязателен на каждом `test()`.
+
+```typescript
+test.describe("@regression [game-panel] Tasks", () => {   // тег на describe — ок
+  test("TC-GP-TASK-001 | дефолтные задачи присутствуют", async () => { ... });
+});
+```
+
 Запуск по тегу:
 
 npx playwright test --grep @smoke      # только critical path

@@ -1,18 +1,13 @@
 /**
  * smoke.pages.spec.ts
  * ───────────────────
- * @smoke — Sanity tests that the three pages we care about load and that the
- * Vue calculator widgets actually mount. If these fail, every other spec is
- * meaningless.
+ * @smoke — проверка, что три ключевые storefront-страницы грузятся и их Vue-калькуляторы
+ * реально монтируются. Если падают эти — остальные спеки бессмысленны.
  *
- * Pages exercised:
- *   1. https://godlike.host/                                      (WordPress)
- *   2. /modded-minecraft-server-hosting/  (#plan-calculator Vue)
- *   3. /minecraft-seeds/sky-haven-island-atm-10-seed/ (#seed-calculator Vue)
- *
- * Запуск:
- *   npx playwright test tests/smoke.pages.spec.ts --project=chromium
- *   npx playwright test tests/smoke.pages.spec.ts --project=chromium --headed
+ * Страницы:
+ *   1. https://godlike.host/                                   (WordPress)
+ *   2. /modded-minecraft-server-hosting/    (#plan-calculator Vue)
+ *   3. /minecraft-seeds/sky-haven-island-atm-10-seed/  (#seed-calculator Vue)
  */
 import { test, expect } from "../../fixtures/base";
 import { ModdedHostingPage } from "../../pages/ModdedHostingPage";
@@ -23,9 +18,7 @@ test.describe("@smoke страницы godlike.host загружаются", () 
   test("главная грузится и содержит 'godlike' в <title>", async ({ page }) => {
     const resp = await page.goto(Urls.home, { waitUntil: "domcontentloaded" });
     expect(resp?.ok()).toBeTruthy();
-    const title = await page.title();
-    console.log(`[INFO] Home <title>: ${title}`);
-    expect(title).toMatch(/godlike/i);
+    expect(await page.title()).toMatch(/godlike/i);
   });
 
   test("страница modded-хостинга грузится и монтирует калькулятор", async ({ page }) => {
@@ -34,13 +27,8 @@ test.describe("@smoke страницы godlike.host загружаются", () 
     await expect(page).toHaveURL(/modded-minecraft-server-hosting/);
 
     await expect(modded.calculator.sliderThumb()).toBeVisible();
-
-    const checkoutLink = modded.calculatorCheckoutLink();
-    await expect(checkoutLink).toHaveAttribute("href", /productId=\d+/);
-
-    const installCount = await modded.installButtons().count();
-    console.log(`[INFO] modpacks-body__install buttons: ${installCount}`);
-    expect(installCount).toBeGreaterThanOrEqual(1);
+    await expect(modded.calculatorCheckoutLink()).toHaveAttribute("href", /productId=\d+/);
+    expect(await modded.installButtons().count()).toBeGreaterThanOrEqual(1);
   });
 
   test("сид-страница грузится и монтирует seed-калькулятор", async ({ page }) => {
@@ -51,8 +39,6 @@ test.describe("@smoke страницы godlike.host загружаются", () 
     await expect(seed.calculator.sliderThumb()).toBeVisible();
 
     const meta = await seed.readCalculatorMeta();
-    console.log(`[INFO] seed meta:`, meta);
-
     expect(meta.cartBaseUrl).toMatch(/godlike\.host\/cart/);
     expect(meta.modpackId).toBeTruthy();
     expect(meta.seedId).toBeTruthy();

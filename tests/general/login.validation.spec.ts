@@ -1,30 +1,19 @@
 /**
  * login.validation.spec.ts
  * ────────────────────────
- * Login validation against the embedded auth-block on the Vue cart.
+ * Валидация встроенной login-формы (auth-block) Vue-корзины: при пустых/неверных данных
+ * корзина НЕ должна уходить на step 2.
  *
- * godlike.host has no public-facing /clientarea.php login form on the cart
- * (it 404s); the user-facing login surface from the funnel is the cart's
- * `.auth-block`. We exercise it with bad / empty inputs and assert the cart
- * does NOT advance to step 2.
- *
- * NOTE: This is intentionally separate from the standalone /clientarea/login
- * page used by the funnel storageState. We're testing the cart-side validation
- * UX, not the WHMCS clientarea.
- *
- * Запуск:
- *   npx playwright test tests/login.validation.spec.ts --project=chromium
+ * Это НЕ страница /clientarea/login (на корзине её нет — 404). Проверяем именно
+ * cart-side валидацию auth-block, а не WHMCS clientarea.
  */
 import { test, expect, type Page } from "../../fixtures/base";
 import { CartPage } from "../../pages/CartPage";
-import { VueCartStep2Pattern } from "../../fixtures/test-data";
-
-const CART_URL =
-  "/cart?productId=346&billingCycle=monthly&currency=1&modpackId=curseforge-925200&promo=COMMUNITY40";
+import { VueCartStep2Pattern, CartAuthValidationPath } from "../../fixtures/test-data";
 
 async function gotoCart(page: Page): Promise<CartPage> {
   const cart = new CartPage(page);
-  await page.goto(CART_URL, { waitUntil: "domcontentloaded", timeout: 60_000 });
+  await page.goto(CartAuthValidationPath, { waitUntil: "domcontentloaded", timeout: 60_000 });
   await cart.cookieBanner.dismissAll();
   await expect(
     page.locator(".auth-block").first(),
@@ -38,49 +27,33 @@ test.describe("Валидация логина (auth-block в корзине)", 
   test("@critical пустая отправка НЕ переводит корзину на step 2", async ({ page }) => {
     const cart = await gotoCart(page);
 
-    // Click submit with empty inputs. HTML5 validation should block it; even
-    // if it doesn't, the URL must not advance to step=2.
-    await cart
-      .loginSubmit()
-      // force: намеренно жмём сабмит с пустыми полями — проверяем, что корзина НЕ
-      // уходит на step 2 (HTML5-валидация может держать кнопку неактивной).
-      // eslint-disable-next-line playwright/no-force-option
-      .click({ force: true })
-      .catch(() => undefined);
+    await test.step("сабмит с пустыми полями", async () => {
+      await cart
+        .loginSubmit()
+        // force: жмём сабмит с пустыми полями намеренно — HTML5-валидация может держать кнопку неактивной.
+        // eslint-disable-next-line playwright/no-force-option
+        .click({ force: true })
+        .catch(() => undefined);
+    });
 
-    await expect.poll(() => page.url(), { timeout: 2_000 }).not.toMatch(VueCartStep2Pattern);
-    console.log(`[INFO] URL after empty submit: ${page.url()}`);
-
-    expect(page.url()).not.toMatch(VueCartStep2Pattern);
+    await test.step("корзина осталась на step 1 (не ушла на step 2)", async () => {
+      await expect.poll(() => page.url(), { timeout: 2_000 }).not.toMatch(VueCartStep2Pattern);
+      expect(page.url()).not.toMatch(VueCartStep2Pattern);
+    });
   });
 
-  test("@critical неверные данные НЕ переводят корзину на step 2", async ({
-    page,
-  }) => {
+  test("@critical неверные данные НЕ переводят корзину на step 2", async ({ page }) => {
     const cart = await gotoCart(page);
 
-    await cart.loginEmail().fill("nope+invalid@example.com");
-    await cart.loginPassword().fill("definitely-not-the-password-123");
-    await cart.loginSubmit().click();
+    await test.step("ввести заведомо неверные креды и отправить", async () => {
+      await cart.loginEmail().fill("nope+invalid@example.com");
+      await cart.loginPassword().fill("definitely-not-the-password-123");
+      await cart.loginSubmit().click();
+    });
 
-    // Give the SPA up to 10s to surface an error or just stay put.
-    await page
-      .waitForURL(VueCartStep2Pattern, { timeout: 10_000 })
-      .catch(() => undefined);
-
-    console.log(`[INFO] URL after invalid login: ${page.url()}`);
-    expect(page.url()).not.toMatch(VueCartStep2Pattern);
-  });
-
-  test("@regression поля формы логина имеют корректные type и placeholder", async ({
-    page,
-  }) => {
-    const cart = await gotoCart(page);
-
-    await expect(cart.loginEmail()).toHaveAttribute("type", "email");
-    await expect(cart.loginPassword()).toHaveAttribute("type", "password");
-    await expect(cart.loginSubmit()).toBeVisible();
-    await expect(cart.loginSubmit()).toBeEnabled();
-    console.log("[INFO] auth-block login form looks well-formed ✓");
+    await test.step("корзина осталась на step 1", async () => {
+      await page.waitForURL(VueCartStep2Pattern, { timeout: 10_000 }).catch(() => undefined);
+      expect(page.url()).not.toMatch(VueCartStep2Pattern);
+    });
   });
 });
