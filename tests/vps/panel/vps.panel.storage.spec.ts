@@ -50,23 +50,26 @@ test.afterAll(async () => {
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// SUITE — Storage Tab
+// Вкладка Storage — информационная: карточка диска с реальными данными.
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("@regression VPS-панель — вкладка Storage", () => {
-  test("вкладка Storage присутствует на странице сервера", async () => {
-    await expect(serverPage.tab("Storage")).toBeVisible({ timeout: 15_000 });
-  });
-
-  test("клик по Storage — карточка диска отображается", async () => {
-    await serverPage.clickTab("Storage");
-    await storagePage.waitForStorageTab();
-
-    await test.step("заголовок Drive: <letter> виден", async () => {
-      await expect(storagePage.driveHeading).toBeVisible({ timeout: 10_000 });
+  test("карточка диска показывает Drive: <letter>, размер в GB и бейдж Primary", async () => {
+    await test.step("вкладка Storage присутствует, клик открывает карточку", async () => {
+      await expect(serverPage.tab("Storage")).toBeVisible({ timeout: 15_000 });
+      await serverPage.clickTab("Storage");
+      await storagePage.waitForStorageTab();
     });
 
-    await test.step("размер диска в GB отображается", async () => {
-      await expect(storagePage.diskSizeLabel).toBeVisible({ timeout: 10_000 });
+    await test.step("заголовок диска — реальный 'Drive: <letter>'", async () => {
+      await expect(storagePage.driveHeading).toHaveText(/Drive:\s*[A-Z]/, { timeout: 10_000 });
+    });
+
+    await test.step("размер диска — реальное значение в GB", async () => {
+      await expect(storagePage.diskSizeLabel).toHaveText(/\d+\s*GB/, { timeout: 10_000 });
+    });
+
+    await test.step("диск помечен бейджем Primary", async () => {
+      await expect(storagePage.primaryBadge).toContainText("Primary", { timeout: 10_000 });
     });
   });
 });

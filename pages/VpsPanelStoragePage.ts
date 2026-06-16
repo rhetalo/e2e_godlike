@@ -45,6 +45,7 @@ export class VpsPanelStoragePage {
   }
 
   async waitForStorageTab(): Promise<void> {
-    await this.page.waitForLoadState("networkidle").catch(() => null);
+    // Вкладка отрисована, когда в панели #pills-storage появилась карточка диска.
+    await this.driveHeading.waitFor({ state: "visible", timeout: 15_000 });
   }
 }

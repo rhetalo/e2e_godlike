@@ -74,7 +74,6 @@ export default tseslint.config(
   // существующего легаси, а не разрешение писать так дальше.
   {
     files: [
-      "tests/vps/panel/vps.panel.login.spec.ts",
       "tests/vps/panel/vps.panel.power.actions.spec.ts",
       "tests/vps/panel/vps.panel.rebuild.spec.ts",
       "tests/vps/panel/vps.panel.server.spec.ts",

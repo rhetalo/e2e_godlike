@@ -53,74 +53,47 @@ test.afterAll(async () => {
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// SUITE 1 — Навигация
+// Вкладка Network — навигация, Primary Network, Statistics, Reverse DNS.
+// Видимость элементов свёрнута в precondition-шаги поведенческих тестов.
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("@regression VPS-панель — вкладка Network: навигация", () => {
-  test("вкладка Network присутствует на странице сервера", async () => {
-    await expect(serverPage.tab("Network")).toBeVisible({ timeout: 10_000 });
+test.describe("@regression VPS-панель — вкладка Network", () => {
+  test("вкладка активна и показывает карточку Primary Network", async () => {
+    await test.step("вкладка Network присутствует и активна", async () => {
+      // activeTab = [role="tab"][aria-selected="true"] — только pill-табы, не верхний navbar.
+      await expect(serverPage.tab("Network")).toBeVisible({ timeout: 10_000 });
+      await expect(serverPage.activeTab).toContainText("Network", { timeout: 5_000 });
+    });
+
+    await test.step("Primary Network: заголовок виден, есть IPv4-адрес", async () => {
+      await expect(networkPage.primaryNetworkHeading).toBeVisible({ timeout: 10_000 });
+      const ips = await networkPage.getVisibleIpAddresses();
+      expect(ips.length, "Ни одного IPv4 на Network tab").toBeGreaterThanOrEqual(1);
+    });
   });
 
-  test("клик по Network — вкладка становится активной", async () => {
-    // activeTab uses [role="tab"][aria-selected="true"] which targets pill-tab
-    // buttons only — skips the top navbar <a class="main nav-link active">
-    await expect(serverPage.activeTab).toContainText("Network", { timeout: 5_000 });
-  });
-});
+  test("Statistics — клик рендерит Plotly-чарт", async () => {
+    await test.step("кнопка Statistics видна", async () => {
+      await expect(networkPage.statisticsButton).toBeVisible({ timeout: 10_000 });
+    });
 
-// ══════════════════════════════════════════════════════════════════════════════
-// SUITE 2 — Карточка Primary Network
-// ══════════════════════════════════════════════════════════════════════════════
-test.describe("@regression VPS-панель — вкладка Network: Primary Network", () => {
-  test("заголовок 'Primary Network' (h2) виден в таб-панели", async () => {
-    await expect(networkPage.primaryNetworkHeading).toBeVisible({ timeout: 10_000 });
-  });
-
-  test("IPv4-адрес сервера присутствует на странице", async () => {
-    const ips = await networkPage.getVisibleIpAddresses();
-    expect(ips.length, "Ни одного IPv4 адреса не найдено на Network tab").toBeGreaterThanOrEqual(1);
-  });
-});
-
-// ══════════════════════════════════════════════════════════════════════════════
-// SUITE 3 — Statistics (трафик-чарты)
-// ══════════════════════════════════════════════════════════════════════════════
-test.describe("@regression VPS-панель — вкладка Network: статистика", () => {
-  test("кнопка Statistics видна в карточке Primary Network", async () => {
-    await expect(networkPage.statisticsButton).toBeVisible({ timeout: 10_000 });
-  });
-
-  test("клик по Statistics — Plotly-чарт #traffic-chart-monthly рендерится", async () => {
-    await networkPage.statisticsButton.click();
-
-    await test.step("chart container получает class js-plotly-plot", async () => {
-      // Plotly adds class="js-plotly-plot" after rendering the chart
+    await test.step("клик → #traffic-chart-monthly получает class js-plotly-plot", async () => {
+      await networkPage.statisticsButton.click();
+      // Plotly навешивает class="js-plotly-plot" после отрисовки чарта.
       await expect(networkPage.trafficChartMonthly).toHaveClass(/js-plotly-plot/, {
         timeout: 15_000,
       });
     });
   });
-});
 
-// ══════════════════════════════════════════════════════════════════════════════
-// SUITE 4 — Reverse DNS модал
-// ══════════════════════════════════════════════════════════════════════════════
-test.describe("@regression VPS-панель — вкладка Network: Reverse DNS", () => {
-  test("кнопка Reverse DNS видна в таб-панели", async () => {
-    await expect(networkPage.reverseDnsButton).toBeVisible({ timeout: 10_000 });
-  });
+  test("Reverse DNS — модал открывается и закрывается по Cancel", async () => {
+    await test.step("кнопка Reverse DNS видна", async () => {
+      await expect(networkPage.reverseDnsButton).toBeVisible({ timeout: 10_000 });
+    });
 
-  test("клик Reverse DNS → модал открывается → Cancel закрывает", async () => {
-    await networkPage.reverseDnsButton.click();
-
-    await test.step("модал #rdnsModal виден", async () => {
+    await test.step("клик → модал #rdnsModal с заголовком и полем ввода", async () => {
+      await networkPage.reverseDnsButton.click();
       await expect(networkPage.rdnsModal).toBeVisible({ timeout: 10_000 });
-    });
-
-    await test.step("заголовок содержит 'Reverse DNS'", async () => {
       await expect(networkPage.rdnsModalTitle).toContainText("Reverse DNS", { timeout: 5_000 });
-    });
-
-    await test.step("поле ввода rdns присутствует", async () => {
       await expect(networkPage.rdnsModalInput).toBeVisible({ timeout: 5_000 });
     });
 
