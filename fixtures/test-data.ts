@@ -16,6 +16,9 @@ export const Urls = {
   moddedHosting: "/modded-minecraft-server-hosting/",
   seedSkyHaven: "/minecraft-seeds/sky-haven-island-atm-10-seed/",
 
+  /** Каталог игровых серверов (game-servers) — вход для promo-проверок по играм. */
+  gameServers: "/game-servers-en/",
+
   /** Vue cart used by both modpack-grid install buttons and seed BUY buttons. */
   cart: "/cart",
 
@@ -50,6 +53,10 @@ export const PaymentUrlPatterns = [
 
 /** A URL is "Vue cart step 2 (billing cycle)" if it matches this. */
 export const VueCartStep2Pattern = /\/cart\?[^#]*step=2/i;
+
+/** Vue-cart путь с тарифом для проверки auth-block (login.validation.spec.ts). */
+export const CartAuthValidationPath =
+  "/cart?productId=346&billingCycle=monthly&currency=1&modpackId=curseforge-925200&promo=COMMUNITY40";
 
 /**
  * Test account. Override via env vars when running locally if needed.

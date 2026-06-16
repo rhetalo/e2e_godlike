@@ -15,7 +15,7 @@ class MarkdownLoggerReporter implements Reporter {
   private globalLogs: string[] = [];
   private startTime: string;
 
-  constructor(options?: any) {
+  constructor() {
     const now = new Date();
     this.startTime = now.toLocaleString('ru-RU').replace(',', '');
   }

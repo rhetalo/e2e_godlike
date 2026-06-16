@@ -1,62 +1,48 @@
 /**
  * funnel.cart.paypal.spec.ts
  * ──────────────────────────
- * Воронка game-сервера до страницы оплаты WHMCS (Review & Checkout) и покрытие
- * методов оплаты + кредитного баланса. ⚠️ Финальный «Continue/Pay» НЕ нажимаем —
- * это реальный платёж (см. CLAUDE.md). Реальную оплату за кредиты намеренно тестирует
- * отдельный funnel.with.credit.check.spec.ts (owner-sanctioned).
+ * Воронка game-сервера до WHMCS Review & Checkout + покрытие методов оплаты и кредитного
+ * баланса. ⚠️ Финальный «Continue/Pay» НЕ нажимаем — это реальный платёж. Реальную оплату
+ * кредитами намеренно тестирует funnel.with.credit.check.spec.ts (owner-sanctioned).
  *
- * Навигация до checkout вынесена в reachCheckout() и переиспользуется всеми тестами.
+ * Навигация до checkout — reachCheckout() через page objects (StorefrontHomePage/CartPage).
  */
 import { test, expect, type Page } from "../../fixtures/base";
-import { Credentials } from "../../fixtures/test-data";
+import { PaymentUrlPatterns } from "../../fixtures/test-data";
+import { StorefrontHomePage } from "../../pages/StorefrontHomePage";
+import { CartPage } from "../../pages/CartPage";
+import { CheckoutPage } from "../../pages/CheckoutPage";
 import { CreditBalanceSelector } from "../../components/CreditBalanceSelector";
 import { PaymentMethodSelector } from "../../components/PaymentMethodSelector";
-import { CheckoutPage } from "../../pages/CheckoutPage";
+import { CHECKOUT } from "../../utils/selectors";
 
-test.use({
-  viewport: { width: 1800, height: 900 },
-  deviceScaleFactor: 1,
-});
+test.use({ viewport: { width: 1800, height: 900 }, deviceScaleFactor: 1 });
 
 /**
  * Пройти воронку game-сервера от главной до WHMCS Review & Checkout (логин в корзине).
  * Останавливается на странице оплаты — ничего не оплачивает.
  */
 async function reachCheckout(page: Page): Promise<void> {
-  await page.goto("https://godlike.host");
+  const home = new StorefrontHomePage(page);
+  const cart = new CartPage(page);
+  const checkout = new CheckoutPage(page);
 
-  await page
-    .getByRole("banner")
-    .getByRole("link", { name: "Minecraft Server Hosting" })
-    .click();
-  await expect(page).toHaveURL(/minecraft-java-servers-hosting/i);
-
-  const orderButton = page.getByText("Add to Cart").first();
-  await expect(orderButton).toBeVisible({ timeout: 10000 });
-  await orderButton.click();
+  await home.open();
+  await home.addFirstTariffToCart();
   await expect(page).toHaveURL(/\/cart\/?/);
 
-  await expect(page.locator(".auth-block__form")).toBeVisible();
-  await page.getByText("Login").click();
-  await page.getByRole("textbox", { name: "* Email" }).fill(Credentials.email);
-  await page.getByRole("textbox", { name: "* Password" }).fill(Credentials.password);
-  await page.getByRole("button", { name: "Login" }).click();
+  await expect(page.locator(".auth-block").first()).toBeVisible({ timeout: 20_000 });
+  const advanced = await cart.loginAndAwaitStep2();
+  expect(advanced, "ожидали переход на step 2 после логина").toBeTruthy();
 
+  await Promise.all([page.waitForURL(/cart\?/), cart.clickNextStep()]);
   await Promise.all([
-    page.waitForURL(/cart\?/),
-    page.getByRole("button", { name: "Next step" }).click(),
+    page.waitForURL((u) => PaymentUrlPatterns.some((re) => re.test(u.toString())), {
+      timeout: 60_000,
+    }),
+    cart.clickNextStep(),
   ]);
-  await expect(page.getByRole("heading", { name: "Choose location" })).toBeVisible({
-    timeout: 15000,
-  });
-
-  await Promise.all([
-    page.waitForURL(/cart\?/),
-    page.getByRole("button", { name: "Next step" }).click(),
-  ]);
-  await expect(page).toHaveURL("https://godlike.host/clientarea/cart.php?a=checkout");
-  await expect(page.getByRole("heading", { name: "Review & Checkout" })).toBeVisible();
+  await expect(checkout.reviewHeading()).toBeVisible();
 }
 
 /** Снять кредит-баланс (если переключатель есть), чтобы открылись платёжные шлюзы. */
@@ -70,40 +56,34 @@ async function revealGateways(page: Page): Promise<void> {
 test("@critical оплата Stripe и PayPal", async ({ page }) => {
   await reachCheckout(page);
   await revealGateways(page);
+  const payment = new PaymentMethodSelector(page);
 
-  await test.step("Stripe", async () => {
-    await page
-      .locator("label")
-      .filter({ hasText: "Credit/Debit Card (Stripe)" })
-      .getByRole("insertion")
-      .click();
-
-    await expect(
-      page.getByText(
-        "Card Number Expiry Date CVV/CVC2 Card NumberExpiry DateCVV/CVC2 Linked Account",
-      ),
-    ).toBeVisible({ timeout: 15000 });
+  await test.step("Stripe — поля карты рендерятся", async () => {
+    await payment.selectStripe();
+    // Стабильная проверка вместо хрупкого конкатенированного текста полей: контейнер Stripe
+    // Elements + iframe поля номера карты (по title, без random-хешей; см. iframe-helper).
+    await expect(page.locator(CHECKOUT.stripeElementsContainer)).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator(CHECKOUT.stripeCardIframe)).toBeVisible({ timeout: 15_000 });
   });
 
-  await test.step("PayPal", async () => {
-    const payment = new PaymentMethodSelector(page);
+  await test.step("PayPal — клик открывает gateway paypal.com (не оплачиваем)", async () => {
     await payment.selectPayPal();
 
-    const paypalContainer = page.locator("#paypal_ppcpv_input_container_button");
-    await expect(paypalContainer).toBeVisible({ timeout: 20000 });
-    await expect(paypalContainer).toBeEnabled({ timeout: 20000 });
+    const paypalContainer = page.locator(CHECKOUT.paypalContainer);
+    await expect(paypalContainer).toBeVisible({ timeout: 20_000 });
+    await expect(paypalContainer).toBeEnabled({ timeout: 20_000 });
 
     const [popup] = await Promise.all([
-      page.context().waitForEvent("page", { timeout: 20000 }).catch(() => null),
+      page.context().waitForEvent("page", { timeout: 20_000 }).catch(() => null),
       paypalContainer.click(),
     ]);
 
     if (popup) {
       await popup.waitForLoadState("domcontentloaded");
-      await expect(popup).toHaveURL(/paypal\.com|sandbox\.paypal/i, { timeout: 30000 });
+      await expect(popup).toHaveURL(/paypal\.com|sandbox\.paypal/i, { timeout: 30_000 });
       await popup.close();
     } else {
-      await expect(page).toHaveURL(/paypal\.com|sandbox\.paypal/i, { timeout: 30000 });
+      await expect(page).toHaveURL(/paypal\.com|sandbox\.paypal/i, { timeout: 30_000 });
     }
   });
 });
@@ -118,13 +98,11 @@ test("@regression Crypto (CoinPayments) доступен, методы опла�
   const payment = new PaymentMethodSelector(page);
 
   await test.step("на checkout предложено несколько методов оплаты", async () => {
-    // panel__gateway есть (slug-модификаторы в DOM иные, чем в старом доке — не опираемся
-    // на них); идентификация метода — по value radio-инпута (надёжно, как для PayPal).
+    // Идентификация метода — по value radio-инпута (надёжно; slug-классы panel__gateway плавают).
     await expect.poll(() => checkout.gatewayPanels().count()).toBeGreaterThanOrEqual(2);
     await expect(payment.paypalRadio).toHaveCount(1);
   });
 
-  // crypto (CoinPayments) может быть не предложен для конкретного продукта — тогда скип
   test.skip(
     (await payment.cryptoRadio.count()) === 0,
     "CoinPayments-шлюз не предложен для этого заказа",

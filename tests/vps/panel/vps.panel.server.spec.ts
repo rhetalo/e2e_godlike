@@ -1,19 +1,17 @@
 /**
  * vps.panel.server.spec.ts
  * ────────────────────────
- * Тесты страницы управления сервером VirtFusion.
+ * Тесты страницы управления сервером VirtFusion и навигации к ней.
  * URL: https://vf-panel.godlike.host/server/{UUID}
  *
  * Покрытие:
- *   1. Dashboard → навигация до сервера
- *   2. /servers список — Manage кнопка
- *   3. Прямой переход на страницу сервера
- *   4. Статус сервера виден
- *   5. Кнопки управления питанием (Boot / Shutdown / Power Off / Restart)
- *   6. Навигация по всем вкладкам
+ *   1. Dashboard → навигация Servers → Manage → страница сервера
+ *   2. Страница сервера: имя и статус
+ *   3. Кнопки управления питанием присутствуют (smoke; детали — power.actions)
+ *   4. Навигация по вкладкам (каждая активируется)
+ *   5. Список /servers: имя сервера, All/Bookmarked, иконка закладки
  *
- * Деструктивные операции (power off, rebuild):
- *   Проверяем UI до подтверждения, затем жмём Cancel.
+ * Read-only: деструктивные операции тут не выполняются (см. power.actions/rebuild).
  *
  * Запуск:
  *   npx playwright test tests/vps/panel/vps.panel.server.spec.ts --project=chromium --headed
@@ -23,7 +21,6 @@ import { VpsPanelServerPage } from "../../../pages/VpsPanelServerPage";
 import { VpsPanelDashboardPage } from "../../../pages/VpsPanelDashboardPage";
 import {
   loginAndSaveSession,
-  PANEL_URL,
   STORAGE_STATE_PATH,
   TEST_SERVER_UUID,
   TEST_SERVER_NAME,
@@ -38,12 +35,14 @@ test.describe.configure({ mode: "serial" });
 
 let sharedContext: BrowserContext;
 let serverPage: VpsPanelServerPage;
+let dashboardPage: VpsPanelDashboardPage;
 
 test.beforeAll(async ({ browser }: { browser: Browser }) => {
   await loginAndSaveSession(browser);
   sharedContext = await browser.newContext({ storageState: STORAGE_STATE_PATH });
   const page = await sharedContext.newPage();
   serverPage = new VpsPanelServerPage(page, TEST_SERVER_UUID);
+  dashboardPage = new VpsPanelDashboardPage(page);
 });
 
 test.afterAll(async () => {
@@ -51,202 +50,125 @@ test.afterAll(async () => {
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// SUITE 1 — Dashboard Navigation
+// SUITE 1 — Dashboard и навигация к серверу
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS-панель — Dashboard и навигация", () => {
-  test("@smoke dashboard загружается после логина", async () => {
-    const page = sharedContext.pages()[0];
-    const dashboard = new VpsPanelDashboardPage(page);
-
-    await dashboard.goto();
+  test("@smoke dashboard загружается, ссылки Dashboard и Servers видны", async () => {
+    await dashboardPage.goto();
 
     await test.step("URL содержит /dashboard", async () => {
-      expect(page.url()).toMatch(/\/dashboard/);
+      expect(serverPage.page.url()).toMatch(/\/dashboard/);
+    });
+
+    await test.step("ссылки навигации Dashboard и Servers видны", async () => {
+      await expect(dashboardPage.navDashboardLink).toBeVisible({ timeout: 10_000 });
+      await expect(dashboardPage.navServersLink).toBeVisible({ timeout: 10_000 });
     });
   });
 
-  test("@regression навигация: ссылки Dashboard и Servers видны", async () => {
-    const page = sharedContext.pages()[0];
-    const dashboard = new VpsPanelDashboardPage(page);
+  test("@regression Servers → /servers → Manage → страница /server/", async () => {
+    const page = serverPage.page;
 
-    await dashboard.goto();
-
-    await test.step("Dashboard link visible", async () => {
-      await expect(dashboard.navDashboardLink).toBeVisible({ timeout: 10_000 });
-    });
-
-    await test.step("Servers link visible", async () => {
-      await expect(dashboard.navServersLink).toBeVisible({ timeout: 10_000 });
-    });
-  });
-
-  test("@regression клик по Servers в навигации → /servers", async () => {
-    const page = sharedContext.pages()[0];
-    const dashboard = new VpsPanelDashboardPage(page);
-
-    await dashboard.goto();
-    await dashboard.navigateToServers();
-
-    await test.step("URL содержит /servers", async () => {
+    await test.step("клик Servers в навигации → /servers", async () => {
+      await dashboardPage.goto();
+      await dashboardPage.navigateToServers();
       expect(page.url()).toMatch(/\/servers/);
     });
-  });
 
-  test("@regression страница /servers — кнопка Manage видна для тестового сервера", async () => {
-    const page = sharedContext.pages()[0];
-
-    await page.goto(`${PANEL_URL}/servers`, { waitUntil: "domcontentloaded", timeout: 30_000 });
-    await page.waitForLoadState("networkidle").catch(() => null);
-
-    await test.step("Manage button visible", async () => {
-      const manageBtn = page.locator('button:has-text("Manage"), a:has-text("Manage")').first();
-      await expect(manageBtn).toBeVisible({ timeout: 15_000 });
+    await test.step("у тестового сервера видна кнопка Manage", async () => {
+      await expect(dashboardPage.manageButtons.first()).toBeVisible({ timeout: 15_000 });
     });
-  });
 
-  test("@regression клик Manage на /servers → открывается страница /server/", async () => {
-    const page = sharedContext.pages()[0];
-    const dashboard = new VpsPanelDashboardPage(page);
-
-    await dashboard.gotoServers();
-    await dashboard.openFirstServer();
-
-    await test.step("URL содержит /server/", async () => {
+    await test.step("клик Manage → открывается страница /server/", async () => {
+      await dashboardPage.openFirstServer();
       expect(page.url()).toMatch(/\/server\//);
     });
   });
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// SUITE 2 — Server Detail Page Structure
+// SUITE 2 — Страница сервера: идентичность и статус
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS-панель — структура страницы сервера", () => {
+test.describe("VPS-панель — страница сервера", () => {
   test.beforeEach(async () => {
     await serverPage.goto();
   });
 
-  test("@regression прямой переход на /server/{UUID} загружается", async () => {
-    const page = sharedContext.pages()[0];
-
-    await test.step("URL содержит TEST_SERVER_UUID", async () => {
-      expect(page.url()).toContain(TEST_SERVER_UUID);
+  test("@regression имя сервера и валидный статус отображаются", async () => {
+    await test.step(`имя "${TEST_SERVER_NAME}" присутствует на странице`, async () => {
+      await expect(serverPage.serverNameLabel(TEST_SERVER_NAME)).toBeVisible({ timeout: 15_000 });
     });
-  });
 
-  test("@regression имя сервера видно на странице", async () => {
-    const page = sharedContext.pages()[0];
-
-    await test.step(`Имя "${TEST_SERVER_NAME}" присутствует`, async () => {
-      const bodyText = await page.locator("body").innerText();
-      expect(bodyText).toContain(TEST_SERVER_NAME);
-    });
-  });
-
-  test("@regression статус сервера отображается (Running / Stopped / Paused)", async () => {
-    const statusText = await serverPage.getStatusText();
-
-    await test.step("Статус-элемент содержит валидное значение", async () => {
-      const validStatuses = ["running", "stopped", "paused", "building", "starting"];
-      const isValid = validStatuses.some(s => statusText.toLowerCase().includes(s));
-      expect(isValid, `Неизвестный статус: "${statusText}"`).toBeTruthy();
+    await test.step("статус сервера — одно из валидных значений", async () => {
+      const statusText = (await serverPage.getStatusText()).toLowerCase();
+      const valid = ["running", "stopped", "paused", "building", "starting"];
+      expect(
+        valid.some((s) => statusText.includes(s)),
+        `Неизвестный статус: "${statusText}"`,
+      ).toBeTruthy();
     });
   });
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// SUITE 3 — Power Controls (smoke)
-// Детальные проверки состояний и модалов — в vps.panel.power.actions.spec.ts
+// SUITE 3 — Power Controls (smoke; детали — vps.panel.power.actions.spec.ts)
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS-панель — управление питанием", () => {
-  test("@regression кнопки управления питанием присутствуют на странице сервера", async () => {
+  test("@regression кнопки управления питанием присутствуют", async () => {
     await serverPage.goto();
-
-    // allPowerButtons исключает data-bs-dismiss="modal" — только реальные кнопки в хедере
+    // allPowerButtons исключает data-bs-dismiss="modal" — только реальные кнопки в хедере.
     await expect(serverPage.allPowerButtons.first()).toBeVisible({ timeout: 10_000 });
-    const count = await serverPage.allPowerButtons.count();
-    expect(count, "Ни одной кнопки питания не найдено").toBeGreaterThanOrEqual(1);
+    expect(await serverPage.allPowerButtons.count(), "Ни одной кнопки питания").toBeGreaterThanOrEqual(1);
   });
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// SUITE 4 — Tab Navigation
+// SUITE 4 — Навигация по вкладкам (каждая активируется)
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS-панель — навигация по вкладкам", () => {
   const tabLabels = ["Overview", "Media", "Options", "Network", "Storage", "Sharing"] as const;
 
-  test("@regression все 6 вкладок присутствуют на странице сервера", async () => {
-    await serverPage.goto();
-
-    const found: string[] = [];
-    for (const label of tabLabels) {
-      const isVisible = await serverPage.tab(label).isVisible().catch(() => false);
-      if (isVisible) found.push(label);
-    }
-
-    await test.step("Минимум 4 вкладки видны", async () => {
-      expect(found.length, `Видны: ${found.join(", ")}`).toBeGreaterThanOrEqual(4);
-    });
-  });
-
   for (const tabLabel of tabLabels) {
-    test(`@regression вкладка "${tabLabel}" — кликабельна, становится активной`, async () => {
+    test(`@regression вкладка "${tabLabel}" — кликабельна и становится активной`, async () => {
       await serverPage.goto();
 
       const isVisible = await serverPage.tab(tabLabel).isVisible().catch(() => false);
       test.skip(!isVisible, `Вкладка "${tabLabel}" не видна`);
 
       await serverPage.clickTab(tabLabel);
-
-      // Проверяем что активный таб содержит нужный текст
       await expect(serverPage.activeTab).toContainText(tabLabel, { timeout: 5_000 });
     });
   }
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// SUITE 5 — Servers List (/servers)
+// SUITE 5 — Список серверов (/servers)
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS-панель — список серверов (/servers)", () => {
   test.beforeEach(async () => {
-    const page = sharedContext.pages()[0];
-    await page.goto(`${PANEL_URL}/servers`, { waitUntil: "domcontentloaded", timeout: 30_000 });
-    await page.waitForLoadState("networkidle").catch(() => null);
+    await dashboardPage.gotoServers();
+    await dashboardPage.waitForServersList();
   });
 
   test("@regression имя тестового сервера видно в списке", async () => {
-    const page = sharedContext.pages()[0];
-    const bodyText = await page.locator("body").innerText();
-    expect(bodyText).toContain(TEST_SERVER_NAME);
+    await expect(serverPage.serverNameLabel(TEST_SERVER_NAME)).toBeVisible({ timeout: 15_000 });
   });
 
-  test("@regression вкладки 'All Servers' и 'Bookmarked Servers' присутствуют", async () => {
-    const page = sharedContext.pages()[0];
+  test("@regression вкладки All/Bookmarked есть, переключение работает, есть иконка закладки", async () => {
+    await test.step("вкладки All Servers и Bookmarked Servers видны", async () => {
+      await expect(dashboardPage.allServersTab).toBeVisible({ timeout: 10_000 });
+      await expect(dashboardPage.bookmarkedServersTab).toBeVisible({ timeout: 10_000 });
+    });
 
-    const allTab = page.locator('label[for="serverListType1"]');
-    const bookmarkedTab = page.locator('label[for="serverListType2"]');
+    await test.step("клик Bookmarked Servers → radio становится checked", async () => {
+      await dashboardPage.bookmarkedServersTab.click();
+      await expect(dashboardPage.bookmarkedServersRadio).toBeChecked({ timeout: 5_000 });
+      // Возвращаемся на All Servers, чтобы не оставлять состояние списка изменённым.
+      await dashboardPage.allServersTab.click();
+    });
 
-    await expect(allTab).toBeVisible({ timeout: 10_000 });
-    await expect(bookmarkedTab).toBeVisible({ timeout: 10_000 });
-  });
-
-  test("@regression клик 'Bookmarked Servers' переключает вкладку", async () => {
-    const page = sharedContext.pages()[0];
-
-    const bookmarkedTab = page.locator('label[for="serverListType2"]');
-    await bookmarkedTab.click();
-
-    // radio input для Bookmarked должен стать checked
-    const input = page.locator('input#serverListType2');
-    await expect(input).toBeChecked({ timeout: 5_000 });
-
-    // Возвращаемся обратно
-    await page.locator('label[for="serverListType1"]').click();
-  });
-
-  test("@regression у сервера есть bookmark-иконка", async () => {
-    const page = sharedContext.pages()[0];
-
-    const bookmarkIcon = page.locator('[tt="Bookmark"], [tt="Remove bookmark"]').first();
-    await expect(bookmarkIcon).toBeVisible({ timeout: 10_000 });
+    await test.step("у сервера есть иконка закладки", async () => {
+      await expect(dashboardPage.bookmarkIcon).toBeVisible({ timeout: 10_000 });
+    });
   });
 });

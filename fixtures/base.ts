@@ -46,7 +46,7 @@ export const test = base.extend<{ page: Page }>({
     const banner = new CookieBanner(page);
 
     const origGoto = page.goto.bind(page);
-    (page as any).goto = async (...args: Parameters<Page['goto']>) => {
+    (page as { goto: Page['goto'] }).goto = async (...args: Parameters<Page['goto']>) => {
       const resp = await origGoto(...args);
       // Ждём завершения всех сетевых запросов — даём JS-баннерам время появиться
       await page.waitForLoadState('networkidle', { timeout: 5_000 }).catch(() => {});

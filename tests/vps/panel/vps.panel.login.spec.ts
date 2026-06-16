@@ -5,15 +5,13 @@
  * URL: https://vf-panel.godlike.host/login
  *
  * Покрытие:
- *   1. Структура страницы (форма, поля, кнопка)
- *   2. Успешный логин → редирект на /dashboard
- *   3. Неверные креды → сообщение об ошибке
+ *   1. Структура страницы (форма, поля, кнопка disabled на пустой форме, заголовок)
+ *   2. Успешный логин → редирект на /dashboard; /login и /dashboard под сессией
+ *   3. Неверные креды → остаёмся на форме логина
  *   4. Незалогиненный пользователь → редирект на /login
- *   5. После логина /login → редирект на /dashboard
  *
  * Запуск:
- *   npx playwright test tests/vps.panel.login.spec.ts --project=chromium
- *   npx playwright test tests/vps.panel.login.spec.ts --project=chromium --headed
+ *   npx playwright test tests/vps/panel/vps.panel.login.spec.ts --project=chromium
  */
 import { test, expect, type Browser } from "@playwright/test";
 import { VpsPanelLoginPage } from "../../../pages/VpsPanelLoginPage";
@@ -34,51 +32,35 @@ test.beforeAll(async ({ browser }: { browser: Browser }) => {
 // SUITE 1 — Login Page Structure
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS-панель — структура страницы логина", () => {
-  test("@regression страница /login загружается и содержит форму", async ({ browser }) => {
+  test("@regression страница /login: форма, поля, заголовок, кнопка disabled на пустой форме", async ({
+    browser,
+  }) => {
     const page = await browser.newPage();
     const loginPage = new VpsPanelLoginPage(page);
 
-    await loginPage.goto();
+    try {
+      await loginPage.goto();
+      expect(page.url()).toMatch(/\/login/);
 
-    console.log(`[INFO] Login page URL: ${page.url()}`);
-    expect(page.url()).toMatch(/\/login/);
+      await test.step("поля email/password и кнопка Login видны", async () => {
+        await expect(loginPage.emailInput).toBeVisible({ timeout: 10_000 });
+        await expect(loginPage.passwordInput).toBeVisible();
+        await expect(loginPage.loginButton).toBeVisible();
+      });
 
-    await expect(loginPage.emailInput).toBeVisible({ timeout: 10_000 });
-    await expect(loginPage.passwordInput).toBeVisible();
-    await expect(loginPage.loginButton).toBeVisible();
+      await test.step("заголовок присутствует и непустой", async () => {
+        await expect(loginPage.heading).toBeVisible({ timeout: 10_000 });
+        expect((await loginPage.heading.innerText()).trim().length).toBeGreaterThan(0);
+      });
 
-    console.log("[INFO] Login form elements visible ✓");
-    await page.close();
+      await test.step("на пустой форме кнопка Login неактивна", async () => {
+        await expect(loginPage.loginButton).toBeDisabled();
+      });
+    } finally {
+      await page.close();
+    }
   });
-
-  test("@regression заголовок страницы присутствует (Welcome back или аналог)", async ({ browser }) => {
-    const page = await browser.newPage();
-    const loginPage = new VpsPanelLoginPage(page);
-
-    await loginPage.goto();
-
-    const heading = page.locator("h1, h2, h3").first();
-    await expect(heading).toBeVisible({ timeout: 10_000 });
-    const headingText = await heading.innerText();
-    console.log(`[INFO] Login heading: "${headingText}"`);
-    expect(headingText.length).toBeGreaterThan(0);
-
-    await page.close();
-  });
-
-  test("@regression кнопка Login видна и неактивна", async ({ browser }) => {
-    const page = await browser.newPage();
-    const loginPage = new VpsPanelLoginPage(page);
-
-    await loginPage.goto();
-
-    await expect(loginPage.loginButton).toBeVisible({ timeout: 10_000 });
-    await expect(loginPage.loginButton).toBeDisabled();
-    console.log("[INFO] Login button disabled ✓");
-
-    await page.close();
-  });
-}); // ← закрываем SUITE 1 (раньше отсутствовал — SUITE 2/3/4 были вложены)
+});
 
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 2 — Successful Login
@@ -88,48 +70,40 @@ test.describe("@critical VPS-панель — успешный логин", () =
     const page = await browser.newPage();
     const loginPage = new VpsPanelLoginPage(page);
 
-    await loginPage.loginAsTestUser();
-
-    console.log(`[INFO] After login URL: ${page.url()}`);
-    expect(page.url()).toMatch(/\/dashboard/);
-
-    await page.close();
+    try {
+      // loginAsTestUser ждёт waitForURL(/dashboard/) внутри.
+      await loginPage.loginAsTestUser();
+      expect(page.url()).toMatch(/\/dashboard/);
+    } finally {
+      await page.close();
+    }
   });
 
-  test("после логина — /dashboard доступен без редиректа на /login", async ({ browser }) => {
+  test("под сессией: /dashboard доступен без редиректа на /login", async ({ browser }) => {
     const context = await browser.newContext({ storageState: STORAGE_STATE_PATH });
     const page = await context.newPage();
 
-    await page.goto(`${PANEL_URL}/dashboard`, {
-      waitUntil: "domcontentloaded",
-      timeout: 30_000,
-    });
-    await page.waitForLoadState("networkidle").catch(() => null);
-
-    console.log(`[INFO] Dashboard URL: ${page.url()}`);
-    expect(page.url()).toMatch(/\/dashboard/);
-
-    await context.close();
+    try {
+      await page.goto(`${PANEL_URL}/dashboard`, { waitUntil: "domcontentloaded", timeout: 30_000 });
+      await page.waitForURL(/\/dashboard/, { timeout: 15_000 });
+      expect(page.url()).toMatch(/\/dashboard/);
+    } finally {
+      await context.close();
+    }
   });
 
-  test("после логина — /login редиректит на /dashboard", async ({ browser }) => {
+  test("под сессией: /login редиректит на /dashboard", async ({ browser }) => {
     const context = await browser.newContext({ storageState: STORAGE_STATE_PATH });
     const page = await context.newPage();
 
-    await page.goto(`${PANEL_URL}/login`, {
-      waitUntil: "domcontentloaded",
-      timeout: 30_000,
-    });
-    await page.waitForLoadState("networkidle").catch(() => null);
-
-    console.log(`[INFO] After visiting /login while logged in: ${page.url()}`);
-    // Authenticated users should be redirected away from /login
-    // VirtFusion typically redirects to /dashboard
-    const url = page.url();
-    const isLoginOrDashboard = /\/(login|dashboard)/.test(url);
-    expect(isLoginOrDashboard).toBeTruthy();
-
-    await context.close();
+    try {
+      await page.goto(`${PANEL_URL}/login`, { waitUntil: "domcontentloaded", timeout: 30_000 });
+      // Авторизованного пользователя панель уводит с /login на /dashboard.
+      await page.waitForURL(/\/dashboard/, { timeout: 15_000 });
+      expect(page.url()).toMatch(/\/dashboard/);
+    } finally {
+      await context.close();
+    }
   });
 });
 
@@ -137,46 +111,31 @@ test.describe("@critical VPS-панель — успешный логин", () =
 // SUITE 3 — Invalid Credentials
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("@critical VPS-панель — неверные креды", () => {
-  test("неверный пароль → остаёмся на /login", async ({ browser }) => {
+  test("неверный пароль → остаёмся на форме логина", async ({ browser }) => {
     const page = await browser.newPage();
     const loginPage = new VpsPanelLoginPage(page);
 
-    await loginPage.loginWith("test@testmail.com", "wrong_password_xyz");
-
-    // On invalid credentials the server responds quickly; just wait for networkidle
-    await page.waitForLoadState("networkidle").catch(() => null);
-
-    console.log(`[INFO] After wrong password URL: ${page.url()}`);
-    // Should stay on /login (not redirect to /dashboard)
-    expect(page.url()).not.toMatch(/\/dashboard/);
-
-    await page.close();
+    try {
+      await loginPage.loginWith("test@testmail.com", "wrong_password_xyz");
+      // Не пускает на /dashboard, форма логина остаётся на экране.
+      await expect(loginPage.emailInput).toBeVisible({ timeout: 10_000 });
+      await expect(page).not.toHaveURL(/\/dashboard/);
+    } finally {
+      await page.close();
+    }
   });
 
-  test("неверный email → остаёмся на /login", async ({ browser }) => {
+  test("неверный email → остаёмся на форме логина", async ({ browser }) => {
     const page = await browser.newPage();
     const loginPage = new VpsPanelLoginPage(page);
 
-    await loginPage.loginWith("nobody@nowhere.invalid", "Password_123");
-    await page.waitForLoadState("networkidle").catch(() => null);
-
-    console.log(`[INFO] After invalid email URL: ${page.url()}`);
-    expect(page.url()).not.toMatch(/\/dashboard/);
-
-    await page.close();
-  });
-
-  test("пустые поля — кнопка Login неактивна", async ({ browser }) => {
-    const page = await browser.newPage();
-    const loginPage = new VpsPanelLoginPage(page);
-
-    await loginPage.goto();
-    await expect(loginPage.loginButton).toBeDisabled();
-    // Button is disabled — no click, so no need to wait; URL stays on /login immediately
-    console.log(`[INFO] After empty submit URL: ${page.url()}`);
-    expect(page.url()).toMatch(/\/login/);
-
-    await page.close();
+    try {
+      await loginPage.loginWith("nobody@nowhere.invalid", "Password_123");
+      await expect(loginPage.emailInput).toBeVisible({ timeout: 10_000 });
+      await expect(page).not.toHaveURL(/\/dashboard/);
+    } finally {
+      await page.close();
+    }
   });
 });
 
@@ -184,33 +143,17 @@ test.describe("@critical VPS-панель — неверные креды", () =
 // SUITE 4 — Protected Routes (unauthenticated)
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("@critical VPS-панель — защищённые маршруты", () => {
-  test("незалогиненный пользователь: /dashboard → редиректит на /login", async ({ browser }) => {
-    const page = await browser.newPage();
+  for (const route of ["/dashboard", "/servers"]) {
+    test(`незалогиненный пользователь: ${route} → редирект на /login`, async ({ browser }) => {
+      const page = await browser.newPage();
 
-    await page.goto(`${PANEL_URL}/dashboard`, {
-      waitUntil: "domcontentloaded",
-      timeout: 30_000,
+      try {
+        await page.goto(`${PANEL_URL}${route}`, { waitUntil: "domcontentloaded", timeout: 30_000 });
+        await page.waitForURL(/\/(login|auth)/, { timeout: 15_000 });
+        expect(page.url()).toMatch(/\/(login|auth)/);
+      } finally {
+        await page.close();
+      }
     });
-    await page.waitForLoadState("networkidle").catch(() => null);
-
-    console.log(`[INFO] Unauthenticated /dashboard URL: ${page.url()}`);
-    expect(page.url()).toMatch(/\/(login|auth)/);
-
-    await page.close();
-  });
-
-  test("незалогиненный пользователь: /servers → редиректит на /login", async ({ browser }) => {
-    const page = await browser.newPage();
-
-    await page.goto(`${PANEL_URL}/servers`, {
-      waitUntil: "domcontentloaded",
-      timeout: 30_000,
-    });
-    await page.waitForLoadState("networkidle").catch(() => null);
-
-    console.log(`[INFO] Unauthenticated /servers URL: ${page.url()}`);
-    expect(page.url()).toMatch(/\/(login|auth)/);
-
-    await page.close();
-  });
+  }
 });

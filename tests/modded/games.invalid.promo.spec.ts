@@ -1,229 +1,58 @@
+/**
+ * games.invalid.promo.spec.ts
+ * ───────────────────────────
+ * Под СТАНДАРТНЫМ аккаунтом (одноразовые промо уже израсходованы) промокод должен
+ * активироваться ТОЛЬКО там, где это допустимо по games.json (`expectPromoValid`),
+ * и НЕ активироваться в остальных случаях.
+ *
+ * Зеркальный кейс — games.valid.promo (тот же флоу под свежим аккаунтом). Общая
+ * навигация/цикл по тарифам — в GameStorefrontPage; здесь только вердикт.
+ */
 import { test, expect } from "../../fixtures/base";
 import gamesData from "../../fixtures/games.json";
 import { pinAmplitudeExperiments } from "../../utils/amplitude";
+import { loginClientareaAndSaveSession } from "../../utils/clientareaAuth";
+import { GameStorefrontPage } from "../../pages/GameStorefrontPage";
 
-const gamesToTest = gamesData.games;
-
-const BASE_URL = "https://godlike.host";
-
-// Стандартный аккаунт с активными сервисами — промокод НЕ должен срабатывать
-// Задай CLIENTAREA_EMAIL и CLIENTAREA_PASSWORD в .env
+const games = gamesData.games;
 const EMAIL = process.env.CLIENTAREA_EMAIL ?? "test@testmail.com";
 const PASSWORD = process.env.CLIENTAREA_PASSWORD ?? "test@testmail.com";
 const storageStatePath = "storageState.json";
 
-// ---------------- LOGIN ----------------
-
 test.beforeAll(async ({ browser }) => {
-  const page = await browser.newPage();
-
-  await page.goto(`${BASE_URL}/clientarea/login`, {
-    waitUntil: "domcontentloaded",
-    timeout: 60000,
+  await loginClientareaAndSaveSession(browser, {
+    email: EMAIL,
+    password: PASSWORD,
+    statePath: storageStatePath,
   });
-
-  await page.fill("#inputEmail", EMAIL);
-  await page.fill("#inputPassword", PASSWORD);
-
-  await Promise.all([
-    page.waitForURL("**/clientarea/clientarea.php", {
-      timeout: 60000,
-    }),
-    page.click("#login"),
-  ]);
-
-  console.log("[INFO] Login successful in beforeAll");
-
-  await page.context().storageState({ path: storageStatePath });
-  await page.close();
 });
 
-// ---------------- TESTS ----------------
-
-for (const game of gamesToTest) {
-  test(`@critical Промокод НЕ активируется для игры: ${game.name}`, async ({ browser }) => {
-    test.setTimeout(60000);
-
-    const gameName = game.name;
+for (const game of games) {
+  test(`@critical Промокод по правилу expectPromoValid для игры: ${game.name}`, async ({
+    browser,
+  }) => {
+    test.setTimeout(60_000);
     const expectPromoValid = game.expectPromoValid ?? false;
-
-    console.log(`\n===== START TEST FOR: ${gameName} =====`);
-
-    const context = await browser.newContext({
-      storageState: storageStatePath,
-    });
-    // Фиксируем A/B-вариант Amplitude, чтобы акционный flash-sale не мешал флоу
+    const context = await browser.newContext({ storageState: storageStatePath });
     await pinAmplitudeExperiments(context);
-
     const page = await context.newPage();
 
-    const invalidPromos: string[] = [];
-
     try {
-      // ---------------- OPEN GAMES ----------------
+      const results = await new GameStorefrontPage(page).collectTariffPromoResults(game.name);
 
-      await page.goto(`${BASE_URL}/game-servers-en/`, {
-        waitUntil: "domcontentloaded",
-        timeout: 60000,
+      await test.step("найдены тарифы с Add to Cart", async () => {
+        expect(results.length, `нет тарифов с Add to Cart для ${game.name}`).toBeGreaterThan(0);
       });
 
-      const gameLink = page
-        .locator("a.game__title")
-        .filter({ hasText: new RegExp(`^${gameName}$`) })
-        .first();
-
-      await expect(gameLink).toBeVisible({ timeout: 60000 });
-
-      await gameLink.scrollIntoViewIfNeeded();
-
-      const gamePageUrl =
-        (await gameLink.getAttribute("href")) ||
-        `${BASE_URL}/game-servers-en/`;
-
-      console.log(`[INFO] Game page URL: ${gamePageUrl}`);
-
-      await gameLink.click();
-
-      await page.waitForLoadState("domcontentloaded", {
-        timeout: 60000,
+      await test.step(`активация совпадает с expectPromoValid=${expectPromoValid}`, async () => {
+        const mismatches = results
+          .filter((r) => r.activated !== expectPromoValid)
+          .map((r) => `${r.title}: activated=${r.activated}, ожидалось ${expectPromoValid} (${r.text})`);
+        expect(
+          mismatches,
+          `Несоответствие промо для ${game.name}:\n${mismatches.join("\n")}`,
+        ).toEqual([]);
       });
-
-      // ---------------- TARIFS ----------------
-
-      const tariffLocator = page.locator(".storefront__tariff");
-
-      await expect(tariffLocator.first()).toBeVisible({
-        timeout: 60000,
-      });
-
-      const allTariffs = await tariffLocator.all();
-
-      const validTariffs: {
-        div: any;
-        btn: any;
-        title: string;
-      }[] = [];
-
-      for (let idx = 0; idx < allTariffs.length; idx++) {
-        const tariff = allTariffs[idx];
-
-        const addToCartBtn = tariff.locator(
-          'a.button.storefront__tariff-action__cart:has-text("Add to Cart")',
-        );
-
-        if ((await addToCartBtn.count()) > 0) {
-          let title = `#${idx + 1}`;
-
-          try {
-            const titleText = await tariff
-              .locator("h3.storefront__tariff-title")
-              .textContent();
-
-            if (titleText) title = titleText.trim();
-          } catch {}
-
-          validTariffs.push({
-            div: tariff,
-            btn: addToCartBtn.first(),
-            title,
-          });
-        }
-      }
-
-      console.log(`[INFO] Valid tariffs: ${validTariffs.length}`);
-
-      if (!validTariffs.length) {
-        throw new Error(`No valid tariffs for ${gameName}`);
-      }
-
-      // ---------------- PROCESS TARIFFS ----------------
-
-      for (let i = 0; i < validTariffs.length; i++) {
-        const { btn, title } = validTariffs[i];
-
-        await test.step(`Тариф «${title}»`, async () => {
-          console.log(`\n[TARIFF] ${title}`);
-
-          await btn.scrollIntoViewIfNeeded();
-          await btn.click();
-
-          const successLabel = page.locator(
-            "span.promocode__label-success",
-          );
-
-          const errorLabel = page.locator(
-            "span.promocode__label-error",
-          );
-
-          await Promise.race([
-            successLabel.waitFor({
-              state: "visible",
-              timeout: 60000,
-            }),
-            errorLabel.waitFor({
-              state: "visible",
-              timeout: 60000,
-            }),
-          ]);
-
-          // ---------------- STRICT INVERTED CHECK ----------------
-
-          if (await successLabel.isVisible()) {
-            const promoText =
-              (await successLabel.textContent())?.trim() || "";
-
-            console.log(
-              `[PROMO ACTIVE] ${title}: ${promoText}`,
-            );
-
-            const hasActivation =
-              promoText.includes("Activated promocode");
-
-            if (hasActivation) {
-              if (!expectPromoValid) {
-                invalidPromos.push(
-                  `${title}: unexpected activation → ${promoText}`,
-                );
-              }
-            }
-          } else if (await errorLabel.isVisible()) {
-            const errorText =
-              (await errorLabel.textContent())?.trim() || "";
-
-            console.log(
-              `[PROMO ERROR] ${title}: ${errorText}`,
-            );
-
-            if (expectPromoValid) {
-              invalidPromos.push(
-                `${title}: expected activation but got error → ${errorText}`,
-              );
-            }
-          }
-
-          console.log(`[INFO] Tariff processed`);
-
-          await page.goto(gamePageUrl, {
-            waitUntil: "domcontentloaded",
-            timeout: 60000,
-          });
-        });
-      }
-
-      // ---------------- FINAL ASSERT ----------------
-
-      console.log(`\n===== RESULT: ${gameName} =====`);
-
-      if (invalidPromos.length > 0) {
-        console.log("[FAILED PROMOS]");
-        invalidPromos.forEach((p) => console.log(` - ${p}`));
-
-        throw new Error(
-          `Invalid promocodes in ${gameName}: ${invalidPromos.length}`,
-        );
-      }
-
-      console.log(`[SUCCESS] All promocodes valid`);
     } finally {
       await page.close();
       await context.close();

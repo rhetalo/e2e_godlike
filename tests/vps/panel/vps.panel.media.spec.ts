@@ -56,7 +56,6 @@ test.beforeAll(async ({ browser }: { browser: Browser }) => {
   await serverPage.clickTab("Media");
 
   initialDevice = await mediaPage.getSelectedBootDevice();
-  console.log(`[SETUP] Initial boot device: "${initialDevice}"`);
 });
 
 test.afterAll(async () => {
@@ -96,7 +95,6 @@ test.describe("VPS-медиа — Boot Order", () => {
     });
 
     await test.step("Текущее устройство определено", () => {
-      console.log(`[T1.1] Boot device: "${initialDevice}"`);
       expect(["HDD", "CD/DVD"]).toContain(initialDevice);
     });
   });
@@ -106,7 +104,6 @@ test.describe("VPS-медиа — Boot Order", () => {
     const currentDevice = await mediaPage.getSelectedBootDevice();
     const targetDevice = currentDevice === "HDD" ? "CD/DVD" : "HDD";
     const rowsBefore = await mediaPage.getActivityRowCount();
-    console.log(`[T1.2] Current: "${currentDevice}" → switching to: "${targetDevice}" | rows before: ${rowsBefore}`);
 
     await test.step(`Выбираем ${targetDevice} (radio.check с force:true — input скрыт custom UI)`, async () => {
       if (targetDevice === "CD/DVD") {
@@ -114,41 +111,32 @@ test.describe("VPS-медиа — Boot Order", () => {
       } else {
         await mediaPage.selectHDD();
       }
-      console.log(`[T1.2] ${targetDevice} selected ✓`);
     });
 
     await test.step("Нажимаем Apply", async () => {
       await expect(mediaPage.applyButton).toBeEnabled({ timeout: 5_000 });
       await mediaPage.applyButton.click();
-      console.log("[T1.2] Apply clicked");
     });
 
     await test.step("Ждём новую строку в activity table", async () => {
       await mediaPage.waitForNewRow(rowsBefore, 30_000);
-      const rowsAfter = await mediaPage.getActivityRowCount();
-      console.log(`[T1.2] Rows after Apply: ${rowsAfter}`);
-      expect(rowsAfter).toBeGreaterThan(rowsBefore);
+      expect(await mediaPage.getActivityRowCount()).toBeGreaterThan(rowsBefore);
     });
 
     await test.step("Задача 'Boot Order' завершилась со статусом Complete", async () => {
       await mediaPage.waitForLatestTaskComplete(90_000);
-      const taskName = await mediaPage.getLatestTaskName();
-      console.log(`[T1.2] Latest task: "${taskName}" — Complete ✓`);
-      expect(taskName).toMatch(/boot order/i);
+      expect(await mediaPage.getLatestTaskName()).toMatch(/boot order/i);
     });
   });
 
   test("@critical 1.3 возврат на исходное устройство → Apply → Complete в таблице", async () => {
-    // Читаем текущее состояние — после теста 1.2 оно должно быть противоположным initialDevice
+    // Читаем текущее состояние — после теста 1.2 оно должно быть противоположным initialDevice.
     const currentDevice = await mediaPage.getSelectedBootDevice();
-    console.log(`[T1.3] Current: "${currentDevice}", restoring to initial: "${initialDevice}"`);
-
-    if (currentDevice === initialDevice) {
-      // Если уже на исходном (тест 1.2 не изменил состояние или пропущен) — пропускаем
-      console.log(`[T1.3] Already on "${initialDevice}", skipping restore`);
-      test.skip();
-      return;
-    }
+    // Если уже на исходном (тест 1.2 не изменил состояние или пропущен) — восстанавливать нечего.
+    test.skip(
+      currentDevice === initialDevice,
+      `Уже на исходном устройстве "${initialDevice}" — восстановление не требуется`,
+    );
 
     const rowsBefore = await mediaPage.getActivityRowCount();
 
@@ -158,28 +146,21 @@ test.describe("VPS-медиа — Boot Order", () => {
       } else {
         await mediaPage.selectCDDVD();
       }
-      console.log(`[T1.3] ${initialDevice} selected ✓`);
     });
 
     await test.step("Нажимаем Apply", async () => {
       await expect(mediaPage.applyButton).toBeEnabled({ timeout: 5_000 });
       await mediaPage.applyButton.click();
-      console.log("[T1.3] Apply clicked");
     });
 
     await test.step("Ждём новую строку в activity table", async () => {
       await mediaPage.waitForNewRow(rowsBefore, 30_000);
-      const rowsAfter = await mediaPage.getActivityRowCount();
-      console.log(`[T1.3] Rows after Apply: ${rowsAfter}`);
-      expect(rowsAfter).toBeGreaterThan(rowsBefore);
+      expect(await mediaPage.getActivityRowCount()).toBeGreaterThan(rowsBefore);
     });
 
     await test.step("Задача 'Boot Order' завершилась со статусом Complete", async () => {
       await mediaPage.waitForLatestTaskComplete(90_000);
-      const taskName = await mediaPage.getLatestTaskName();
-      console.log(`[T1.3] Latest task: "${taskName}" — Complete ✓`);
-      expect(taskName).toMatch(/boot order/i);
-      console.log(`[T1.3] Boot device restored to "${initialDevice}" ✓`);
+      expect(await mediaPage.getLatestTaskName()).toMatch(/boot order/i);
     });
   });
 

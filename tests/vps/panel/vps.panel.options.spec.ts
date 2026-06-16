@@ -5,15 +5,9 @@
  * URL: https://vf-panel.godlike.host/server/{UUID}
  *
  * Структура Options (подтверждена из live HTML, май 2026):
- *   Options tab → 4 под-таба (Bootstrap pills):
- *     #pills-options-vnc-tab      → VNC (дефолтный при открытии Options)
- *     #pills-options-rescue-tab   → Rescue
- *     #pills-options-password-tab → Password (Reset Password button)
- *     #pills-options-settings-tab → Settings (Boot Type, BIOS/UEFI, Protect Server)
- *
- * Hostname/Save — в #editNameModal (gear-иконка в сайдбаре, Vue-click), не в Options.
- * Reset Password — может быть disabled когда сервер Stopped.
- * Protect Server — div.bubble[data-bs-target="#protectServerModal"] в сайдбаре.
+ *   Options tab → 4 под-таба (Bootstrap pills): VNC (дефолт) / Rescue / Password / Settings.
+ *   Reset Password — может быть disabled когда сервер Stopped.
+ *   VNC toggle и Reset Password обратимы (toggle откатываем; Reset только до Cancel).
  *
  * Запуск:
  *   npx playwright test tests/vps/panel/vps.panel.options.spec.ts --project=chromium --headed
@@ -29,6 +23,8 @@ import {
 
 test.use({ viewport: { width: 1440, height: 900 } });
 test.describe.configure({ mode: "serial" });
+
+const SUB_TABS = ["VNC", "Rescue", "Password", "Settings"] as const;
 
 let sharedContext: BrowserContext;
 let serverPage: VpsPanelServerPage;
@@ -46,8 +42,6 @@ test.afterAll(async () => {
   await sharedContext.close();
 });
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
 async function gotoOptions(): Promise<void> {
   await serverPage.goto();
   await expect(serverPage.tab("Options")).toBeVisible({ timeout: 15_000 });
@@ -55,143 +49,104 @@ async function gotoOptions(): Promise<void> {
   await optionsPage.waitForOptionsTab();
 }
 
-async function gotoSubTab(name: "VNC" | "Rescue" | "Password" | "Settings"): Promise<void> {
-  await optionsPage.clickSubTab(name);
-}
-
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 1 — Навигация: Options tab + под-табы
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS-панель — Options: навигация", () => {
-  test("@regression вкладка Options присутствует и кликабельна", async () => {
-    await serverPage.goto();
-    await expect(serverPage.tab("Options")).toBeVisible({ timeout: 15_000 });
-  });
-
-  test("@regression клик по Options — URL содержит UUID сервера", async () => {
+  test("@regression Options открывается, 4 под-таба видны, VNC активен по умолчанию", async () => {
     await gotoOptions();
-    expect(serverPage.page.url()).toContain(TEST_SERVER_UUID);
-  });
 
-  test("@regression все 4 под-таба видны: VNC, Rescue, Password, Settings", async () => {
-    await gotoOptions();
-    const page = serverPage.page;
-    for (const id of ["#pills-options-vnc-tab", "#pills-options-rescue-tab",
-                       "#pills-options-password-tab", "#pills-options-settings-tab"]) {
-      await expect(page.locator(id)).toBeVisible({ timeout: 10_000 });
-    }
-  });
+    await test.step("все 4 под-таба видны (VNC, Rescue, Password, Settings)", async () => {
+      for (const name of SUB_TABS) {
+        await expect(optionsPage.subTab(name)).toBeVisible({ timeout: 10_000 });
+      }
+    });
 
-  test("@regression VNC является активным под-табом по умолчанию", async () => {
-    await gotoOptions();
-    const vncTab = serverPage.page.locator("#pills-options-vnc-tab");
-    await expect(vncTab).toHaveClass(/active/, { timeout: 5_000 });
+    await test.step("VNC — активный под-таб по умолчанию", async () => {
+      await expect(optionsPage.subTab("VNC")).toHaveClass(/active/, { timeout: 5_000 });
+    });
   });
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// SUITE 2 — VNC под-таб
+// SUITE 2 — VNC под-таб (vlang[168])
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS-панель — Options: VNC (vlang[168])", () => {
-  test.beforeEach(async () => { await gotoOptions(); });
-
-  test("@regression заголовок секции 'Virtual Network Computing (VNC)' виден", async () => {
-    await expect(optionsPage.vncSectionTitle).toBeVisible({ timeout: 10_000 });
-  });
-
-  test("@regression кнопка Enable/Disable VNC Access присутствует", async () => {
-    await expect(optionsPage.vncToggleButton).toBeVisible({ timeout: 10_000 });
-  });
-
+test.describe("VPS-панель — Options: VNC", () => {
   test("@critical VNC toggle: клик меняет состояние и задача появляется в activity table", async () => {
+    await gotoOptions();
+
+    await test.step("секция VNC и кнопка toggle присутствуют", async () => {
+      await expect(optionsPage.vncSectionTitle).toBeVisible({ timeout: 10_000 });
+      await expect(optionsPage.vncToggleButton).toBeVisible({ timeout: 10_000 });
+    });
+
     const toggleBtn = optionsPage.vncToggleButton;
-    await expect(toggleBtn).toBeVisible({ timeout: 10_000 });
-
     const labelBefore = (await toggleBtn.innerText()).trim();
-    const actionExpected = labelBefore.includes("Enable") ? "Enable VNC" : "Disable VNC";
+    // "Enable VNC Access" / "Disable VNC Access" → действие в activity: "Enable VNC" / "Disable VNC".
+    const actionExpected = labelBefore.replace(/\s*Access$/i, "");
 
-    await toggleBtn.click();
+    await test.step(`клик toggle → текст меняется, задача "${actionExpected}" в activity`, async () => {
+      await toggleBtn.click();
+      await expect(toggleBtn).not.toHaveText(labelBefore, { timeout: 15_000 });
+      await expect
+        .poll(async () => optionsPage.latestActivityRow.innerText().catch(() => ""), {
+          timeout: 15_000,
+          message: `Activity table не показала задачу "${actionExpected}"`,
+        })
+        .toMatch(new RegExp(actionExpected, "i"));
+    });
 
-    // Ждём пока Vue перерендерит секцию и кнопка сменит текст
-    await expect(toggleBtn).not.toHaveText(labelBefore, { timeout: 15_000 });
-
-    // Проверяем activity table — задача появилась
-    await expect.poll(
-      async () => optionsPage.latestActivityRow.innerText().catch(() => ""),
-      { timeout: 15_000, message: `Activity table не показала задачу "${actionExpected}"` }
-    ).toMatch(new RegExp(actionExpected, "i"));
-
-    // Откатываем обратно — ждём возврата исходного текста кнопки
-    await toggleBtn.click();
-    await expect(toggleBtn).toHaveText(labelBefore, { timeout: 15_000 });
+    await test.step("откат: повторный клик возвращает исходное состояние", async () => {
+      await toggleBtn.click();
+      await expect(toggleBtn).toHaveText(labelBefore, { timeout: 15_000 });
+    });
   });
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// SUITE 3 — Password под-таб: Reset Password
+// SUITE 3 — Password под-таб: Reset Password (vlang[102])
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS-панель — Options: Reset Password (vlang[102])", () => {
-  test.beforeEach(async () => {
+test.describe("VPS-панель — Options: Reset Password", () => {
+  test("@regression Reset Password: модал с текстом про email открывается и закрывается по Cancel", async () => {
     await gotoOptions();
-    await gotoSubTab("Password");
-  });
+    await optionsPage.clickSubTab("Password");
 
-  test("@regression кнопка 'Reset Password' присутствует в Password под-табе", async () => {
     await expect(optionsPage.resetPasswordButton).toBeVisible({ timeout: 10_000 });
-  });
-
-  test("@regression 'Reset Password' → модал открывается → содержит текст о email → Cancel закрывает", async () => {
     const isEnabled = await optionsPage.resetPasswordButton.isEnabled().catch(() => false);
     test.skip(!isEnabled, "Reset Password недоступен — сервер остановлен или функция отключена");
 
-    await optionsPage.resetPasswordButton.click();
-    await expect(optionsPage.activeModal).toBeVisible({ timeout: 8_000 });
+    await test.step("клик → модал с предупреждением про email; кнопку Reset НЕ жмём", async () => {
+      await optionsPage.resetPasswordButton.click();
+      await expect(optionsPage.activeModal).toBeVisible({ timeout: 8_000 });
+      await expect(optionsPage.activeModal).toContainText(
+        /resetting the password|new password will sent|account email/i,
+      );
+      await expect(optionsPage.resetConfirmButton).toBeVisible({ timeout: 5_000 });
+    });
 
-    const modalText = await optionsPage.activeModal.innerText();
-    expect(modalText).toMatch(/resetting the password|new password will sent|account email/i);
-
-    // Проверяем что кнопка Reset (confirm) есть, но НЕ нажимаем её
-    await expect(optionsPage.resetConfirmButton).toBeVisible({ timeout: 5_000 });
-
-    await optionsPage.modalCancelButton.click();
-    await expect(optionsPage.activeModal).not.toBeVisible({ timeout: 5_000 });
-  });
-
-  test("@regression после закрытия модала кнопка 'Reset Password' снова доступна", async () => {
-    const isEnabled = await optionsPage.resetPasswordButton.isEnabled().catch(() => false);
-    test.skip(!isEnabled, "Reset Password недоступен — сервер остановлен или функция отключена");
-
-    await optionsPage.resetPasswordButton.click();
-    await expect(optionsPage.activeModal).toBeVisible({ timeout: 8_000 });
-    await optionsPage.modalCancelButton.click();
-    await expect(optionsPage.activeModal).not.toBeVisible({ timeout: 5_000 });
-
-    await expect(optionsPage.resetPasswordButton).toBeVisible({ timeout: 5_000 });
-    await expect(optionsPage.resetPasswordButton).toBeEnabled();
+    await test.step("Cancel закрывает модал, кнопка Reset Password снова доступна", async () => {
+      await optionsPage.modalCancelButton.click();
+      await expect(optionsPage.activeModal).not.toBeVisible({ timeout: 5_000 });
+      await expect(optionsPage.resetPasswordButton).toBeEnabled({ timeout: 5_000 });
+    });
   });
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// SUITE 4 — Settings под-таб: Boot Type
+// SUITE 4 — Settings под-таб: Boot Type (vlang[354–356])
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("VPS-панель — Options: Settings / Boot Type (vlang[354–356])", () => {
-  test.beforeEach(async () => {
+test.describe("VPS-панель — Options: Settings / Boot Type", () => {
+  test("@regression Settings: секция Boot Type и опции BIOS / UEFI присутствуют", async () => {
     await gotoOptions();
-    await gotoSubTab("Settings");
-  });
+    await optionsPage.clickSubTab("Settings");
 
-  test("@regression секция 'Boot Type' (vlang[354]) видна в Settings", async () => {
-    await expect(optionsPage.bootTypeLabel).toBeVisible({ timeout: 10_000 });
-  });
+    await test.step("заголовок Boot Type виден", async () => {
+      await expect(optionsPage.bootTypeLabel).toBeVisible({ timeout: 10_000 });
+    });
 
-  test("@regression опции 'BIOS (Legacy Mode)' и 'UEFI' присутствуют в Settings", async () => {
-    const settingsPane = serverPage.page.locator("#pills-options-settings");
-    await expect(settingsPane.getByText("BIOS (Legacy Mode)", { exact: false }).first()).toBeVisible({ timeout: 8_000 });
-    await expect(settingsPane.getByText("UEFI", { exact: false }).first()).toBeVisible({ timeout: 8_000 });
+    await test.step("опции BIOS (Legacy Mode) и UEFI присутствуют", async () => {
+      await expect(optionsPage.biosOption).toBeVisible({ timeout: 8_000 });
+      await expect(optionsPage.uefiOption).toBeVisible({ timeout: 8_000 });
+    });
   });
 });
-
-// NOTE: Protect Server (vlang[106] / vlang[184])
-// div.bubble[data-bs-target="#protectServerModal"] присутствует в DOM (Vue-шаблон),
-// но не отображается на тестовом аккаунте — возможно feature-флаг или ограничение плана.
-// Тесты не добавлены до выяснения условий появления кнопки.

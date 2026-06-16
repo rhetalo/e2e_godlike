@@ -9,6 +9,7 @@
  */
 import { test, expect } from "@playwright/test";
 import { GamePanelLoginPage } from "../../../pages/game/GamePanelLoginPage";
+import { GamePanelDashboardPage } from "../../../pages/game/GamePanelDashboardPage";
 import { GAME_EMAIL, GAME_PASSWORD, GAME_PANEL_URL, GAME_SERVER_UUID } from "../../../utils/gameAuth";
 
 test.describe("@smoke [game-panel] Логин", () => {
@@ -50,9 +51,7 @@ test.describe("@smoke [game-panel] Логин", () => {
 
     await test.step("редирект с /login на My Servers", async () => {
       await page.waitForURL((u) => !u.toString().includes("/login"), { timeout: 30_000 });
-      await expect(
-        page.locator("h1, h2").filter({ hasText: /My Servers/i }).first(),
-      ).toBeVisible({ timeout: 20_000 });
+      await expect(new GamePanelDashboardPage(page).heading).toBeVisible({ timeout: 20_000 });
     });
   });
 
@@ -78,9 +77,7 @@ test.describe("@smoke [game-panel] Логин", () => {
     await test.step("после reload остаёмся залогинены (не редирект на /login)", async () => {
       await page.reload();
       await expect(page).not.toHaveURL(/\/login/);
-      await expect(
-        page.locator("h1, h2").filter({ hasText: /My Servers/i }).first(),
-      ).toBeVisible({ timeout: 20_000 });
+      await expect(new GamePanelDashboardPage(page).heading).toBeVisible({ timeout: 20_000 });
     });
   });
 

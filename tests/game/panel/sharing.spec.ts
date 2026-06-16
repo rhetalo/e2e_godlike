@@ -88,7 +88,7 @@ test.describe("@critical [game-panel] Sharing — invitee видит расша�
     });
 
     await test.step("имя сервера видно (доступ предоставлен)", async () => {
-      await expect(dash.page.getByText(GAME_SERVER_NAME).first()).toBeVisible();
+      await expect(srv.nameLabel(GAME_SERVER_NAME)).toBeVisible();
     });
   });
 });

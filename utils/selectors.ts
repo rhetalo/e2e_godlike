@@ -52,6 +52,9 @@ export const STOREFRONT = {
   tariffTitle: ".storefront__tariff-title",
   tariffPrice: ".storefront__tariff-footer",
   tariffAddToCart: ".storefront__tariff-action__cart",
+  viewAllPlans: 'a[href*="minecraft-java-servers-hosting"], a:has-text("View all plans")',
+  gameTitle: "a.game__title",
+  customizeButton: "button.storefront__tariff-action__cart",
   discountBadge: ".storefront__tariffs-discount__percentage",
   firstPurchaseDiscount: ".storefront__tariffs-first-purchase",
 } as const;
@@ -80,6 +83,9 @@ export const BILLING = {
   period: ".period",
   periodTitle: ".period__title",
   periodPrice: ".period__price",
+  // VPS-воронка использует .period__price-primary_amount вместо .period__price. (подтверждено DOM 16-Jun-2026)
+  periodPriceAmount: ".period__price-primary_amount",
+  periodDiscount: ".period__discount",
   periodActive: ".period__active",
   renewInfo: ".period__renew",
 } as const;
@@ -92,12 +98,32 @@ export const PROMO = {
   errorLabel: ".promocode__label-error",
 } as const;
 
+// Кастомайзер тарифа «Customize server» на storefront game-страницах (slider-блоки).
+// Confirmed live (game-slider). Используется pages/GameSliderPage.ts.
+export const GAME_SLIDER = {
+  tariffAny: '[class*="storefront__tariff"]',
+  customizeButton: "button.storefront__tariff-action__cart",
+  block: ".storefront__tariffs-customizer-block",
+  blockTitle: ".storefront__tariffs-customizer-block__title",
+  blockValue: ".storefront__tariffs-customizer-block__value",
+  option: ".range_slider__option",
+  handle: ".range_slider .range_slider__selector",
+  customChoiceCard:
+    ".storefront__tariff.storefront__tariff-custom.storefront__tariff-choice",
+  customPrice: ".storefront__tariff-pricing__price",
+  daysDiscountBadge: ".range_slider__option-discount",
+} as const;
+
 export const ORDER_SUMMARY = {
   container: ".order",
   nextStepButton: ".order__button-order",
   planName: ".order__plan-value",
   billingCycle: ".order__billing-value",
   total: ".order__total",
+  // Строки сводки заказа (Billing cycle / Location / Server type) + итоговая цена. (подтверждено DOM 16-Jun-2026)
+  detailsItem: ".order__details-item",
+  detailsCaption: ".order__details-item__caption",
+  pricingPrice: ".order__pricing-price",
 } as const;
 
 /* ===== Credit Balance (Checkout) ===== */
@@ -306,6 +332,8 @@ export const MOBILE_CART = {
   promocodeToggle: ".cart__promocode-button",
   promocodeInput: '.cart__input[placeholder="Enter your promocode"]',
   promocodeApplyButton: ".cart__promocode .cart__button",
+  // Результат применения промокода: при невалидном коде показывает текст ошибки. (16-Jun-2026)
+  promocodeDisplayPrice: ".cart__promocode-display-price",
 
   /* --- Auth (mobile variant) --- */
   authPage: ".auth-page",
@@ -740,6 +768,21 @@ export const GAME_PANEL_UPGRADE = {
   // цену проверяем по тексту валюты в корне (классы цены грузятся async / варьируются)
   priceText: /[€$]\s?\d/,
   backButton: ".server__upgrade__btn-back",
+} as const;
+
+// Throttling / «Lag Detected» upgrade-модалка (вебхук CPU-троттлинга → предложение апгрейда).
+// Confirmed via live DOM 15-Jun-2026. Текст английский; число «g» в «Lag…Detected» варьируется
+// (regex Lag+). ⚠️ Minecraft-only; триггер ~1 раз в 3 дня на сервер. См. utils/throttlingWebhook.ts.
+export const GAME_PANEL_THROTTLING = {
+  dialog: ".upgrade-dialog",
+  title: ".upgrade-dialog__title", // «Laggggggg Detected»
+  subtitle: ".upgrade-dialog__subtitle", // «Your server is operating under reduced capacity.»
+  userLine: ".upgrade-dialog__user", // «{Name}, we detected server lags on your server.»
+  requiredPlan: ".upgrade__block-inner__text-bold", // «Required plan:»
+  // Keep current plan = .dialog__button БЕЗ модификатора -primary; Upgrade = -primary.
+  keepButton: ".upgrade-dialog__actions .dialog__button:not(.dialog__button-primary)",
+  upgradeButton: ".upgrade-dialog__actions .dialog__button-primary", // «Upgrade for $X»
+  titleText: /Lag+\s*Detected/i,
 } as const;
 
 // Free Premium модалка. Кнопка "What is a Free Premium?" (на страницах сервера) → premium__dialog

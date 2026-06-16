@@ -1,71 +1,65 @@
-import { test, expect, Page } from '../../fixtures/base';
-import { generateCredentials, saveCredentials } from '../../utils/credentials';
+/**
+ * registration-flow.spec.ts — регистрация нового пользователя при оформлении тарифа.
+ *
+ * Флоу: главная → «View all plans» → Add to Cart → форма регистрации (auth-block) →
+ * принять условия → шаги оформления. Сгенерированные креды сохраняются в credentials.json
+ * (ротация 30 записей, utils/credentials.ts).
+ *
+ * ⚠️ MANUAL-ONLY (env-gate `RUN_REGISTRATION_TEST`): создаёт РЕАЛЬНОГО пользователя на LIVE
+ *    PROD → НЕ для CI/рутинных прогонов. На gitlab/upd этот флоу ведёт тимлид. Запуск:
+ *      RUN_REGISTRATION_TEST=1 npx playwright test tests/general/registration-flow.spec.ts --project=chromium
+ */
+import { test, expect, type Page } from "../../fixtures/base";
+import { StorefrontHomePage } from "../../pages/StorefrontHomePage";
+import { CartPage } from "../../pages/CartPage";
+import { generateCredentials, saveCredentials } from "../../utils/credentials";
 
-test.describe('Регистрация из тарифа', () => {
-    test('@critical Пользователь может зарегистрироваться при оформлении тарифа', async ({ page }: { page: Page }) => {
-    test.setTimeout(60000);
-    await page.setViewportSize({ width: 1920, height: 1080 });
+test.use({ viewport: { width: 1920, height: 1080 } });
 
-    /* ---------- Открыть сайт ---------- */
-    await page.goto('https://godlike.host/', {
-        waitUntil: 'domcontentloaded'
-    });
+test.describe("Регистрация из тарифа", () => {
+  test("@critical Пользователь регистрируется при оформлении тарифа", async ({
+    page,
+  }: {
+    page: Page;
+  }) => {
+    test.skip(
+      !process.env.RUN_REGISTRATION_TEST,
+      "manual-only: создаёт реального пользователя на проде; запуск с RUN_REGISTRATION_TEST=1",
+    );
+    test.setTimeout(60_000);
 
-    /* ---------- Перейти к списку тарифов ---------- */
-    const viewAllPlans = page.locator(
-        `a[href*="minecraft-java-servers-hosting"], a:has-text("View all plans")`
-    ).first();
-
-    await viewAllPlans.waitFor({ state: 'visible' });
-    await viewAllPlans.click();
-
-    /* ---------- Добавить первый тариф в корзину ---------- */
-    const addToCart = page
-        .locator('a.storefront__tariff-action__cart')
-        .first();
-
-    await addToCart.waitFor({ state: 'visible' });
-    await addToCart.click();
-
-    /* ---------- Сгенерировать учётные данные ---------- */
+    const home = new StorefrontHomePage(page);
+    const cart = new CartPage(page);
     const { login, password, email } = generateCredentials();
 
-    /* ---------- Форма регистрации ---------- */
-    await page.locator('input[type="email"]').fill(email);
-    await page
-        .locator('input[name="username"], input[type="text"]')
-        .fill(login);
+    await test.step("главная → список тарифов → первый тариф в корзину", async () => {
+      await home.open();
+      await home.addFirstTariffToCart();
+      await expect(cart.registerEmail()).toBeVisible({ timeout: 20_000 });
+    });
 
-    const passwords = page.locator('input[type="password"]');
-    await passwords.nth(0).fill(password);
-    await passwords.nth(1).fill(password);
+    await test.step("заполнить форму регистрации и отправить", async () => {
+      await cart.registerEmail().fill(email);
+      await cart.registerUsername().fill(login);
+      await cart.registerPassword(0).fill(password);
+      await cart.registerPassword(1).fill(password);
+      await cart.registerSubmit().click();
+    });
 
-    await page.locator('button[type="submit"]').click();
+    await test.step("принять условия", async () => {
+      await cart.termsAcceptButton().click();
+    });
 
-    /* ---------- Принять условия ---------- */
-    const acceptTerms = page.locator(
-        'button.terms-modal__actions-accept'
-    );
+    await test.step("пройти шаги оформления (без оплаты)", async () => {
+      await cart.clickNextStep();
+      await cart.clickNextStep();
+    });
 
-    await acceptTerms.waitFor({ state: 'visible' });
-    await acceptTerms.click();
-
-    /* ---------- Шаги оформления заказа ---------- */
-    const nextStep = page.locator(
-        'button:has-text("Next step")'
-    );
-
-    await nextStep.first().waitFor({ state: 'visible' });
-    await nextStep.first().click();
-    await nextStep.first().click();
-
-    /* ---------- Сохранить учётные данные ---------- */
     saveCredentials(login, password, email);
 
-    console.log('Registration complete');
-    console.log(login, password, email);
-
-    /* ---------- Базовая проверка ---------- */
-    await expect(page).not.toHaveURL(/login/i);
+    await test.step("регистрация прошла: auth-block закрыт и мы не на /login", async () => {
+      await expect(page).not.toHaveURL(/\/login/i);
+      expect(await cart.isAuthBlockVisible()).toBe(false);
     });
+  });
 });

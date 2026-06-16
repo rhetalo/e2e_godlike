@@ -82,6 +82,11 @@ export class VpsPanelServerPage {
 
   // ── Server Identity ───────────────────────────────────────────────────────
 
+  /** Элемент с именем сервера (на детальной странице или в списке /servers). */
+  serverNameLabel(name: string): Locator {
+    return this.page.getByText(name, { exact: false }).first();
+  }
+
   /**
    * Status badge.
    * Confirmed HTML: <div class="p-3">&nbsp;&nbsp;Running</div>

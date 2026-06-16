@@ -180,13 +180,8 @@ test("@critical оформление заказа с кредитным бала
   // Нажимаем кнопку "Next step" (Следующий шаг) для перехода к выбору локации
   await page.getByRole("button", { name: "Next step" }).click();
 
-  // ПРОВЕРКА 5: Проверка заголовка "Choose location" (Выберите локацию)
-  // page.getByRole('heading', { name: 'Choose location' }) - ищет заголовок (h1-h6) с текстом "Choose location"
-  // getByRole('heading') - ищет элементы с ролью heading (любого уровня h1-h6)
-  // Заголовок подтверждает, что мы перешли на этап выбора локации сервера
-  // Примечание: здесь нет await expect().toBeVisible(), поэтому проверка может быть нестрогой
-  // (это скорее "подтверждение", чем обязательная проверка)
-  page.getByRole("heading", { name: "Choose location" });
+  // Подтверждаем переход на этап выбора локации (раньше была висячая строка без await/expect).
+  await expect(page.getByRole("heading", { name: "Choose location" })).toBeVisible();
 
   // ШАГ 9: Повторный клик по "Next step" для подтверждения выбора локации
   // После выбора локации (или оставления значений по умолчанию) переходим к следующему шагу

@@ -80,21 +80,40 @@ export class VpsPanelOptionsPage {
     return this.page.locator(':has-text("Settings updated successfully.")').first();
   }
 
+  // ── Sub-tabs (Bootstrap pills) ─────────────────────────────────────────────
+  // IDs подтверждены из live HTML: nav-кнопка #pills-options-{name}-tab,
+  // контент-пейн #pills-options-{name}.
+
+  /** Nav-кнопка под-таба (VNC / Rescue / Password / Settings). */
+  subTab(name: "VNC" | "Rescue" | "Password" | "Settings"): Locator {
+    return this.page.locator(`#pills-options-${name.toLowerCase()}-tab`);
+  }
+
+  /** Контент-пейн под-таба. */
+  subTabPane(name: "VNC" | "Rescue" | "Password" | "Settings"): Locator {
+    return this.page.locator(`#pills-options-${name.toLowerCase()}`);
+  }
+
+  /** Пейн под-таба Settings. */
+  get settingsPane(): Locator {
+    return this.subTabPane("Settings");
+  }
+
   // ── Boot Type (vlang[354–356]) ─────────────────────────────────────────────
 
   /** "Boot Type" section heading (vlang[354]) — scoped to Settings sub-tab pane */
   get bootTypeLabel(): Locator {
-    return this.page.locator('#pills-options-settings h4:has-text("Boot Type")');
+    return this.settingsPane.locator('h4:has-text("Boot Type")');
   }
 
-  /** "BIOS (Legacy Mode)" option (vlang[355]) */
+  /** "BIOS (Legacy Mode)" option (vlang[355]) — scoped to Settings pane */
   get biosOption(): Locator {
-    return this.page.locator(':has-text("BIOS (Legacy Mode)")').first();
+    return this.settingsPane.getByText("BIOS (Legacy Mode)", { exact: false }).first();
   }
 
-  /** "UEFI" option (vlang[356]) */
+  /** "UEFI" option (vlang[356]) — scoped to Settings pane */
   get uefiOption(): Locator {
-    return this.page.locator(':has-text("UEFI")').first();
+    return this.settingsPane.getByText("UEFI", { exact: false }).first();
   }
 
   // ── VNC (vlang[168] / vlang[183] / vlang[215]) ────────────────────────────
@@ -264,14 +283,14 @@ export class VpsPanelOptionsPage {
    * IDs confirmed from live HTML: #pills-options-{name}-tab
    */
   async clickSubTab(name: "VNC" | "Rescue" | "Password" | "Settings"): Promise<void> {
-    const tabId = `#pills-options-${name.toLowerCase()}-tab`;
-    await this.page.locator(tabId).click();
-    await this.page.waitForLoadState("networkidle").catch(() => null);
+    await this.subTab(name).click();
+    // Под-таб открыт, когда его контент-пейн стал видимым.
+    await this.subTabPane(name).waitFor({ state: "visible", timeout: 10_000 });
   }
 
-  /** Wait for Options tab content to fully load (networkidle + settlement) */
+  /** Wait for Options tab content to load — виден дефолтный под-таб VNC. */
   async waitForOptionsTab(): Promise<void> {
-    await this.page.waitForLoadState("networkidle").catch(() => null);
+    await this.subTab("VNC").waitFor({ state: "visible", timeout: 15_000 });
   }
 
   /**

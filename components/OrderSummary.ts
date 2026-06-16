@@ -17,4 +17,17 @@ export class OrderSummary {
   async clickNextStep(): Promise<void> {
     await this.nextStepButton.click();
   }
+
+  /** Значение строки сводки по её подписи ("Billing cycle", "Location", "Server type"). */
+  detailCaption(label: string): Locator {
+    return this.container
+      .locator(ORDER_SUMMARY.detailsItem)
+      .filter({ hasText: label })
+      .locator(ORDER_SUMMARY.detailsCaption);
+  }
+
+  /** Итоговая стоимость заказа в блоке summary. */
+  get pricingPrice(): Locator {
+    return this.container.locator(ORDER_SUMMARY.pricingPrice);
+  }
 }
