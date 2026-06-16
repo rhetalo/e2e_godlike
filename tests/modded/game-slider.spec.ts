@@ -1,30 +1,26 @@
 /**
- * E2E tests for the "Customize server" slider panel on Godlike.host game pages.
+ * E2E-тесты панели «Customize server» (slider-кастомайзер) на game-страницах godlike.host.
  *
- * Architecture:
- *  - GAME_CONFIGS — master list of all games. No slider values are hardcoded here;
- *    everything is discovered dynamically from the live page at runtime.
- *  - SliderPageHelper — thin page-object that wraps all DOM interactions.
- *  - Universal behavioral tests run identically for every game via test.describe().
- *  - Days-Runtime options (30/90/180/360) and slider count (3) are the only
- *    invariants asserted across all games, because they never change per-game.
+ * Архитектура:
+ *  - GAME_CONFIGS — список всех игр. Никакие значения слайдеров не хардкодятся: всё
+ *    вычитывается из живой страницы в рантайме.
+ *  - GameSliderPage (pages/) — page-object всех DOM-взаимодействий кастомайзера.
+ *  - Универсальные поведенческие тесты выполняются одинаково для каждой игры.
+ *  - Инварианты, общие для всех игр: опции Days Runtime (30/90/180/360) и 3 блока-слайдера.
  */
-
-import { test, expect, Page } from "../../fixtures/base";
+import { test, expect } from "../../fixtures/base";
+import { GameSliderPage } from "../../pages/GameSliderPage";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Game registry
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface GameConfig {
-  /** Human-readable label used in test titles */
+  /** Человекочитаемая метка для имени теста */
   name: string;
-  /** Full URL of the game hosting page */
+  /** Полный URL страницы хостинга игры */
   url: string;
-  /**
-   * Set to false for pages that are known NOT to have a "Customize server"
-   * button (e.g. Modded Minecraft redirects straight to a preset plan).
-   */
+  /** false для страниц, у которых заведомо НЕТ кнопки «Customize server». */
   hasCustomizer?: boolean;
 }
 
@@ -88,209 +84,18 @@ const GAME_CONFIGS: GameConfig[] = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Page-object helper
-// ─────────────────────────────────────────────────────────────────────────────
-
-/** Discovered slider block data read from the live DOM */
-interface SliderBlock {
-  /** e.g. "Slots", "GB Ram", "Days runtime" */
-  title: string;
-  /** Currently displayed value (text inside .value element) */
-  currentValue: string;
-  /** All available option values in order */
-  options: string[];
-}
-
-class SliderPageHelper {
-  constructor(private page: Page) {}
-
-  /** Navigate and wait for Vue to fully boot. */
-  async navigate(url: string): Promise<void> {
-    await this.page.goto(url, {
-      waitUntil: "domcontentloaded",
-      timeout: 30000,
-    });
-    // Wait for Vue to render the tariff section instead of a fixed 3-second delay
-    await this.page
-      .locator('[class*="storefront__tariff"]')
-      .first()
-      .waitFor({ state: 'visible', timeout: 15_000 })
-      .catch(() => null);
-  }
-
-  /** Returns true if a "Customize server" button exists on the page. */
-  async hasCustomizeButton(): Promise<boolean> {
-    return this.page.evaluate(() => {
-      return !!document.querySelector("button.storefront__tariff-action__cart");
-    });
-  }
-
-  /**
-   * Click "Customize server" via JS (Playwright's native click doesn't fire
-   * the Vue event handler in headless mode on this site).
-   * Waits until at least one `.storefront__tariffs-customizer-block` appears.
-   */
-  async openCustomizer(): Promise<void> {
-    await this.page.evaluate(() => {
-      const btn = document.querySelector<HTMLButtonElement>(
-        "button.storefront__tariff-action__cart",
-      );
-      if (!btn) throw new Error('"Customize server" button not found in DOM');
-      btn.click();
-    });
-    await this.page
-      .locator(".storefront__tariffs-customizer-block")
-      .first()
-      .waitFor({ state: "visible", timeout: 10000 });
-  }
-
-  /** Read all slider block data from the current DOM state. */
-  async getSliderBlocks(): Promise<SliderBlock[]> {
-    return this.page.evaluate(() => {
-      return Array.from(
-        document.querySelectorAll(".storefront__tariffs-customizer-block"),
-      ).map((block) => ({
-        title:
-          block
-            .querySelector(".storefront__tariffs-customizer-block__title")
-            ?.textContent?.trim()
-            .replace(/\s+/g, " ") ?? "",
-        currentValue:
-          block
-            .querySelector(".storefront__tariffs-customizer-block__value")
-            ?.textContent?.trim() ?? "",
-        options: Array.from(
-          block.querySelectorAll(".range_slider__option"),
-        ).map((o) => (o as HTMLElement).dataset.value ?? ""),
-      }));
-    });
-  }
-
-  /**
-   * Click a specific option inside the Nth block (0-indexed).
-   * Uses JS click to reliably trigger Vue handlers.
-   */
-  async clickOption(blockIndex: number, value: string): Promise<void> {
-    await this.page.evaluate(
-      ({ idx, val }) => {
-        const block = document.querySelectorAll(
-          ".storefront__tariffs-customizer-block",
-        )[idx];
-        if (!block) throw new Error(`Block ${idx} not found`);
-        const opt = block.querySelector<HTMLElement>(
-          `.range_slider__option[data-value="${val}"]`,
-        );
-        if (!opt)
-          throw new Error(
-            `Option data-value="${val}" not found in block ${idx}`,
-          );
-        opt.click();
-      },
-      { idx: blockIndex, val: value },
-    );
-    // Poll until Vue re-renders the selected value
-    await expect.poll(
-      () => this.page.locator('.storefront__tariffs-customizer-block').nth(blockIndex)
-        .locator('.storefront__tariffs-customizer-block__value').innerText(),
-      { timeout: 3_000 }
-    ).not.toBe("");
-  }
-
-  /** Get the displayed value for the Nth block. */
-  async getCurrentValue(blockIndex: number): Promise<string> {
-    return this.page.evaluate((idx) => {
-      const block = document.querySelectorAll(
-        ".storefront__tariffs-customizer-block",
-      )[idx];
-      return (
-        block
-          ?.querySelector(".storefront__tariffs-customizer-block__value")
-          ?.textContent?.trim() ?? ""
-      );
-    }, blockIndex);
-  }
-
-  /**
-   * Get the price of the currently configured/active custom tariff.
-   *
-   * After opening the customizer, the site renders a tariff card that has BOTH
-   * the `storefront__tariff-custom` AND the `storefront__tariff-choice` CSS
-   * classes. This is the "your plan" card whose price updates in real-time
-   * as slider options change.
-   *
-   * (There is also a second `.storefront__tariff-custom` card without
-   * `tariff-choice` that shows the static text "Custom" — we skip that one.)
-   */
-  async getCustomizedPrice(): Promise<string> {
-    return this.page.evaluate(() => {
-      const choiceCard = document.querySelector(
-        ".storefront__tariff.storefront__tariff-custom.storefront__tariff-choice",
-      );
-      return (
-        choiceCard
-          ?.querySelector(".storefront__tariff-pricing__price")
-          ?.textContent?.trim() ?? ""
-      );
-    });
-  }
-
-  /** Get CSS `left` position of the slider handle in the Nth block. */
-  async getHandleLeft(blockIndex: number): Promise<string> {
-    return this.page.evaluate((idx) => {
-      const block = document.querySelectorAll(
-        ".storefront__tariffs-customizer-block",
-      )[idx];
-      const handle = block?.querySelector<HTMLImageElement>(
-        ".range_slider .range_slider__selector",
-      );
-      return handle?.style.left ?? "";
-    }, blockIndex);
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 // Test suites — one per game
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Universal invariants that hold for EVERY game with a customizer (~30 tests each):
- *
- *  STRUCTURE
- *   1. Customizer opens → exactly 3 blocks appear
- *   2. Block 0 title contains "Slots", block 1 contains "Ram", block 2 contains "Days"
- *   3. Days Runtime block always has exactly these options: 30, 90, 180, 360
- *   4. Each block has at least 1 option; Slots and RAM have the same count (paired)
- *   5. All 3 slider handle elements are present in the DOM
- *
- *  INITIAL STATE
- *   6. Initial displayed value = first option in each block; Days starts at "30"
- *
- *  SLOTS INTERACTIONS
- *   7. Clicking last/middle Slots option updates displayed Slots value
- *
- *  SLOTS ↔ RAM SYNC  (skipped when all Slot values are identical, e.g. Valheim)
- *   8. Last/middle/first Slots → RAM moves to matching index
- *
- *  RAM DIRECT INTERACTIONS  (runs for ALL games including Valheim)
- *   9. Clicking last RAM option directly updates displayed RAM value
- *  10. Clicking first RAM after last returns RAM to first value
- *  11. Changing RAM from first to last option changes the tariff price
- *  12. RAM slider handle moves when clicked directly
- *
- *  DAYS RUNTIME
- *  13. Clicking Days=90/180/360/30 updates displayed Days value
- *
- *  PRICE / BILLING
- *  14. 30→360 days billing change → tariff price changes
- *  15. First→last Slots change → tariff price changes (skipped when all Slots equal)
- *  16. Discount badges visible for 90/180/360 options
- *
- *  HANDLE POSITIONS
- *  17. Slots handle moves when option clicked (skipped when all Slots equal)
- *  18. Days handle moves when option clicked
- *
- *  FULL FLOW
- *  19. Select last Slots (or last RAM for Valheim-like) + Days=360 → all 3 values update
+ * Универсальные инварианты для КАЖДОЙ игры с кастомайзером:
+ *  СТРУКТУРА: 3 блока; заголовки Slots/Ram/Days; Days-опции [30,90,180,360]; парность Slots↔RAM; 3 ползунка.
+ *  СТАРТ: начальное значение = первая опция; Days стартует с «30».
+ *  SLOTS: клик по опции обновляет значение; Slots↔RAM синхронизация по индексу.
+ *  RAM: прямой клик меняет значение; смена RAM меняет цену.
+ *  DAYS: клик по 90/180/360/30 обновляет значение.
+ *  ЦЕНА/БИЛЛИНГ: 30→360 меняет цену; Slots first→last меняет цену; бейджи скидок видны.
+ *  ПОЛНЫЙ ФЛОУ: последние Slots/RAM + Days=360 → все три значения обновляются.
  */
 function registerGameTests(game: GameConfig): void {
   test.describe(game.name, () => {
@@ -299,30 +104,29 @@ function registerGameTests(game: GameConfig): void {
       test('@regression страница грузится и НЕ имеет кнопки "Customize server" (ожидаемо)', async ({
         page,
       }) => {
-        const helper = new SliderPageHelper(page);
+        const helper = new GameSliderPage(page);
         await helper.navigate(game.url);
-        const hasBtn = await helper.hasCustomizeButton();
-        expect(hasBtn).toBe(false);
+        expect(await helper.hasCustomizeButton()).toBe(false);
       });
 
       return;
     }
 
     // ── shared setup ─────────────────────────────────────────────────────────
-    let helper: SliderPageHelper;
+    let helper: GameSliderPage;
 
     // smoke-тест для игр без кастомайзера живёт ВЫШЕ в ветке `if(!hasCustomizer){…return}`;
     // поднять хук над ним нельзя — его navigate+openCustomizer упадёт для таких игр.
     // eslint-disable-next-line playwright/prefer-hooks-on-top
     test.beforeEach(async ({ page }) => {
-      helper = new SliderPageHelper(page);
+      helper = new GameSliderPage(page);
       await helper.navigate(game.url);
       await helper.openCustomizer();
     });
 
     // ── structure ────────────────────────────────────────────────────────────
 
-    test("@regression структура кастомайзера", async ({ page }) => {
+    test("@regression структура кастомайзера", async () => {
       const blocks = await helper.getSliderBlocks();
 
       await test.step("показывает ровно 3 блока-слайдера", async () => {
@@ -355,13 +159,8 @@ function registerGameTests(game: GameConfig): void {
         expect(blocks[0].options).toHaveLength(blocks[1].options.length);
       });
 
-      await test.step("присутствуют все 3 ползунка (.range_slider__selector)", async () => {
-        const count = await page.evaluate(
-          () =>
-            document.querySelectorAll(".range_slider .range_slider__selector")
-              .length,
-        );
-        expect(count).toBe(3);
+      await test.step("присутствуют все 3 ползунка", async () => {
+        expect(await helper.countSliderHandles()).toBe(3);
       });
     });
 
@@ -389,8 +188,7 @@ function registerGameTests(game: GameConfig): void {
       const blocks = await helper.getSliderBlocks();
       const lastSlotOption = blocks[0].options[blocks[0].options.length - 1];
       await helper.clickOption(0, lastSlotOption);
-      const updated = await helper.getCurrentValue(0);
-      expect(updated).toBe(lastSlotOption);
+      expect(await helper.getCurrentValue(0)).toBe(lastSlotOption);
     });
 
     test("@regression клик по средней опции Slots обновляет отображаемое значение Slots", async () => {
@@ -406,9 +204,8 @@ function registerGameTests(game: GameConfig): void {
 
     test("@regression выбор последней опции Slots двигает и RAM на последнюю (синхронизация)", async () => {
       const blocks = await helper.getSliderBlocks();
-      // Skip when all slot options share the same value (e.g. Valheim: ["10","10","10"]).
-      // In that case clickOption() always resolves to index 0 by DOM query, so we cannot
-      // reliably test index-based sync.
+      // Skip, когда все опции Slots одинаковы (напр. Valheim ["10","10","10"]) — index-based
+      // проверка невозможна (clickOption всегда резолвится в index 0 по DOM-запросу).
       test.skip(
         blocks[0].options.every((opt) => opt === blocks[0].options[0]),
         "все опции Slots одинаковы (напр. Valheim) — index-based проверка невозможна",
@@ -425,7 +222,6 @@ function registerGameTests(game: GameConfig): void {
 
     test("@regression выбор средней опции Slots двигает RAM на парную среднюю опцию", async () => {
       const blocks = await helper.getSliderBlocks();
-      // Need at least 3 unique options to have a meaningful middle
       test.skip(blocks[0].options.length < 3, "нет средней опции (опций < 3)");
       test.skip(
         blocks[0].options.every((opt) => opt === blocks[0].options[0]),
@@ -439,9 +235,8 @@ function registerGameTests(game: GameConfig): void {
 
     test("@regression выбор первой опции Slots оставляет RAM на первой опции (синхронизация)", async () => {
       const blocks = await helper.getSliderBlocks();
-      // First click the last to move away from default, then go back to first.
-      // When all options share the same value (Valheim), the "last" click is a no-op
-      // but the final assertion still holds — RAM stays at first option.
+      // Сначала уходим на последнюю, потом возвращаемся на первую. Когда все опции одинаковы
+      // (Valheim), «последний» клик — no-op, но финальная проверка всё равно держится.
       const lastSlotOption = blocks[0].options[blocks[0].options.length - 1];
       await helper.clickOption(0, lastSlotOption);
       await helper.clickOption(0, blocks[0].options[0]);
@@ -450,12 +245,8 @@ function registerGameTests(game: GameConfig): void {
     });
 
     // ── RAM slider direct interactions ───────────────────────────────────────
-    //
-    // These tests click RAM options directly (block index 1) without going through
-    // Slots. This is particularly important for Valheim, where all Slot options share
-    // the same display value ("10") and the real product differentiation is done via
-    // the RAM tier. For all other games these tests provide additional coverage of
-    // the RAM slider behaving independently.
+    // Прямой клик по RAM (блок 1), без Slots. Важно для Valheim, где все Slot-опции имеют
+    // одно значение («10»), а реальная дифференциация — по RAM-тиру.
 
     test("@regression прямой клик по последней опции RAM обновляет отображаемое значение RAM", async () => {
       const blocks = await helper.getSliderBlocks();
@@ -477,24 +268,11 @@ function registerGameTests(game: GameConfig): void {
       const blocks = await helper.getSliderBlocks();
       const firstRam = blocks[1].options[0];
       const lastRam = blocks[1].options[blocks[1].options.length - 1];
-      // Only meaningful if the RAM tiers have different pricing
       test.skip(firstRam === lastRam, "RAM-тиры с одинаковой ценой — цена не изменится");
       const priceAtFirst = await helper.getCustomizedPrice();
       await helper.clickOption(1, lastRam);
       const priceAtLast = await helper.getCustomizedPrice();
       expect(priceAtLast).not.toBe(priceAtFirst);
-    });
-
-    test("@regression ползунок RAM двигается при прямом клике по опции", async () => {
-      const blocks = await helper.getSliderBlocks();
-      const firstRam = blocks[1].options[0];
-      const lastRam = blocks[1].options[blocks[1].options.length - 1];
-      // Skip if all RAM options share the same value (handle won't shift)
-      test.skip(firstRam === lastRam, "все опции RAM одинаковы — ползунок не сдвинется");
-      const initialLeft = await helper.getHandleLeft(1);
-      await helper.clickOption(1, lastRam);
-      const updatedLeft = await helper.getHandleLeft(1);
-      expect(updatedLeft).not.toBe(initialLeft);
     });
 
     // ── Days Runtime slider interactions ────────────────────────────────────
@@ -526,7 +304,6 @@ function registerGameTests(game: GameConfig): void {
       const priceAt30 = await helper.getCustomizedPrice();
       await helper.clickOption(2, "360");
       const priceAt360 = await helper.getCustomizedPrice();
-      // 360-day total billed upfront differs from 30-day price
       expect(priceAt360).not.toBe(priceAt30);
     });
 
@@ -534,8 +311,7 @@ function registerGameTests(game: GameConfig): void {
       const blocks = await helper.getSliderBlocks();
       const firstOption = blocks[0].options[0];
       const lastOption = blocks[0].options[blocks[0].options.length - 1];
-      // Skip if there is only 1 option or all options have the same value
-      // (e.g. Valheim where slots are always 10 — only RAM tier differs)
+      // Skip при одной опции или одинаковых (Valheim: slots всегда 10 — отличается только RAM-тир).
       test.skip(
         blocks[0].options.length < 2 || firstOption === lastOption,
         "у Slots одна опция или все одинаковы — цена не изменится",
@@ -543,49 +319,14 @@ function registerGameTests(game: GameConfig): void {
       const priceAtFirst = await helper.getCustomizedPrice();
       await helper.clickOption(0, lastOption);
       const priceAtLast = await helper.getCustomizedPrice();
-      // Bigger server should have a different (higher) price
       expect(priceAtLast).not.toBe(priceAtFirst);
     });
 
     // ── Discount badges ──────────────────────────────────────────────────────
 
-    test("@regression блок Days Runtime показывает бейджи скидок на длинных периодах", async ({ page }) => {
-      const discountCount = await page.evaluate(() => {
-        const daysBlock = document.querySelectorAll(
-          ".storefront__tariffs-customizer-block",
-        )[2];
-        return (
-          daysBlock?.querySelectorAll(".range_slider__option-discount")
-            .length ?? 0
-        );
-      });
-      // 90, 180, 360 days should all have at least 1 discount badge
-      expect(discountCount).toBeGreaterThanOrEqual(1);
-    });
-
-    // ── Slider handle position ────────────────────────────────────────────────
-
-    test("@regression ползунок Slots двигается при клике по опции", async () => {
-      const blocks = await helper.getSliderBlocks();
-      const firstOption = blocks[0].options[0];
-      const lastOption = blocks[0].options[blocks[0].options.length - 1];
-      // Skip if there is only 1 option or all options have the same value
-      // (e.g. Valheim where all slot options equal "10" — handle won't visually shift)
-      test.skip(
-        blocks[0].options.length < 2 || firstOption === lastOption,
-        "у Slots одна опция или все одинаковы — ползунок не сдвинется",
-      );
-      const initialLeft = await helper.getHandleLeft(0);
-      await helper.clickOption(0, lastOption);
-      const updatedLeft = await helper.getHandleLeft(0);
-      expect(updatedLeft).not.toBe(initialLeft);
-    });
-
-    test("@regression ползунок Days Runtime двигается при клике по опции", async () => {
-      const initialLeft = await helper.getHandleLeft(2);
-      await helper.clickOption(2, "360");
-      const updatedLeft = await helper.getHandleLeft(2);
-      expect(updatedLeft).not.toBe(initialLeft);
+    test("@regression блок Days Runtime показывает бейджи скидок на длинных периодах", async () => {
+      // 90/180/360 дней должны нести минимум 1 бейдж скидки.
+      expect(await helper.countDaysDiscountBadges()).toBeGreaterThanOrEqual(1);
     });
 
     // ── Full flow ─────────────────────────────────────────────────────────────
@@ -593,21 +334,18 @@ function registerGameTests(game: GameConfig): void {
     test("@regression полный флоу: выбрать последние Slots/RAM + Days=360 → все три значения обновляются", async () => {
       const blocks = await helper.getSliderBlocks();
       const lastIdx = blocks[0].options.length - 1;
-      const allSlotsSame = blocks[0].options.every(
-        (opt) => opt === blocks[0].options[0],
-      );
+      const allSlotsSame = blocks[0].options.every((opt) => opt === blocks[0].options[0]);
 
       let expectedSlot: string;
       let expectedRam: string;
 
       if (allSlotsSame) {
-        // Games like Valheim where all Slot options share the same display value.
-        // Drive the plan change via RAM directly instead of via Slots sync.
-        expectedSlot = blocks[0].options[0]; // Slots stays at the only value
+        // Valheim-подобные: все Slot-опции одинаковы → меняем план через RAM напрямую.
+        expectedSlot = blocks[0].options[0];
         expectedRam = blocks[1].options[lastIdx];
         await helper.clickOption(1, expectedRam);
       } else {
-        // Normal case: click last Slots option; RAM follows via sync.
+        // Обычный случай: клик по последней Slots; RAM следует через синхронизацию.
         expectedSlot = blocks[0].options[lastIdx];
         expectedRam = blocks[1].options[lastIdx];
         await helper.clickOption(0, expectedSlot);

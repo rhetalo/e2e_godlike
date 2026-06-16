@@ -54,6 +54,7 @@ export const STOREFRONT = {
   tariffAddToCart: ".storefront__tariff-action__cart",
   viewAllPlans: 'a[href*="minecraft-java-servers-hosting"], a:has-text("View all plans")',
   gameTitle: "a.game__title",
+  customizeButton: "button.storefront__tariff-action__cart",
   discountBadge: ".storefront__tariffs-discount__percentage",
   firstPurchaseDiscount: ".storefront__tariffs-first-purchase",
 } as const;
@@ -92,6 +93,22 @@ export const PROMO = {
   applyButton: ".promocode__button",
   successLabel: ".promocode__label-success",
   errorLabel: ".promocode__label-error",
+} as const;
+
+// Кастомайзер тарифа «Customize server» на storefront game-страницах (slider-блоки).
+// Confirmed live (game-slider). Используется pages/GameSliderPage.ts.
+export const GAME_SLIDER = {
+  tariffAny: '[class*="storefront__tariff"]',
+  customizeButton: "button.storefront__tariff-action__cart",
+  block: ".storefront__tariffs-customizer-block",
+  blockTitle: ".storefront__tariffs-customizer-block__title",
+  blockValue: ".storefront__tariffs-customizer-block__value",
+  option: ".range_slider__option",
+  handle: ".range_slider .range_slider__selector",
+  customChoiceCard:
+    ".storefront__tariff.storefront__tariff-custom.storefront__tariff-choice",
+  customPrice: ".storefront__tariff-pricing__price",
+  daysDiscountBadge: ".range_slider__option-discount",
 } as const;
 
 export const ORDER_SUMMARY = {
