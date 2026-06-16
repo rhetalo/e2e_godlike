@@ -325,6 +325,8 @@ export const MOBILE_CART = {
   promocodeToggle: ".cart__promocode-button",
   promocodeInput: '.cart__input[placeholder="Enter your promocode"]',
   promocodeApplyButton: ".cart__promocode .cart__button",
+  // Результат применения промокода: при невалидном коде показывает текст ошибки. (16-Jun-2026)
+  promocodeDisplayPrice: ".cart__promocode-display-price",
 
   /* --- Auth (mobile variant) --- */
   authPage: ".auth-page",

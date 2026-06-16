@@ -70,6 +70,7 @@ export class MobileCartPage {
   readonly originalPrice: Locator;
   readonly orderButton: Locator;
   readonly promocodeToggle: Locator;
+  readonly promoResult: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -84,6 +85,7 @@ export class MobileCartPage {
     this.originalPrice = page.locator(MOBILE_CART.pricingDiscounted);
     this.orderButton = page.locator(MOBILE_CART.orderButton);
     this.promocodeToggle = page.locator(MOBILE_CART.promocodeToggle);
+    this.promoResult = page.locator(MOBILE_CART.promocodeDisplayPrice);
   }
 
   async goto(): Promise<void> {
@@ -121,13 +123,9 @@ export class MobileCartPage {
 
   async selectGameByChip(gameName: string): Promise<void> {
     await this.gameChips.filter({ hasText: gameName }).first().click();
-    // Wait for RAM dropdown to become enabled (remove disabled class)
-    await this.page.waitForFunction(
-      () => !document.querySelector('.custom-select--disabled'),
-      { timeout: 5_000 }
-    );
-    // Allow price to update
-    await this.page.waitForTimeout(1000);
+    // Чип активирует RAM-дропдаун (снимает --disabled) и авто-выбирает тариф → цена становится ненулевой.
+    await this.expectPlanDropdownEnabled();
+    await this.waitForPriceNonZero();
   }
 
   async selectGameBySearch(gameName: string): Promise<void> {
@@ -135,19 +133,14 @@ export class MobileCartPage {
     await this.gameSearchInput.fill(gameName);
 
     const option = this.page
-    .locator(MOBILE_CART.gameSelectOption)
-    .filter({ hasText: gameName })
+      .locator(MOBILE_CART.gameSelectOption)
+      .filter({ hasText: gameName })
       .first();
+    await expect(option).toBeVisible();
+    await option.click();
 
-await expect(option).toBeVisible();
-
-await option.click();
-    // Wait for RAM dropdown to become enabled
-    await this.page.waitForFunction(
-      () => !document.querySelector('.custom-select--disabled'),
-      { timeout: 5_000 }
-    );
-    await this.page.waitForTimeout(500);
+    // Выбор игры активирует RAM-дропдаун (снимает --disabled). Rust авто-тариф не ставит — цену не ждём.
+    await this.expectPlanDropdownEnabled();
   }
 
   /* --- RAM / Plan --- */
@@ -157,9 +150,11 @@ await option.click();
   }
 
   async selectPlan(planName: string): Promise<void> {
-    await this.ramDropdown.locator(MOBILE_CART.customSelectSelected).click();
+    const selected = this.ramDropdown.locator(MOBILE_CART.customSelectSelected);
+    await selected.click();
     await this.ramDropdown.locator(MOBILE_CART.customSelectOption).filter({ hasText: planName }).click();
-    await this.page.waitForTimeout(500);
+    // Дропдаун зеркалит выбор в .custom-select__selected — детерминированный сигнал применения.
+    await expect(selected).toContainText(planName);
   }
 
   async getPlanOptions(): Promise<string[]> {
@@ -174,6 +169,10 @@ await option.click();
     await expect(this.ramDropdown).toHaveClass(/disabled/);
   }
 
+  async expectPlanDropdownEnabled(): Promise<void> {
+    await expect(this.ramDropdown).not.toHaveClass(/disabled/, { timeout: 5_000 });
+  }
+
   /* --- Billing Period --- */
 
   async getSelectedBillingPeriod(): Promise<string> {
@@ -181,9 +180,11 @@ await option.click();
   }
 
   async selectBillingPeriod(label: string): Promise<void> {
-    await this.billingDropdown.locator(MOBILE_CART.customSelectSelected).click();
+    const selected = this.billingDropdown.locator(MOBILE_CART.customSelectSelected);
+    await selected.click();
     await this.billingDropdown.locator(MOBILE_CART.billingOptionRow).filter({ hasText: label }).click();
-    await this.page.waitForTimeout(500);
+    // Период отражается в .custom-select__selected; итоговая цена пересчитывается реактивно — её поллит спек.
+    await expect(selected).toContainText(label);
   }
 
   /* --- Pricing --- */
@@ -200,16 +201,20 @@ await option.click();
     return (await this.originalPrice.innerText()).trim();
   }
 
-  /** Wait for price to be non-zero (after game/plan selection). */
-  async waitForPriceUpdate(): Promise<string> {
-    await this.page.waitForFunction(
-      () => {
-        const el = document.querySelector('.cart__pricing-price');
-        return el && el.textContent?.trim() !== '$0.00';
-      },
-      { timeout: 10_000 }
-    );
-    return this.getTotalPrice();
+  /**
+   * Дождаться, пока итоговая цена уйдёт с плейсхолдера $0.00 (после выбора игры/тарифа).
+   * Поллим разобранное число, а не строку — иначе подстрока "0.00" ложно срабатывала бы на "$10.00".
+   */
+  async waitForPriceNonZero(): Promise<void> {
+    await expect
+      .poll(
+        async () => {
+          const match = (await this.getTotalPrice()).replace(',', '.').match(/[\d]+(\.\d+)?/);
+          return match ? parseFloat(match[0]) : 0;
+        },
+        { timeout: 10_000, intervals: [200, 300, 500] },
+      )
+      .toBeGreaterThan(0);
   }
 
   /* --- Promocode --- */
@@ -223,6 +228,11 @@ await option.click();
     await this.expandPromocode();
     await this.page.locator(MOBILE_CART.promocodeInput).fill(code);
     await this.page.locator(MOBILE_CART.promocodeApplyButton).click();
+  }
+
+  /** Текст блока результата промокода (для невалидного кода — сообщение об ошибке). */
+  async getPromoResultText(): Promise<string> {
+    return (await this.promoResult.innerText()).trim();
   }
 
   /* --- Order --- */
