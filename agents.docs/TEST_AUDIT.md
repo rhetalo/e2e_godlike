@@ -13,7 +13,7 @@
 |---|---|---|
 | **general** | ✅ done | registration creds-leak+manual-gate, credentials.ts→JSON+ротация, StorefrontHomePage PO, DROP слабого TC, RU+test.step |
 | **modded** | ✅ done | promo dedup (GameStorefrontPage PO, −220 стр), funnel.modded test.step+PO, game-slider→GameSliderPage PO + DROP 3 style.left, modpack/seed свёртки |
-| **funnels** | 🔶 частично | funnel.spec→PO ✅; credit.check висячий локатор ✅. **Осталось:** funnel.mobile (raw-локаторы + waitForTimeout в MobileCartPage + слабые TC), funnel.seed (console/networkidle/дубль хвоста), funnel.cart.paypal (хрупкий Stripe getByText → iframe-helper) |
+| **funnels** | 🔶 4/5 | funnel.spec→PO ✅; credit.check висячий локатор→expect ✅; funnel.seed test.step+дедуп хвоста ✅; funnel.cart.paypal reachCheckout→PO + стабильный Stripe ✅. **Осталось:** funnel.mobile — ⚠️ требует правки PO `MobileCartPage` (4× waitForTimeout на реактивный пересчёт цены — тонкий тайминг) + DROP/MERGE слабых TC (страница грузится/Location/промо-поле) + REWRITE «невалидный промо» (+цена не изменилась) + raw-локаторы (location/promo). Делать на свежем контексте. |
 | **vps/funnel** | ⏳ TODO | дробление vps.funnel 692 стр; waitForTimeout×6; raw-локаторы; MERGE/DROP структурных |
 | **vps/panel** | ⏳ TODO | ⚠️ stateful — слить SUITE power.actions в test.step; дробить rebuild (700, кроме SUITE7-деструктив); storage/network/options REWRITE/MERGE структурных; console/waitForTimeout |
 | **game/panel** | ⏳ TODO | лёгкое: tag-convention уже узаконен; вынести 2-3 raw-локатора (login `My Servers`, server.overview getByText, sharing SHR-004) в PO-геттеры; мелкие MERGE структурных |
