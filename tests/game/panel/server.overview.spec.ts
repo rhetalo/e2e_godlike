@@ -36,7 +36,7 @@ test.describe("@smoke [game-panel] Обзор сервера", () => {
     await srv.goto();
 
     await test.step("имя сервера отображается", async () => {
-      await expect(page.getByText(GAME_SERVER_NAME).first()).toBeVisible();
+      await expect(srv.nameLabel(GAME_SERVER_NAME)).toBeVisible();
     });
 
     await test.step("кнопки питания присутствуют", async () => {
@@ -66,11 +66,11 @@ test.describe("@smoke [game-panel] Обзор сервера", () => {
     await srv.goto();
 
     await test.step("адрес srvN.godlike.club:PORT отображается", async () => {
-      await expect(page.getByText(/srv\d+\.godlike\.club:\d+/i).first()).toBeVisible();
+      await expect(srv.addressLabel).toBeVisible();
     });
 
     await test.step("UUID сервера показан в Server Information", async () => {
-      await expect(page.getByText(GAME_SERVER_UUID).first()).toBeVisible();
+      await expect(srv.uuidLabel(GAME_SERVER_UUID)).toBeVisible();
     });
   });
 });

@@ -182,6 +182,21 @@ export class GamePanelServerPage extends GamePanelBasePage {
     return ((await el.textContent().catch(() => null)) ?? "").trim() || null;
   }
 
+  /** Элемент с именем сервера на странице (идентичность / проверка доступа). */
+  nameLabel(name: string): Locator {
+    return this.page.getByText(name).first();
+  }
+
+  /** Видимый адрес сервера srvN.godlike.club:PORT (Server Information). */
+  get addressLabel(): Locator {
+    return this.page.getByText(GAME_PANEL_SERVER.addressText).first();
+  }
+
+  /** Элемент с UUID сервера (Server Information). */
+  uuidLabel(uuid: string): Locator {
+    return this.page.getByText(uuid).first();
+  }
+
   // ── Access control (Phase 5 / IDOR) ───────────────────────────
   /** Сообщение отказа доступа к чужому/несуществующему серверу. */
   get notFoundError(): Locator {
