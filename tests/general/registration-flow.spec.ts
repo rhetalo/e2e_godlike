@@ -5,9 +5,8 @@
  * принять условия → шаги оформления. Сгенерированные креды сохраняются в credentials.json
  * (ротация 30 записей, utils/credentials.ts).
  *
- * ⚠️ MANUAL-ONLY (env-gate `RUN_REGISTRATION_TEST`): создаёт РЕАЛЬНОГО пользователя на LIVE
- *    PROD → НЕ для CI/рутинных прогонов. На gitlab/upd этот флоу ведёт тимлид. Запуск:
- *      RUN_REGISTRATION_TEST=1 npx playwright test tests/general/registration-flow.spec.ts --project=chromium
+ * ⚠️ Создаёт РЕАЛЬНОГО пользователя на LIVE PROD (без оформления оплаты — Continue не жмём).
+ *    Сгенерированные креды сохраняются в credentials.json (ротация 30 записей).
  */
 import { test, expect, type Page } from "../../fixtures/base";
 import { StorefrontHomePage } from "../../pages/StorefrontHomePage";
@@ -22,10 +21,6 @@ test.describe("Регистрация из тарифа", () => {
   }: {
     page: Page;
   }) => {
-    test.skip(
-      !process.env.RUN_REGISTRATION_TEST,
-      "manual-only: создаёт реального пользователя на проде; запуск с RUN_REGISTRATION_TEST=1",
-    );
     test.setTimeout(60_000);
 
     const home = new StorefrontHomePage(page);
