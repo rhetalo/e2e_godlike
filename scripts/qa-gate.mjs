@@ -5,6 +5,7 @@
  * Делает ТОЛЬКО быстрые статические проверки (никаких live-прогонов спеков — они
  * бьют по проду и идут минутами):
  *   - npx tsc --noEmit  → БЛОКИРУЕТ коммит/пуш при ошибках типов (exit 2);
+ *   - npx eslint .      → БЛОКИРУЕТ при ESLint-ОШИБКАХ (hard-rules); warnings пропускает;
  *   - grep антипаттерна waitForTimeout в pages/components/tests → ПРЕДУПРЕЖДАЕТ (не блокирует).
  *
  * Хук получает JSON на stdin: { tool_name, tool_input: { command } }. Гейт реагирует
@@ -90,7 +91,18 @@ function main() {
     process.exit(2);
   }
 
-  // 2) waitForTimeout — предупреждение (не блокирует)
+  // 2) eslint — жёсткий блок на ERROR (hard-rules репо: no-wait-for-timeout,
+  // expect-expect, no-focused-test, no-standalone-expect и т.д.). Warnings не блокируют
+  // (eslint exit=1 только при errors), поэтому «мягкий слой» (any/unused/web-first) не мешает.
+  const lint = spawnSync("npx", ["eslint", "."], { shell: true, encoding: "utf8" });
+  if (lint.status !== 0) {
+    console.error("[qa-gate] ❌ eslint нашёл ОШИБКИ — коммит/пуш заблокирован. Почини правила:\n");
+    console.error((lint.stdout || "") + (lint.stderr || ""));
+    process.exit(2);
+  }
+
+  // 3) waitForTimeout — предупреждение (не блокирует). Дополняет eslint: ловит
+  // waitForTimeout в pages/components, куда playwright-правило (tests/**) не достаёт.
   const waits = findWaitForTimeout();
   if (waits.length) {
     console.error("[qa-gate] ⚠️ waitForTimeout вне разрешённых файлов (антипаттерн, см. CLAUDE.md):");
@@ -98,7 +110,7 @@ function main() {
     console.error("  (предупреждение, не блокирует — но замени на web-first ожидания)");
   }
 
-  console.error("[qa-gate] ✅ tsc чист.");
+  console.error("[qa-gate] ✅ tsc + eslint чисты.");
   process.exit(0);
 }
 

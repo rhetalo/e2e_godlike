@@ -9,7 +9,20 @@
             "command": "node scripts/qa-gate.mjs",
             "if": "Bash(git *)",
             "timeout": 120,
-            "statusMessage": "qa-gate: tsc + анти-паттерны"
+            "statusMessage": "qa-gate: tsc + eslint + анти-паттерны"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node scripts/qa-postedit.mjs",
+            "timeout": 60,
+            "statusMessage": "qa-postedit: eslint изменённого файла"
           }
         ]
       }

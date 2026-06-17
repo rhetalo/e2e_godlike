@@ -63,6 +63,25 @@ export default tseslint.config(
       // valid-title автофиксом срезает осмысленные префиксы заголовков ("Step 1:" → "1:") —
       // деградация читаемости, в hard-rules репо не входит. Выключено осознанно.
       "playwright/valid-title": "off",
+
+      // ── Второй слой (внедрён по итогам ресёрча QA/AI-практик, 17-Jun) ──
+      // Источник: OTUS «Вы неправильно тестируете асинхронный код» + «5 ошибок в E2E».
+      // expect внутри if/try-catch может молча НЕ выполниться (false positive
+      // «зелёного» теста) — ровно та боль, что лечит наше правило «≥1 expect на тест».
+      // Пока warn: 4 существующих нарушения в live-prod-спеках (funnel.cart.paypal,
+      // game/panel/dashboard, funnel.modded) — их фикс требует прогона по проду, вынесен
+      // в backlog (test-docs/README.md). После чистки промоутим в error.
+      "playwright/no-conditional-expect": "warn",
+      // expect вне тела теста (в хелпере/верхнем уровне) — почти всегда ошибка структуры.
+      "playwright/no-standalone-expect": "error",
+      // web-first ассерты (await expect(loc).toBeVisible()) вместо expect(await loc.isVisible()).
+      // Пока warn: ~12 мест в legacy + это hard-rule репо «web-first waits». Промоутим в
+      // error после чистки (см. test-docs/README.md → backlog).
+      "playwright/prefer-web-first-assertions": "warn",
+      // force:true маскирует реальную проблему UI (анти-паттерн OTUS). Только warn —
+      // в репо есть задокументированные легитимные случаи (скрытые custom-UI инпуты,
+      // напр. VpsPanelMediaPage), их error сломал бы зря.
+      "playwright/no-force-option": "warn",
     },
   },
 
