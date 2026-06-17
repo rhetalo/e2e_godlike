@@ -60,3 +60,14 @@ description: >-
 - Импорт: storefront → `fixtures/base`; панель → `@playwright/test` + page object.
 - Перечисли затрагиваемые файлы (page object, selectors-блок, спек) и что в каждом.
 - **Жди аппрува перед кодом.** После реализации — `npx tsc --noEmit` + прогон спека.
+
+## 6. Эмитить кейсы в тест-документацию (docs-as-code)
+
+После аппрува плана — оформи кейсы как **Table-test Markdown** в `test-docs/<product>/<feature>.md`
+по шаблону `test-docs/templates/test-case.md` (это источник истины по кейсам, см.
+`test-docs/README.md`). Для каждого кейса:
+- ID `TC-<DOMAIN>-<FEATURE>-NNN` = заголовок теста в спеке (traceability grep'ом).
+- «Ожидаемый результат» — как **эффект** (состояние/ответ API), а не текст на экране.
+- Поле «Автоматизация» — реальная ссылка на спек; термины сверяй с `test-docs/glossary.md`.
+- **Защита от выдумок** (`agents.docs/PROMPT_TEMPLATE.md`): не выдумывай покрытие/селекторы —
+  если не уверен, что флоу покрыт, ставь `not-covered`, а для нового экрана сначала `live-recon`.
