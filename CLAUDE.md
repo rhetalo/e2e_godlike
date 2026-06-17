@@ -1,6 +1,8 @@
 # CLAUDE.md
 
-Guidance for Claude Code when working in this repository.
+Guidance for Claude Code when working in this repository. This file is the **contract** —
+kept tight on purpose (< 200 lines). Architecture detail and how-tos live in `agents.docs/`
+(linked below), because a long CLAUDE.md gets followed worse, not better.
 
 ## What this project is
 
@@ -21,19 +23,22 @@ VPS hosting storefront) and its **VirtFusion control panel** (`vf-panel.godlike.
 Before writing or changing anything, read the authoritative in-repo docs — they
 already encode hard-won knowledge and override anything generic:
 
-- `agents.docs/TEST_GUIDELINES.md` — test structure, tagging, anti-patterns, Vue/VirtFusion gotchas
+- `agents.docs/ARCHITECTURE.md` — repo map, search-first/reuse rules, Page Object &
+  Component patterns, selectors, stateful-test setup. **Read before touching any test.**
+- `agents.docs/TEST_GUIDELINES.md` — how to write a test: structure, tagging, anti-patterns, Vue/VirtFusion gotchas
 - `agents.docs/AGENT_HANDOFF.md` — auth flows, storageState files, server gotchas, roadmap
 - `agents.docs/CODE_REVIEW.md` — log of past fixes and why
 - `agents.docs/vps-panel/` — VPS (vf-panel/VirtFusion) audit, Install/Build/Delete plan, **HANDOFF.md** (continue here)
-- `agents.docs/game-panel/` — game panel (ultra.panel) knowledge base + test plan (~64 tests; **Phase 5 закрыта** = IDOR + XSS бэкап/папка/motd/консоль + SQLi; + 09-Jun: FILE редактор/Recycle Bin, Logout-smoke, Audit Log, scheduled-форма структурно. Next — только **деструктив** (version change/rebuild, backups restore, install плагина, scheduled-мутация) — вне рамки «обратимо+recovery», нужен явный risk-decision владельца)
-- `agents.docs/MCP_RECON_VS_CODE.md` — сравнение Playwright MCP vs наш код-формат (когда что применять)
+- `agents.docs/game-panel/` — game panel (ultra.panel) knowledge base + test plan (~64 tests; **Phase 5 закрыта**; next = только **деструктив** — нужен явный risk-decision владельца)
+- `agents.docs/MCP_RECON_VS_CODE.md` — Playwright MCP vs наш код-формат (когда что применять)
+- `agents.docs/AI_AGENTS_NOTES.md` — выжимка best-practices по ИИ-агентам под наш QA-репо
 
 ## Implementation workflow
 
-Do NOT jump straight into editing 20 files. Follow this loop for any non-trivial change:
+Do NOT jump straight into editing 20 files. For any non-trivial change:
 
 1. **Analyze** — read the relevant existing tests, page objects, components, fixtures
-   (see "Before implementing any test" below).
+   (see the search-first checklist in `ARCHITECTURE.md`).
 2. **Present an implementation plan** — what you'll add/change, which existing code you'll
    reuse or extend, and which files you'll touch.
 3. **Ask questions if requirements are ambiguous** (see "Ask before coding").
@@ -44,37 +49,21 @@ Do NOT jump straight into editing 20 files. Follow this loop for any non-trivial
 
 ## Effort — подстройка под сложность задачи
 
-Подстраивай уровень усилий (глубину рассуждений / Effort) под реальную сложность задачи и
-**проговаривай это**:
-- Механические/текстовые правки (переименования, комментарии, перевод названий тестов на
-  русский, форматирование) — **низкий Effort**. Не жги ресурсы зря.
-- Recon живого DOM, мутирующие/stateful-тесты, отладка флоки, архитектурные решения —
-  **выше**.
+Подстраивай уровень усилий (Effort) под реальную сложность задачи и **проговаривай это**:
+- Механические/текстовые правки (переименования, комментарии, перевод, форматирование) —
+  **низкий Effort**. Не жги ресурсы зря.
+- Recon живого DOM, мутирующие/stateful-тесты, отладка флоки, архитектурные решения — **выше**.
 - В начале нетривиального хода одной строкой обозначь выбранный уровень и предложи
-  **понизить** (если задача проще, чем кажется) или **повысить** (если сложнее). Лимиты
-  расходуются — это важно владельцу.
+  **понизить** (проще) или **повысить** (сложнее). Лимиты расходуются — это важно владельцу.
 
-## Before implementing any test
+## Reuse, don't duplicate — the #1 rule
 
 The #1 failure mode of AI in a large Playwright project is **not bad code — it is
-duplicating architecture that already exists.** Always search first:
-
-1. **Search existing tests** — `tests/**/*.spec.ts`. Is this flow already covered? Grep for
-   the feature, URL, or user action.
-2. **Search existing Page Objects** — `pages/*.ts`. Does a page object for this screen exist?
-   (`VpsPanelServerPage` is the reference pattern.)
-3. **Search existing Components** — `components/*.ts`. Header, Footer, CookieBanner,
-   StripeCardFields, SeedCard, StorefrontTariffCard, selectors for billing/payment/promo, etc.
-4. **Search existing Fixtures & utils** — `fixtures/*`, `utils/selectors.ts`, `utils/auth.ts`,
-   `utils/iframe-helper.ts`. The selector you need is probably already in `selectors.ts`.
-5. **Reuse existing code whenever possible.** A new locator goes into the existing page
-   object/component, sourced from `selectors.ts` — not inline in a spec.
-6. **Never create duplicate abstractions.** No second "ActivityTable", second banner helper,
-   second login flow, second selector for the same element.
-
-If similar functionality already exists, **extend it instead of creating a new
-implementation.** If you believe a new abstraction is genuinely needed, say so in the plan
-and explain why the existing one can't be extended — then wait for approval.
+duplicating architecture that already exists.** Before writing anything: search existing
+`tests/`, `pages/`, `components/`, `fixtures/`, `utils/selectors.ts`. If similar
+functionality exists, **extend it** — don't create a second login flow / banner helper /
+ActivityTable / selector. New abstraction only with a justification in the plan + approval.
+Full search-first checklist and reuse patterns: `agents.docs/ARCHITECTURE.md`.
 
 ## Commands
 
@@ -91,105 +80,23 @@ npm run report           # open last HTML report
 
 Type-check before claiming done: `npx tsc --noEmit` (must be 0 errors).
 
-## Repository map
+## Writing a test — the essentials
 
-```
-fixtures/base.ts        Custom test fixture — wraps page.goto() to auto-dismiss
-                        cookie/promo banners. STOREFRONT specs import from here.
-fixtures/test-data.ts   Central URLs, credentials (env-based), QuickPickModpacks
-fixtures/games.json     Data-driven game list (name + expectPromoValid)
+(Full decision flow, repo map and reuse detail: `agents.docs/ARCHITECTURE.md`. Test
+philosophy, templates and anti-patterns: `agents.docs/TEST_GUIDELINES.md`.)
 
-pages/BasePage.ts       Abstract base: goto(), waitForUrl(), shared header/heading
-pages/*.ts              Page Objects — storefront funnel + VirtFusion panel.
-                        VpsPanelServerPage is the reference ("etalon") implementation.
-
-components/*.ts          Component Objects — Header, Footer, CookieBanner,
-                         StripeCardFields (iframe), SeedCard, StorefrontTariffCard, ...
-
-utils/selectors.ts       SINGLE SOURCE OF TRUTH for selectors (documented priority).
-utils/auth.ts            VirtFusion login + storageState persistence + TEST_SERVER_*
-utils/bannerHandlers.ts  addLocatorHandler orchestration over CookieBanner
-utils/iframe-helper.ts   Stable Stripe iframe locators (by title attribute)
-
-tests/funnels|general|modded|vps/funnel|vps/panel/   specs grouped by domain
-```
-
-## How to write a NEW test — decision flow
-
-(Only after the search step above and an approved plan.)
-
-1. **Pick the folder by domain** (`tests/<domain>/`) and match the existing naming
-   (`<feature>.spec.ts`). Keep specs focused (~≤300 lines); split by `describe` if larger.
-
-2. **Choose the import:**
-   - Storefront-facing test (hits `godlike.host`, has marketing banners):
-     `import { test, expect } from "../../fixtures/base";`
-   - Panel test (hits `vf-panel.godlike.host`, no marketing banners): you may import
-     from `@playwright/test`, but page navigation must still go through a Page Object.
-
-3. **Drive the UI through Page Objects and Components — never raw locators in the spec.**
-   If the locator you need doesn't exist on a page/component yet, ADD it there, sourced
-   from `utils/selectors.ts`. Do not inline CSS/text selectors in the spec body.
-
-4. **Assertions live in the spec**, wrapped in `test.step(...)`. Page/component methods
-   return state (`Promise<boolean>` / values) or perform actions — they must not call `expect`.
-
-5. **Tag it:** `@smoke` (critical path), `@critical` (user story), or `@regression`.
-
-6. **Synchronize with web-first waits**, never `waitForTimeout`. Use
-   `expect(locator).toBeVisible/toHaveText/toBeEnabled`, `locator.waitFor({ state })`,
-   or `expect.poll(...)` for reactive Vue values.
-
-## Reusing fixtures
-
-`fixtures/base.ts` overrides `page.goto()` so that after every navigation it waits for
-network to settle and dismisses cookie/promo banners twice (banners appear via delayed
-JS). Just `await page.goto(path)` as usual — banner handling is automatic. Do NOT
-re-implement banner dismissal in the spec; do NOT use `addLocatorHandler` for banners
-(it intercepts mid-test nav clicks and redirects to `/` — see the comment in base.ts).
-
-Credentials come from `fixtures/test-data.ts` / `utils/*` via `process.env.* ?? fallback`.
-Never hardcode credentials, server UUIDs, or URLs in a spec.
-
-## Reusing Page Objects
-
-- Concrete pages should `extend BasePage` and navigate via `BasePage.goto(path)`
-  (handles `domcontentloaded` + banner dismissal). Some older panel pages still use a
-  standalone `constructor(page: Page)` — when you touch one, prefer migrating it to
-  `BasePage`, but match the file's existing style if a full migration is out of scope.
-- `VpsPanelServerPage` is the **reference pattern** for panel pages — study it before
-  adding a new panel page.
-- Methods are actions (`selectTemplate()`, `deployFirstPlan()`) or state readers
-  (`getStatusText()`, `isCardComplete()`). Expose locators as getters. Keep one
-  responsibility per class; if a class crosses ~150 lines covering multiple tabs,
-  prefer composing tab Components rather than growing the class.
-
-## Reusing Components
-
-- Preferred pattern is **Locator-rooted** (see `SeedCard`, `StorefrontTariffCard`):
-  `constructor(private readonly root: Locator)` with static `nth()`/`byName()` factories.
-  Use page-rooted components only for genuine page-globals (`Header`, `Footer`, `CookieBanner`).
-- `StripeCardFields` + `utils/iframe-helper.ts` is the reference for iframe handling
-  (target frames by stable `title`, `waitForReady()` across frames, read state from
-  container CSS classes). Reuse this approach for any new payment/iframe work.
-- Components never assert — they return state.
-
-## Selectors
-
-All selectors come from `utils/selectors.ts`, grouped by domain. The file documents the
-priority: stable IDs → BEM classes → semantic attributes → roles. Explicitly avoid
-`:nth-child`, Vue `data-v-*` hashes, and (where avoidable) `:has-text()`. When adding a
-selector, put it in `selectors.ts` with a short dated source comment.
-
-## Stateful / serial panel tests
-
-VirtFusion panel suites that change server state use
-`test.describe.configure({ mode: "serial" })` with a shared `BrowserContext` and an
-`afterAll` that restores the server to Running. If you add such a test:
-- log in once via `loginAndSaveSession()` and reuse `storageState.panel.json`;
-- make the test arrange its own precondition where possible rather than depending on a
-  sibling's side effect;
-- ensure `afterAll` leaves the server in a clean state.
+- **Folder by domain** (`tests/<domain>/`), name `<feature>.spec.ts`, keep specs ~≤300 lines.
+- **Import:** storefront test → `import { test, expect } from "../../fixtures/base";`
+  (auto-dismisses banners). Panel test → `@playwright/test` is fine, but navigate via a
+  Page Object. Banner handling is automatic — never re-implement it or use `addLocatorHandler`
+  for banners (it hijacks mid-test nav — see `fixtures/base.ts`).
+- **Drive the UI through Page Objects / Components — never raw locators in the spec.** A
+  missing locator goes into the PO/component, sourced from `utils/selectors.ts`.
+- **Assertions live in the spec**, wrapped in `test.step(...)`. Page/component methods
+  return state or perform actions — they must not call `expect`.
+- **Tag it:** `@smoke` (critical path) / `@critical` (user story) / `@regression`.
+- **Web-first waits only** — `expect(locator).toBeVisible/...`, `locator.waitFor({state})`,
+  `expect.poll(...)`. Never `waitForTimeout`.
 
 ## Conventions / hard rules
 
@@ -199,22 +106,25 @@ VirtFusion panel suites that change server state use
 - Every test must contain at least one `expect`. Never gate setup with a silent
   `.catch(() => false)` early-return — use `test.skip(condition, reason)` with a logged reason.
 - No raw locators or hardcoded test data (URLs, UUIDs, credentials) in spec bodies.
+  Credentials/URLs come from `fixtures/test-data.ts` / `utils/*` via `process.env.* ?? fallback`.
+- All selectors come from `utils/selectors.ts` (priority: stable IDs → BEM → semantic
+  attributes → roles; avoid `:nth-child`, `data-v-*`, and where possible `:has-text()`).
+- Stateful panel tests run `mode: "serial"` with a shared context and a clean-state
+  `afterAll`. Details in `ARCHITECTURE.md` / `AGENT_HANDOFF.md`.
 - Docs and code comments in this repo are bilingual (RU/EN); follow the surrounding file.
 
 ## Ask before coding — clarifying questions
 
-Stop and ask the user when any of these is unclear, instead of assuming:
+Stop and ask when any of these is unclear, instead of assuming:
 
-1. **Environment:** Is this meant to run against live production, or is a staging/seeded
-   environment now available? (Changes everything about destructive tests.)
-2. **Account/state safety:** Will this test create orders, mutate a real VPS, or consume a
-   one-time promo on the shared account? Is that acceptable / how should it clean up?
-3. **Scope of selector changes:** If a needed `data-testid` is missing, should we add it to
-   the application repo, or work around it with existing selectors?
-4. **Migration vs. match:** When touching an older standalone Page Object, should I migrate
-   it to `BasePage`, or keep the change minimal and match existing style?
-5. **Tag / suite:** Which tag (`@smoke` / `@critical` / `@regression`) and which folder does
-   this test belong to?
+1. **Environment** — live production, or a staging/seeded environment now available?
+2. **Account/state safety** — will this create orders, mutate a real VPS, or consume a
+   one-time promo on the shared account? Acceptable? How to clean up?
+3. **Selector changes** — if a needed `data-testid` is missing, add it to the app repo or
+   work around it with existing selectors?
+4. **Migration vs. match** — migrate an older standalone Page Object to `BasePage`, or keep
+   the change minimal and match existing style?
+5. **Tag / suite** — which tag (`@smoke` / `@critical` / `@regression`) and which folder?
 
 When unsure whether an action is reversible or could affect the shared production account,
 ask first.
