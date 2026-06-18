@@ -42,12 +42,33 @@
 - PO расширены (`NewSeedCalculator`, `SeedPage`); новые селекторы в `NEW_SEED_CALCULATOR`.
 - ⚠️ modpackId: Host Now с двоеточиями, BUY/listing с дефисами → проверять структурно.
 
-**Live-прогон:** `tests/vps/funnel` 9/9 passed (39s) · `funnel.mobile` 4/4 passed ·
-seed-тесты (3 файла) 14/14 passed (1.9m).
+**Ещё в этой сессии (тоже в main):**
+- **`cart.modded-new.spec.ts` → serial shared-session** (вход лендинг→Host Now→/cart-modded-new
+  один раз в `beforeAll` вместо ×4). Состояние переносится чисто; тест смены плана идёт первым.
+- **Флоки транзиентного auth-block починен в `funnel.modded` + `funnel.seed`:** `ensurePastAuthStep`
+  ждёт ДЕТЕРМИНИРОВАННЫЙ сигнал (URL `step=2`), а не реагирует на мелькнувшую вкладку Login
+  (та детачится в момент авто-перехода → таймаут, воспроизводилось ~1/4). Гард в
+  `CartPage.switchToLoginTab` (return, если блок исчез) — защищает всех. (память `funnel-serial-and-doc-drift`)
+- **Локальный headed-комфорт** (`playwright.config.ts`, gated `process.env.CI`): окно на основной
+  монитор `--window-position=0,0` + `--force-device-scale-factor=1` (отключает OS-масштаб 150% →
+  вьюпорт 1800 влезает в физ. экран ноута). ⚠️ ГОЧА: `deviceScaleFactor` НЕ меняет размер
+  headed-окна (окно жёстко = вьюпорт+рамка) — для «зума» это не рычаг. Вьюпорт остаётся 1800×900
+  как в CI, поведение тестов не меняется.
+
+**Git:** все рабочие ветки сессии влиты в `main` и удалены (origin + локально); `gitlab/*` нетронут.
+
+**Live-прогон:** `tests/vps/funnel` 9/9 (39s) · `funnel.mobile` 4/4 · seed-тесты 14/14 (1.9m) ·
+`cart.modded-new` 4/4 (29s) · `funnel.modded` 8/8 (`--repeat-each`, флоки ушёл) · `funnel.seed`
+3/3. Владелец прошёл headed-ревью — ОК.
 
 **⚠️ Долг доков:** во многих доках (`CODE_REVIEW`, `TEST_AUDIT`, `vps-panel/*`) воронка всё
-ещё зовётся монолитом `vps.funnel.spec.ts` — это дрейф с момента сплита на focused-спеки,
+ещё зовётся монолитом `vps.funnel.spec.ts` — дрейф с момента сплита на focused-спеки,
 не трогал (часть — исторические логи). Привести в порядок отдельным проходом.
+
+**Следующее:** (1) долг доков выше; (2) если в headed-ревью владельца мигали НЕ-рефакторнутые
+тесты — собрать список и пройтись flaky-triage; (3) test-quality #3 — переписать слабые
+`toBeVisible`-тесты от реального поведения (память `test-quality-plan`); (4) при рефакторинге
+тестов держать читаемость/трассируемость в теле спека (память `test-refactor-readability`).
 
 ---
 
