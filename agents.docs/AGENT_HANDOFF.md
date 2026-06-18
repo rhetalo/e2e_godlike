@@ -1,6 +1,6 @@
 # AGENT HANDOFF — godlike.host Playwright E2E Suite
 
-> **Последнее обновление:** 15-Jun-2026
+> **Последнее обновление:** 18-Jun-2026
 > **Стек:** TypeScript · Playwright · Chromium
 > **Репо:** https://github.com/rhetalo/e2e_godlike
 
@@ -14,7 +14,32 @@
 
 ---
 
-## ▶ Продолжаем здесь (15-Jun-2026 · сессия «Качество + lint-долг»)
+## ▶ Продолжаем здесь (18-Jun-2026 · сессия «Serial-рефактор воронок»)
+
+**Сделано (ветка `refactor/funnel-serial-shared-session` → main; tsc 0 / eslint 0; live green):**
+- **Воронки переведены на serial + shared session.** `funnel.mobile` (4 теста),
+  `vps.funnel.billing` (3), `vps.funnel.configure` (5): логин + контекст + первичная
+  навигация (`cart.goto` / `deployFirstPlan` / `goToConfigureStep`) теперь **один раз** в
+  `beforeAll`, сценарии идут серийно по одной залогиненной странице (раньше каждый тест
+  поднимал свой контекст и заново навигировал/деплоил). Покрытие НЕ тронуто — только обвязка.
+- **Удалён дублирующий `vps.funnel.landing.spec.ts`** — навигация Deploy→cart и так в
+  setup каждого funnel-теста (`deployFirstPlan`); уникальная проверка `productId=\d+`
+  свёрнута в `vps.funnel.happy-path` (Step 1). `landing`/`happy-path` (по 1 тесту) на
+  serial НЕ переводились — нечего шарить.
+- **Починен латентный баг mobile-viewport:** `test.use({viewport})` не наследуется
+  `browser.newContext()` → 390×844 теперь задаётся явно в контексте `beforeAll`.
+- **Доки актуализированы:** `TEST_GUIDELINES.md` §9.1 (serial-shared как осн. паттерн
+  воронок + порядко-зависимость shared page), этот файл, `VPS_COVERAGE_ANALYSIS.md`.
+
+**Live-прогон:** `tests/vps/funnel` 9/9 passed (39s) · `funnel.mobile` 4/4 passed.
+
+**⚠️ Долг доков:** во многих доках (`CODE_REVIEW`, `TEST_AUDIT`, `vps-panel/*`) воронка всё
+ещё зовётся монолитом `vps.funnel.spec.ts` — это дрейф с момента сплита на focused-спеки,
+не трогал (часть — исторические логи). Привести в порядок отдельным проходом.
+
+---
+
+### Прошлая сессия (15-Jun-2026 · «Качество + lint-долг»)
 
 **Сделано (на ветке `chore/quality-lint`; tsc 0 / lint 0 errors; lint 165 → 97 warn):**
 - **Дедуп clientarea-логина.** Новый `utils/clientareaAuth.ts` →
