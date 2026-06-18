@@ -43,4 +43,11 @@ test.describe("@smoke страницы godlike.host загружаются", () 
     expect(meta.modpackId).toBeTruthy();
     expect(meta.seedId).toBeTruthy();
   });
+
+  test("несуществующая страница отдаёт 404, а не 500", async ({ page }) => {
+    const resp = await page.goto("/this-page-definitely-does-not-exist-e2e-probe/", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(resp?.status()).toBe(404);
+  });
 });
