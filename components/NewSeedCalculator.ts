@@ -125,4 +125,74 @@ export class NewSeedCalculator {
   async sliderToMin(): Promise<void> {
     await this.range().press("Home");
   }
+
+  // ─── версии ──────────────────────────────────────────────────────────────
+
+  /** Выбрать версию по value (mc:… для Minecraft, mp:curseforge-… для модпака ATM10). */
+  async selectVersionValue(value: string): Promise<void> {
+    await this.gameVersionSelect().selectOption(value);
+  }
+
+  // ─── сид: чипы / поиск / кастом ────────────────────────────────────────────
+
+  seedChips(): Locator {
+    return this.root().locator(SEL.chip);
+  }
+
+  /** Кликнуть seed-чип по индексу; вернуть его catalog-id (data-id) и подпись. */
+  async selectSeedChip(index = 0): Promise<{ id: string | null; name: string }> {
+    const chip = this.seedChips().nth(index);
+    const id = await chip.getAttribute("data-id");
+    const name = ((await chip.textContent()) ?? "").trim();
+    await chip.click();
+    return { id, name };
+  }
+
+  /** Ввести запрос в поиск сидов — открывает дропдаун с результатами. */
+  async searchSeed(query: string): Promise<void> {
+    await this.root().locator(SEL.seedSearch).fill(query);
+  }
+
+  /** Пункты дропдауна поиска сидов. */
+  searchResults(): Locator {
+    return this.root().locator(SEL.searchListItem);
+  }
+
+  /** Выбрать результат поиска по индексу; вернуть его текст. */
+  async pickSearchResult(index = 0): Promise<string> {
+    const item = this.searchResults().nth(index);
+    const txt = ((await item.textContent()) ?? "").trim();
+    await item.click();
+    return txt;
+  }
+
+  /** Ввести произвольный сид в поле кастомного сида (Enter применяет). */
+  async setCustomSeed(value: string): Promise<void> {
+    const input = this.root().locator(SEL.customSeed);
+    await input.fill(value);
+    await input.press("Enter");
+  }
+
+  // ─── тариф ступенями / summary / CTA ───────────────────────────────────────
+
+  /** Кликнуть ступень тарифа (slider-label) по data-step-index. */
+  async selectTierStep(stepIndex: number): Promise<void> {
+    await this.root().locator(`${SEL.sliderLabel}[data-step-index="${stepIndex}"]`).click();
+  }
+
+  /** Summary-блок: выбранный сид + версия (data-sc-sum-seed / -version). */
+  async readSummary(): Promise<{ seed: string; version: string }> {
+    const root = this.root();
+    const text = async (sel: string) =>
+      ((await root.locator(sel).first().textContent()) ?? "").trim();
+    return { seed: await text(SEL.sumSeed), version: await text(SEL.sumVersion) };
+  }
+
+  /**
+   * URL корзины, который построит CTA «Create server» (читается из data-href без клика —
+   * атрибут синхронен выбору версии/сида/тарифа). Безопасно: навигации нет.
+   */
+  async ctaHref(): Promise<string> {
+    return (await this.cta().getAttribute("data-href")) ?? "";
+  }
 }

@@ -31,7 +31,19 @@
 - **Доки актуализированы:** `TEST_GUIDELINES.md` §9.1 (serial-shared как осн. паттерн
   воронок + порядко-зависимость shared page), этот файл, `VPS_COVERAGE_ANALYSIS.md`.
 
-**Live-прогон:** `tests/vps/funnel` 9/9 passed (39s) · `funnel.mobile` 4/4 passed.
+**Seed-тесты редизайн (ветка `refactor/seed-tests-redesign`):** три пересекавшихся спека
+разведены на 2 корзины + 1 happy-path по recon живого DOM:
+- `seed-list.calculator.spec.ts` (/minecraft-seeds/): поля, версии (mc + ATM10-модпак),
+  выбор сида чипом/поиском/кастомом, слайдер → проверка `data-href` CTA (productId/seedId/
+  modpackId) + 1 реальный переход на /cart-seed.
+- `slider.seed.spec.ts` (одиночный сид): слайдер + Host Now (слайдер меняет productId
+  343→713) + BUY-A-SERVER (фикс. Quadra, data-url).
+- `funnel.seed.spec.ts` слимнут до ОДНОГО @critical Host Now→/cart-seed→WHMCS payment.
+- PO расширены (`NewSeedCalculator`, `SeedPage`); новые селекторы в `NEW_SEED_CALCULATOR`.
+- ⚠️ modpackId: Host Now с двоеточиями, BUY/listing с дефисами → проверять структурно.
+
+**Live-прогон:** `tests/vps/funnel` 9/9 passed (39s) · `funnel.mobile` 4/4 passed ·
+seed-тесты (3 файла) 14/14 passed (1.9m).
 
 **⚠️ Долг доков:** во многих доках (`CODE_REVIEW`, `TEST_AUDIT`, `vps-panel/*`) воронка всё
 ещё зовётся монолитом `vps.funnel.spec.ts` — это дрейф с момента сплита на focused-спеки,

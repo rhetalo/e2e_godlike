@@ -1,15 +1,17 @@
 /**
  * funnel.seed.spec.ts
  * ───────────────────
- * Воронка покупки сида до страницы оплаты (стоп до оплаты), три входа:
- *   1. BUY-A-SERVER на одиночной seed-странице → /cart-seed
- *   2. Host Now Vuetify-калькулятора одиночного сида → /cart-seed
- *   3. Create server нового калькулятора /minecraft-seeds/ → /cart-seed
+ * Глубокий happy-path сид-воронки до страницы оплаты WHMCS (стоп до оплаты).
+ * Один вход — Host Now Vuetify-калькулятора одиночного сида → /cart-seed → step 2 → WHMCS.
  * Далее общий хвост: auth (через storageState) → Next step ×2 → WHMCS payment. ⚠ Continue НЕ жмём.
+ *
+ * Проброс параметров (productId/seedId/modpackId) по входам проверяется отдельно, без глубины:
+ *   - /minecraft-seeds/ (Create server)        → tests/modded/seed-list.calculator.spec.ts
+ *   - одиночный сид (Host Now / BUY-A-SERVER)   → tests/modded/slider.seed.spec.ts
+ * Здесь — единственный сценарий, доводящий сид-воронку до самой страницы оплаты.
  */
 import { test, expect, type Browser, type Page } from "@playwright/test";
 import { SeedPage } from "../../pages/SeedPage";
-import { SeedListPage } from "../../pages/SeedListPage";
 import { CartPage } from "../../pages/CartPage";
 import { CheckoutPage } from "../../pages/CheckoutPage";
 import { pinAmplitudeExperiments } from "../../utils/amplitude";
@@ -47,8 +49,7 @@ async function driveSeedCartToPayment(
   checkoutPage: CheckoutPage,
 ): Promise<void> {
   // Осознанный networkidle: даём сессии из storageState примениться и SPA авто-скипнуть
-  // auth-block. Без этого ловим ТРАНЗИЕНТНЫЙ auth-block и зря триггерим fallback-логин
-  // (подтверждено: element-race здесь ломал «Create server»-флоу).
+  // auth-block. Без этого ловим ТРАНЗИЕНТНЫЙ auth-block и зря триггерим fallback-логин.
   // eslint-disable-next-line playwright/no-networkidle
   await page.waitForLoadState("networkidle", { timeout: 5_000 }).catch(() => {});
   await ensurePastAuthStep(page, cartPage);
@@ -79,51 +80,11 @@ async function driveSeedCartToPayment(
 test.describe("Воронка покупки сида (стоп на странице оплаты)", () => {
   test.setTimeout(180_000);
 
-  test("@critical BUY → корзина → step 2 → страница оплаты", async ({ browser }) => {
-    const context = await browser.newContext({ storageState: storageStatePath });
-    // §9.10: фиксируем A/B Amplitude ДО первой страницы (иначе flash-sale перехватит клик BUY).
-    await pinAmplitudeExperiments(context);
-    const page = await context.newPage();
-    const seed = new SeedPage(page);
-    const cartPage = new CartPage(page);
-    const checkoutPage = new CheckoutPage(page);
-
-    try {
-      await test.step("seed-страница → BUY несёт data-url", async () => {
-        await seed.open();
-        const cartUrl = await seed.buyServerCartUrl();
-        expect(cartUrl, "BUY-A-SERVER должен нести data-url").toBeTruthy();
-      });
-
-      await test.step("BUY → /cart-seed с productId", async () => {
-        // Осознанный networkidle: ждём, пока инлайн-скрипт навесит обработчик BUY
-        // (читает data-url → редирект). На этой капризной seed-странице это надёжнее
-        // элемент-ожидания (handler-attach не наблюдаем через DOM).
-        // eslint-disable-next-line playwright/no-networkidle
-        await page.waitForLoadState("networkidle", { timeout: 10_000 }).catch(() => {});
-        const buyButton = seed.buyServerButton();
-        await expect(buyButton).toBeVisible({ timeout: 15_000 });
-        await buyButton.scrollIntoViewIfNeeded();
-        await Promise.all([
-          page.waitForURL(SEED_CART_PRODUCT, { timeout: 30_000 }),
-          buyButton.click(),
-        ]);
-        await cartPage.cookieBanner.dismissAll();
-        expect(page.url()).toContain("productId=");
-      });
-
-      await test.step("auth + Next step ×2 → страница оплаты (стоп)", async () => {
-        await driveSeedCartToPayment(page, cartPage, checkoutPage);
-      });
-    } finally {
-      await context.close();
-    }
-  });
-
-  test("@critical Host Now (калькулятор одиночного сида) → /cart-seed → оплата", async ({
+  test("@critical Host Now (калькулятор одиночного сида) → /cart-seed → step 2 → страница оплаты", async ({
     browser,
   }) => {
     const context = await browser.newContext({ storageState: storageStatePath });
+    // Фиксируем A/B Amplitude ДО первой страницы (иначе flash-sale перехватит сабмит Host Now).
     await pinAmplitudeExperiments(context);
     const page = await context.newPage();
     const seed = new SeedPage(page);
@@ -140,47 +101,6 @@ test.describe("Воронка покупки сида (стоп на стран�
         await Promise.all([
           page.waitForURL(SEED_CART_PRODUCT, { timeout: 30_000 }),
           seed.hostNowSubmit().click(),
-        ]);
-        await cartPage.cookieBanner.dismissAll();
-        const url = new URL(page.url());
-        expect(url.pathname).toMatch(/\/cart-seed/);
-        expect(url.searchParams.get("productId")).toMatch(/^\d+$/);
-        expect(url.searchParams.get("promo")).toBeTruthy();
-      });
-
-      await test.step("auth + Next step ×2 → страница оплаты (стоп)", async () => {
-        await driveSeedCartToPayment(page, cartPage, checkoutPage);
-      });
-    } finally {
-      await context.close();
-    }
-  });
-
-  test("@critical Create server (новый калькулятор /minecraft-seeds/) → /cart-seed → оплата", async ({
-    browser,
-  }) => {
-    const context = await browser.newContext({ storageState: storageStatePath });
-    await pinAmplitudeExperiments(context);
-    const page = await context.newPage();
-    const seedList = new SeedListPage(page);
-    const cartPage = new CartPage(page);
-    const checkoutPage = new CheckoutPage(page);
-
-    try {
-      await test.step("выбор версии + слайдер→max → Create server → /cart-seed", async () => {
-        await seedList.open();
-        await seedList.calculator.selectGameVersion(0);
-        await expect
-          .poll(() => seedList.calculator.readPlan().then((p) => p.name), {
-            timeout: 10_000,
-            intervals: [300, 500, 800],
-          })
-          .not.toBe("—");
-        await seedList.calculator.sliderToMax();
-
-        await Promise.all([
-          page.waitForURL(SEED_CART_PRODUCT, { timeout: 30_000 }),
-          seedList.calculator.cta().click(),
         ]);
         await cartPage.cookieBanner.dismissAll();
         const url = new URL(page.url());

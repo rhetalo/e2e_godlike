@@ -58,6 +58,19 @@ export class SeedPage extends BasePage {
       .locator('button[type="submit"].seed-calculator__btn');
   }
 
+  /**
+   * Клик «Host Now» (submit формы калькулятора) → переход на /cart-seed.
+   * productId в итоговом URL соответствует выбранному слайдером тарифу. Возвращает URL корзины.
+   * ⚠️ Дальше воронку/оплату НЕ ведём.
+   */
+  async hostNowToCartUrl(): Promise<string> {
+    await Promise.all([
+      this.page.waitForURL(/\/cart-seed/, { timeout: 30_000 }),
+      this.hostNowSubmit().click(),
+    ]);
+    return this.page.url();
+  }
+
   /** Big "BUY A SERVER" card CTA above the calculator. */
   buyServerButton(): Locator {
     return this.page.locator("button.single-seed-card__button").first();
