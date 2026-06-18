@@ -32,7 +32,19 @@ test.beforeAll(async ({ browser }: { browser: Browser }) => {
   });
 });
 
+/**
+ * Провести корзину за auth-block. Валидная сессия из storageState авто-проскакивает блок прямо
+ * на step 2 — СНАЧАЛА даём ей это сделать (ждём step 2). Логинимся вручную ТОЛЬКО если step 2 не
+ * достигнут И блок реально держится. Иначе ловим ТРАНЗИЕНТНЫЙ auth-block (мелькает даже у
+ * залогиненного) и зря триггерим fallback — он падает на детаче вкладки Login в момент
+ * авто-перехода (тот же класс флоки, что чинили в funnel.modded).
+ */
 async function ensurePastAuthStep(page: Page, cartPage: CartPage): Promise<void> {
+  const reachedStep2 = await page
+    .waitForURL(SEED_CART_STEP2, { timeout: 12_000 })
+    .then(() => true)
+    .catch(() => false);
+  if (reachedStep2) return;
   if (!(await cartPage.isAuthBlockVisible())) return;
   const advanced = await cartPage.loginAndAwaitStep2(Credentials.email, Credentials.password);
   expect(advanced, "ожидали переход на ?step=2 после fallback-логина").toBeTruthy();
@@ -48,10 +60,7 @@ async function driveSeedCartToPayment(
   cartPage: CartPage,
   checkoutPage: CheckoutPage,
 ): Promise<void> {
-  // Осознанный networkidle: даём сессии из storageState примениться и SPA авто-скипнуть
-  // auth-block. Без этого ловим ТРАНЗИЕНТНЫЙ auth-block и зря триггерим fallback-логин.
-  // eslint-disable-next-line playwright/no-networkidle
-  await page.waitForLoadState("networkidle", { timeout: 5_000 }).catch(() => {});
+  // ensurePastAuthStep сам ждёт step 2 (детерминированный сигнал) — networkidle-костыль не нужен.
   await ensurePastAuthStep(page, cartPage);
   await page.waitForURL(SEED_CART_STEP2, { timeout: 30_000 }).catch(() => {});
   await cartPage.cookieBanner.dismissAll();
