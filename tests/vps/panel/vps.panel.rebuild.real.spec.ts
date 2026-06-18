@@ -24,7 +24,7 @@ test.beforeAll(async ({ browser }: { browser: Browser }) => {
   await loginAndSaveSession(browser);
 });
 
-test.describe("VPS-панель — Rebuild: РЕАЛЬНЫЙ install (Build)", () => {
+test.describe("@critical VPS-панель — Rebuild: РЕАЛЬНЫЙ install (Build)", () => {
   test("@critical TC-VPS-BUILD-001 реальный rebuild ОС → задача Build → Complete → Running", async ({
     browser,
   }) => {

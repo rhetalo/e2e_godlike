@@ -17,7 +17,7 @@ test.beforeAll(async ({ browser }: { browser: Browser }) => {
   await loginVpsSession(browser);
 });
 
-test.describe("@critical VPS-воронка — полный happy path", () => {
+test.describe("@smoke @critical VPS-воронка — полный happy path", () => {
   test("Deploy Now → Billing → Configure (OS + Location) → WHMCS checkout", async ({
     browser,
   }) => {
