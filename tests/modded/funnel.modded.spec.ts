@@ -34,8 +34,19 @@ test.beforeAll(async ({ browser }: { browser: Browser }) => {
   });
 });
 
-/** Fallback: если корзина всё ещё на auth-block (сессия протухла) — логинимся в корзине. */
+/**
+ * Провести корзину за auth-block. Валидная сессия из storageState авто-проскакивает блок прямо
+ * на step 2 — СНАЧАЛА даём ей это сделать (ждём step 2). Логинимся вручную ТОЛЬКО если step 2 не
+ * достигнут И блок реально держится. Иначе ловим ТРАНЗИЕНТНЫЙ auth-block (он мелькает даже у
+ * залогиненного) и зря триггерим fallback-логин — а он падает: вкладка Login детачится из DOM в
+ * момент авто-перехода на step 2 (флоки, воспроизводилось ~1 из 4).
+ */
 async function ensurePastAuthStep(page: Page, cartPage: CartPage): Promise<void> {
+  const reachedStep2 = await page
+    .waitForURL(VueCartStep2Pattern, { timeout: 12_000 })
+    .then(() => true)
+    .catch(() => false);
+  if (reachedStep2) return;
   if (!(await cartPage.isAuthBlockVisible())) return;
   const advanced = await cartPage.loginAndAwaitStep2(Credentials.email, Credentials.password);
   expect(advanced, "ожидали переход на ?step=2 после fallback-логина").toBeTruthy();
@@ -75,12 +86,7 @@ test.describe("Воронка покупки modded (стоп на страни�
         expect(page.url()).toContain(`productId=${meta.productId}`);
       });
 
-      await test.step("пройти auth-block (storageState; иначе fallback-логин) → step 2", async () => {
-        // дать Vue смонтировать auth-block ИЛИ сразу step-2 (web-first, без networkidle)
-        await Promise.race([
-          cartPage.authTab("Login").waitFor({ state: "visible", timeout: 5_000 }).catch(() => {}),
-          cartPage.nextStepButton().waitFor({ state: "visible", timeout: 5_000 }).catch(() => {}),
-        ]);
+      await test.step("auth-block: авто-проскок сессией, иначе fallback-логин → step 2", async () => {
         await ensurePastAuthStep(page, cartPage);
         await page.waitForURL(VueCartStep2Pattern, { timeout: 30_000 }).catch(() => {});
         await cartPage.cookieBanner.dismissAll();

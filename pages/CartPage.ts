@@ -46,6 +46,9 @@ export class CartPage extends BasePage {
 
   /** Switch to the Login tab if it isn't active yet. */
   async switchToLoginTab(): Promise<void> {
+    // Если auth-block уже исчез (валидная сессия авто-проскочила на step 2) — переключать нечего.
+    // Защита от флоки: вкладка Login детачится из DOM в момент авто-перехода (см. funnel.modded).
+    if (!(await this.isAuthBlockVisible())) return;
     const activeLogin = this.page.locator(
       ".auth-block__header-inner__active",
       { hasText: "Login" },
