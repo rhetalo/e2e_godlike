@@ -63,8 +63,8 @@ export const CartAuthValidationPath =
  * Reference project uses the same shared test@testmail.com account.
  */
 export const Credentials = {
-  email: process.env.GODLIKE_USER ?? "test@testmail.com",
-  password: process.env.GODLIKE_PASSWORD ?? "test@testmail.com",
+  email: process.env.CLIENTAREA_EMAIL ?? "test@testmail.com",
+  password: process.env.CLIENTAREA_PASSWORD ?? "test@testmail.com",
 };
 
 /**
