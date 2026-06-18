@@ -176,12 +176,15 @@ export const SEEDS = {
 } as const;
 
 /* ===== New Seed Calculator (/minecraft-seeds/ listing page) ===== */
-// Confirmed via MCP recon 13-Jun-2026. ⚠️ ОТДЕЛЬНЫЙ виджет, НЕ Vuetify PlanCalculator:
+// Confirmed via recon 13-Jun + 18-Jun-2026. ⚠️ ОТДЕЛЬНЫЙ виджет, НЕ Vuetify PlanCalculator:
 // кастомный кальк с нативным <input type=range> и инлайн-конфигом window.GodlikeNewSeedCalculator
-// (products[]/seeds[]/versions[], cartBaseUrl="/cart-seed", promocode="SEED", discount=40).
-// Гидрируется асинхронно и ПУСТ (план/цена "—"), пока не выбрана версия игры в #glike-sc-game-version.
-// Слайдер двигает тариф (Double→…→Godlike), меняя план/RAM/слоты/цену/игроков. CTA «Create server»
-// строит URL корзины НА КЛИК (href="#") → /cart-seed.
+// (products[]/seeds[]/versions[], cartBaseUrl="/cart-seed", promocode="SEED").
+// Гидрируется ЛЕНИВО (нужен mouse-нудж, см. NewSeedCalculator.waitReady).
+// Версии: mc:* (Minecraft) и mp:curseforge-… (модпак ATM10 → modpackId в URL).
+// Сид выбирается: чипом (.__chip[data-id]) / поиском (#glike-sc-seed-search → .__list-item) /
+// кастомным полем (#glike-sc-custom-seed). Слайдер + ступени (.__slider-label) двигают тариф.
+// CTA «Create server» держит готовый URL корзины в data-href, синхронный выбору
+// (productId&seedId&modpackId&billingCycle&promo) → /cart-seed.
 export const NEW_SEED_CALCULATOR = {
   root: ".godlike-new-seed-calculator",
   gameVersionSelect: "#glike-sc-game-version", // <select> версий игры (Minecraft 1.18…)
@@ -196,7 +199,12 @@ export const NEW_SEED_CALCULATOR = {
   priceOld: ".godlike-new-seed-calculator__price-old",
   priceCycle: ".godlike-new-seed-calculator__price-cycle",
   summaryRow: ".godlike-new-seed-calculator__summary-row",
-  cta: "a.godlike-new-seed-calculator__cta", // «Create server» → /cart-seed (URL строится на клик)
+  sumSeed: "[data-sc-sum-seed]", // summary: выбранный сид
+  sumVersion: "[data-sc-sum-version]", // summary: выбранная версия
+  chip: ".godlike-new-seed-calculator__chip", // быстрый выбор сида (data-id); список зависит от версии
+  sliderLabel: ".godlike-new-seed-calculator__slider-label", // ступени тарифа (data-step-index 0..N)
+  searchListItem: ".godlike-new-seed-calculator__list-item", // пункт дропдауна поиска сидов
+  cta: "a.godlike-new-seed-calculator__cta", // «Create server»; готовый URL корзины — в data-href (синхронен выбору)
 } as const;
 
 /* ===== New Modded Cart (/cart-modded-new — НОВЫЙ UI воронки) ===== */
