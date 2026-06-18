@@ -81,7 +81,10 @@ export default defineConfig({
       trace: 'on-first-retry',
 
       viewport: { width: 1800, height: 900 },
-      deviceScaleFactor: 1,
+      // Локально (не CI): 80% рендер → headed-окно ~1440px влезает на ноут и видно больше страницы.
+      deviceScaleFactor: process.env.CI ? 1 : 0.8,
+      // Локально держим headed-окно на основном мониторе, чтобы не вылезало на соседний.
+      launchOptions: { args: process.env.CI ? [] : ['--window-position=0,0'] },
     },
   },
     // {

@@ -37,6 +37,7 @@ export async function newPinnedContext(browser: Browser): Promise<BrowserContext
   const context = await browser.newContext({
     storageState: storageStatePath,
     viewport: DESKTOP_VIEWPORT,
+    deviceScaleFactor: process.env.CI ? 1 : 0.8, // локально 80% — headed-окно влезает на ноут
   });
   await pinAmplitudeExperiments(context);
   return context;
