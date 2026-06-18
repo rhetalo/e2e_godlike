@@ -11,7 +11,7 @@
 
 | Сценарий       | Статус          | Файл(-ы)                                                | Комментарий                                                    |
 |----------------|-----------------|---------------------------------------------------------|----------------------------------------------------------------|
-| **Install VPS**| ✅ Покрыт (частично) | `vps.funnel.spec.ts`                               | Воронка до checkout: landing → billing → configure → NEXT STEP |
+| **Install VPS**| ✅ Покрыт (частично) | `tests/vps/funnel/*` (billing · configure · happy-path) | Воронка до WHMCS checkout: landing → billing → configure → checkout |
 | **Build VPS**  | ✅ Покрыт (частично) | `vps.build.spec.ts`, `vps.panel.rebuild.spec.ts`   | UI rebuild-флоу + OS selection; деструктив отменяется Cancel  |
 | **Delete VPS** | ❌ НЕ покрыт    | _(нет теста)_ / `VpsPanelServersListPage.ts` (PO есть) | Page object готов, тест не написан                             |
 
@@ -24,14 +24,20 @@
 **Интерпретация:** «Install» = прохождение воронки покупки VPS (landing → cart → configure → checkout).  
 Полного end-to-end до реального создания сервера нет — это невозможно в автоматическом тесте без реальной оплаты и не нужно для CI.
 
-### Файл: `tests/vps/funnel/vps.funnel.spec.ts` (742 строки)
+> **Обновление 18-Jun-2026:** монолит `vps.funnel.spec.ts` разбит на focused-спеки
+> (`vps.funnel.billing` / `.configure` / `.happy-path`), переведённые на **serial-shared
+> session** (логин + навигация один раз в `beforeAll`). Отдельный `vps.funnel.landing`
+> удалён как дублирующий — навигация Deploy→cart выполняется в setup каждого спека
+> (`deployFirstPlan`), а уникальная проверка `productId=\d+` свёрнута в `happy-path` (Step 1).
 
-#### Suite 1 — VPS Landing Page (`/vps-hosting/`)
+### Файлы: `tests/vps/funnel/{billing,configure,happy-path}.spec.ts`
+
+#### Шаг 1 — VPS Landing Page (`/vps-hosting/`) → покрыт в `vps.funnel.happy-path` (Step 1)
 | # | Тест | Что проверяет | Статус |
 |---|------|---------------|--------|
-| 1 | страница загружается, кнопки Deploy Now видны | `count >= 1` Deploy Now кнопок | ✅ |
-| 2 | у каждой кнопки Deploy Now есть корректный href с productId | `href` содержит `/cart-vps` + `productId=\d+` | ✅ |
-| 3 | клик Deploy Now ведёт в /cart-vps/ и монтирует Vue SPA | URL `/cart-vps` + `[data-v-app]` видим | ✅ |
+| 1 | на лендинге есть кнопки Deploy Now | `firstDeployButton` видна (⇒ ≥1 кнопка) | ✅ |
+| 2 | клик Deploy → URL корзины с productId | URL `/cart-vps` + `productId=\d+` | ✅ |
+| 3 | корзина (Vue SPA) монтируется | `billing.container` видим | ✅ |
 
 #### Suite 2 — Billing Cycle Step (`/cart-vps/`)
 | # | Тест | Что проверяет | Статус |
@@ -213,7 +219,7 @@
 
 ### P2 — Желательно
 2. **Мигрировать `vps.build.spec.ts`** на `VpsPanelServerPage` + `VpsPanelRebuildPage`, удалить устаревшие PO (`VpsPanelServerDetailPage`, `VpsPanelServersListPage` если Delete не нужен).
-3. **Добавить в `vps.funnel.spec.ts`** финальный тест навигации до WHMCS checkout (без Place Order — проверить только что страница загрузилась).
+3. ✅ **Сделано** (`vps.funnel.happy-path.spec.ts`): полный happy path Deploy → Billing → Configure → WHMCS checkout (без Place Order — проверяется загрузка формы оплаты).
 
 ### P3 — Технический долг
 4. Уточнить статус `Protect Server` (feature-flag?) — добавить тест когда функция станет доступна.
@@ -226,7 +232,10 @@
 ```
 tests/vps/
 ├── funnel/
-│   └── vps.funnel.spec.ts          ← Install VPS (воронка покупки)
+│   ├── vps.funnel.billing.spec.ts    ← шаг Billing (serial-shared)
+│   ├── vps.funnel.configure.spec.ts  ← шаг Configure (serial-shared)
+│   ├── vps.funnel.happy-path.spec.ts ← полный happy path → WHMCS checkout
+│   └── vps.funnel.helpers.ts         ← общие хелперы воронки
 └── panel/
     ├── vps.build.spec.ts            ← Build VPS smoke (УСТАРЕЛ, к миграции)
     ├── vps.panel.login.spec.ts      ← Auth

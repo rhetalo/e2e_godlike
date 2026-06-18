@@ -315,28 +315,50 @@ test("@critical Пользователь делает X и получает ре
 
 9. Funnel/Storefront — специфичные паттерны
 
-Воронки покупки (`/cart/`, `/cart-vps/`) — Vue SPA, загружаемые динамически.
-Отличаются от panel-тестов: нет изменения состояния сервера, нет serial mode.
+Воронки покупки (`/cart/`, `/cart-vps/`, `/mobile-cart/`) — Vue SPA, загружаемые
+динамически. Мутации сервера здесь нет, но при нескольких проверках **одного шага**
+воронки применяется **serial mode + shared page** (см. 9.1).
 
-9.1 Архитектура: изолированные vs shared контекст
+9.1 Архитектура: shared session (serial) vs изолированный контекст
 
-Для воронок используется **изолированный** подход по умолчанию:
+Логин выполняется **один раз** в `beforeAll` и сохраняется в `storageState.vps.json` /
+`storageState.mobile.json` — каждый тест стартует авторизованным без повторного логина.
+
+**Когда несколько тестов проверяют один и тот же шаг воронки** (billing / configure /
+мобильная корзина) — используем **serial mode + одну общую страницу**: контекст и
+первичная навигация выполняются один раз в `beforeAll`, сценарии переиспользуют одну
+живую страницу (раньше каждый тест поднимал свой контекст и навигировал заново). Так
+сделано в `vps.funnel.billing`, `vps.funnel.configure`, `funnel.mobile`.
 
 ```typescript
-// Каждый тест создаёт свой контекст из сохранённого storageState
-test('проверка', async ({ browser }) => {
-  const context = await browser.newContext({ storageState: storageStatePath });
-  const page = await context.newPage();
-  // ...
-  await context.close();
+test.describe.configure({ mode: "serial" });
+
+test.describe("...", () => {
+  let context: BrowserContext;
+  let cart: CartBillingPage;
+
+  test.beforeAll(async ({ browser }) => {
+    await loginVpsSession(browser);              // логин 1 раз
+    context = await newPinnedContext(browser);   // контекст 1 раз
+    const page = await context.newPage();
+    cart = new CartBillingPage(page);
+    await deployFirstPlan(page);                  // навигация 1 раз
+    await cart.billing.container.waitFor({ state: "visible" });
+  });
+  test.afterAll(async () => { await context.close(); });
+
+  test("сценарий 1", async () => { /* test.step(...) по общей странице cart */ });
+  test("сценарий 2", async () => { /* ... */ });
 });
 ```
 
-Логин выполняется **один раз** в `beforeAll` и сохраняется в `storageState.vps.json`.
-Это позволяет каждому тесту стартовать с авторизованной сессией без повторного логина.
+⚠️ Цена shared page — **порядко-зависимость**: страница живёт между тестами, поэтому
+проверки «свежего» состояния (цена $0, дропдаун заблокирован до выбора, дефолтный тип ОС)
+валидны только в первом сценарии — выноси их туда и не повторяй ниже.
 
-> Для оптимизации (когда все тесты проверяют один шаг воронки) можно использовать
-> shared page через `serial` mode — но это не обязательно, если тестов немного.
+**Изолированный контекст на тест** оправдан, только если тест единственный в файле или
+его предмет = сама навигация со свежего лендинга (как было в удалённом
+`vps.funnel.landing`, чьи проверки свёрнуты в `vps.funnel.happy-path`).
 
 9.2 Ожидание Vue SPA
 

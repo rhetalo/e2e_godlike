@@ -28,10 +28,13 @@ test.describe("@critical VPS-воронка — полный happy path", () => 
     const checkout = new CheckoutPage(page);
 
     try {
-      await test.step("Step 1: /vps-hosting/ → /cart-vps/", async () => {
+      await test.step("Step 1: /vps-hosting/ → /cart-vps/ c productId", async () => {
         await deployFirstPlan(page);
         await cart.billing.container.waitFor({ state: "visible", timeout: 15_000 });
+        // /\/cart-vps/ ловит обе формы URL от A/B (.../cart-vps?... и .../cart-vps/?...).
         expect(page.url()).toMatch(/\/cart-vps/);
+        // productId уходит в URL корзины только ПОСЛЕ клика Deploy (кнопки — javascript:void(0)).
+        expect(page.url()).toMatch(/productId=\d+/);
       });
 
       await test.step("Step 2: Billing — выбрать 1 Month → Next Step → Configure", async () => {
