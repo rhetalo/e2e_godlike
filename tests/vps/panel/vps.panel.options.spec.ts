@@ -53,7 +53,7 @@ async function gotoOptions(): Promise<void> {
 // SUITE 1 — Навигация: Options tab + под-табы
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS-панель — Options: навигация", () => {
-  test("@regression Options открывается, 4 под-таба видны, VNC активен по умолчанию", async () => {
+  test("@regression TC-VPS-OPT-001 | Options открывается, 4 под-таба видны, VNC активен по умолчанию", async () => {
     await gotoOptions();
 
     await test.step("все 4 под-таба видны (VNC, Rescue, Password, Settings)", async () => {
@@ -72,7 +72,7 @@ test.describe("VPS-панель — Options: навигация", () => {
 // SUITE 2 — VNC под-таб (vlang[168])
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS-панель — Options: VNC", () => {
-  test("@critical VNC toggle: клик меняет состояние и задача появляется в activity table", async () => {
+  test("@critical TC-VPS-OPT-002 | VNC toggle: клик меняет состояние и задача появляется в activity table", async () => {
     await gotoOptions();
 
     await test.step("секция VNC и кнопка toggle присутствуют", async () => {
@@ -107,7 +107,7 @@ test.describe("VPS-панель — Options: VNC", () => {
 // SUITE 3 — Password под-таб: Reset Password (vlang[102])
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS-панель — Options: Reset Password", () => {
-  test("@regression Reset Password: модал с текстом про email открывается и закрывается по Cancel", async () => {
+  test("@regression TC-VPS-OPT-003 | Reset Password: модал с текстом про email открывается и закрывается по Cancel", async () => {
     await gotoOptions();
     await optionsPage.clickSubTab("Password");
 
@@ -136,7 +136,7 @@ test.describe("VPS-панель — Options: Reset Password", () => {
 // SUITE 4 — Settings под-таб: Boot Type (vlang[354–356])
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS-панель — Options: Settings / Boot Type", () => {
-  test("@regression Settings: секция Boot Type и опции BIOS / UEFI присутствуют", async () => {
+  test("@regression TC-VPS-OPT-004 | Settings: секция Boot Type и опции BIOS / UEFI присутствуют", async () => {
     await gotoOptions();
     await optionsPage.clickSubTab("Settings");
 

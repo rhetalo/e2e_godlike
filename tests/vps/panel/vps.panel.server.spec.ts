@@ -53,7 +53,7 @@ test.afterAll(async () => {
 // SUITE 1 — Dashboard и навигация к серверу
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS-панель — Dashboard и навигация", () => {
-  test("@smoke dashboard загружается, ссылки Dashboard и Servers видны", async () => {
+  test("@smoke TC-VPS-SRV-001 | dashboard загружается, ссылки Dashboard и Servers видны", async () => {
     await dashboardPage.goto();
 
     await test.step("URL содержит /dashboard", async () => {
@@ -66,7 +66,7 @@ test.describe("VPS-панель — Dashboard и навигация", () => {
     });
   });
 
-  test("@regression Servers → /servers → Manage → страница /server/", async () => {
+  test("@regression TC-VPS-SRV-002 | Servers → /servers → Manage → страница /server/", async () => {
     const page = serverPage.page;
 
     await test.step("клик Servers в навигации → /servers", async () => {
@@ -94,7 +94,7 @@ test.describe("VPS-панель — страница сервера", () => {
     await serverPage.goto();
   });
 
-  test("@regression имя сервера и валидный статус отображаются", async () => {
+  test("@regression TC-VPS-SRV-003 | имя сервера и валидный статус отображаются", async () => {
     await test.step(`имя "${TEST_SERVER_NAME}" присутствует на странице`, async () => {
       await expect(serverPage.serverNameLabel(TEST_SERVER_NAME)).toBeVisible({ timeout: 15_000 });
     });
@@ -114,7 +114,7 @@ test.describe("VPS-панель — страница сервера", () => {
 // SUITE 3 — Power Controls (smoke; детали — vps.panel.power.actions.spec.ts)
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS-панель — управление питанием", () => {
-  test("@regression кнопки управления питанием присутствуют", async () => {
+  test("@regression TC-VPS-SRV-004 | кнопки управления питанием присутствуют", async () => {
     await serverPage.goto();
     // allPowerButtons исключает data-bs-dismiss="modal" — только реальные кнопки в хедере.
     await expect(serverPage.allPowerButtons.first()).toBeVisible({ timeout: 10_000 });
@@ -150,11 +150,11 @@ test.describe("VPS-панель — список серверов (/servers)", (
     await dashboardPage.waitForServersList();
   });
 
-  test("@regression имя тестового сервера видно в списке", async () => {
+  test("@regression TC-VPS-SRV-005 | имя тестового сервера видно в списке", async () => {
     await expect(serverPage.serverNameLabel(TEST_SERVER_NAME)).toBeVisible({ timeout: 15_000 });
   });
 
-  test("@regression вкладки All/Bookmarked есть, переключение работает, есть иконка закладки", async () => {
+  test("@regression TC-VPS-SRV-006 | вкладки All/Bookmarked есть, переключение работает, есть иконка закладки", async () => {
     await test.step("вкладки All Servers и Bookmarked Servers видны", async () => {
       await expect(dashboardPage.allServersTab).toBeVisible({ timeout: 10_000 });
       await expect(dashboardPage.bookmarkedServersTab).toBeVisible({ timeout: 10_000 });

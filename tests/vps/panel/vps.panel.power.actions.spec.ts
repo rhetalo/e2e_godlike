@@ -81,7 +81,7 @@ test.afterAll(async () => {
 // Power-переходы (SUITE 1–4 свёрнуты: один тест на действие, шаги внутри)
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("@critical VPS-питание — переходы состояний", () => {
-  test("Shutdown: Running → Stopped (модал → confirm → activity → статус)", async () => {
+  test("TC-VPS-PWR-001 | Shutdown: Running → Stopped (модал → confirm → activity → статус)", async () => {
     test.setTimeout(180_000);
     await serverPage.goto();
 
@@ -108,7 +108,7 @@ test.describe("@critical VPS-питание — переходы состоян�
     });
   });
 
-  test("Boot: Stopped → Running (прямой клик, без модала)", async () => {
+  test("TC-VPS-PWR-002 | Boot: Stopped → Running (прямой клик, без модала)", async () => {
     test.setTimeout(180_000);
 
     await test.step("предусловие: сервер Stopped", async () => {
@@ -126,7 +126,7 @@ test.describe("@critical VPS-питание — переходы состоян�
     });
   });
 
-  test("Power Off: Running → Stopped (модал → confirm)", async () => {
+  test("TC-VPS-PWR-003 | Power Off: Running → Stopped (модал → confirm)", async () => {
     test.setTimeout(180_000);
 
     await test.step("нормализация: Running", async () => {
@@ -144,7 +144,7 @@ test.describe("@critical VPS-питание — переходы состоян�
     });
   });
 
-  test("Restart: Running → Running (модал → confirm, без перехода в Stopped)", async () => {
+  test("TC-VPS-PWR-004 | Restart: Running → Running (модал → confirm, без перехода в Stopped)", async () => {
     test.setTimeout(180_000);
 
     await test.step("нормализация: Running (boot после Power Off при необходимости)", async () => {
@@ -173,7 +173,7 @@ test.describe("@critical VPS-питание — переходы состоян�
 // SUITE 5 — Activity table после всех операций
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("@regression VPS-питание — Activity table после операций", () => {
-  test("записи Boot/Shutdown/Poweroff присутствуют, все Complete, прогресс 100%, реальный duration", async () => {
+  test("TC-VPS-PWR-005 | записи Boot/Shutdown/Poweroff присутствуют, все Complete, прогресс 100%, реальный duration", async () => {
     await expect(serverPage.activityTable).toBeVisible({ timeout: 10_000 });
 
     await test.step("в таблице есть Boot, Shutdown и Poweroff от этого запуска", async () => {
@@ -229,7 +229,7 @@ test.describe("@regression VPS-питание — структура модал�
     },
   ] as const;
 
-  test("каждый модал: заголовок + вопрос + confirm + cancel; Cancel не меняет статус", async () => {
+  test("TC-VPS-PWR-006 | каждый модал: заголовок + вопрос + confirm + cancel; Cancel не меняет статус", async () => {
     test.setTimeout(120_000);
     await serverPage.ensureRunning(60_000);
     const statusBefore = await serverPage.getStatusText();

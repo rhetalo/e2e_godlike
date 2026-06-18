@@ -57,7 +57,7 @@ test.afterAll(async () => {
 // Видимость элементов свёрнута в precondition-шаги поведенческих тестов.
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("@regression VPS-панель — вкладка Network", () => {
-  test("вкладка активна и показывает карточку Primary Network", async () => {
+  test("TC-VPS-NET-001 | вкладка активна и показывает карточку Primary Network", async () => {
     await test.step("вкладка Network присутствует и активна", async () => {
       // activeTab = [role="tab"][aria-selected="true"] — только pill-табы, не верхний navbar.
       await expect(serverPage.tab("Network")).toBeVisible({ timeout: 10_000 });
@@ -71,7 +71,7 @@ test.describe("@regression VPS-панель — вкладка Network", () => {
     });
   });
 
-  test("Statistics — клик рендерит Plotly-чарт", async () => {
+  test("TC-VPS-NET-002 | Statistics — клик рендерит Plotly-чарт", async () => {
     await test.step("кнопка Statistics видна", async () => {
       await expect(networkPage.statisticsButton).toBeVisible({ timeout: 10_000 });
     });
@@ -85,7 +85,7 @@ test.describe("@regression VPS-панель — вкладка Network", () => {
     });
   });
 
-  test("Reverse DNS — модал открывается и закрывается по Cancel", async () => {
+  test("TC-VPS-NET-003 | Reverse DNS — модал открывается и закрывается по Cancel", async () => {
     await test.step("кнопка Reverse DNS видна", async () => {
       await expect(networkPage.reverseDnsButton).toBeVisible({ timeout: 10_000 });
     });

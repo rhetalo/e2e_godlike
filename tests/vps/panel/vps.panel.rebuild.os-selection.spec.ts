@@ -17,7 +17,7 @@ test.beforeAll(async ({ browser }: { browser: Browser }) => {
 });
 
 test.describe("@regression VPS-панель — Rebuild: страница выбора ОС", () => {
-  test("страница загружается: 15+ карточек ОС с названиями, по умолчанию ничего не выбрано", async ({
+  test("TC-VPS-RBD-001 | страница загружается: 15+ карточек ОС с названиями, по умолчанию ничего не выбрано", async ({
     browser,
   }) => {
     const { context, rebuildPage, navigated } = await openRebuildPage(browser);
@@ -42,7 +42,7 @@ test.describe("@regression VPS-панель — Rebuild: страница выб
     }
   });
 
-  test("аккордеон групп ОС: 6 групп, свёрнуты по умолчанию, раскрытие показывает шаблоны", async ({
+  test("TC-VPS-RBD-002 | аккордеон групп ОС: 6 групп, свёрнуты по умолчанию, раскрытие показывает шаблоны", async ({
     browser,
   }) => {
     const { context, page, rebuildPage, navigated } = await openRebuildPage(browser);

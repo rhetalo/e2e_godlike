@@ -17,7 +17,7 @@ test.beforeAll(async ({ browser }: { browser: Browser }) => {
 });
 
 test.describe("@regression VPS-панель — Rebuild: выбор ОС (Install не нажимаем)", () => {
-  test("single-select: выбор карточки даёт .selected-card/.border-success; вторая снимает первую", async ({
+  test("TC-VPS-RBD-003 | single-select: выбор карточки даёт .selected-card/.border-success; вторая снимает первую", async ({
     browser,
   }) => {
     const { context, rebuildPage, navigated } = await openRebuildPage(browser);
@@ -50,7 +50,7 @@ test.describe("@regression VPS-панель — Rebuild: выбор ОС (Instal
     }
   });
 
-  test("кнопка Install: отсутствует до выбора, появляется с названием ОС и меняется; Swap Space появляется", async ({
+  test("TC-VPS-RBD-004 | кнопка Install: отсутствует до выбора, появляется с названием ОС и меняется; Swap Space появляется", async ({
     browser,
   }) => {
     const { context, rebuildPage, navigated } = await openRebuildPage(browser);
@@ -95,7 +95,7 @@ test.describe("@regression VPS-панель — Rebuild: выбор ОС (Instal
     }
   });
 
-  test("возврат на сервер без Install — статус сервера виден (rebuild не запущен)", async ({
+  test("TC-VPS-RBD-005 | возврат на сервер без Install — статус сервера виден (rebuild не запущен)", async ({
     browser,
   }) => {
     const { context, page, serverPage, navigated } = await openRebuildPage(browser);

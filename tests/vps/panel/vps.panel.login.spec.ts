@@ -32,7 +32,7 @@ test.beforeAll(async ({ browser }: { browser: Browser }) => {
 // SUITE 1 — Login Page Structure
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS-панель — структура страницы логина", () => {
-  test("@regression страница /login: форма, поля, заголовок, кнопка disabled на пустой форме", async ({
+  test("@regression TC-VPS-LOGIN-001 | страница /login: форма, поля, заголовок, кнопка disabled на пустой форме", async ({
     browser,
   }) => {
     const page = await browser.newPage();
@@ -66,7 +66,7 @@ test.describe("VPS-панель — структура страницы логи
 // SUITE 2 — Successful Login
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("@smoke @critical VPS-панель — успешный логин", () => {
-  test("логин с валидными кредами → редирект на /dashboard", async ({ browser }) => {
+  test("TC-VPS-LOGIN-002 | логин с валидными кредами → редирект на /dashboard", async ({ browser }) => {
     const page = await browser.newPage();
     const loginPage = new VpsPanelLoginPage(page);
 
@@ -79,7 +79,7 @@ test.describe("@smoke @critical VPS-панель — успешный логин
     }
   });
 
-  test("под сессией: /dashboard доступен без редиректа на /login", async ({ browser }) => {
+  test("TC-VPS-LOGIN-003 | под сессией: /dashboard доступен без редиректа на /login", async ({ browser }) => {
     const context = await browser.newContext({ storageState: STORAGE_STATE_PATH });
     const page = await context.newPage();
 
@@ -92,7 +92,7 @@ test.describe("@smoke @critical VPS-панель — успешный логин
     }
   });
 
-  test("под сессией: /login редиректит на /dashboard", async ({ browser }) => {
+  test("TC-VPS-LOGIN-004 | под сессией: /login редиректит на /dashboard", async ({ browser }) => {
     const context = await browser.newContext({ storageState: STORAGE_STATE_PATH });
     const page = await context.newPage();
 
@@ -111,7 +111,7 @@ test.describe("@smoke @critical VPS-панель — успешный логин
 // SUITE 3 — Invalid Credentials
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("@critical VPS-панель — неверные креды", () => {
-  test("неверный пароль → остаёмся на форме логина", async ({ browser }) => {
+  test("TC-VPS-LOGIN-005 | неверный пароль → остаёмся на форме логина", async ({ browser }) => {
     const page = await browser.newPage();
     const loginPage = new VpsPanelLoginPage(page);
 
@@ -125,7 +125,7 @@ test.describe("@critical VPS-панель — неверные креды", () =
     }
   });
 
-  test("неверный email → остаёмся на форме логина", async ({ browser }) => {
+  test("TC-VPS-LOGIN-006 | неверный email → остаёмся на форме логина", async ({ browser }) => {
     const page = await browser.newPage();
     const loginPage = new VpsPanelLoginPage(page);
 

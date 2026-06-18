@@ -53,7 +53,7 @@ test.afterAll(async () => {
 // Вкладка Storage — информационная: карточка диска с реальными данными.
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("@regression VPS-панель — вкладка Storage", () => {
-  test("карточка диска показывает Drive: <letter>, размер в GB и бейдж Primary", async () => {
+  test("TC-VPS-STG-001 | карточка диска показывает Drive: <letter>, размер в GB и бейдж Primary", async () => {
     await test.step("вкладка Storage присутствует, клик открывает карточку", async () => {
       await expect(serverPage.tab("Storage")).toBeVisible({ timeout: 15_000 });
       await serverPage.clickTab("Storage");

@@ -68,7 +68,7 @@ test.afterAll(async () => {
 
 test.describe("VPS-медиа — Boot Order", () => {
 
-  test("@smoke 1.1 вкладка Media открыта, Boot Order секция видна, устройство определено", async () => {
+  test("@smoke TC-VPS-MED-001 | вкладка Media открыта, Boot Order секция видна, устройство определено", async () => {
     await test.step("Проверяем URL сервера", () => {
       expect(serverPage.page.url()).toContain(TEST_SERVER_UUID);
     });
@@ -99,7 +99,7 @@ test.describe("VPS-медиа — Boot Order", () => {
     });
   });
 
-  test("@critical 1.2 переключение на противоположное устройство → Apply → Complete в таблице", async () => {
+  test("@critical TC-VPS-MED-002 | переключение на противоположное устройство → Apply → Complete в таблице", async () => {
     // Читаем текущее состояние непосредственно перед действием — не полагаемся только на beforeAll
     const currentDevice = await mediaPage.getSelectedBootDevice();
     const targetDevice = currentDevice === "HDD" ? "CD/DVD" : "HDD";
@@ -129,7 +129,7 @@ test.describe("VPS-медиа — Boot Order", () => {
     });
   });
 
-  test("@critical 1.3 возврат на исходное устройство → Apply → Complete в таблице", async () => {
+  test("@critical TC-VPS-MED-003 | возврат на исходное устройство → Apply → Complete в таблице", async () => {
     // Читаем текущее состояние — после теста 1.2 оно должно быть противоположным initialDevice.
     const currentDevice = await mediaPage.getSelectedBootDevice();
     // Если уже на исходном (тест 1.2 не изменил состояние или пропущен) — восстанавливать нечего.
