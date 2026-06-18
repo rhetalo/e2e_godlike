@@ -56,7 +56,10 @@ test.describe("Воронка покупки modded (стоп на страни�
   test.setTimeout(180_000);
 
   test("@critical Install → корзина → step 2 → страница оплаты", async ({ browser }) => {
-    const context = await browser.newContext({ storageState: storageStatePath });
+    const context = await browser.newContext({
+      storageState: storageStatePath,
+      deviceScaleFactor: process.env.CI ? 1 : 0.8, // локально 80% — headed-окно мельче и влезает
+    });
     await pinAmplitudeExperiments(context);
     const page = await context.newPage();
     const modded = new ModdedHostingPage(page);
@@ -125,7 +128,10 @@ test.describe("Воронка покупки modded (стоп на страни�
   test("@critical Host Now (калькулятор) → /cart-modded-new несёт выбранный тариф", async ({
     browser,
   }) => {
-    const context = await browser.newContext({ storageState: storageStatePath });
+    const context = await browser.newContext({
+      storageState: storageStatePath,
+      deviceScaleFactor: process.env.CI ? 1 : 0.8, // локально 80% — headed-окно мельче и влезает
+    });
     await pinAmplitudeExperiments(context);
     const page = await context.newPage();
     const modded = new ModdedHostingPage(page);

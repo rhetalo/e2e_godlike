@@ -44,7 +44,10 @@ test.describe("Воронка /cart-modded-new — конфигурация че
       password: Credentials.password,
       statePath: storageStatePath,
     });
-    context = await browser.newContext({ storageState: storageStatePath });
+    context = await browser.newContext({
+      storageState: storageStatePath,
+      deviceScaleFactor: process.env.CI ? 1 : 0.8, // локально 80% — headed-окно мельче и влезает
+    });
     await pinAmplitudeExperiments(context);
     const page = await context.newPage();
     const modded = new ModdedHostingPage(page);

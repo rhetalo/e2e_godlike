@@ -92,7 +92,10 @@ test.describe("Воронка покупки сида (стоп на стран�
   test("@critical Host Now (калькулятор одиночного сида) → /cart-seed → step 2 → страница оплаты", async ({
     browser,
   }) => {
-    const context = await browser.newContext({ storageState: storageStatePath });
+    const context = await browser.newContext({
+      storageState: storageStatePath,
+      deviceScaleFactor: process.env.CI ? 1 : 0.8, // локально 80% — headed-окно мельче и влезает
+    });
     // Фиксируем A/B Amplitude ДО первой страницы (иначе flash-sale перехватит сабмит Host Now).
     await pinAmplitudeExperiments(context);
     const page = await context.newPage();
