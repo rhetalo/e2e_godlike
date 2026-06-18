@@ -65,7 +65,7 @@ test.describe("VPS-панель — структура страницы логи
 // ══════════════════════════════════════════════════════════════════════════════
 // SUITE 2 — Successful Login
 // ══════════════════════════════════════════════════════════════════════════════
-test.describe("@critical VPS-панель — успешный логин", () => {
+test.describe("@smoke @critical VPS-панель — успешный логин", () => {
   test("логин с валидными кредами → редирект на /dashboard", async ({ browser }) => {
     const page = await browser.newPage();
     const loginPage = new VpsPanelLoginPage(page);

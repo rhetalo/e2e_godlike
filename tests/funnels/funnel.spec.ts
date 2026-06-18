@@ -13,7 +13,7 @@ import { BASE_URL, Urls, PaymentUrlPatterns } from "../../fixtures/test-data";
 
 test.use({ viewport: { width: 1800, height: 900 }, deviceScaleFactor: 1 });
 
-test("@critical базовая воронка покупки", async ({ page }) => {
+test("@smoke @critical базовая воронка покупки", async ({ page }) => {
   const home = new StorefrontHomePage(page);
   const cart = new CartPage(page);
   const checkout = new CheckoutPage(page);

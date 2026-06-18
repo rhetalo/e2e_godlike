@@ -3,23 +3,20 @@ import { defineConfig, devices, type ReporterDescription } from '@playwright/tes
 export default defineConfig({
   testDir: './tests',
 
-  // Глобальный таймаут на один тест
   timeout: 120_000,
 
   expect: {
     timeout: 30_000,
   },
 
-  // workers:1 keeps panel tests serial so the shared auth session is not
-  // invalidated by concurrent logins. Remove or increase for pure UI tests.
   fullyParallel: false,
 
-  // Запрещает test.only в CI
   forbidOnly: !!process.env.CI,
 
-  // 2 retry в CI, 0 локально
   retries: process.env.CI ? 2 : 0,
 
+  // workers:1 keeps panel tests serial so the shared auth session is not
+  // invalidated by concurrent logins. Remove or increase for pure UI tests.
   workers: 1,
 
   // Тихий вывод: в CI — dot (точка на пройденный тест, подробно только падения),
@@ -47,60 +44,57 @@ export default defineConfig({
     ] as ReporterDescription,
   ],
 
-  // use: {
-  //   baseURL: 'https://godlike.host',
+  // Настройки браузера, общие для всех проектов.
+  use: {
+    ...devices['Desktop Chrome'],
 
-  //   actionTimeout: 15_000,
-  //   navigationTimeout: 60_000,
+    headless: true,
 
-  //   // Трассировка при первом retry — для отладки упавших тестов
-  //   trace: 'on-first-retry',
+    baseURL: 'https://godlike.host',
 
-  //   viewport: { width: 1800, height: 900 },
-  //   deviceScaleFactor: 1,
-  // },
+    actionTimeout: 15_000,
+    navigationTimeout: 60_000,
 
-  projects: [
-    {
-    name: 'chromium',
+    trace: 'on-first-retry',
 
-    use: {
-      ...devices['Desktop Chrome'],
+    viewport: { width: 1800, height: 900 },
+    deviceScaleFactor: 1,
 
-      // Тесты бегут в фоне (без окон браузера). Переопределить разово:
-      // npm run test:headed  /  npx playwright test --headed
-      // В расширении Playwright для VS Code режим headed включает галочка
-      // "Show browser" в панели Testing — этот флаг её НЕ перебивает, сними её там.
-      headless: true,
-
-      baseURL: 'https://godlike.host',
-
-      actionTimeout: 15_000,
-      navigationTimeout: 60_000,
-
-      trace: 'on-first-retry',
-
-      viewport: { width: 1800, height: 900 },
-      deviceScaleFactor: 1,
-      // Локально (не CI): окно на основной монитор (0,0) + отключаем OS-масштаб 150% — тогда
-      // окно вьюпорта 1800px влезает целиком в физический экран ноута (контент мельче = видно
-      // больше). Вьюпорт остаётся 1800×900 как в CI, поведение тестов не меняется.
-      launchOptions: {
-        args: process.env.CI ? [] : ['--window-position=0,0', '--force-device-scale-factor=1'],
-      },
+    // Локально (не CI): окно на основной монитор (0,0) + отключаем OS-масштаб 150% — тогда
+    // окно вьюпорта 1800px влезает целиком в физический экран ноута (контент мельче = видно
+    // больше). Вьюпорт остаётся 1800×900 как в CI, поведение тестов не меняется.
+    launchOptions: {
+      args: process.env.CI ? [] : ['--window-position=0,0', '--force-device-scale-factor=1'],
     },
   },
-    // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] },
-    // },
-    // {
-    //   name: 'webkit',
-    //   use: { ...devices['Desktop Safari'] },
-    // },
-    // {
-    //   name: 'Mobile Chrome',
-    //   use: { ...devices['Pixel 5'] },
-    // },
+
+  // Четыре проекта соответствуют четырём surface area.
+  // Запуск одного: npx playwright test --project=game-panel
+  // Поведение не изменилось — те же workers:1 / fullyParallel:false что и раньше.
+  projects: [
+    {
+      // Storefront: game-funnels, modded, general smoke.
+      // Запуск: npx playwright test --project=storefront
+      name: 'storefront',
+      testMatch: ['**/funnels/**', '**/general/**', '**/modded/**'],
+    },
+    {
+      // VPS покупка: billing, configure, happy-path.
+      // Запуск: npx playwright test --project=vps-funnel
+      name: 'vps-funnel',
+      testMatch: '**/vps/funnel/**',
+    },
+    {
+      // VPS VirtFusion-панель: login, power, rebuild, storage, …
+      // Запуск: npx playwright test --project=vps-panel
+      name: 'vps-panel',
+      testMatch: '**/vps/panel/**',
+    },
+    {
+      // Game ultra.panel: login, power, security, backups, files, …
+      // Запуск: npx playwright test --project=game-panel
+      name: 'game-panel',
+      testMatch: '**/game/**',
+    },
   ],
 });
