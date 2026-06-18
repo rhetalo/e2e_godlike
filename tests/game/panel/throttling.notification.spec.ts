@@ -8,7 +8,7 @@
  * ⚠️ MANUAL-ONLY (env-gate `RUN_THROTTLING_TEST`): успешный вебхук «сжигает» 3-дневное
  *    анти-спам-окно троттлинга сервера → НЕ для CI / не для регулярных прогонов. Запуск:
  *      RUN_THROTTLING_TEST=1 GAME_PANEL_THROTTLE_SERVER_UUID=<свежий online MC-сервер> \
- *        npx playwright test tests/game/panel/throttling.notification.spec.ts --project=chromium
+ *        npx playwright test tests/game/panel/throttling.notification.spec.ts --project=game-panel
  *
  * ⚠️ ОТКРЫТО (исследует владелец — костяк допилить по итогам): точные условия ТРИГГЕРА
  *    модалки. Известно (live-recon 15-Jun-2026): фича только для Minecraft-серверов,

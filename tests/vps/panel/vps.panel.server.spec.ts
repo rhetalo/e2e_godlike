@@ -14,7 +14,7 @@
  * Read-only: деструктивные операции тут не выполняются (см. power.actions/rebuild).
  *
  * Запуск:
- *   npx playwright test tests/vps/panel/vps.panel.server.spec.ts --project=chromium --headed
+ *   npx playwright test tests/vps/panel/vps.panel.server.spec.ts --project=vps-panel --headed
  */
 import { test, expect, type Browser, type BrowserContext } from "@playwright/test";
 import { VpsPanelServerPage } from "../../../pages/VpsPanelServerPage";

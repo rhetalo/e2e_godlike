@@ -20,7 +20,7 @@
  *   открывают .modal.show; confirm = *ConfirmButton геттеры PO; activity table.normal.
  *
  * Запуск:
- *   npx playwright test tests/vps/panel/vps.panel.power.actions.spec.ts --project=chromium
+ *   npx playwright test tests/vps/panel/vps.panel.power.actions.spec.ts --project=vps-panel
  */
 import { test, expect, type Locator, type Browser, type BrowserContext } from "@playwright/test";
 import { VpsPanelServerPage } from "../../../pages/VpsPanelServerPage";

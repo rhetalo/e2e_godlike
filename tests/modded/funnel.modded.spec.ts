@@ -5,7 +5,7 @@
  *     → WHMCS checkout: видны платёжные шлюзы. ⚠ «Continue/Оплатить» НЕ жмём.
  * (2) Host Now калькулятора → /cart-modded-new (новый UI): выбранный тариф доехал.
  *
- * Запуск: npx playwright test tests/modded/funnel.modded.spec.ts --project=chromium
+ * Запуск: npx playwright test tests/modded/funnel.modded.spec.ts --project=storefront
  */
 import { test, expect, type Browser, type Page } from "@playwright/test";
 import { pinAmplitudeExperiments } from "../../utils/amplitude";

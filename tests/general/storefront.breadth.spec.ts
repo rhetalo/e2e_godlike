@@ -9,7 +9,7 @@
  * Структурные проверки (не точный маркетинговый текст — он меняется). Confirmed recon 15-Jun-2026.
  *
  * Запуск:
- *   npx playwright test tests/general/storefront.breadth.spec.ts --project=chromium
+ *   npx playwright test tests/general/storefront.breadth.spec.ts --project=storefront
  */
 import { test, expect } from "../../fixtures/base";
 import { StorefrontPages } from "../../fixtures/test-data";

@@ -11,7 +11,7 @@
  *   4. Незалогиненный пользователь → редирект на /login
  *
  * Запуск:
- *   npx playwright test tests/vps/panel/vps.panel.login.spec.ts --project=chromium
+ *   npx playwright test tests/vps/panel/vps.panel.login.spec.ts --project=vps-panel
  */
 import { test, expect, type Browser } from "@playwright/test";
 import { VpsPanelLoginPage } from "../../../pages/VpsPanelLoginPage";

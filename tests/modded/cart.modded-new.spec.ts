@@ -18,7 +18,7 @@
  * Confirmed via MCP/scratch recon 13-Jun-2026.
  *
  * Запуск:
- *   npx playwright test tests/modded/cart.modded-new.spec.ts --project=chromium
+ *   npx playwright test tests/modded/cart.modded-new.spec.ts --project=storefront
  */
 import { test, expect, type BrowserContext } from "@playwright/test";
 import { pinAmplitudeExperiments } from "../../utils/amplitude";

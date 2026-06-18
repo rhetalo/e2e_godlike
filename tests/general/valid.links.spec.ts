@@ -5,7 +5,7 @@
  * Собирает все сломанные ссылки и падает один раз в конце с полным списком.
  *
  * Запуск:
- *   npx playwright test tests/general/valid.links.spec.ts --project=chromium
+ *   npx playwright test tests/general/valid.links.spec.ts --project=storefront
  */
 import { test, expect, BrowserContext, Page } from "@playwright/test";
 import { pinAmplitudeExperiments } from "../../utils/amplitude";

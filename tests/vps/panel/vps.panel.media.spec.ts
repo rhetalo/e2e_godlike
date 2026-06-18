@@ -22,8 +22,8 @@
  *   Complete:     span.badge.badge-active
  *
  * Запуск:
- *   npx playwright test tests/vps.panel.media.spec.ts --project=chromium
- *   npx playwright test tests/vps.panel.media.spec.ts --project=chromium --headed
+ *   npx playwright test tests/vps/panel/vps.panel.media.spec.ts --project=vps-panel
+ *   npx playwright test tests/vps/panel/vps.panel.media.spec.ts --project=vps-panel --headed
  */
 import { test, expect, type Browser, type BrowserContext } from "@playwright/test";
 import { VpsPanelServerPage } from "../../../pages/VpsPanelServerPage";

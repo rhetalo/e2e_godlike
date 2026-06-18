@@ -14,7 +14,7 @@
  *   <span class="mt-3">30 GB</span>
  *
  * Запуск:
- *   npx playwright test tests/vps/panel/vps.panel.storage.spec.ts --project=chromium --headed
+ *   npx playwright test tests/vps/panel/vps.panel.storage.spec.ts --project=vps-panel --headed
  */
 import { test, expect, type Browser, type BrowserContext } from "@playwright/test";
 import { VpsPanelServerPage } from "../../../pages/VpsPanelServerPage";

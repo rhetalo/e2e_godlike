@@ -10,7 +10,7 @@
  *   VNC toggle и Reset Password обратимы (toggle откатываем; Reset только до Cancel).
  *
  * Запуск:
- *   npx playwright test tests/vps/panel/vps.panel.options.spec.ts --project=chromium --headed
+ *   npx playwright test tests/vps/panel/vps.panel.options.spec.ts --project=vps-panel --headed
  */
 import { test, expect, type Browser, type BrowserContext } from "@playwright/test";
 import { VpsPanelServerPage } from "../../../pages/VpsPanelServerPage";

@@ -12,7 +12,7 @@
  * выбора ОС — общий openRebuildPage() (см. vps.panel.rebuild.helpers.ts).
  *
  * Запуск (осознанно, отдельно):
- *   npx playwright test tests/vps/panel/vps.panel.rebuild.real.spec.ts --project=chromium
+ *   npx playwright test tests/vps/panel/vps.panel.rebuild.real.spec.ts --project=vps-panel
  */
 import { test, expect, type Browser } from "@playwright/test";
 import { loginAndSaveSession, TEST_SERVER_UUID, PANEL_URL } from "../../../utils/auth";
