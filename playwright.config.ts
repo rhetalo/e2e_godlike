@@ -82,6 +82,12 @@ export default defineConfig({
 
       viewport: { width: 1800, height: 900 },
       deviceScaleFactor: 1,
+      // Локально (не CI): окно на основной монитор (0,0) + отключаем OS-масштаб 150% — тогда
+      // окно вьюпорта 1800px влезает целиком в физический экран ноута (контент мельче = видно
+      // больше). Вьюпорт остаётся 1800×900 как в CI, поведение тестов не меняется.
+      launchOptions: {
+        args: process.env.CI ? [] : ['--window-position=0,0', '--force-device-scale-factor=1'],
+      },
     },
   },
     // {
