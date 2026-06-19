@@ -18,7 +18,9 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, extname } from "node:path";
 
 // Файлы, где waitForTimeout санкционирован (документирован) — не флагать.
-const WAIT_ALLOWED = ["fixtures/base.ts", "valid.links.spec.ts"];
+// CookieBanner.ts — settle(150) после force-close транзиентных баннеров (2 места,
+// помечены eslint-disable); теперь авторитет — ESLint (no-wait-for-timeout на pages/components).
+const WAIT_ALLOWED = ["fixtures/base.ts", "valid.links.spec.ts", "components/CookieBanner.ts"];
 const SCAN_DIRS = ["pages", "components", "tests"];
 
 function readStdin() {

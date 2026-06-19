@@ -82,7 +82,47 @@ export default tseslint.config(
       // в репо есть задокументированные легитимные случаи (скрытые custom-UI инпуты,
       // напр. VpsPanelMediaPage), их error сломал бы зря.
       "playwright/no-force-option": "warn",
+
+      // ── Hard-rule «no raw-locators в теле спека» (CLAUDE.md) — пока warn ──
+      // Спек драйвит UI через Page Object/Component; сырой page.locator()/getBy* прямо
+      // в спеке — антипаттерн (селектор должен жить в utils/selectors.ts → PO).
+      // Warn, а не error: ~25 легаси-нарушений (funnel.*, storefront.breadth,
+      // login.validation). Промоут в error после чистки. valid.links (краулер) и
+      // *.helpers.ts исключены ниже отдельным блоком.
+      "no-restricted-syntax": [
+        "warn",
+        {
+          selector:
+            "CallExpression[callee.object.name='page'][callee.property.name=/^(locator|frameLocator|getBy[A-Za-z]+)$/]",
+          message:
+            "Сырой локатор в теле спека — заведи его в Page Object/Component (селектор из utils/selectors.ts). Hard-rule CLAUDE.md: спек драйвит UI через PO.",
+        },
+      ],
     },
+  },
+
+  // ── Playwright-правила для Page Objects / Components ─────────────
+  // Раньше playwright-правила висели только на tests/**, и hard-rule «no waitForTimeout
+  // в pages/components/tests» держался лишь grep'ом в qa-gate.mjs. Навешиваем линтер и
+  // сюда: правило-текст агент трактует, упавший линт он чинит (статья «Clean Architecture
+  // и AI», 18-Jun). pages — 0 нарушений; components — 2 санкц. settle в CookieBanner
+  // (помечены eslint-disable). prefer-web-first/no-conditional-expect = warn (ловят дрейф).
+  {
+    files: ["pages/**/*.ts", "components/**/*.ts"],
+    plugins: { playwright },
+    rules: {
+      "playwright/no-wait-for-timeout": "error",
+      "playwright/prefer-web-first-assertions": "warn",
+      "playwright/no-conditional-expect": "warn",
+    },
+  },
+
+  // ── Исключения для no-restricted-syntax (raw-locators) ───────────
+  // valid.links — задокументированный краулер (ходит по сырым ссылкам/локаторам);
+  // *.helpers.ts — тест-хелперы, а не тело спека. Сырой локатор тут легитимен.
+  {
+    files: ["tests/general/valid.links.spec.ts", "tests/**/*.helpers.ts"],
+    rules: { "no-restricted-syntax": "off" },
   },
 
   // ── Legacy-fence ────────────────────────────────────────────────

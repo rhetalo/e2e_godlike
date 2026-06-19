@@ -173,6 +173,7 @@ export class CookieBanner {
       const close = this.promoBannerClose();
       if (await close.isVisible({ timeout: 600 }).catch(() => false)) {
         await close.click({ force: true }).catch(() => undefined);
+        // eslint-disable-next-line playwright/no-wait-for-timeout -- settle после force-close транзиентного баннера; санкц. исключение (см. CLAUDE.md)
         await this.page.waitForTimeout(150);
       } else {
         break;
@@ -203,6 +204,7 @@ export class CookieBanner {
       const close = this.flashSaleClose();
       if (await close.isVisible({ timeout: 600 }).catch(() => false)) {
         await close.click({ force: true }).catch(() => undefined);
+        // eslint-disable-next-line playwright/no-wait-for-timeout -- settle после force-close транзиентного баннера; санкц. исключение (см. CLAUDE.md)
         await this.page.waitForTimeout(150);
       } else {
         break;
