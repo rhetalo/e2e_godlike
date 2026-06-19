@@ -528,6 +528,38 @@ SSD/CPU, Server Setup by Support, Dedicated SysAdmin) + CTA **«Get Premium (3-D
 сборки) и **«Go Back»**. Клик по версии → уровень билдов → выбор → install. ⚠️ Клик по версии капризен
 к селектору (карточка — `div`-контейнер, не текст); install = деструктивный rebuild — в тестах не доходить.
 
+### 9f. Connection-info (Server IP) + KNOWN BUG ip_alias (live-recon 19-Jun-2026)
+
+Адрес подключения на Overview (Server Information, строка «Server IP») берётся из
+**`GET /api/v2/servers/{shortUuid}`** (бэкенд `panel.godlike.host`, не SPA-домен). Ключевые поля:
+
+| Поле ответа | Пример (ARK `cc25cea1`) | Значение |
+|---|---|---|
+| `data.allocation.ip` | `185.156.53.133` | **реальный публичный IP** (его показывает старая панель) |
+| `data.allocation.ip_alias` | `srv1001.godlike.club` | FQDN ноды (alias) |
+| `data.allocation.port` | `26077` | игровой порт (`SERVER_PORT`) |
+| `data.query_port` | `26079` | Steam query-порт (top-level; бэк выводит из аллокации с именем `QUERY_PORT`) |
+| `data.is_ark` / `is_minecraft` / `is_bedrock` / … | — | флаги типа игры (по ним ветвится логика порта) |
+
+Доп. endpoint `/api/v2/servers/{fullUuid}/allocations` — именованные аллокации
+(`SERVER_PORT/ALLOCATED_UDP_PORT/QUERY_PORT/RCON_PORT`), у каждой `ip` + `ip_alias`.
+
+🐞 **KNOWN BUG (Steam-игры, Ultra):** в адресе подключения панель рендерит
+**`allocation.ip_alias`** (FQDN ноды) вместо **`allocation.ip`**. Оба поля — в одном
+ответе → фикс фронтовый, общий для всех игр. Порт берётся из `query_port` — для ARK верно;
+но `query_port` хрупкий: заполняется по аллокации, **названной строкой `QUERY_PORT`**, а у
+части яиц имя иное (Unturned = `ALLOCATED_GAME_PORT_2`) или query-порта нет (Starbound) →
+нужен фолбэк `query_port → allocation.port`. ⚠️ Не путать с провижинг-багом «порты не
+прописались» (7DTD) — это другой слой.
+
+- **DOM-якорь адреса:** `.server__information-item.roadmap-ip .server__information-item__caption`
+  (селектор `GAME_PANEL_SERVER.connectionValue`, формат-агностичный — переживёт фикс FQDN→IP).
+  ⚠️ Скоуп по `.roadmap-ip` обязателен: консоль `.terminal.xterm` содержит `127.0.0.1:PORT`.
+  Ридеры: `GamePanelServerPage.getConnectionHost()/getConnectionPort()`.
+- ✅ **Покрыто TC-GP-NET-010** (`network.connection-info.spec.ts`, `@regression @known-bug`,
+  read-only): `test.fail()` — пока баг жив, тест «ожидаемо падает» (suite зелёный); после фикса
+  станет unexpected pass (красный) = сигнал снять `test.fail()`. Сервер из `GAME_STEAM_SERVER_UUID`.
+
 ## 10. Online-проверка post-reinstall (MCP, 06-Jun-2026)
 
 Владелец **переустановил** `test_e2e` (старый крашился из-за несовместимой конфигурации). После реинсталла —

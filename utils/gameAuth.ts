@@ -23,6 +23,13 @@ export const GAME_SERVER_UUID =
 export const GAME_SERVER_NAME =
   process.env.GAME_PANEL_SERVER_NAME ?? "test_e2e";
 
+/**
+ * Steam-сервер (ARK) для проверки connection-info: query_port + ip/ip_alias.
+ * Short-UUID (как в /api/v2/servers/{short}). Под тем же аккаунтом, что GAME_EMAIL.
+ */
+export const GAME_STEAM_SERVER_UUID =
+  process.env.GAME_PANEL_STEAM_SERVER_UUID ?? "cc25cea1";
+
 /** Второй аккаунт для тестов шеринга/ролей (Фаза 4). Приглашён на GAME_SERVER_UUID. */
 export const GAME_INVITEE_EMAIL =
   process.env.GAME_PANEL_INVITEE_EMAIL ?? "dan.ica.althe.i.aa@gmail.com";

@@ -510,7 +510,13 @@ export const GAME_PANEL_SERVER = {
   consoleLog: ".terminal-container, .terminal", // websocket-лог сервера
   // ВАЖНО: online-статус в панели — "Running" (не "Online"); offline — "Offline".
   statusWord: /Running|Online|Offline|Starting|Stopping|Installing|Suspended/i,
-  addressText: /srv\d+\.godlike\.club:\d+/i,
+  // Server Information → строка адреса подключения («Server IP»). Стабильный BEM-якорь
+  // (.roadmap-ip) — формат-агностичный, переживает фикс FQDN→IP. Источник: live DOM 19-Jun-2026.
+  // ⚠️ Скоуп по .roadmap-ip обязателен: консоль (.terminal.xterm) содержит 127.0.0.1:PORT.
+  connectionRow: ".server__information-item.roadmap-ip",
+  connectionValue: ".server__information-item.roadmap-ip .server__information-item__caption",
+  // host:port в любом виде — реальный IP ИЛИ srvN.godlike.club (FQDN ноды). m[1]=host, m[2]=port.
+  addressPattern: /((?:\d{1,3}\.){3}\d{1,3}|srv\d+\.godlike\.club):(\d{4,5})/i,
   // Edit Server диалог (rename + Game/Platform/Type). ⚠️ "Reinstall Server" НЕ жать (деструктив).
   // После "Save Changes" диалог закрывается и заголовок обновляется РЕАКТИВНО (без reload).
   editDialog: ".edit__server-block__dialog",

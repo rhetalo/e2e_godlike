@@ -176,10 +176,21 @@ export class GamePanelServerPage extends GamePanelBasePage {
     return match ? match[0] : "";
   }
 
-  /** Адрес сервёра вида srvN.godlike.club:PORT. */
+  /** Текст адреса подключения «<host>:<port>» из Server Information (формат-агностично). */
   async getAddress(): Promise<string | null> {
-    const el = this.page.getByText(GAME_PANEL_SERVER.addressText).first();
-    return ((await el.textContent().catch(() => null)) ?? "").trim() || null;
+    return ((await this.addressLabel.textContent().catch(() => null)) ?? "").trim() || null;
+  }
+
+  /** Хост из адреса подключения: реальный IP или srvN.godlike.club (FQDN ноды). */
+  async getConnectionHost(): Promise<string | null> {
+    const m = (await this.getAddress() ?? "").match(GAME_PANEL_SERVER.addressPattern);
+    return m ? m[1] : null;
+  }
+
+  /** Порт из адреса подключения. */
+  async getConnectionPort(): Promise<string | null> {
+    const m = (await this.getAddress() ?? "").match(GAME_PANEL_SERVER.addressPattern);
+    return m ? m[2] : null;
   }
 
   /** Элемент с именем сервера на странице (идентичность / проверка доступа). */
@@ -187,9 +198,9 @@ export class GamePanelServerPage extends GamePanelBasePage {
     return this.page.getByText(name).first();
   }
 
-  /** Видимый адрес сервера srvN.godlike.club:PORT (Server Information). */
+  /** Видимая строка адреса подключения (Server IP) в Server Information. */
   get addressLabel(): Locator {
-    return this.page.getByText(GAME_PANEL_SERVER.addressText).first();
+    return this.page.locator(GAME_PANEL_SERVER.connectionValue).first();
   }
 
   /** Элемент с UUID сервера (Server Information). */
