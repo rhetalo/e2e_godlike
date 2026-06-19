@@ -80,17 +80,20 @@ Audit Log, кнопка **«Send Invite»**.
 ## 5a. Power-флоу (подтверждено recon 03-Jun-2026)
 
 Тоггл-кнопка меняет текст: **Start** (offline) → **Starting...** → **Shut Down** (online).
-Restart/Kill — отдельные кнопки, открывают Vuetify-диалог `.v-card.dialog`.
+Restart/Kill — отдельные кнопки. ⚠️ **Раньше** открывали Vuetify-диалог `.v-card.dialog`
+(«Restart/Kill the server?»), но в текущем UI действие срабатывает **СРАЗУ, без модалки**
+(подтверждено вживую 19-Jun-2026). `clickRestart`/`clickKill` подтверждают диалог **best-effort**
+(`confirmDialogIfPresent`) — если модалка вернётся, тест не сломается.
 
 - **Статус Online = «Running»** (не «Online»); Offline = «Offline». Надёжнее ориентироваться
   на тоггл: `Shut Down` виден ⇒ online, `Start` виден ⇒ offline.
 - **EULA (первый старт):** диалог «Accept Minecraft® EULA», кнопка `button.dialog__button-primary`
   («I Accept»). Пишет `eula=true` в `eula.txt` файлового менеджера. `clickStart()` принимает сам.
-- **Restart:** диалог «Restart the server?» → `button.dialog__button-primary` («Yes, Restart»).
+- **Restart:** клик по «Restart» рестартит **сразу** (модалки подтверждения больше нет — 19-Jun-2026; если вернётся: confirm = `button.dialog__button-primary`).
   Цикл: `Shut Down/Running → Stopping... → Start/Offline (кратко) → Starting... → Shut Down/Running`,
   ~65–70с. Кнопка «прыгает» (мелькает даже «Start»). Надёжная проверка — `waitForRestartCycle()`:
   тоггл `Shut Down` исчезает → снова появляется.
-- **Kill:** диалог «Kill the server?» → `button.dialog__button-primary` («Yes, Kill»). Мгновенно → Offline.
+- **Kill:** клик по «Kill» останавливает **сразу** → Offline (модалки подтверждения больше нет — 19-Jun-2026; если вернётся: confirm = `button.dialog__button-primary`).
 - **Shut Down:** тоггл, без модалки.
 - **Тайминги:** первый старт (ставит файлы/конфиги) — до нескольких минут; обычный старт ≈ минута;
   стоп ≈ 30с. В тестах: `waitForOnline` 300с, `waitForOffline` 90с, `test.setTimeout` до 360с.

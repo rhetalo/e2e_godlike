@@ -68,9 +68,16 @@ export class GamePanelServerPage extends GamePanelBasePage {
     return true;
   }
 
-  private async confirmDialog(titleRe: RegExp): Promise<void> {
+  /**
+   * Подтвердить confirm-диалог, ЕСЛИ он появился. Исторически Restart/Kill открывали
+   * модалку «Restart/Kill the server?». В текущем UI действие срабатывает СРАЗУ, без
+   * модалки (подтверждено вживую 19-Jun-2026) — поэтому ждём диалог МЯГКО: появился →
+   * жмём confirm; не появился → действие уже выполнилось, идём дальше (без падения).
+   * Тот же best-effort-подход, что и в clickShutDown.
+   */
+  private async confirmDialogIfPresent(titleRe: RegExp, timeoutMs = 2_000): Promise<void> {
     const dlg = this.dialogByTitle(titleRe);
-    await dlg.waitFor({ state: "visible", timeout: 8_000 });
+    if (!(await dlg.isVisible({ timeout: timeoutMs }).catch(() => false))) return;
     await dlg.locator(GAME_PANEL_DIALOG.confirmBtn).first().click();
     await dlg.waitFor({ state: "hidden", timeout: 8_000 }).catch(() => {});
   }
@@ -83,11 +90,11 @@ export class GamePanelServerPage extends GamePanelBasePage {
   }
   async clickRestart(): Promise<void> {
     await this.restartButton.click();
-    await this.confirmDialog(GAME_PANEL_DIALOG.restartTitle);
+    await this.confirmDialogIfPresent(GAME_PANEL_DIALOG.restartTitle);
   }
   async clickKill(): Promise<void> {
     await this.killButton.click();
-    await this.confirmDialog(GAME_PANEL_DIALOG.killTitle);
+    await this.confirmDialogIfPresent(GAME_PANEL_DIALOG.killTitle);
   }
   /** Shut Down — тоггл Start'а, без модалки (на всякий случай подтверждаем, если появилась). */
   async clickShutDown(): Promise<void> {
