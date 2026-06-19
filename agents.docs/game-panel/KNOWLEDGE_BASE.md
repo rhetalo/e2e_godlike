@@ -394,13 +394,17 @@ Moderator/Member + счётчики), **Members**, **Audit Log**.
   self-cleaning кейс — **rename**: сменить Server Name → Save → проверить (заголовок/дашборд) →
   **вернуть `test_e2e`**.
 
-### 7g. Referral `/referral` (глобальный сайдбар, НЕ покрыто)
+### 7g. Referral `/referral` (глобальный сайдбар — покрыто REF-001, structural)
 - Глобальная страница (`default_layout__wrapper`). Секции: **Referral Program** (`referral-page__*`),
-  **Share with Friends** (`share-card__*` + read-only реф-ссылка `link-card__input` вида
+  **Share with Friends** (`share-card__*` + read-only реф-ссылка вида
   `affiliate.godlike.host/ref/<code>`, кнопка **Copy Link**), баланс/выплата
   (`balance-card__*` + кнопка **Request Withdrawal**), соц-кнопки (`social-share__*`),
   «How It Works?» (3 шага), «Referrals Analytics».
 - ⚠️ **Request Withdrawal** = вывод средств — не жать. Покрываемо структурным смоуком (low prio).
+- ⚠️ **Реф-ссылка — селектор (подтв. live DOM 19-Jun-2026):** карточка на Vuetify; `.link-card__input`
+  это ОБЁРТКА-`div` (`v-input`), а сам `<input>` (`.v-field__input`, readonly) = **`.link-card__input input`**.
+  Старый `.link-card__input-wrapper input, .link-card__input` устарел — `.first()` матчил пустую ноду.
+  REF-001 проверяет, что `.value` несёт реальный `https://affiliate.godlike.host/ref/<UUID>` (PO `refLinkValue()`).
 - Прочий сайдбар — **внешние** ссылки на `godlike.host` (Billing → `/clientarea`, Support Tickets,
   Knowledge Base, Main Site) → вне scope панели.
 
