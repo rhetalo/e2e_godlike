@@ -280,14 +280,14 @@ PASSWORD  = "test@testmail.com"
 ```bash
 npm install  # один раз
 
-npx playwright test tests/vps/panel/     --project=chromium --headed
-npx playwright test tests/vps/funnel/    --project=chromium
-npx playwright test tests/funnels/       --project=chromium
-npx playwright test tests/modded/        --project=chromium
-npx playwright test tests/general/       --project=chromium
+# По проекту (surface area). storefront = funnels + modded + general.
+npx playwright test --project=vps-panel   --headed
+npx playwright test --project=vps-funnel
+npx playwright test --project=storefront
+npx playwright test --project=game-panel
 
-npx playwright test --grep "@smoke"      --project=chromium
-npx playwright test --grep "@critical"   --project=chromium
+npx playwright test --grep "@smoke"
+npx playwright test --grep "@critical"
 
 npx playwright show-report
 ```

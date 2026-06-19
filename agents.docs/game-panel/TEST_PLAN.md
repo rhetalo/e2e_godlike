@@ -12,7 +12,7 @@
 | 2. Power lifecycle | Start (+EULA) → Online; Restart (полный цикл); Kill → Offline | мутации (serial + teardown) | **P1 — ядро** | ✅ done (3 теста) |
 | 2b. Console (live) | стрим лога + поле команд; безопасная команда `list` → отклик | read-only команда (serial, поднимает Online) | P1 | ✅ done (2 теста) |
 | 3. Stateful (мягкие) | **Files ✅ (2)**, **Config ✅ (2)**, **Players: whitelist через консоль ✅ (2)**; Databases — заблокировано (баг ноды) | мутации, self-cleaning | P2 | ✅ done (soft) |
-| 3b. Stateful (тяжёлые) | **Backups create→COMPLETED→delete ✅ (2)**; смена версии (Versions); установка плагинов/модпаков | мутации, self-cleaning | P2 | 🔄 in progress |
+| 3b. Stateful (тяжёлые) | **Backups create→COMPLETED→delete ✅ (2)**; смена версии (rebuild) и установка плагинов/модпаков — **деструктив, отложено** | мутации, self-cleaning | P2 | ✅ Backups; деструктив-остаток ждёт risk-decision владельца |
 | 4. Access / multi-actor | **Sharing ✅ (5)**, **Port & Domains ✅ (2)**, **Tasks ✅ (2)**, **enforcement ролей ✅ (3: Member+Moderator)** | мутации, 2-й аккаунт | P3 | ✅ done |
 | 5. Негатив / security | **IDOR ✅ + XSS (бэкап, папка, config motd, console) + SQLi (motd) ✅ (5)** | смешанно | P3 | ✅ done |
 

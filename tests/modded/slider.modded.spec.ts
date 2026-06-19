@@ -21,10 +21,13 @@ test.describe("Modded-хостинг: слайдер тарифа", () => {
 
   test("@regression слайдер отдаёт ARIA-диапазон и стартует внутри [min, max]", async () => {
     const state = await modded.calculator.readSlider();
-    expect(state.min).toBe(0);
-    expect(state.max).toBe(100);
-    expect(state.value).toBeGreaterThanOrEqual(0);
-    expect(state.value).toBeLessThanOrEqual(state.max);
+
+    await test.step("ARIA-диапазон [0,100], значение внутри диапазона", async () => {
+      expect(state.min).toBe(0);
+      expect(state.max).toBe(100);
+      expect(state.value).toBeGreaterThanOrEqual(0);
+      expect(state.value).toBeLessThanOrEqual(state.max);
+    });
   });
 
   test("@regression ArrowRight двигает слайдер на один равномерный шаг", async () => {
@@ -39,10 +42,12 @@ test.describe("Modded-хостинг: слайдер тарифа", () => {
     const v2 = (await modded.calculator.readSlider()).value;
     const step = v1 - v0;
 
-    expect(step).toBeGreaterThan(0); // ArrowRight увеличивает
-    expect(v2 - v1).toBeCloseTo(step, 1); // шаги равномерны (1 ArrowRight = 1 тик)
-    const ticks = 100 / step;
-    expect(ticks).toBeCloseTo(Math.round(ticks), 1); // шаг делит диапазон нацело
+    await test.step("шаги равномерны и делят диапазон 0..100 нацело", async () => {
+      expect(step).toBeGreaterThan(0); // ArrowRight увеличивает
+      expect(v2 - v1).toBeCloseTo(step, 1); // шаги равномерны (1 ArrowRight = 1 тик)
+      const ticks = 100 / step;
+      expect(ticks).toBeCloseTo(Math.round(ticks), 1); // шаг делит диапазон нацело
+    });
   });
 
   test("@regression скрытый input игроков повторяет значение слайдера", async () => {
@@ -52,38 +57,49 @@ test.describe("Modded-хостинг: слайдер тарифа", () => {
     await modded.calculator.stepRight(4);
     const stepped = Number((await modded.playersHiddenInput().inputValue()) || "0");
 
-    expect(stepped).toBeGreaterThan(minHidden);
-    expect(stepped).toBeGreaterThanOrEqual(1);
+    await test.step("скрытый input игроков вырос вместе со слайдером", async () => {
+      expect(stepped).toBeGreaterThan(minHidden);
+      expect(stepped).toBeGreaterThanOrEqual(1);
+    });
   });
 
   test("@critical сдвиг слайдера меняет productId в ссылке корзины", async () => {
     await modded.calculator.toMin();
     const lo = await modded.readCalculatorCartParams();
-    expect(lo.productId).toMatch(/^\d+$/);
-    expect(lo.billingCycle).toBe("monthly");
+
+    await test.step("в min: productId числовой, биллинг monthly", async () => {
+      expect(lo.productId).toMatch(/^\d+$/);
+      expect(lo.billingCycle).toBe("monthly");
+    });
 
     await modded.calculator.stepRight(5);
 
-    // Ждём, пока SPA протолкнёт новый productId в href.
-    await expect
-      .poll(async () => (await modded.readCalculatorCartParams()).productId, {
-        timeout: 10_000,
-        intervals: [200, 400, 800],
-      })
-      .not.toBe(lo.productId);
+    await test.step("сдвиг слайдера меняет productId (модпак тот же)", async () => {
+      // Ждём, пока SPA протолкнёт новый productId в href.
+      await expect
+        .poll(async () => (await modded.readCalculatorCartParams()).productId, {
+          timeout: 10_000,
+          intervals: [200, 400, 800],
+        })
+        .not.toBe(lo.productId);
 
-    const hi = await modded.readCalculatorCartParams();
-    expect(hi.productId).toMatch(/^\d+$/);
-    expect(hi.productId).not.toBe(lo.productId);
-    // Sanity: модпак не меняется, когда двигаем только слайдер.
-    expect(hi.modpackId).toBe(lo.modpackId);
+      const hi = await modded.readCalculatorCartParams();
+      expect(hi.productId).toMatch(/^\d+$/);
+      expect(hi.productId).not.toBe(lo.productId);
+      // Sanity: модпак не меняется, когда двигаем только слайдер.
+      expect(hi.modpackId).toBe(lo.modpackId);
+    });
   });
 
   test("@regression End/Home переводят слайдер в крайние значения", async () => {
-    await modded.calculator.toMax();
-    expect((await modded.calculator.readSlider()).value).toBe(100);
+    await test.step("End → 100", async () => {
+      await modded.calculator.toMax();
+      expect((await modded.calculator.readSlider()).value).toBe(100);
+    });
 
-    await modded.calculator.toMin();
-    expect((await modded.calculator.readSlider()).value).toBe(0);
+    await test.step("Home → 0", async () => {
+      await modded.calculator.toMin();
+      expect((await modded.calculator.readSlider()).value).toBe(0);
+    });
   });
 });

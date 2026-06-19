@@ -157,7 +157,7 @@ T2.6 ждёт только 3 секунды после подтверждени�
 | `funnel.paypal.redirect.spec.ts` | То же | То же |
 | `vps.funnel.spec.ts` | `const EMAIL/PASSWORD = "test@testmail.com"` | Импорт `Credentials` из `fixtures/test-data` |
 
-Единственный источник правды для storefront-учётки теперь — `fixtures/test-data.ts` → `Credentials` (с `process.env.GODLIKE_USER` override).
+Единственный источник правды для storefront-учётки теперь — `fixtures/test-data.ts` → `Credentials` (с `process.env.CLIENTAREA_EMAIL` / `CLIENTAREA_PASSWORD` override).
 
 ### waitForTimeout — убраны нетривиальные ожидания
 

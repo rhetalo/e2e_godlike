@@ -62,15 +62,19 @@ test.describe("Воронка /cart-modded-new — конфигурация че
   });
 
   test("@regression три дропдауна (план/биллинг/локация) и Order Now видны", async () => {
-    await expect(cart.planSelect()).toBeVisible();
-    await expect(cart.billingSelect()).toBeVisible();
-    await expect(cart.locationSelect()).toBeVisible();
-    await expect(cart.orderButton()).toBeVisible();
-    await expect(cart.orderButton()).toHaveText(/order now/i);
+    await test.step("дропдауны и кнопка Order Now видимы", async () => {
+      await expect(cart.planSelect()).toBeVisible();
+      await expect(cart.billingSelect()).toBeVisible();
+      await expect(cart.locationSelect()).toBeVisible();
+      await expect(cart.orderButton()).toBeVisible();
+      await expect(cart.orderButton()).toHaveText(/order now/i);
+    });
 
-    const planOpts = await cart.optionTexts(cart.planSelect());
-    expect(planOpts.length).toBeGreaterThanOrEqual(5);
-    expect(await cart.priceText()).toMatch(/[€$]\s?\d/);
+    await test.step("≥5 планов в списке и цена отрендерена", async () => {
+      const planOpts = await cart.optionTexts(cart.planSelect());
+      expect(planOpts.length).toBeGreaterThanOrEqual(5);
+      expect(await cart.priceText()).toMatch(/[€$]\s?\d/);
+    });
   });
 
   test("@critical смена тарифа (плана) меняет выбор и пересчитывает цену", async () => {
@@ -78,10 +82,12 @@ test.describe("Воронка /cart-modded-new — конфигурация че
     const priceBefore = await cart.priceText();
 
     await cart.selectOption(cart.planSelect(), /Godlike/); // заметно более крупный тариф
-    await expect.poll(() => cart.toggleText(cart.planSelect()), { timeout: 10_000 }).not.toBe(planBefore);
-    await expect.poll(() => cart.priceText(), { timeout: 10_000 }).not.toBe(priceBefore);
 
-    expect(await cart.toggleText(cart.planSelect())).toMatch(/Godlike/i);
+    await test.step("выбран Godlike, цена пересчиталась", async () => {
+      await expect.poll(() => cart.toggleText(cart.planSelect()), { timeout: 10_000 }).not.toBe(planBefore);
+      await expect.poll(() => cart.priceText(), { timeout: 10_000 }).not.toBe(priceBefore);
+      expect(await cart.toggleText(cart.planSelect())).toMatch(/Godlike/i);
+    });
   });
 
   test("@regression смена биллинга меняет выбор и пересчитывает цену", async () => {
@@ -89,16 +95,21 @@ test.describe("Воронка /cart-modded-new — конфигурация че
     const priceBefore = await cart.priceText();
 
     await cart.selectOption(cart.billingSelect(), /12 Months/);
-    await expect.poll(() => cart.toggleText(cart.billingSelect()), { timeout: 10_000 }).not.toBe(billingBefore);
-    await expect.poll(() => cart.priceText(), { timeout: 10_000 }).not.toBe(priceBefore);
 
-    expect(await cart.toggleText(cart.billingSelect())).toMatch(/12 Months/i);
+    await test.step("выбран 12 Months, цена пересчиталась", async () => {
+      await expect.poll(() => cart.toggleText(cart.billingSelect()), { timeout: 10_000 }).not.toBe(billingBefore);
+      await expect.poll(() => cart.priceText(), { timeout: 10_000 }).not.toBe(priceBefore);
+      expect(await cart.toggleText(cart.billingSelect())).toMatch(/12 Months/i);
+    });
   });
 
   test("@regression смена локации меняет выбор", async () => {
     const locBefore = await cart.toggleText(cart.locationSelect());
     const chosen = await cart.selectDifferentOption(cart.locationSelect());
-    expect(chosen).not.toBe(locBefore);
-    await expect.poll(() => cart.toggleText(cart.locationSelect()), { timeout: 10_000 }).not.toBe(locBefore);
+
+    await test.step("выбрана другая локация", async () => {
+      expect(chosen).not.toBe(locBefore);
+      await expect.poll(() => cart.toggleText(cart.locationSelect()), { timeout: 10_000 }).not.toBe(locBefore);
+    });
   });
 });

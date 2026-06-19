@@ -3,6 +3,13 @@ import { defineConfig, devices, type ReporterDescription } from '@playwright/tes
 export default defineConfig({
   testDir: './tests',
 
+  // Хелперы воронок/ребилда лежат рядом со спеками (tests/**/*.helpers.ts), но это
+  // НЕ тест-файлы. testMatch проектов ниже — директорные глобы (**/vps/funnel/** и т.п.),
+  // поэтому без этого исключения Playwright собирал бы хелперы как тест-файлы и падал с
+  // "test file should not import test file" при импорте их из спеков. testIgnore задан на
+  // верхнем уровне → наследуется всеми проектами (они переопределяют только testMatch).
+  testIgnore: '**/*.helpers.ts',
+
   timeout: 120_000,
 
   expect: {

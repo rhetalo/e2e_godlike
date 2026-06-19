@@ -149,11 +149,13 @@ test.describe("Проверка внутренних ссылок", () => {
     console.log(`\nCrawl done. Pages: ${visited.size}, Broken: ${brokenLinks.length}`);
     await context.close();
 
-    expect(
-      brokenLinks,
-      brokenLinks.length
-        ? `Broken links:\n${brokenLinks.map((b) => `  ${b.url} → ${b.reason}`).join("\n")}`
-        : "All links valid",
-    ).toEqual([]);
+    await test.step("битых внутренних ссылок нет", async () => {
+      expect(
+        brokenLinks,
+        brokenLinks.length
+          ? `Broken links:\n${brokenLinks.map((b) => `  ${b.url} → ${b.reason}`).join("\n")}`
+          : "All links valid",
+      ).toEqual([]);
+    });
   });
 });

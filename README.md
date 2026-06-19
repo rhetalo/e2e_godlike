@@ -2,7 +2,7 @@
 
 Автоматические E2E-тесты для [godlike.host](https://godlike.host) (Minecraft/VPS хостинг) и VirtFusion VPS панели [vf-panel.godlike.host](https://vf-panel.godlike.host).
 
-Документация для агентов: **[AGENT_HANDOFF3.md](./AGENT_HANDOFF3.md)**
+Документация для агентов: **[agents.docs/AGENT_HANDOFF.md](./agents.docs/AGENT_HANDOFF.md)** (+ `CLAUDE.md` в корне)
 
 ---
 
@@ -11,21 +11,28 @@
 ```bash
 npm install
 
-# Все тесты
-npx playwright test --project=chromium
+# Все тесты (4 проекта: storefront / vps-funnel / vps-panel / game-panel)
+npx playwright test
 
-# По группам
-npx playwright test tests/vps/panel/    --project=chromium
-npx playwright test tests/funnels/      --project=chromium
-npx playwright test tests/modded/       --project=chromium
-npx playwright test tests/general/      --project=chromium
+# По проекту (surface area)
+npx playwright test --project=storefront     # funnels + modded + general
+npx playwright test --project=vps-funnel
+npx playwright test --project=vps-panel
+npx playwright test --project=game-panel
+
+# По папке (npm-скрипты — см. package.json)
+npm run test:panel      # tests/vps/panel/
+npm run test:funnel     # tests/vps/funnel/ + tests/funnels/
+npm run test:modded
+npm run test:general
+npm run test:game
 
 # Конкретный файл с визуальным режимом
-npx playwright test tests/vps/panel/vps.panel.media.spec.ts --project=chromium --headed
+npx playwright test tests/vps/panel/vps.panel.media.spec.ts --headed
 
 # По тегам
-npx playwright test --grep "@smoke"    --project=chromium
-npx playwright test --grep "@critical" --project=chromium
+npm run test:smoke      # = npx playwright test --grep @smoke
+npm run test:critical
 
 # Отчёт
 npx playwright show-report
@@ -38,10 +45,11 @@ npx playwright show-report
 ```
 tests/
 ├── vps/
-│   ├── panel/     ← VirtFusion VPS панель (vps.panel.*.spec.ts, vps.build.spec.ts)
-│   └── funnel/    ← VPS purchase funnel (vps.funnel.spec.ts)
+│   ├── panel/     ← VirtFusion VPS панель (vps.panel.*.spec.ts)
+│   └── funnel/    ← VPS purchase funnel (billing / configure / happy-path)
 ├── funnels/       ← Воронки покупки Minecraft/seed/mobile/PayPal
 ├── modded/        ← Modded серверы, seed, игровые промо, слайдеры
+├── game/panel/    ← Game ultra.panel (login / power / files / security / …)
 └── general/       ← Smoke, валидация, регистрация, ссылки
 ```
 
@@ -74,4 +82,4 @@ tests/
 - VirtFusion: статус сервера возвращается в `UPPERCASE` — всегда использовать `getStatusText()`
 - VirtFusion: radio-кнопки Boot Order — только `dispatchEvent('click')`, не `.check()`
 
-Полный список gotchas: `TEST_GUIDELINES.md` §7, `AGENT_HANDOFF3.md` §5.
+Полный список gotchas: `agents.docs/TEST_GUIDELINES.md` §7, `agents.docs/AGENT_HANDOFF.md` §5.
