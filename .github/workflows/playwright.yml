@@ -15,7 +15,12 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
     - name: Run Playwright tests
-      run: npx playwright test
+      # Основной CI — GitLab (.gitlab-ci.yml: по расписанию + push в дефолтную ветку).
+      # Этот workflow вторичный и ручной (workflow_dispatch). Гоняем ТОЛЬКО проект
+      # storefront — он не мутирует живой VPS / игровой сервер. Проекты vps-panel и
+      # game-panel исключены намеренно: они стейтфул и работают по общему прод-аккаунту.
+      # Для auth-воронок задать CLIENTAREA_EMAIL / CLIENTAREA_PASSWORD в GitHub Secrets.
+      run: npx playwright test --project=storefront
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:

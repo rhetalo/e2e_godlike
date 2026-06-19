@@ -68,6 +68,16 @@ export const Credentials = {
 };
 
 /**
+ * Свежий/free аккаунт (без активных подписок) — одноразовые промо ещё НЕ израсходованы.
+ * Единственный источник правды для free-учётки; используется в
+ * tests/modded/games.valid.promo.spec.ts. Override через CLIENTAREA_FREE_* в .env.
+ */
+export const CredentialsFree = {
+  email: process.env.CLIENTAREA_FREE_EMAIL ?? "testfree2@testmail.com",
+  password: process.env.CLIENTAREA_FREE_PASSWORD ?? "testfree2@testmail.com",
+};
+
+/**
  * Quick-pick modpack pills present on /modded-minecraft-server-hosting/.
  * Verified by DOM inspection on 2026-04-26.
  */

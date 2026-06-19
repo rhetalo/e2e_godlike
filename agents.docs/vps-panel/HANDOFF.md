@@ -1,12 +1,12 @@
 # VPS Panel — Handoff (continue here in a fresh session)
 
 > Одна страница «где мы и что дальше». Читать вместе с `KNOWLEDGE_BASE.md` + `TEST_PLAN.md`
-> и корневым `CLAUDE.md`. Обновлено 03-Jun-2026.
+> и корневым `CLAUDE.md`. Обновлено 19-Jun-2026.
 
-## TL;DR (обновлено 03-Jun-2026)
+## TL;DR (обновлено 19-Jun-2026)
 Задача: закрыть ТЗ «Install / Build / Delete VPS» в vf-panel (VirtFusion).
-- **Install** — покрыто воронкой (`vps.funnel.spec.ts`).
-- **Build = реальный rebuild** — ✅ **СДЕЛАНО**: `tests/vps/panel/vps.rebuild.real.spec.ts` (зелёный).
+- **Install** — покрыто воронкой (`tests/vps/funnel/`).
+- **Build = реальный rebuild** — ✅ **СДЕЛАНО**: `tests/vps/panel/vps.panel.rebuild.real.spec.ts` (зелёный).
 - **Delete** — снято со скоупа (панель не умеет удалять сервер; это отмена услуги в биллинге).
 - Legacy удалён (`vps.build.spec.ts`, `VpsPanelServerDetailPage`, `VpsPanelServersListPage`).
 - **ТЗ по сути закрыто.** Осталось — необязательный техдолг (см. TEST_PLAN «Осталось»).
@@ -18,23 +18,18 @@
 - ⚠️ DOM врёт (скрытые элементы) → ассертить `toBeVisible`, модалки через `.modal.show`,
   реальность сверять скринами, не гадать — дёргать владельца.
 
-## Следующий шаг (ровно один)
-**Recon реального rebuild (read-only, со скринами)** на `c13d2e04`:
-1. Rebuild → Continue → выбрать ОС (`div.card.os-select`) → НЕ нажимать Install.
-2. Снять: точный текст/селектор финальной кнопки «Install with {OS}», есть ли confirm-модал,
-   как выглядит статус `Building`, где маркер завершения (activity table / бейдж), тайминги.
-3. По результату — добавить метод rebuild в `VpsPanelRebuildPage` и написать
-   `tests/vps/panel/vps.rebuild.real.spec.ts` (`@critical`, serial + teardown в Running).
+## Состояние: ТЗ закрыто ✅ (обновлено 19-Jun-2026)
+- Реальный rebuild покрыт: `tests/vps/panel/vps.panel.rebuild.real.spec.ts`
+  (`@critical`, serial + teardown в Running) — эталон stateful-паттерна для VPS-панели.
+- Реорг сделан: legacy `vps.build.spec.ts`, `VpsPanelServerDetailPage` и delete-часть
+  `VpsPanelServersListPage` удалены; фантом-ассерты вычищены.
+- Остальное — необязательный техдолг (см. `TEST_PLAN.md` «Осталось»): dashboard
+  (список серверов / фильтрация), дожидание полного цикла Building→Running.
 
 Эталон stateful-теста: `tests/vps/panel/vps.panel.power.actions.spec.ts`
 и (game-панель) паттерн `ensureOnline/waitForOnline` из `pages/game/GamePanelServerPage.ts`.
 
-## После rebuild — реорг (TEST_PLAN §B)
-Мигрировать/удалить `vps.build.spec.ts`, удалить legacy `VpsPanelServerDetailPage` +
-delete-часть `VpsPanelServersListPage`, почистить фантом-ассерты (`toBeAttached`→`toBeVisible`,
-`.catch(()=>false)`→`test.skip`).
-
 ## Что НЕ трогать
 - Не ломать существующие зелёные тесты (power.actions, network, options, storage, login, media).
-- Game-панель (ultra.panel) — на паузе, 15 тестов зелёные (см. `agents.docs/game-panel/`).
+- Game-панель (ultra.panel) — Phase 5 закрыта, ~58 тестов зелёные (см. `agents.docs/game-panel/`).
 - Незакоммиченные правки владельца: `pages/VpsPage.ts`, 2 funnel-спека — не мои, не смешивать.

@@ -66,7 +66,7 @@ Continue на оплате / Rebuild / Kill. Navи и `page.evaluate`-дампы
 ## 5. Прогон и итерации
 
 ```bash
-npx playwright test tests/<domain>/_recon.<thing>.temp.spec.ts --project=chromium --reporter=line 2>&1 | grep -E "RECON_|passed|failed"
+npx playwright test tests/<domain>/_recon.<thing>.temp.spec.ts --reporter=line 2>&1 | grep -E "RECON_|passed|failed"
 ```
 
 Каждый прогон ≈ 1+ мин (логин + навигация). **Минимизируй число проходов** — собирай за

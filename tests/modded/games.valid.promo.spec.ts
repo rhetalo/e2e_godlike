@@ -12,16 +12,15 @@ import gamesData from "../../fixtures/games.json";
 import { pinAmplitudeExperiments } from "../../utils/amplitude";
 import { loginClientareaAndSaveSession } from "../../utils/clientareaAuth";
 import { GameStorefrontPage } from "../../pages/GameStorefrontPage";
+import { CredentialsFree } from "../../fixtures/test-data";
 
 const games = gamesData.games;
-const EMAIL = process.env.CLIENTAREA_FREE_EMAIL ?? "testfree2@testmail.com";
-const PASSWORD = process.env.CLIENTAREA_FREE_PASSWORD ?? "testfree2@testmail.com";
 const storageStatePath = "storageState.free.json";
 
 test.beforeAll(async ({ browser }) => {
   await loginClientareaAndSaveSession(browser, {
-    email: EMAIL,
-    password: PASSWORD,
+    email: CredentialsFree.email,
+    password: CredentialsFree.password,
     statePath: storageStatePath,
   });
 });
