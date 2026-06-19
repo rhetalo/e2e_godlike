@@ -31,4 +31,14 @@ export class GamePanelReferralPage extends GamePanelBasePage {
   get howItWorks(): Locator {
     return this.page.locator(GAME_PANEL_REFERRAL.howItWorks).first();
   }
+
+  /**
+   * Значение readonly реф-ссылки. refLink → <input.v-field__input> (Vuetify) внутри
+   * обёртки .link-card__input; читаем .value. evaluate-форма устойчива и к не-input DOM.
+   */
+  async refLinkValue(): Promise<string> {
+    return this.refLink.evaluate((el) =>
+      (el instanceof HTMLInputElement ? el.value : (el.textContent ?? "")).trim(),
+    );
+  }
 }

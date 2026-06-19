@@ -763,7 +763,7 @@ export const GAME_PANEL_EXTENSIONS = {
 // ⚠️ В тестах НЕ жмём Request Withdrawal (вывод средств) — структурные проверки.
 export const GAME_PANEL_REFERRAL = {
   title: ".referral-page__title",
-  refLink: ".link-card__input-wrapper input, .link-card__input", // readonly реф-ссылка
+  refLink: ".link-card__input input", // readonly реф-ссылка: <input.v-field__input> внутри Vuetify-обёртки .link-card__input (подтв. live DOM 19-Jun-2026)
   copyLinkButton: ".link-card__btn",
   withdrawButton: ".balance-card__btn",              // ⚠️ Request Withdrawal — НЕ жать
   howItWorks: ".how-it-works__title",

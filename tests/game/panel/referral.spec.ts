@@ -30,10 +30,19 @@ test.describe("@regression [game-panel] Referral", () => {
     await context.close();
   });
 
-  test("TC-GP-REF-001 | реф-страница: заголовок, реф-ссылка, Copy Link, How It Works", async () => {
+  test("TC-GP-REF-001 | реф-ссылка несёт реальный реф-код; Copy Link и How It Works на месте", async () => {
     await test.step("заголовок и readonly реф-ссылка видны", async () => {
       await expect(ref.title).toBeVisible();
       await expect(ref.refLink).toBeVisible();
+    });
+
+    await test.step("реф-ссылка содержит реальный URL с кодом после домена (эффект, не просто рендер)", async () => {
+      // refLink → readonly <input> (Vuetify) с реф-URL в .value; refLinkValue() его читает.
+      // Пустая/голая (только домен) ссылка = сломанная реф-программа при «зелёном» тесте.
+      const link = await ref.refLinkValue();
+      expect(link, "referral link is an http(s) URL").toMatch(/^https?:\/\/\S+/);
+      const afterHost = link.replace(/^https?:\/\/[^/?#]+/i, ""); // отрезаем протокол+домен
+      expect(afterHost, "ссылка несёт путь/код после домена, а не голый домен").toMatch(/[A-Za-z0-9]{3,}/);
     });
 
     await test.step("Copy Link и блок How It Works присутствуют", async () => {
