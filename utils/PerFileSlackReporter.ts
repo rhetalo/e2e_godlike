@@ -120,17 +120,9 @@ class PerFileSlackReporter implements Reporter {
       },
     ];
 
-    // 1. Show summary of ALL tests in this file
-    if (results.tests.length > 0) {
-      const testLines = results.tests.map((t: TestEntry) => {
-        const emoji = t.status === 'passed' ? '✅' : t.status === 'skipped' ? '⏭️' : '❌';
-        return `${emoji} *${t.name}* (${(t.duration / 1000).toFixed(1)}s)`;
-      });
-
-      this.chunkTextToBlocks('*Test Execution Summary:*', testLines).forEach((b) => allBlocks.push(b));
-    }
-
-    // 2. Failure Details (ALL failures)
+    // Деталі окремих тестів показуємо ТІЛЬКИ для падінь (щоб звіт був стислим:
+    // зведення по файлу вище + список лише того, що впало). Зелені тести не
+    // перелічуємо поіменно — раніше це давало 620+ рядків шуму в Slack.
     const failures = results.tests.filter((t: TestEntry) => t.status === 'failed' || t.status === 'timedOut');
     if (failures.length > 0) {
       const failureLines = failures.map((f: TestEntry) => {
@@ -141,7 +133,7 @@ class PerFileSlackReporter implements Reporter {
       this.chunkTextToBlocks('*Detailed Failures:*', failureLines, '\n\n').forEach((b) => allBlocks.push(b));
     }
 
-    // 3. Artifacts
+    // Artifacts
     const artifactLinks = [];
     if (jobUrl) {
       artifactLinks.push(`- <${jobUrl}/artifacts/file/playwright-report/index.html|HTML Report>`);
