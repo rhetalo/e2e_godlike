@@ -1,27 +1,61 @@
-# GitLab CI — e2e Playwright (порт с gitlab/upd, адаптирован под наш проект 13-Jun-2026).
-# Прогон по расписанию (Schedule) / при пуше в дефолтную ветку / вручную из UI.
-# Отчёт в Slack — через utils/PerFileSlackReporter.ts (подключён в playwright.config.ts).
+# ─────────────────────────────────────────────────────────────────────────────
+# CI/CD для godlike-tests.
 #
-# ⚠️ SLACK_WEBHOOK_URL задаётся ТОЛЬКО как CI/CD-переменная (Settings → CI/CD → Variables),
-#    НИКОГДА не хардкодим вебхук в коде/конфиге (это секрет).
+# ОСНОВНЕ (задача): при push у main раннер на VPS (tag godlike-vps, shell)
+#   оновлює робочу папку /home/admin/godlike-tests. Тести запускаються окремо —
+#   по cron на VPS (runner.sh). Цей pipeline лише ДОСТАВЛЯЄ код на VPS за ≤2 хв.
+#
+# ОПЦІЙНЕ (порт з gitlab/upd, Рома): запуск тестів у Docker всередині GitLab
+#   з HTML-report у Artifacts. Лишено для ручного запуску з UI та за розкладом,
+#   але НЕ на push (щоб не дублювати прогін, який і так іде на VPS по cron).
+#
+# ⚠️ SLACK_WEBHOOK_URL — лише CI/CD Variable (Settings → CI/CD → Variables, masked),
+#    ніколи не хардкодимо вебхук у коді (це секрет).
+# ─────────────────────────────────────────────────────────────────────────────
 stages:
+  - deploy
   - test
 
-variables:
-  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '0'
-  SLACK_WEBHOOK_URL: $SLACK_WEBHOOK_URL
+# ── ОСНОВНЕ: доставка коду на VPS при push у main ────────────────────────────
+deploy_to_vps:
+  stage: deploy
+  tags:
+    - godlike-vps
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+  variables:
+    GIT_STRATEGY: none            # раннер не клонує у build-dir — оновлюємо наявну папку
+  script:
+    - |
+      set -e
+      cd /home/admin/godlike-tests
+      echo "[deploy] поточний HEAD: $(git rev-parse --short HEAD)"
+      BEFORE=$(sha256sum package-lock.json 2>/dev/null | cut -d" " -f1)
+      git fetch origin main --quiet
+      git reset --hard origin/main
+      echo "[deploy] новий HEAD:    $(git rev-parse --short HEAD)"
+      AFTER=$(sha256sum package-lock.json 2>/dev/null | cut -d" " -f1)
+      if [ "$BEFORE" != "$AFTER" ]; then
+        echo "[deploy] package-lock.json змінився → npm ci + npx playwright install"
+        npm ci
+        npx playwright install
+      else
+        echo "[deploy] залежності без змін — npm ci пропущено"
+      fi
+      echo "[deploy] OK — тести на VPS оновлено до $(git rev-parse --short HEAD)"
 
+# ── ОПЦІЙНЕ: запуск тестів у Docker (ручний / за розкладом), report у Artifacts ─
 run_e2e_tests:
   stage: test
-  # Версия образа = версия @playwright/test в package.json (^1.60.0).
   image: mcr.microsoft.com/playwright:v1.60.0-noble
+  variables:
+    SLACK_WEBHOOK_URL: $SLACK_WEBHOOK_URL
   script:
     - npm ci
-    # Подстраховка, если версия образа разойдётся с установленной версией Playwright:
     - npx playwright install --with-deps chromium
     - npx playwright test
   after_script:
-    - echo "Tests finished. Результаты уходят в Slack через Playwright-репортер."
+    - echo "Tests finished. Результати йдуть у Slack через Playwright-репортер."
   artifacts:
     when: always
     paths:
@@ -30,9 +64,6 @@ run_e2e_tests:
       - test-logs/
     expire_in: 30 days
   rules:
-    # Прогон по расписанию (Schedule в GitLab)
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-    # Прогон при пуше в дефолтную ветку
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-    # Ручной запуск из интерфейса GitLab
-    - if: $CI_PIPELINE_SOURCE == "web"
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'   # за розкладом (Schedule)
+    - if: '$CI_PIPELINE_SOURCE == "web"'        # ручний запуск з UI
+    # навмисно НЕ на push — щоб не дублювати прогін, який іде на VPS по cron
