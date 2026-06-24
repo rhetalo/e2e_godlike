@@ -12,7 +12,7 @@ import { GamePanelFilesPage } from "../../../pages/game/GamePanelFilesPage";
 import {
   loginAndSaveGameSession,
   GAME_STORAGE_STATE_PATH,
-  GAME_SERVER_UUID,
+  GAME_SERVER_FILE_UUID,
 } from "../../../utils/gameAuth";
 
 const TEST_FOLDER = "qae2e-folder";
@@ -29,7 +29,7 @@ test.describe("@critical [game-panel] Файловый менеджер", () => 
     await loginAndSaveGameSession(browser);
     context = await browser.newContext({ storageState: GAME_STORAGE_STATE_PATH });
     const page = await context.newPage();
-    files = new GamePanelFilesPage(page, GAME_SERVER_UUID);
+    files = new GamePanelFilesPage(page, GAME_SERVER_FILE_UUID);
     await files.goto();
     // на случай мусора от прошлого упавшего прогона
     await files.deleteEntryIfPresent(TEST_FOLDER);

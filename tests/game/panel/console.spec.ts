@@ -12,7 +12,7 @@ import { GamePanelServerPage } from "../../../pages/game/GamePanelServerPage";
 import {
   loginAndSaveGameSession,
   GAME_STORAGE_STATE_PATH,
-  GAME_SERVER_UUID,
+  GAME_SERVER_CONSOLE_UUID,
 } from "../../../utils/gameAuth";
 
 test.describe.configure({ mode: "serial" });
@@ -26,7 +26,7 @@ test.describe("@critical [game-panel] Консоль", () => {
     await loginAndSaveGameSession(browser);
     context = await browser.newContext({ storageState: GAME_STORAGE_STATE_PATH });
     const page = await context.newPage();
-    srv = new GamePanelServerPage(page, GAME_SERVER_UUID);
+    srv = new GamePanelServerPage(page, GAME_SERVER_CONSOLE_UUID);
     await srv.goto();
     await srv.ensureOnline(300_000);
     await srv.waitForConsoleReady(180_000);

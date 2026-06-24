@@ -30,8 +30,20 @@ test.describe("@critical [game-panel] Edit Server — переименовани
   });
 
   test.afterAll(async () => {
+    // Гарантированный откат имени с ВЕРИФИКАЦИЕЙ + ретраем: edit.server остаётся на shared
+    // дефолтном сервере (test_e2e), и незакрытый rename ломает соседей (server.overview и др.).
+    // Раньше revert был best-effort и мог тихо упасть в CI (флоки логина/populate) → сервер
+    // оставался переименованным. Теперь проверяем имя после отката и повторяем.
     try {
-      await server.setServerName(GAME_SERVER_NAME); // гарантированный откат имени
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        await server.setServerName(GAME_SERVER_NAME).catch(() => {});
+        const title = ((await server.overviewTitle.textContent().catch(() => "")) ?? "").trim();
+        if (title === GAME_SERVER_NAME) break;
+        if (attempt === 3) {
+          console.error(`[edit.server] ⚠️ откат имени НЕ удался: на сервере "${title}", ожидали "${GAME_SERVER_NAME}"`);
+        }
+        await server.goto().catch(() => {}); // перечитать страницу перед повторной попыткой
+      }
     } catch {
       /* best-effort teardown */
     }

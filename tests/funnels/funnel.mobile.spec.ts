@@ -81,16 +81,18 @@ test.describe("Мобильная воронка корзины", () => {
 
     await test.step("Minecraft по чипу → цена за 1 месяц > 0", async () => {
       await cart.selectGameByChip("Minecraft");
-      monthly = parsePrice(await cart.getTotalPrice());
+      monthly = await cart.getTotalPriceSettled();
+      console.log(`[mobile] Minecraft, период 1 месяц: total = ${monthly}`);
       expect(monthly).toBeGreaterThan(0);
     });
 
-    await test.step("период 3 Months → итоговая цена выросла", async () => {
+    await test.step("период 3 Months → итоговая цена выросла (≈3× месячной)", async () => {
       await cart.selectBillingPeriod("3 Months");
-      // Цена пересчитывается реактивно — поллим число, а не спим.
-      await expect
-        .poll(async () => parsePrice(await cart.getTotalPrice()), { timeout: 5_000 })
-        .toBeGreaterThan(monthly);
+      // Читаем УСТАКАНИВШУЮСЯ цену после смены периода (именованное ожидание, не голый poll) и
+      // логируем сравнение — числа видны в выводе. monthly корректно снят (фикс гонки в selectGameByChip).
+      const threeMonths = await cart.getTotalPriceAfterChange(monthly);
+      console.log(`[mobile] период: 1 месяц = ${monthly} → 3 Months = ${threeMonths}`);
+      expect(threeMonths, "итог за 3 месяца должен быть выше месячного").toBeGreaterThan(monthly);
       expect(await cart.getSelectedBillingPeriod()).toContain("3 Months");
     });
   });
@@ -102,18 +104,16 @@ test.describe("Мобильная воронка корзины", () => {
     // в serial-режиме игра уже выбрана; это поведение покрыто первым сценарием.
     await test.step("Minecraft по чипу → базовая цена > 0", async () => {
       await cart.selectGameByChip("Minecraft");
-      base = parsePrice(await cart.getTotalPrice());
+      base = await cart.getTotalPriceSettled();
+      console.log(`[mobile] Minecraft, базовый тариф: total = ${base}`);
       expect(base).toBeGreaterThan(0);
     });
 
     await test.step("старший тариф Godlike → цена выросла относительно базовой", async () => {
       await cart.selectPlan("Godlike");
-      await expect
-        .poll(async () => parsePrice(await cart.getTotalPrice()), {
-          timeout: 5_000,
-          intervals: [300, 500, 1000],
-        })
-        .toBeGreaterThan(base);
+      const godlike = await cart.getTotalPriceAfterChange(base);
+      console.log(`[mobile] тариф: базовый = ${base} → Godlike = ${godlike}`);
+      expect(godlike, "старший тариф (Godlike) должен быть дороже базового").toBeGreaterThan(base);
     });
   });
 
@@ -122,14 +122,17 @@ test.describe("Мобильная воронка корзины", () => {
 
     await test.step("Minecraft по чипу → базовая цена > 0", async () => {
       await cart.selectGameByChip("Minecraft");
-      base = parsePrice(await cart.getTotalPrice());
+      base = await cart.getTotalPriceSettled();
+      console.log(`[mobile] Minecraft, цена до промокода = ${base}`);
       expect(base).toBeGreaterThan(0);
     });
 
     await test.step("невалидный код → показана ошибка, скидка не применена", async () => {
       await cart.applyPromocode("ТЕСТ123");
       await expect(cart.promoResult).toBeVisible({ timeout: 10_000 });
-      expect((await cart.getPromoResultText()).length).toBeGreaterThan(0);
+      const msg = await cart.getPromoResultText();
+      console.log(`[mobile] промокод "ТЕСТ123" → сообщение: "${msg}"; цена должна остаться ${base}`);
+      expect(msg.length).toBeGreaterThan(0);
       // Главное поведение: невалидный код НЕ изменил итоговую цену.
       await expect
         .poll(async () => parsePrice(await cart.getTotalPrice()), { timeout: 5_000 })

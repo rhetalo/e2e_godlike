@@ -66,26 +66,50 @@ test("@critical оплата Stripe и PayPal", async ({ page }) => {
     await expect(page.locator(CHECKOUT.stripeCardIframe)).toBeVisible({ timeout: 15_000 });
   });
 
-  await test.step("PayPal — клик открывает gateway paypal.com (не оплачиваем)", async () => {
+  await test.step("PayPal — шлюз предложен, выбирается, SDK-кнопка рендерится", async () => {
+    // Детерминированная «наша» часть: PayPal-шлюз доступен, radio выбирается, контейнер SDK
+    // отрендерился. Реальный редирект на paypal.com (popup) — внешняя территория PayPal,
+    // нестабилен в headless/CI → вынесен в отдельный only_local-тест ниже.
     await payment.selectPayPal();
+    await expect(payment.paypalRadio).toBeChecked();
 
     const paypalContainer = page.locator(CHECKOUT.paypalContainer);
     await expect(paypalContainer).toBeVisible({ timeout: 20_000 });
     await expect(paypalContainer).toBeEnabled({ timeout: 20_000 });
-
-    const [popup] = await Promise.all([
-      page.context().waitForEvent("page", { timeout: 20_000 }).catch(() => null),
-      paypalContainer.click(),
-    ]);
-
-    if (popup) {
-      await popup.waitForLoadState("domcontentloaded");
-      await expect(popup).toHaveURL(/paypal\.com|sandbox\.paypal/i, { timeout: 30_000 });
-      await popup.close();
-    } else {
-      await expect(page).toHaveURL(/paypal\.com|sandbox\.paypal/i, { timeout: 30_000 });
-    }
   });
+});
+
+/**
+ * ЛОКАЛЬНАЯ проверка реального редиректа на paypal.com (НЕ для CI).
+ * PayPal Smart Button открывает popup/редирект только в живом браузере; в headless с
+ * датацентрового IP SDK ведёт себя недетерминированно (popup не открывается / детект
+ * автоматизации). Поэтому пропускается при CI=true — в gitlab/на VPS-cron не гоняется,
+ * локально (`npx playwright test`) отрабатывает полную проверку. См. flaky-triage 24-Jun.
+ */
+test("only_local PayPal popup открывает paypal.com (не оплачиваем)", async ({ page }) => {
+  test.skip(!!process.env.CI, "only-local: реальный PayPal popup нестабилен в headless/CI");
+
+  await reachCheckout(page);
+  await revealGateways(page);
+  const payment = new PaymentMethodSelector(page);
+
+  await payment.selectPayPal();
+  const paypalContainer = page.locator(CHECKOUT.paypalContainer);
+  await expect(paypalContainer).toBeVisible({ timeout: 20_000 });
+  await expect(paypalContainer).toBeEnabled({ timeout: 20_000 });
+
+  const [popup] = await Promise.all([
+    page.context().waitForEvent("page", { timeout: 20_000 }).catch(() => null),
+    paypalContainer.click(),
+  ]);
+
+  if (popup) {
+    await popup.waitForLoadState("domcontentloaded");
+    await expect(popup).toHaveURL(/paypal\.com|sandbox\.paypal/i, { timeout: 30_000 });
+    await popup.close();
+  } else {
+    await expect(page).toHaveURL(/paypal\.com|sandbox\.paypal/i, { timeout: 30_000 });
+  }
 });
 
 test("@regression Crypto (CoinPayments) доступен, методы оплаты переключаются", async ({

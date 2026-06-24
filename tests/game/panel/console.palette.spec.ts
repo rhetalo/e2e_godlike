@@ -11,7 +11,7 @@ import { GamePanelConsolePage } from "../../../pages/game/GamePanelConsolePage";
 import {
   loginAndSaveGameSession,
   GAME_STORAGE_STATE_PATH,
-  GAME_SERVER_UUID,
+  GAME_SERVER_CONSOLE_UUID,
 } from "../../../utils/gameAuth";
 
 test.describe.configure({ mode: "serial" });
@@ -23,7 +23,7 @@ test.describe("@regression [game-panel] Console — Commands палитра", ()
   test.beforeAll(async ({ browser }) => {
     await loginAndSaveGameSession(browser);
     context = await browser.newContext({ storageState: GAME_STORAGE_STATE_PATH });
-    console = new GamePanelConsolePage(await context.newPage(), GAME_SERVER_UUID);
+    console = new GamePanelConsolePage(await context.newPage(), GAME_SERVER_CONSOLE_UUID);
     await console.goto();
   });
 

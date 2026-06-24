@@ -13,6 +13,7 @@ import { GamePanelDashboardPage } from "../../../pages/game/GamePanelDashboardPa
 import { GamePanelLoginPage } from "../../../pages/game/GamePanelLoginPage";
 import {
   loginAndSaveGameSession,
+  resetGameSession,
   GAME_STORAGE_STATE_PATH,
 } from "../../../utils/gameAuth";
 
@@ -28,6 +29,9 @@ test.describe("@smoke [game-panel] Logout", () => {
   });
 
   test.afterAll(async () => {
+    // Logout убил сессию аккаунта → сбрасываем кэш сквозного логина, чтобы СЛЕДУЮЩИЙ спек сделал
+    // свежий UI-логин (иначе он возьмёт мёртвый storageState и окажется разлогинен). Порядок-независимо.
+    resetGameSession();
     await context.close();
   });
 

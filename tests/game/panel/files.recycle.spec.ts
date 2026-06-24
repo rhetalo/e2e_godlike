@@ -13,7 +13,7 @@ import { GamePanelFilesPage } from "../../../pages/game/GamePanelFilesPage";
 import {
   loginAndSaveGameSession,
   GAME_STORAGE_STATE_PATH,
-  GAME_SERVER_UUID,
+  GAME_SERVER_FILE_UUID,
 } from "../../../utils/gameAuth";
 
 const TRASH_FOLDER = "qae2e-trash-probe";
@@ -27,7 +27,7 @@ test.describe("@regression [game-panel] File manager — Recycle Bin", () => {
   test.beforeAll(async ({ browser }) => {
     await loginAndSaveGameSession(browser);
     context = await browser.newContext({ storageState: GAME_STORAGE_STATE_PATH });
-    files = new GamePanelFilesPage(await context.newPage(), GAME_SERVER_UUID);
+    files = new GamePanelFilesPage(await context.newPage(), GAME_SERVER_FILE_UUID);
     await files.goto();
     await files.deleteEntryIfPresent(TRASH_FOLDER); // мусор от прошлого упавшего прогона (из корня)
   });

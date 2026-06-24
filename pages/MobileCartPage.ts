@@ -122,10 +122,22 @@ export class MobileCartPage {
   /* --- Game Selection --- */
 
   async selectGameByChip(gameName: string): Promise<void> {
+    // ⚠️ serial-гонка: при СМЕНЕ игры на странице ещё держится цена прошлой игры (ненулевая),
+    // поэтому «цена > 0» проходит мгновенно на старом значении (читали Rust €25.99 как Minecraft).
+    // Решение: если игра реально меняется — ждём, пока пересчёт даст НОВОЕ устаканившееся значение;
+    // если та же игра (повторный клик) — цена уже валидна, ждать смену нельзя (зависнет).
+    const switching = !(await this.getSelectedGame()).includes(gameName);
+    const before = await this.parsedTotalPrice();
     await this.gameChips.filter({ hasText: gameName }).first().click();
-    // Чип активирует RAM-дропдаун (снимает --disabled) и авто-выбирает тариф → цена становится ненулевой.
+    // Чип активирует RAM-дропдаун (снимает --disabled) и авто-выбирает тариф.
     await this.expectPlanDropdownEnabled();
-    await this.waitForPriceNonZero();
+    if (switching) await this.getTotalPriceAfterChange(before);
+    else await this.getTotalPriceSettled();
+  }
+
+  /** Текущая выбранная игра (для решения: смена игры или повторный клик той же). "" если не выбрана. */
+  async getSelectedGame(): Promise<string> {
+    return (await this.gameSelect.locator(MOBILE_CART.gameSelectSelected).innerText().catch(() => "")).trim();
   }
 
   async selectGameBySearch(gameName: string): Promise<void> {
@@ -201,20 +213,55 @@ export class MobileCartPage {
     return (await this.originalPrice.innerText()).trim();
   }
 
+  /** Итоговая цена числом (валюта/формат-агностично; "$0.00" → 0). */
+  private async parsedTotalPrice(): Promise<number> {
+    const match = (await this.getTotalPrice()).replace(',', '.').match(/[\d]+(\.\d+)?/);
+    return match ? parseFloat(match[0]) : 0;
+  }
+
   /**
-   * Дождаться, пока итоговая цена уйдёт с плейсхолдера $0.00 (после выбора игры/тарифа).
-   * Поллим разобранное число, а не строку — иначе подстрока "0.00" ложно срабатывала бы на "$10.00".
+   * Общий поллер цены: ждём НЕНУЛЕВУЮ цену, удовлетворяющую accept(), и УСТАКАНИВШУЮСЯ
+   * (2 одинаковых замера подряд). Возвращает число — чтобы спек мог его залогировать/сверить.
    */
-  async waitForPriceNonZero(): Promise<void> {
+  private async pollPrice(accept: (price: number) => boolean): Promise<number> {
+    let last = -1;
+    let stable = 0;
+    let val = 0;
     await expect
       .poll(
         async () => {
-          const match = (await this.getTotalPrice()).replace(',', '.').match(/[\d]+(\.\d+)?/);
-          return match ? parseFloat(match[0]) : 0;
+          val = await this.parsedTotalPrice();
+          if (val <= 0 || !accept(val)) {
+            stable = 0;
+            last = -1;
+            return false;
+          }
+          if (val === last) stable++;
+          else {
+            stable = 0;
+            last = val;
+          }
+          return stable >= 1;
         },
-        { timeout: 10_000, intervals: [200, 300, 500] },
+        { timeout: 12_000, intervals: [200, 300, 400, 600] },
       )
-      .toBeGreaterThan(0);
+      .toBe(true);
+    return val;
+  }
+
+  /** Цена устаканилась (ненулевая, 2 равных замера) → число. Для ПЕРВОГО снятия (игра уже выбрана). */
+  async getTotalPriceSettled(): Promise<number> {
+    return this.pollPrice(() => true);
+  }
+
+  /**
+   * Цена ИЗМЕНИЛАСЬ относительно `before` и устаканилась → число. Для чтения ПОСЛЕ смены
+   * игры/тарифа/периода: снимает serial-гонку «осталось старое значение перед проверкой».
+   * before=0 (свежая страница) → просто ждём ненулевую. ⚠️ если новое значение совпало
+   * со старым (маловероятно при смене тарифа/игры) — упадёт по таймауту.
+   */
+  async getTotalPriceAfterChange(before: number): Promise<number> {
+    return this.pollPrice((price) => before <= 0 || price !== before);
   }
 
   /* --- Promocode --- */

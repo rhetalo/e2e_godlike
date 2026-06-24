@@ -19,7 +19,7 @@ import { GamePanelServerPage } from "../../../pages/game/GamePanelServerPage";
 import {
   loginAndSaveGameSession,
   GAME_STORAGE_STATE_PATH,
-  GAME_SERVER_UUID,
+  GAME_SERVER_CONSOLE_UUID,
 } from "../../../utils/gameAuth";
 
 const XSS_CONSOLE = "<img src=x onerror=alert(8)>"; // payload в say-сообщение
@@ -43,7 +43,7 @@ test.describe("@regression [game-panel] Security — инъекция в кон�
       dialogFired = true;
       await d.dismiss().catch(() => {});
     });
-    srv = new GamePanelServerPage(page, GAME_SERVER_UUID);
+    srv = new GamePanelServerPage(page, GAME_SERVER_CONSOLE_UUID);
     await srv.goto();
     await srv.ensureOnline(300_000);
     await srv.waitForConsoleReady(360_000);

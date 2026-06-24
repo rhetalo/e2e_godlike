@@ -16,7 +16,7 @@ import { GamePanelServerPage } from "../../../pages/game/GamePanelServerPage";
 import {
   loginAndSaveGameSession,
   GAME_STORAGE_STATE_PATH,
-  GAME_SERVER_UUID,
+  GAME_SERVER_POWER_UUID,
 } from "../../../utils/gameAuth";
 
 test.describe.configure({ mode: "serial" });
@@ -29,7 +29,7 @@ test.describe("@critical [game-panel] Жизненный цикл питания
     await loginAndSaveGameSession(browser);
     context = await browser.newContext({ storageState: GAME_STORAGE_STATE_PATH });
     const page = await context.newPage();
-    srv = new GamePanelServerPage(page, GAME_SERVER_UUID);
+    srv = new GamePanelServerPage(page, GAME_SERVER_POWER_UUID);
     await srv.goto();
   });
 
