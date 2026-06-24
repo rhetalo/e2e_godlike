@@ -584,3 +584,98 @@ storage ~247 MiB, neoforge 1.21.1. Онлайн-флоу, ранее забло�
   использовать консоль как источник правды (§5d).
 - ⚠️ **Каверза (со слов владельца):** смена версии / несовместимые настройки могут снова уронить старт.
   Онлайн-тесты — щедрый `ensureOnline`-таймаут + понятный фейл с диагностикой, а не вечное ожидание.
+
+## 11. Cancel Module + Amplitude-события (recon 23-Jun-2026)
+
+Контекст: dev-таска «Передати події в Cancel Module on backend side» (Alyona) — переименование/
+добавление Amplitude-событий воронки отмены. AC: «QA & PM подтверждает, что каждое событие
+корректно передаётся в Amplitude». Recon на сервере `c2b09498` (`test_amplitude_cancel`).
+
+**Открытие модуля:** deep-link `…/server/{uuid}?canceled=true`. SPA монтирует модалку поверх
+Overview (роутинг не меняется, финальный URL без query). ⚠️ deep-link НЕ эквивалент реальной
+кнопки «Request Cancellation» в Product Details — он НЕ триггерит клик-событие входа.
+
+**Два флоу = A/B-эксперимент `cancel_new_inpanel`** (тот же, что пиннит `utils/amplitude.ts`):
+- вариант `old_with_hytale` → модалка `.old-cancellation-modal` (флоу с Hytale-апселом);
+- вариант `new_with_freez` → модалка `.cancellation-modal` (флоу с pause/freeze).
+- ⚠️ Вариант назначается **случайно по device_id** на каждый свежий контекст (между прогонами
+  скачет old↔new). Детерминизм — **пиннингом**: `context.route(/api\.lab\.eu\.amplitude\.com\/sdk\/v2\/vardata/)`
+  + пред-засев LS `amp-exp-$default_instance-u6z6Wv` (структура `{ cancel_new_inpanel: { value:"old_with_hytale" | "new_with_freez", … } }`).
+  Подтверждено: оба варианта форсятся этим способом (расширение паттерна `pinAmplitudeExperiments`,
+  пока scoped на storefront-домен — для панели нужен тот же route+LS, домен `ultra.panel.godlike.host`).
+
+**Карта первых экранов (подтверждена DOM):**
+| Флоу | Экран 1 (кнопки) | Клик «Cancel Plan» → Экран 2 (кнопки) |
+|---|---|---|
+| Hytale `.old-cancellation-modal` | «Confirm Cancellation»: `Change Plan`, `Cancel Plan` | «Switch to Hytale?»: `Back`, `No, continue with cancellation`, `Yes, switch to Hytale!` |
+| Freeze `.cancellation-modal` | «Confirm Cancellation / We'll miss your server!»: `Select pause period`, `Change Plan`, `Cancel Plan` | «Cancel Plan / Select a reason»: `Go to Pause Plan`, `Back`, `Continue` |
+
+Селекторы экрана 1 (Hytale): карточки `.old-cancellation-modal__action-card--cancel button` /
+`--upgrade button`, заголовок `.old-cancellation-modal__title`, закрытие `.old-cancellation-modal__close`.
+Кнопки надёжнее брать по роли+тексту внутри `[role='dialog']` (работает для обеих модалок).
+
+**🟢 МЕХАНИЗМ СОБЫТИЙ (подтверждено владельцем + перехватом):** событие летит НЕ напрямую в
+Amplitude из браузера, а на **бэкенд** godlike:
+`POST https://panel.godlike.host/api/v2/whmcs/cancel/{fullUuid}/event?locale=en`,
+тело `{ "event": "<event_type>" }` (+ доп. поля, напр. `{"event":"cancellation_reason_submitted_5","reason":"reason_8"}`).
+Бэк сам форвардит в Amplitude (отсюда «on backend side»). ⚠️ Поэтому первый recon «не видел»
+событий — фильтровал `api.eu.amplitude.com`, а не `/whmcs/cancel/.../event`. **События ВИДНЫ в
+Network браузера** → перехватываемы Playwright'ом (`page.on('request')` по `/whmcs\/cancel\/[^/]+\/event/`).
+
+**Реальный вход (для `start_cancel_request`):** кнопка «Request Cancellation» — в **clientarea**
+(`godlike.host/clientarea/clientarea.php?action=productdetails&id=<whmcsId>`, для `c2b09498` это
+`id=446953`), а не в панели. Клик ведёт кросс-домен на панель `?canceled=true`. ⚠️ Жать только
+после полной загрузки страницы услуги (иначе сырой href уводит на `ultra.panel/login` — гонка).
+`start_cancel_request` и (частично) `view_cancel_module` эмитятся **server-side** → в Network браузера
+их может не быть, проверять в дашборде Amplitude.
+
+**ИТОГ ПРОВЕРКИ (23-24-Jun, автопроход + ручная верификация владельца; деструктив выполнялся и откачен):**
+все события воронки отправляются (оба флоу). Сняты на бэкенд-эндпоинте/подтверждены вручную: вся OLD-воронка
+(`cancellation_plan_confirmed_2`, `plan_change_selected_2`, `hytale_declined_3`, `change_to_hytale_3` →
+«Plan Continued» (план не меняется), `info_proceeded_4`, `abandoned_4`, `reason_submitted_5`, `abandoned_5`,
+`discount_claimed_6` → «Plan Continued», `discount_declined_6`, `confirmed_7`, `stay_on_my_hosting_7`,
+`free_hosting_clicked_8`, `reactivate_server_clicked_8`) и весь FREEZE (`pause_plan_start_2`,
+`pause_for_30/60/90_days_2_1`, `pause_my_subscription_2_1`, `back_to_other_options_2_1`, `undo_pause_2_2`
+(двухшаговый: Unpause Server → окно → Undo pause), `go_to_pause_plan_3`, `cancellation_reason_submitted_3`,
+`undo_cancellation_4`, `open_your_ticket_4`).
+- **🐞 БАГ:** OLD «View Free Hosting» (Plan Cancelled) — событие `cancellation_free_hosting_clicked_8`
+  шлётся, но кнопка ведёт на **404**: `https://godlike.host/free-minecraft-hosting-en/`.
+- **`start_cancel_request` / `view_cancel_module`** — server-side, в браузере не видны → подтверждать в Amplitude.
+- `reason` приходит кодом (`reason_1`…) — по владельцу ОЖИДАЕМО (текст в ТЗ был примером), не баг.
+  Воронка OLD: Confirm → [Switch to Hytale?] → Important Information (1/4) → Select a reason (2/4) →
+  Special Offer (3) → Final Confirmation (4/4) → Plan Cancelled [Reactivate Server / View Free Hosting / Close].
+
+**ОТКАТ реальной отмены (важно для деструктив-тестов):**
+- На странице услуги в clientarea — кнопка **«Cancel the cancellation»** (снимает pending; подтверждено
+  `requested:true → false`). Панель-модуль при повторном входе Undo НЕ даёт.
+- Либо **«Reactivate Server»** на экране Plan Cancelled сразу после отмены (тоже `undo`/событие #16).
+- WHMCS pending-cancellation держит статус **Active** до конца оплаченного периода → проверять не только
+  статус, а текст «Cancellation Requested / You have cancelled the service…».
+
+**⚙️ ВАЖНО ПО КЛИКАМ (Vuetify-засада, НЕ rate-limit): кнопки модуля надёжно срабатывают только через
+`locator.dispatchEvent('click')`, а не `.click()`.** Обычный клик периодически перехватывается оверлеем
+`.v-btn__overlay` → событие не уходит, экран не меняется (выглядело как «модуль залип»). Это тот же
+паттерн, что Boot Order radio в vf-panel (README: «только `dispatchEvent('click')`»). Подтверждено:
+после перехода на dispatch разблокировались pause-флоу и длины 30/60/90. Длины паузы 30/60/90 — это
+**кликабельные опции-карточки** (не `<button>`), события `pause_for_30/60/90_days_2_1` реальны.
+
+**🐞 НАХОДКИ (актуальные):**
+1. **🐞 Баг:** OLD «View Free Hosting» (Plan Cancelled) → 404 `https://godlike.host/free-minecraft-hosting-en/`
+   (событие `cancellation_free_hosting_clicked_8` при этом шлётся).
+2. **Ограничение реализации (не баг):** точку в имени Amplitude-события использовать нельзя — только `_`,
+   поэтому sub-step события идут как `…_2_1`/`…_2_2` (vs ТЗ `…_2.1`). ТЗ привести к подчёркиванию.
+3. **`start_cancel_request` / `view_cancel_module`** — server-side, в браузере не видны → подтверждать в Amplitude.
+- _Снято:_ `reason` кодом (`reason_1`…) — по владельцу ожидаемо. `undo_pause_2_2` — двухшаговый (Unpause
+  Server → окно → Undo pause), работает.
+
+**⚠️ ПАУЗА = реальный suspend.** `pause_my_subscription_2_1` ставит услугу в WHMCS-статус **Paused**
+(в clientarea «Status: Paused»). Откат — **«Unpause Server»** → окно → **«Undo pause»**; проверять статус по clientarea (авторитетно).
+
+**Состояние сервиса после прогонов:** `c2b09498` **Active** (владелец подтвердил; переведён на план
+**Hytale** — намеренно, откат не нужен). Реальные отмена/пауза в ходе тестов выполнялись и откачены
+(«Cancel the cancellation» в clientarea / Reactivate / Unpause).
+
+**Статус покрытия:** проверка таски завершена (все события воронки отправляются; 2 server-side — в Amplitude;
+1 баг — 404). Автотеста-регресса нет; селекторы НЕ заведены в `utils/selectors.ts` (модалки
+`.old-cancellation-modal` / `.cancellation-modal`, кнопки — по роли+тексту в `[role='dialog']`, клик через
+`dispatchEvent`). Полный отчёт-матрица: `test-docs/ultra.panel/cancel-module-amplitude.md`.
