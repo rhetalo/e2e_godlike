@@ -1,14 +1,12 @@
 /**
  * Connection-info (Server IP) — адрес подключения на Overview Steam-сервера.
  *
- * KNOWN BUG (live-recon 19-Jun-2026): Ultra-панель рендерит allocation.ip_alias
- * (FQDN ноды, srvN.godlike.club) вместо allocation.ip (реальный IP). Старая панель
- * показывает ip. Источник правды — GET /api/v2/servers/{uuid} (поля allocation.ip /
- * allocation.ip_alias / query_port). Детали: agents.docs/game-panel/KNOWLEDGE_BASE.md.
+ * Проверяет: панель показывает РЕАЛЬНЫЙ allocation.ip (а не allocation.ip_alias — FQDN ноды).
+ * Источник правды — GET /api/v2/servers/{uuid} (поля allocation.ip / allocation.ip_alias).
  *
- * Тест помечен test.fail(): пока баг жив — он «ожидаемо падает», suite остаётся зелёным.
- * Когда разраб починит (host станет = ip), ассерт пройдёт → Playwright пометит тест как
- * unexpected pass (красный) = сигнал снять test.fail() и оставить обычный @regression.
+ * История: до ~25-Jun-2026 панель рендерила ip_alias (FQDN ноды) вместо ip — баг был под
+ * test.fail() (@known-bug, «ожидаемо падал»). Прод-фикс выкатили (host стал = ip, напр.
+ * 185.156.53.133:26079) → test.fail() снят, тест стал обычным @regression. Детали: KNOWLEDGE_BASE.md §9f.
  *
  * Read-only: только заход на Overview + перехват ответа панели, ничего не мутируем.
  */
@@ -22,7 +20,7 @@ import {
 
 test.describe.configure({ mode: "serial" });
 
-test.describe("@regression @known-bug [game-panel] Connection-info — Server IP", () => {
+test.describe("@regression [game-panel] Connection-info — Server IP", () => {
   let context: BrowserContext;
   let srv: GamePanelServerPage;
   let allocIp: string | undefined;
@@ -56,8 +54,6 @@ test.describe("@regression @known-bug [game-panel] Connection-info — Server IP
       !allocIp || !allocAlias || allocIp === allocAlias,
       "У сервера нет различимого ip_alias — проверять нечего",
     );
-    test.fail(); // KNOWN BUG: панель показывает ip_alias вместо ip (см. шапку файла)
-
     const shownHost = await srv.getConnectionHost();
 
     await test.step("отображаемый host = allocation.ip", async () => {

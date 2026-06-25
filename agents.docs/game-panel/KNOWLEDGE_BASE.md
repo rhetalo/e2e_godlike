@@ -551,9 +551,9 @@ SSD/CPU, Server Setup by Support, Dedicated SysAdmin) + CTA **«Get Premium (3-D
 Доп. endpoint `/api/v2/servers/{fullUuid}/allocations` — именованные аллокации
 (`SERVER_PORT/ALLOCATED_UDP_PORT/QUERY_PORT/RCON_PORT`), у каждой `ip` + `ip_alias`.
 
-🐞 **KNOWN BUG (Steam-игры, Ultra):** в адресе подключения панель рендерит
-**`allocation.ip_alias`** (FQDN ноды) вместо **`allocation.ip`**. Оба поля — в одном
-ответе → фикс фронтовый, общий для всех игр. Порт берётся из `query_port` — для ARK верно;
+✅ **FIXED (~25-Jun-2026):** панель теперь показывает реальный **`allocation.ip`**
+(подтверждено `185.156.53.133:26079` на ARK `cc25cea1`), а НЕ **`allocation.ip_alias`** (FQDN ноды).
+Прод-фикс выкатили — раньше тут был баг (рендерился ip_alias). Порт берётся из `query_port` — для ARK верно;
 но `query_port` хрупкий: заполняется по аллокации, **названной строкой `QUERY_PORT`**, а у
 части яиц имя иное (Unturned = `ALLOCATED_GAME_PORT_2`) или query-порта нет (Starbound) →
 нужен фолбэк `query_port → allocation.port`. ⚠️ Не путать с провижинг-багом «порты не
@@ -563,9 +563,9 @@ SSD/CPU, Server Setup by Support, Dedicated SysAdmin) + CTA **«Get Premium (3-D
   (селектор `GAME_PANEL_SERVER.connectionValue`, формат-агностичный — переживёт фикс FQDN→IP).
   ⚠️ Скоуп по `.roadmap-ip` обязателен: консоль `.terminal.xterm` содержит `127.0.0.1:PORT`.
   Ридеры: `GamePanelServerPage.getConnectionHost()/getConnectionPort()`.
-- ✅ **Покрыто TC-GP-NET-010** (`network.connection-info.spec.ts`, `@regression @known-bug`,
-  read-only): `test.fail()` — пока баг жив, тест «ожидаемо падает» (suite зелёный); после фикса
-  станет unexpected pass (красный) = сигнал снять `test.fail()`. Сервер из `GAME_STEAM_SERVER_UUID`.
+- ✅ **Покрыто TC-GP-NET-010** (`network.connection-info.spec.ts`, `@regression`, read-only):
+  после прод-фикса `test.fail()` снят — тест проверяет, что host = `allocation.ip` (и ≠ ip_alias),
+  обычный проходящий @regression. Сервер из `GAME_STEAM_SERVER_UUID` (ARK `cc25cea1`).
 
 ## 10. Online-проверка post-reinstall (MCP, 06-Jun-2026)
 
