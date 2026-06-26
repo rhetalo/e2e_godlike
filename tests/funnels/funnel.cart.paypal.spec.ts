@@ -83,11 +83,14 @@ test("@critical оплата Stripe и PayPal", async ({ page }) => {
  * ЛОКАЛЬНАЯ проверка реального редиректа на paypal.com (НЕ для CI).
  * PayPal Smart Button открывает popup/редирект только в живом браузере; в headless с
  * датацентрового IP SDK ведёт себя недетерминированно (popup не открывается / детект
- * автоматизации). Поэтому пропускается при CI=true — в gitlab/на VPS-cron не гоняется,
- * локально (`npx playwright test`) отрабатывает полную проверку. См. flaky-triage 24-Jun.
+ * автоматизации). Гоняется ТОЛЬКО при RUN_LOCAL_ONLY=1 (локально, вручную); на push/CI/VPS-cron —
+ * пропускается. Опт-ин флаг, а не CI: VPS-cron НЕ выставляет CI=true, на него полагаться нельзя.
  */
 test("only_local PayPal popup открывает paypal.com (не оплачиваем)", async ({ page }) => {
-  test.skip(!!process.env.CI, "only-local: реальный PayPal popup нестабилен в headless/CI");
+  test.skip(
+    !process.env.RUN_LOCAL_ONLY,
+    "only-local: гоняется ТОЛЬКО при RUN_LOCAL_ONLY=1 (локально); на push/CI/VPS-cron — пропускается",
+  );
 
   await reachCheckout(page);
   await revealGateways(page);

@@ -29,7 +29,27 @@ export abstract class GamePanelBasePage {
     // networkidle на панели не всегда наступает (websocket-консоль) — отсюда .catch
     await this.page.waitForLoadState("networkidle", { timeout: 8_000 }).catch(() => {});
     await this.tour.dismissIfPresent();
+    await this.neutralizeOverlays();
     return resp;
+  }
+
+  /**
+   * Нейтрализует оверлеи, перехватывающие клики на страницах сервера:
+   *  - `.server__header-help` — контекстная Help-панель (висит ОТКРЫТОЙ: «Why Backups…», помощь по
+   *    портам/ролям и т.п.), перекрывает кнопки (backups/network/sharing/role.enforcement);
+   *  - shepherd-онбординг — всплывает на ПЕРВОМ заходе на сервер (а серверы изоляции — новые),
+   *    иногда уже ПОСЛЕ dismissIfPresent (отложенный триггер) → разовый клик его не ловит.
+   * Ставим `pointer-events:none` через <style>: стиль живёт весь lifecycle страницы и применится
+   * к оверлею, даже если он появится позже (надёжнее разового клика/таймаута). Клики проходят
+   * сквозь оверлей к целевым элементам. Подтверждено recon 26-Jun-2026.
+   */
+  private async neutralizeOverlays(): Promise<void> {
+    await this.page
+      .addStyleTag({
+        content:
+          ".server__header-help, .server__help-wrapper, .shepherd-modal-overlay-container, .shepherd-modal-is-visible, .shepherd-element { pointer-events: none !important; }",
+      })
+      .catch(() => {});
   }
 
   url(): string {

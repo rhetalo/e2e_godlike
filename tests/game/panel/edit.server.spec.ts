@@ -11,8 +11,8 @@ import { GamePanelServerPage } from "../../../pages/game/GamePanelServerPage";
 import {
   loginAndSaveGameSession,
   GAME_STORAGE_STATE_PATH,
-  GAME_SERVER_UUID,
-  GAME_SERVER_NAME,
+  GAME_SERVER_RENAME_UUID,
+  GAME_SERVER_RENAME_NAME,
 } from "../../../utils/gameAuth";
 
 test.describe.configure({ mode: "serial" });
@@ -20,12 +20,12 @@ test.describe.configure({ mode: "serial" });
 test.describe("@critical [game-panel] Edit Server — переименование (self-cleaning)", () => {
   let context: BrowserContext;
   let server: GamePanelServerPage;
-  const NEW_NAME = `${GAME_SERVER_NAME}_qa`;
+  const NEW_NAME = `${GAME_SERVER_RENAME_NAME}_qa`;
 
   test.beforeAll(async ({ browser }) => {
     await loginAndSaveGameSession(browser);
     context = await browser.newContext({ storageState: GAME_STORAGE_STATE_PATH });
-    server = new GamePanelServerPage(await context.newPage(), GAME_SERVER_UUID);
+    server = new GamePanelServerPage(await context.newPage(), GAME_SERVER_RENAME_UUID);
     await server.goto();
   });
 
@@ -36,11 +36,11 @@ test.describe("@critical [game-panel] Edit Server — переименовани
     // оставался переименованным. Теперь проверяем имя после отката и повторяем.
     try {
       for (let attempt = 1; attempt <= 3; attempt++) {
-        await server.setServerName(GAME_SERVER_NAME).catch(() => {});
+        await server.setServerName(GAME_SERVER_RENAME_NAME).catch(() => {});
         const title = ((await server.overviewTitle.textContent().catch(() => "")) ?? "").trim();
-        if (title === GAME_SERVER_NAME) break;
+        if (title === GAME_SERVER_RENAME_NAME) break;
         if (attempt === 3) {
-          console.error(`[edit.server] ⚠️ откат имени НЕ удался: на сервере "${title}", ожидали "${GAME_SERVER_NAME}"`);
+          console.error(`[edit.server] ⚠️ откат имени НЕ удался: на сервере "${title}", ожидали "${GAME_SERVER_RENAME_NAME}"`);
         }
         await server.goto().catch(() => {}); // перечитать страницу перед повторной попыткой
       }
@@ -56,9 +56,9 @@ test.describe("@critical [game-panel] Edit Server — переименовани
       await expect(server.overviewTitle).toHaveText(NEW_NAME);
     });
 
-    await test.step(`откат к ${GAME_SERVER_NAME} → заголовок вернулся`, async () => {
-      await server.setServerName(GAME_SERVER_NAME);
-      await expect(server.overviewTitle).toHaveText(GAME_SERVER_NAME);
+    await test.step(`откат к ${GAME_SERVER_RENAME_NAME} → заголовок вернулся`, async () => {
+      await server.setServerName(GAME_SERVER_RENAME_NAME);
+      await expect(server.overviewTitle).toHaveText(GAME_SERVER_RENAME_NAME);
     });
   });
 });

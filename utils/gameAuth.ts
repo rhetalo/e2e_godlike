@@ -49,6 +49,13 @@ export const GAME_SERVER_CONSOLE_UUID =
 export const GAME_SERVER_CONSOLE_NAME =
   process.env.GAME_PANEL_SERVER_CONSOLE_NAME ?? "test_e2e_console";
 
+// Выделенный сервер ТОЛЬКО под rename-тест (edit.server): даже если откат имени упадёт в CI
+// (racy setServerName), пострадает лишь он — основной test_e2e больше не клоббрится.
+export const GAME_SERVER_RENAME_UUID =
+  process.env.GAME_PANEL_SERVER_RENAME_UUID ?? "e9440b5d-d77e-4dc6-b258-705e067ee5d2";
+export const GAME_SERVER_RENAME_NAME =
+  process.env.GAME_PANEL_SERVER_RENAME_NAME ?? "test_e2e_rename";
+
 /**
  * Steam-сервер (ARK) для проверки connection-info: query_port + ip/ip_alias.
  * Short-UUID (как в /api/v2/servers/{short}). Под тем же аккаунтом, что GAME_EMAIL.
