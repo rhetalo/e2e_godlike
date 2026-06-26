@@ -140,10 +140,16 @@ export class GamePanelBackupsPage extends GamePanelBasePage {
     await row.waitFor({ state: "hidden", timeout: 30_000 }).catch(() => {});
   }
 
-  /** Best-effort уборка (precondition/teardown). */
+  /**
+   * Best-effort уборка ВСЕХ строк с этим именем (precondition/teardown).
+   * ⚠️ Дубли копятся от прошлых упавших прогонов (self-cleaning не отработал) и забивают
+   * квоту слотов (3) → удаляем все совпадающие в цикле, иначе остаток блокирует создание
+   * (overlay `backups__slots-limit-overlay`). Кап итераций — чтобы не зациклиться.
+   */
   async deleteIfPresent(name: string): Promise<void> {
-    if (await this.hasBackup(name)) {
+    for (let i = 0; i < 5 && (await this.hasBackup(name)); i++) {
       await this.deleteBackup(name).catch(() => {});
+      await this.refresh().catch(() => {});
     }
   }
 
