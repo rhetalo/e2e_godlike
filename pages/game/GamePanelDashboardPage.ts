@@ -92,7 +92,13 @@ export class GamePanelDashboardPage extends GamePanelBasePage {
 
   /** Открыть аккаунт-меню (Knowledgebase / Edit Account / Log Out). */
   async openAccountMenu(): Promise<void> {
-    await this.accountButton.click();
+    // На странице может висеть открытый Vuetify-оверлей (`.v-overlay__scrim`), перехватывающий клик
+    // по аккаунт-кнопке (флок auth.logout на VPS). Гасим его (Escape) и кликаем через dispatchEvent —
+    // он идёт мимо hit-test оверлея (тот же приём, что Boot Order radio в vf-panel).
+    await this.page.keyboard.press("Escape").catch(() => {});
+    await this.page.locator(".v-overlay__scrim").first().waitFor({ state: "hidden", timeout: 3_000 }).catch(() => {});
+    await this.accountButton.scrollIntoViewIfNeeded().catch(() => {});
+    await this.accountButton.dispatchEvent("click");
     await this.logoutLink.waitFor({ state: "visible", timeout: 10_000 });
   }
 

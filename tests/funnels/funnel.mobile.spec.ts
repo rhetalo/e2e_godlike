@@ -78,6 +78,8 @@ test.describe("Мобильная воронка корзины", () => {
 
   test("@critical смена периода оплаты меняет итоговую цену", async () => {
     let monthly = NaN;
+    // Изоляция от предыдущего serial-теста: чистая корзина → нет гонки «осталась игра/цена прошлого теста».
+    await cart.goto();
 
     await test.step("Minecraft по чипу → цена за 1 месяц > 0", async () => {
       await cart.selectGameByChip("Minecraft");
@@ -99,9 +101,9 @@ test.describe("Мобильная воронка корзины", () => {
 
   test("@critical смена тарифа (RAM) меняет итоговую цену", async () => {
     let base = NaN;
+    // Изоляция от предыдущего serial-теста: чистая корзина (убирает гонку смены игры/тарифа).
+    await cart.goto();
 
-    // Примечание: проверка «дропдаун заблокирован до выбора» здесь не повторяется —
-    // в serial-режиме игра уже выбрана; это поведение покрыто первым сценарием.
     await test.step("Minecraft по чипу → базовая цена > 0", async () => {
       await cart.selectGameByChip("Minecraft");
       base = await cart.getTotalPriceSettled();
@@ -119,6 +121,8 @@ test.describe("Мобильная воронка корзины", () => {
 
   test("@critical невалидный промокод: ошибка показана и цена не меняется", async () => {
     let base = NaN;
+    // Изоляция от предыдущего serial-теста: чистая корзина.
+    await cart.goto();
 
     await test.step("Minecraft по чипу → базовая цена > 0", async () => {
       await cart.selectGameByChip("Minecraft");
