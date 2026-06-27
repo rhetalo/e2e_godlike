@@ -17,11 +17,15 @@ export const GAME_EMAIL = process.env.GAME_PANEL_EMAIL ?? "test@testmail.com";
 export const GAME_PASSWORD = process.env.GAME_PANEL_PASSWORD ?? "test@testmail.com";
 export const GAME_STORAGE_STATE_PATH = path.join(__dirname, "..", "storageState.game.json");
 
-/** Текущий тестовый сервер (Minecraft, Paper). Переопределяется через env. */
+/**
+ * Текущий тестовый сервер (Minecraft, Paper). Идентичность сервера = UUID (он не меняется при
+ * переименовании); навигация и все ассерты идентичности идут по нему. Имя сервера НЕ хардкодим:
+ * владелец переименовывает main-сервер на проде, и любой захардкоженный `GAME_SERVER_NAME` тут же
+ * протухал и ронял тесты. Где UI всё же требует имя (карточка дашборда) — читаем его живьём со
+ * страницы через GamePanelServerPage.getServerName(). Переопределяется через env.
+ */
 export const GAME_SERVER_UUID =
   process.env.GAME_PANEL_SERVER_UUID ?? "ebb03adc-48bf-46f1-95dd-a45d07f0d23d";
-export const GAME_SERVER_NAME =
-  process.env.GAME_PANEL_SERVER_NAME ?? "test_e2e";
 
 /**
  * Изоляция мутаций по выделенным серверам (один аккаунт, разные серверы) — чтобы тесты не

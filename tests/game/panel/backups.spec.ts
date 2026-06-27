@@ -17,7 +17,6 @@ import {
   loginAndSaveGameSession,
   GAME_STORAGE_STATE_PATH,
   GAME_SERVER_BACKUP_UUID,
-  GAME_SERVER_BACKUP_NAME,
 } from "../../../utils/gameAuth";
 
 const TEST_BACKUP = "qae2e-backup";
@@ -32,7 +31,7 @@ test.describe("[game-panel] Backups", () => {
     test.setTimeout(120_000);
     await loginAndSaveGameSession(browser);
     context = await browser.newContext({ storageState: GAME_STORAGE_STATE_PATH });
-    backups = new GamePanelBackupsPage(await context.newPage(), GAME_SERVER_BACKUP_UUID, GAME_SERVER_BACKUP_NAME);
+    backups = new GamePanelBackupsPage(await context.newPage(), GAME_SERVER_BACKUP_UUID);
     await backups.goto();
     await backups.deleteIfPresent(TEST_BACKUP); // мусор от прошлого упавшего прогона
   });

@@ -30,10 +30,10 @@ test.describe("@critical [game-panel] Edit Server — переименовани
   });
 
   test.afterAll(async () => {
-    // Гарантированный откат имени с ВЕРИФИКАЦИЕЙ + ретраем: edit.server остаётся на shared
-    // дефолтном сервере (test_e2e), и незакрытый rename ломает соседей (server.overview и др.).
-    // Раньше revert был best-effort и мог тихо упасть в CI (флоки логина/populate) → сервер
-    // оставался переименованным. Теперь проверяем имя после отката и повторяем.
+    // Гарантированный откат имени с ВЕРИФИКАЦИЕЙ + ретраем. Тест на ВЫДЕЛЕННОМ сервере
+    // (GAME_SERVER_RENAME_UUID), так что незакрытый rename не заденет соседей. Но откат всё равно
+    // важен: следующий прогон ждёт исходное имя. Раньше revert был best-effort и мог тихо упасть в
+    // CI (флоки логина/populate) → сервер оставался переименованным. Теперь проверяем и повторяем.
     try {
       for (let attempt = 1; attempt <= 3; attempt++) {
         await server.setServerName(GAME_SERVER_RENAME_NAME).catch(() => {});

@@ -11,7 +11,6 @@ import {
   loginAndSaveGameSession,
   GAME_STORAGE_STATE_PATH,
   GAME_SERVER_UUID,
-  GAME_SERVER_NAME,
 } from "../../../utils/gameAuth";
 import { GAME_PANEL_TABS } from "../../../utils/selectors";
 
@@ -35,8 +34,11 @@ test.describe("@smoke [game-panel] Обзор сервера", () => {
     const srv = new GamePanelServerPage(page, GAME_SERVER_UUID);
     await srv.goto();
 
-    await test.step("имя сервера отображается", async () => {
-      await expect(srv.nameLabel(GAME_SERVER_NAME)).toBeVisible();
+    await test.step("заголовок с именем сервера отрисован (непустой)", async () => {
+      // Имя сервера меняется при переименовании на проде — не пиним конкретную строку.
+      // Идентичность сервера проверяется по UUID в TC-GP-SRV-003; здесь — что хедер с именем есть.
+      await expect(srv.overviewTitle).toBeVisible();
+      expect((await srv.getServerName()).length).toBeGreaterThan(0);
     });
 
     await test.step("кнопки питания присутствуют", async () => {

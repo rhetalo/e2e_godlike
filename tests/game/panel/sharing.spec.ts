@@ -19,7 +19,6 @@ import {
   GAME_STORAGE_STATE_PATH,
   GAME_INVITEE_STORAGE_STATE_PATH,
   GAME_SERVER_UUID,
-  GAME_SERVER_NAME,
   GAME_EMAIL,
   GAME_INVITEE_EMAIL,
 } from "../../../utils/gameAuth";
@@ -76,7 +75,22 @@ test.describe("@critical [game-panel] Sharing — invitee видит расша�
   });
 
   test("TC-GP-SHR-003 | invitee видит расшаренный сервер в своём дашборде", async () => {
-    expect(await dash.hasServer(GAME_SERVER_NAME)).toBe(true);
+    // Карточка дашборда показывает сервер ПО ИМЕНИ, а имя на проде переименовывают. Поэтому
+    // читаем живое имя сервера (invitee имеет к нему доступ) и ищем карточку по нему — вместо
+    // хардкода, который протухал при каждом ренейме.
+    const srv = new GamePanelServerPage(dash.page, GAME_SERVER_UUID);
+    let liveName = "";
+
+    await test.step("прочитать текущее имя расшаренного сервера", async () => {
+      await srv.goto();
+      liveName = await srv.getServerName();
+      expect(liveName.length).toBeGreaterThan(0);
+    });
+
+    await test.step("сервер с этим именем виден в «My Servers» invitee", async () => {
+      await dash.goto();
+      expect(await dash.hasServer(liveName)).toBe(true);
+    });
   });
 
   test("TC-GP-SHR-004 | invitee открывает страницу расшаренного сервера (доступ есть)", async () => {
@@ -87,8 +101,9 @@ test.describe("@critical [game-panel] Sharing — invitee видит расша�
       expect(srv.page.url()).toContain(GAME_SERVER_UUID);
     });
 
-    await test.step("имя сервера видно (доступ предоставлен)", async () => {
-      await expect(srv.nameLabel(GAME_SERVER_NAME)).toBeVisible();
+    await test.step("UUID сервера виден в Server Information (доступ предоставлен)", async () => {
+      // Доступ доказываем по UUID (он стабилен), а не по имени (меняется при переименовании).
+      await expect(srv.uuidLabel(GAME_SERVER_UUID)).toBeVisible();
     });
   });
 });

@@ -19,7 +19,6 @@ import {
   loginAndSaveGameSession,
   GAME_STORAGE_STATE_PATH,
   GAME_SERVER_UUID,
-  GAME_SERVER_NAME,
 } from "../../../utils/gameAuth";
 
 // Чужие/несуществующие UUID (валидный формат). Реальный — для baseline-контраста.
@@ -53,7 +52,7 @@ test.describe("[game-panel] Security — IDOR + input validation", () => {
       dialogFired = true;
       await d.dismiss().catch(() => {});
     });
-    backups = new GamePanelBackupsPage(page, GAME_SERVER_UUID, GAME_SERVER_NAME);
+    backups = new GamePanelBackupsPage(page, GAME_SERVER_UUID);
     files = new GamePanelFilesPage(page, GAME_SERVER_UUID);
     await backups.goto();
     await backups.deleteIfPresent(XSS_NAME); // мусор от прошлого упавшего прогона

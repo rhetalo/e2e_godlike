@@ -27,6 +27,7 @@
   "devDependencies": {
     "@playwright/test": "^1.60.0",
     "@types/node": "^25.2.1",
+    "dotenv": "^17.4.2",
     "eslint": "^9.39.4",
     "eslint-plugin-playwright": "^2.10.4",
     "globals": "^15.15.0",

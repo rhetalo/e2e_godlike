@@ -20,7 +20,6 @@ export class GamePanelBackupsPage extends GamePanelBasePage {
   constructor(
     page: Page,
     private readonly uuid: string,
-    private readonly serverName: string,
   ) {
     super(page);
   }
@@ -41,13 +40,15 @@ export class GamePanelBackupsPage extends GamePanelBasePage {
     return this.page.locator(GAME_PANEL_BACKUPS.tab);
   }
 
-  /** Выбрать сервер в v-select (без него «Create Backup» остаётся disabled). */
+  /**
+   * Выбрать сервер в v-select (без него «Create Backup» остаётся disabled). Страница уже
+   * скоуплена по UUID (/server/{uuid}/backups), поэтому в дропдане РОВНО одна опция — текущий
+   * сервер. Берём первую опцию, а не матчим по имени: имя сервера меняется при переименовании
+   * (это и ломало тесты), UUID в URL — нет. Подтверждено live-recon 27-Jun-2026 (1 опция).
+   */
   private async selectServer(): Promise<void> {
     await this.page.locator(GAME_PANEL_BACKUPS.serverSelectField).first().click();
-    const opt = this.page
-      .locator(GAME_PANEL_BACKUPS.overlayOption)
-      .filter({ hasText: this.serverName })
-      .first();
+    const opt = this.page.locator(GAME_PANEL_BACKUPS.overlayOption).first();
     await opt.waitFor({ state: "visible", timeout: 6_000 });
     await opt.click();
   }

@@ -1,4 +1,16 @@
 import { defineConfig, devices, type ReporterDescription } from '@playwright/test';
+// Подгружаем .env в process.env ДО чтения переменных ниже. dotenv по умолчанию НЕ перезаписывает
+// уже заданные переменные → на CI (GitLab/VPS-cron) реальные env-vars побеждают, локально .env
+// заполняет недостающее. Без этого .env был инертен и весь код брал хардкод-фолбэки (utils/*).
+import 'dotenv/config';
+
+// Slack-вебхук: .env содержит ПЛЕЙСХОЛДЕР («…/T.../B.../...»). После подключения dotenv он бы
+// активировался → репортёр стучался бы в несуществующий URL каждый прогон. Считаем плейсхолдер
+// (с «...») пустым; реальный вебхук приходит из GitLab CI/CD Variable.
+const slackWebhookUrl =
+  process.env.SLACK_WEBHOOK_URL && !process.env.SLACK_WEBHOOK_URL.includes('...')
+    ? process.env.SLACK_WEBHOOK_URL
+    : '';
 
 export default defineConfig({
   testDir: './tests',
@@ -42,7 +54,7 @@ export default defineConfig({
     [
       './utils/PerFileSlackReporter.ts',
       {
-        webhookUrl: process.env.SLACK_WEBHOOK_URL || '',
+        webhookUrl: slackWebhookUrl,
         meta: [
           { key: 'Branch', value: process.env.CI_COMMIT_REF_NAME || 'local' },
           { key: 'Job URL', value: process.env.CI_JOB_URL || '' },

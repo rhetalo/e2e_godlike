@@ -22,7 +22,6 @@ import {
   GAME_STORAGE_STATE_PATH,
   GAME_INVITEE_STORAGE_STATE_PATH,
   GAME_SERVER_UUID,
-  GAME_SERVER_NAME,
 } from "../../../utils/gameAuth";
 
 test.describe.configure({ mode: "serial" });
@@ -54,7 +53,7 @@ test.describe("[game-panel] Role enforcement — Member vs Co-owner", () => {
     ownerSharing = new GamePanelSharingPage(await ownerCtx.newPage(), GAME_SERVER_UUID);
     const inviteePage = await inviteeCtx.newPage();
     srv = new GamePanelServerPage(inviteePage, GAME_SERVER_UUID);
-    backups = new GamePanelBackupsPage(inviteePage, GAME_SERVER_UUID, GAME_SERVER_NAME);
+    backups = new GamePanelBackupsPage(inviteePage, GAME_SERVER_UUID);
   });
 
   test.afterAll(async () => {

@@ -205,6 +205,14 @@ export class GamePanelServerPage extends GamePanelBasePage {
     return this.page.getByText(name).first();
   }
 
+  /**
+   * Текущее (живое) имя сервера из заголовка overview. Имя меняется при переименовании, поэтому
+   * читаем его со страницы, а не из хардкода — для случаев, где UI оперирует именем (дашборд).
+   */
+  async getServerName(): Promise<string> {
+    return ((await this.overviewTitle.textContent().catch(() => "")) ?? "").trim();
+  }
+
   /** Видимая строка адреса подключения (Server IP) в Server Information. */
   get addressLabel(): Locator {
     return this.page.locator(GAME_PANEL_SERVER.connectionValue).first();
