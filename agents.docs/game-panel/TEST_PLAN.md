@@ -184,6 +184,12 @@ IDOR — read-only. XSS — мутации (свой бэкап/папка, уд
 
 > **Maintenance 19-Jun-2026:** REF-001 усилен (реф-ссылка несёт реальный код) + починен устаревший
 > селектор `refLink` (Vuetify; см. KNOWLEDGE_BASE §7g). Счёт тестов не изменился; следующий фокус — прежний (ниже).
+>
+> **Maintenance 27-Jun-2026:** регрессия после переименования main-сервера (`test_e2e`→`Fcz3VN5n_439772`).
+> Корень — `.env` не грузился (нет `dotenv`), код жил на хардкод-фолбэке `?? "test_e2e"`. Фикс: подключён
+> `dotenv` + **идентичность сервера = UUID, не имя** (убран `GAME_SERVER_NAME`; ассерты на UUID/структуру;
+> где UI требует имя — читаем живьём `getServerName()`; backups v-select берёт единственную опцию). Детали —
+> `CODE_REVIEW.md` ENV-001. Счёт тестов не изменился; следующий фокус — прежний (ниже).
 
 Реализовано: **~64 теста**. База (36): Phase 1 (8) + power (3) + console (2) + files (2) + config (2) + players (2) + backups (2) + sharing (5) + Port&Domains (2) + Tasks (2) + role enforcement (3) + security (3). + 07-Jun MCP-сессия (15) + 09-Jun (13: FILE-005/006, SEC-004, AUTH-004, SEC-005, SHR-006, BKP-003, LOGIN-004/005/006, DASH-003/004, NET-004). (+ storefront LOC-001/002/003 — отдельно, не в этом счёте.)
 **07-Jun (MCP-сессия, +15 тестов):** VER×2, EXT×2, REF, UPG, PREM, NET-003, FILE-003, SFTP-001, CF-001, FILE-004, CON-003, TASK-003, EDIT-001 — детали в секциях ниже («Live-recon Round-1/2/3 (MCP)» + «Реализовано из матрицы»). Онлайн-набор (PWR/CON/PLR) **пере-подтверждён зелёным** после реинсталла сервера. `npx tsc --noEmit` чистый. Сравнение Playwright MCP vs наш код-формат — `agents.docs/MCP_RECON_VS_CODE.md`.
