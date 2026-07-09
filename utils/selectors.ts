@@ -340,7 +340,8 @@ export const MOBILE_CART = {
   promocodeToggle: ".cart__promocode-button",
   promocodeInput: '.cart__input[placeholder="Enter your promocode"]',
   promocodeApplyButton: ".cart__promocode .cart__button",
-  // Результат применения промокода: при невалидном коде показывает текст ошибки. (16-Jun-2026)
+  // Результат применения промокода: показывает % скидки применённого кода. Невалидный код на
+  // не-месячном периоде отображается с «0% OFF» (скидки нет). (16-Jun-2026; акция 09-Jul-2026)
   promocodeDisplayPrice: ".cart__promocode-display-price",
 
   /* --- Auth (mobile variant) --- */

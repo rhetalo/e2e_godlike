@@ -30,26 +30,35 @@ for (const game of games) {
   test(`@critical Промокод по правилу expectPromoValid для игры: ${game.name}`, async ({
     browser,
   }) => {
-    test.setTimeout(60_000);
+    // Long-term добавляет переключение периода на каждый тариф; у игр с 7+ тарифами 60с мало.
+    test.setTimeout(120_000);
     const expectPromoValid = game.expectPromoValid ?? false;
     const context = await browser.newContext({ storageState: storageStatePath });
     await pinAmplitudeExperiments(context);
     const page = await context.newPage();
 
     try {
-      const results = await new GameStorefrontPage(page).collectTariffPromoResults(game.name);
+      // Читаем на long-term (3 мес) — там акции MONTHLY75 нет никогда (см. ниже).
+      const results = await new GameStorefrontPage(page).collectTariffPromoResults(
+        game.name,
+        "longTerm",
+      );
 
       await test.step("найдены тарифы с Add to Cart", async () => {
         expect(results.length, `нет тарифов с Add to Cart для ${game.name}`).toBeGreaterThan(0);
       });
 
-      await test.step(`активация совпадает с expectPromoValid=${expectPromoValid}`, async () => {
+      await test.step(`long-term: дефолтный промо совпадает с expectPromoValid=${expectPromoValid}`, async () => {
+        // На не-месячном периоде (3 мес) НИКОГДА нет акции MONTHLY75 (она только на 1 месяц +
+        // её состояние не детерминировано между окружениями — пин Amplitude гасит её локально,
+        // но не на CI). Значит применяется дефолтный одноразовый промо (VANILLA20); под стандартным
+        // (израсходованным) аккаунтом он invalid, кроме игр с expectPromoValid=true.
         const mismatches = results
           .filter((r) => r.activated !== expectPromoValid)
           .map((r) => `${r.title}: activated=${r.activated}, ожидалось ${expectPromoValid} (${r.text})`);
         expect(
           mismatches,
-          `Несоответствие промо для ${game.name}:\n${mismatches.join("\n")}`,
+          `Несоответствие дефолтного промо (long-term) для ${game.name}:\n${mismatches.join("\n")}`,
         ).toEqual([]);
       });
     } finally {

@@ -27,7 +27,8 @@ test.beforeAll(async ({ browser }) => {
 
 for (const game of games) {
   test(`@critical Промокод активен для игры: ${game.name}`, async ({ browser }) => {
-    test.setTimeout(60_000);
+    // Игры с множеством тарифов (Minecraft ~9) + чтение промо на каждом → 60с мало.
+    test.setTimeout(120_000);
     const context = await browser.newContext({ storageState: storageStatePath });
     await pinAmplitudeExperiments(context);
     const page = await context.newPage();
@@ -39,7 +40,8 @@ for (const game of games) {
         expect(results.length, `нет тарифов с Add to Cart для ${game.name}`).toBeGreaterThan(0);
       });
 
-      await test.step("промокод активировался на каждом тарифе", async () => {
+      await test.step("промокод активировался на каждом тарифе (monthly)", async () => {
+        // Свежий аккаунт: на 1 месяц действует акция MONTHLY75 (для всех) → активен на каждом тарифе.
         const notActivated = results
           .filter((r) => !r.activated)
           .map((r) => `${r.title}: ${r.text}`);
