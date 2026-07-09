@@ -191,9 +191,8 @@ test("@critical оформление заказа с кредитным бала
   // ПРОВЕРКА 6: Проверка финального URL после прохождения всех шагов настройки
   // После выбора локации пользователь должен оказаться на странице оформления заказа
   // Страница checkout - это последний этап перед оплатой
-  await expect(page).toHaveURL(
-    "https://godlike.host/clientarea/cart.php?a=checkout",
-  );
+  // Толерантно к трекинг-суффиксам (?…&rtkcid=/amplitude), которые прод добавляет в URL.
+  await expect(page).toHaveURL(/\/clientarea\/cart\.php\?a=checkout/);
 
   // ШАГ 10: Поиск заголовка "Review & Checkout" (Проверка и оформление)
   // page.getByRole('heading', { name: 'Review & Checkout' }) - ищет заголовок страницы
@@ -229,7 +228,5 @@ test("@critical оформление заказа с кредитным бала
 
   // ШАГ 13: Финальная проверка успешной оплаты
   // Если мы на странице complete — значит оплата прошла успешно
-  await expect(page).toHaveURL(
-    "https://godlike.host/clientarea/cart.php?a=complete",
-  );
+  await expect(page).toHaveURL(/\/clientarea\/cart\.php\?a=complete/);
 });

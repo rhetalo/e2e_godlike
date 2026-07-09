@@ -8,7 +8,6 @@
  * Навигация до checkout — reachCheckout() через page objects (StorefrontHomePage/CartPage).
  */
 import { test, expect, type Page } from "../../fixtures/base";
-import { PaymentUrlPatterns } from "../../fixtures/test-data";
 import { StorefrontHomePage } from "../../pages/StorefrontHomePage";
 import { CartPage } from "../../pages/CartPage";
 import { CheckoutPage } from "../../pages/CheckoutPage";
@@ -35,13 +34,9 @@ async function reachCheckout(page: Page): Promise<void> {
   const advanced = await cart.loginAndAwaitStep2();
   expect(advanced, "ожидали переход на step 2 после логина").toBeTruthy();
 
-  await Promise.all([page.waitForURL(/cart\?/), cart.clickNextStep()]);
-  await Promise.all([
-    page.waitForURL((u) => PaymentUrlPatterns.some((re) => re.test(u.toString())), {
-      timeout: 60_000,
-    }),
-    cart.clickNextStep(),
-  ]);
+  // Идём до WHMCS-оплаты через все Vue-шаги (billing → Configure/location), не хардкодя их число.
+  await cart.advanceToPayment();
+  await expect(page).toHaveURL(/\/clientarea\/cart\.php\?a=checkout/);
   await expect(checkout.reviewHeading()).toBeVisible();
 }
 

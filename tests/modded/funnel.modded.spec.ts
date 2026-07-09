@@ -13,11 +13,7 @@ import { ModdedHostingPage } from "../../pages/ModdedHostingPage";
 import { CartPage } from "../../pages/CartPage";
 import { CartModdedNewPage } from "../../pages/CartModdedNewPage";
 import { CheckoutPage } from "../../pages/CheckoutPage";
-import {
-  Credentials,
-  PaymentUrlPatterns,
-  VueCartStep2Pattern,
-} from "../../fixtures/test-data";
+import { Credentials, VueCartStep2Pattern } from "../../fixtures/test-data";
 import { loginClientareaAndSaveSession } from "../../utils/clientareaAuth";
 
 const storageStatePath = "storageState.modded.json";
@@ -94,14 +90,9 @@ test.describe("Воронка покупки modded (стоп на страни�
 
       await test.step("Next step → WHMCS payment page", async () => {
         await expect(cartPage.nextStepButton()).toBeVisible({ timeout: 15_000 });
-        // Первый Next step (в пределах Vue-корзины), затем — переход на WHMCS checkout.
-        await Promise.all([page.waitForURL(/cart\?/), cartPage.clickNextStep()]);
-        await Promise.all([
-          page.waitForURL((url) => PaymentUrlPatterns.some((re) => re.test(url.toString())), {
-            timeout: 60_000,
-          }),
-          cartPage.clickNextStep(),
-        ]);
+        // Идём до payment-URL через все Vue-шаги (billing → Configure/location), не хардкодя
+        // их число (между billing и WHMCS появился шаг «Configure your server»).
+        await cartPage.advanceToPayment();
       });
 
       await test.step("на странице оплаты: видны шлюзы; Continue НЕ жмём", async () => {

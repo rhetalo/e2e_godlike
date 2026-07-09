@@ -25,7 +25,7 @@
  */
 import type { Locator } from "@playwright/test";
 import { BasePage } from "./BasePage";
-import { Credentials, VueCartStep2Pattern } from "../fixtures/test-data";
+import { Credentials, VueCartStep2Pattern, PaymentUrlPatterns } from "../fixtures/test-data";
 
 export class CartPage extends BasePage {
   // ─── step 1 (auth-block) ──────────────────────────────────────────────────
@@ -155,8 +155,55 @@ export class CartPage extends BasePage {
   }
 
   async clickNextStep(): Promise<void> {
-    const btn = this.nextStepButton();
-    await btn.scrollIntoViewIfNeeded();
-    await btn.click({ force: true });
+    // Кнопка «Next step» ре-рендерится при смене Vue-шага и детачится из DOM («not attached»);
+    // force:true не ретраит actionability, поэтому одиночный клик мигал. Ретраим с РЕ-РЕЗОЛВОМ
+    // локатора. Если во время ретраев ушли на WHMCS (редирект финального шага) — выходим без
+    // ошибки: кнопки Next там нет. force — Vue-обработчик, нативный клик не всегда проходит.
+    let lastErr: unknown;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (this.reachedPaymentArea()) return;
+      const btn = this.nextStepButton();
+      try {
+        await btn.waitFor({ state: "visible", timeout: 10_000 });
+        await btn.click({ force: true, timeout: 10_000 });
+        return;
+      } catch (e) {
+        lastErr = e;
+      }
+    }
+    if (this.reachedPaymentArea()) return;
+    throw lastErr;
+  }
+
+  /** True, если мы уже на WHMCS-странице оплаты (cart.php?a=checkout/complete/viewinvoice). */
+  isOnPaymentStep(): boolean {
+    return PaymentUrlPatterns.some((re) => re.test(this.page.url()));
+  }
+
+  /**
+   * Дошли до платёжной зоны: либо точный payment-URL, либо в принципе ушли из Vue-корзины на
+   * WHMCS (`/clientarea/…`). Второе надёжнее точного `?a=checkout` — не зависит от формы query
+   * (валюта/трекинг-суффиксы/промежуточные хопы редиректа).
+   */
+  reachedPaymentArea(): boolean {
+    return this.isOnPaymentStep() || this.page.url().includes("/clientarea/");
+  }
+
+  /**
+   * Пройти оставшиеся Vue-шаги корзины кликами «Next step», пока не уйдём на WHMCS-оплату.
+   * Между billing (step 2) и оплатой есть шаг «Configure your server» (location/тип) — число
+   * промежуточных шагов может меняться, поэтому не хардкодим N кликов, а идём до /clientarea/.
+   * Прежняя версия падала: waitForURL(u!=before) резолвился на промежуточном хопе, затем
+   * clickNextStep звался уже на WHMCS (кнопки Next нет) → таймаут. Теперь стоп ловит /clientarea/,
+   * а clickNextStep сам выходит при попадании на WHMCS.
+   */
+  async advanceToPayment(maxSteps = 4): Promise<void> {
+    for (let i = 0; i < maxSteps && !this.reachedPaymentArea(); i++) {
+      const before = this.page.url();
+      await this.clickNextStep();
+      await this.page
+        .waitForURL((u) => u.toString() !== before, { timeout: 60_000 })
+        .catch(() => {});
+    }
   }
 }

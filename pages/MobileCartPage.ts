@@ -267,8 +267,14 @@ export class MobileCartPage {
   /* --- Promocode --- */
 
   async expandPromocode(): Promise<void> {
-    await this.promocodeToggle.click();
-    await this.page.locator(MOBILE_CART.promocodeInput).waitFor({ state: 'visible' });
+    // На не-месячных периодах поле промокода показано сразу (без тоггла); на monthly с активной
+    // акцией оно свёрнуто под «Have a Promocode?». Кликаем тоггл только если инпута ещё не видно.
+    const input = this.page.locator(MOBILE_CART.promocodeInput);
+    if (await input.isVisible().catch(() => false)) return;
+    if (await this.promocodeToggle.isVisible().catch(() => false)) {
+      await this.promocodeToggle.click();
+    }
+    await input.waitFor({ state: 'visible', timeout: 8_000 });
   }
 
   async applyPromocode(code: string): Promise<void> {

@@ -9,7 +9,7 @@ import { test, expect } from "../../fixtures/base";
 import { StorefrontHomePage } from "../../pages/StorefrontHomePage";
 import { CartPage } from "../../pages/CartPage";
 import { CheckoutPage } from "../../pages/CheckoutPage";
-import { BASE_URL, Urls, PaymentUrlPatterns } from "../../fixtures/test-data";
+import { BASE_URL } from "../../fixtures/test-data";
 
 test.use({ viewport: { width: 1800, height: 900 }, deviceScaleFactor: 1 });
 
@@ -30,18 +30,14 @@ test("@smoke @critical базовая воронка покупки", async ({ p
     expect(advanced, "ожидали переход на step 2 после логина").toBeTruthy();
   });
 
-  await test.step("Next step ×2 → WHMCS Review & Checkout", async () => {
-    await Promise.all([page.waitForURL(/cart\?/), cart.clickNextStep()]);
-    await Promise.all([
-      page.waitForURL((u) => PaymentUrlPatterns.some((re) => re.test(u.toString())), {
-        timeout: 60_000,
-      }),
-      cart.clickNextStep(),
-    ]);
+  await test.step("проходим Vue-шаги (billing → Configure) до WHMCS Review & Checkout", async () => {
+    // Идём до payment-URL, не хардкодя число промежуточных шагов (между billing и оплатой
+    // есть шаг «Configure your server»/location).
+    await cart.advanceToPayment();
+    await expect(page).toHaveURL(/\/clientarea\/cart\.php\?a=checkout/);
   });
 
   await test.step("страница Review & Checkout видна (стоп до оплаты)", async () => {
-    await expect(page).toHaveURL(/\/clientarea\/cart\.php\?a=checkout/);
     await expect(checkout.reviewHeading()).toBeVisible();
   });
 });
@@ -50,5 +46,7 @@ test("@regression старая ссылка воронки редиректит 
   await page.goto(
     `${BASE_URL}/clientarea/cart.php?a=add&pid=341&billingcycle=monthly&currency=1&language=english&promocode=VANILLA20`,
   );
-  await expect(page).toHaveURL(`${BASE_URL}${Urls.home}`);
+  // Редирект на главную. Толерантно к трекинг-суффиксам в URL (?rtkcid=… / amplitude), которые
+  // прод стал добавлять в ссылки (09-Jul-2026) — иначе точный матч главной падал.
+  await expect(page).toHaveURL(/^https:\/\/godlike\.host\/?(\?.*)?$/);
 });

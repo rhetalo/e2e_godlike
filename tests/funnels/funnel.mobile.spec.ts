@@ -119,23 +119,29 @@ test.describe("Мобильная воронка корзины", () => {
     });
   });
 
-  test("@critical невалидный промокод: ошибка показана и цена не меняется", async () => {
+  test("@critical невалидный промокод: скидка не применяется, цена не меняется", async () => {
     let base = NaN;
     // Изоляция от предыдущего serial-теста: чистая корзина.
     await cart.goto();
 
-    await test.step("Minecraft по чипу → базовая цена > 0", async () => {
+    await test.step("Minecraft + период 3 Months (вне акции) → базовая цена > 0", async () => {
       await cart.selectGameByChip("Minecraft");
-      base = await cart.getTotalPriceSettled();
-      console.log(`[mobile] Minecraft, цена до промокода = ${base}`);
+      const monthly = await cart.getTotalPriceSettled();
+      // Акция MONTHLY75 применяется ТОЛЬКО на 1 месяц и перехватывает поле промокода (свой код
+      // молча отвергается, акционный авто-возвращается). На не-месячном периоде акции нет → поле
+      // промокода чистое, и можно детерминированно проверить, что мусорный код скидки не даёт.
+      // (live-recon 09-Jul-2026: на 3 месяца ТЕСТ123 применяется с «0% OFF», цена не меняется.)
+      await cart.selectBillingPeriod("3 Months");
+      base = await cart.getTotalPriceAfterChange(monthly);
+      console.log(`[mobile] Minecraft 3 Months, цена до промокода = ${base}`);
       expect(base).toBeGreaterThan(0);
     });
 
-    await test.step("невалидный код → показана ошибка, скидка не применена", async () => {
+    await test.step("невалидный код → 0% скидки, итоговая цена не изменилась", async () => {
       await cart.applyPromocode("ТЕСТ123");
       await expect(cart.promoResult).toBeVisible({ timeout: 10_000 });
       const msg = await cart.getPromoResultText();
-      console.log(`[mobile] промокод "ТЕСТ123" → сообщение: "${msg}"; цена должна остаться ${base}`);
+      console.log(`[mobile] промокод "ТЕСТ123" → результат: "${msg}"; цена должна остаться ${base}`);
       expect(msg.length).toBeGreaterThan(0);
       // Главное поведение: невалидный код НЕ изменил итоговую цену.
       await expect
