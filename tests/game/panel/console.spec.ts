@@ -22,13 +22,15 @@ test.describe("@critical [game-panel] Консоль", () => {
   let srv: GamePanelServerPage;
 
   test.beforeAll(async ({ browser }) => {
-    test.setTimeout(360_000); // старт сервера + ожидание готовности
+    // Бюджет хука ≥ суммы внутренних ожиданий (ensureOnline 360 + waitForConsoleReady 180 = 540),
+    // иначе хук падал раньше, чем сервер успевал подняться на медленном старте (version-fetch лаг).
+    test.setTimeout(600_000);
     await loginAndSaveGameSession(browser);
     context = await browser.newContext({ storageState: GAME_STORAGE_STATE_PATH });
     const page = await context.newPage();
     srv = new GamePanelServerPage(page, GAME_SERVER_CONSOLE_UUID);
     await srv.goto();
-    await srv.ensureOnline(300_000);
+    await srv.ensureOnline(360_000);
     await srv.waitForConsoleReady(180_000);
   });
 

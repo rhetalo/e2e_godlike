@@ -83,22 +83,30 @@ export class GamePanelServerPage extends GamePanelBasePage {
   }
 
   // ── Power actions (МУТИРУЮЩИЕ — только Phase 2 с teardown) ─────
+  // Power-кнопка temporarily DISABLED, пока сервер в переходном состоянии (Stopping/Starting/
+  // Installing). Дефолтный actionTimeout (15с) не переживал «element is not enabled» на
+  // подлагивающем сервере (соседний тест оставил его дозаканчивать операцию). Даём клику щедрый
+  // таймаут — он auto-ждёт, пока кнопка станет enabled (сервер выйдет из перехода).
+  private static readonly POWER_CLICK_TIMEOUT = 120_000;
+
   /** Клик Start + приём EULA. НЕ ждёт Online — используйте waitForOnline(). */
   async clickStart(): Promise<void> {
-    await this.startButton.click();
+    if (await this.isOnline()) return; // уже онлайн — «Start» превратился в «Shut Down»
+    await this.startButton.click({ timeout: GamePanelServerPage.POWER_CLICK_TIMEOUT });
     await this.acceptEulaIfPresent();
   }
   async clickRestart(): Promise<void> {
-    await this.restartButton.click();
+    await this.restartButton.click({ timeout: GamePanelServerPage.POWER_CLICK_TIMEOUT });
     await this.confirmDialogIfPresent(GAME_PANEL_DIALOG.restartTitle);
   }
   async clickKill(): Promise<void> {
-    await this.killButton.click();
+    await this.killButton.click({ timeout: GamePanelServerPage.POWER_CLICK_TIMEOUT });
     await this.confirmDialogIfPresent(GAME_PANEL_DIALOG.killTitle);
   }
   /** Shut Down — тоггл Start'а, без модалки (на всякий случай подтверждаем, если появилась). */
   async clickShutDown(): Promise<void> {
-    await this.shutDownButton.click();
+    if (await this.isOffline()) return; // уже оффлайн — «Shut Down» превратился в «Start»
+    await this.shutDownButton.click({ timeout: GamePanelServerPage.POWER_CLICK_TIMEOUT });
     const dlg = this.page.locator(GAME_PANEL_DIALOG.root).first();
     if (await dlg.isVisible({ timeout: 1_500 }).catch(() => false)) {
       await dlg.locator(GAME_PANEL_DIALOG.confirmBtn).first().click().catch(() => {});

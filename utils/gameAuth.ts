@@ -17,11 +17,15 @@ export const GAME_EMAIL = process.env.GAME_PANEL_EMAIL ?? "test@testmail.com";
 export const GAME_PASSWORD = process.env.GAME_PANEL_PASSWORD ?? "test@testmail.com";
 export const GAME_STORAGE_STATE_PATH = path.join(__dirname, "..", "storageState.game.json");
 
-/** Текущий тестовый сервер (Minecraft, Paper). Переопределяется через env. */
+/** Канонический тестовый сервер (Minecraft, Paper). UUID + имя заданы в .env → CI; фолбэки
+ *  синхронизированы с ними. ⚠️ Реинстолл 07-Jun сбросил имя test_e2e на авто-имя
+ *  «Fcz3VN5n_439772» (подтверждено live-recon 09-Jul; UUID неизменен). Дедики (power/backup/
+ *  file/console/rename) НЕ дрейфнули. Если сервер снова реинсталлят → имя опять сменится:
+ *  обновить GAME_PANEL_SERVER_NAME в .env/CI (и фолбэк ниже). */
 export const GAME_SERVER_UUID =
   process.env.GAME_PANEL_SERVER_UUID ?? "ebb03adc-48bf-46f1-95dd-a45d07f0d23d";
 export const GAME_SERVER_NAME =
-  process.env.GAME_PANEL_SERVER_NAME ?? "test_e2e";
+  process.env.GAME_PANEL_SERVER_NAME ?? "Fcz3VN5n_439772";
 
 /**
  * Изоляция мутаций по выделенным серверам (один аккаунт, разные серверы) — чтобы тесты не

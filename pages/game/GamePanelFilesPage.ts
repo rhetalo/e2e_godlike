@@ -7,7 +7,7 @@
  *
  * Методы — действия и читатели состояния; assert'ы в спеках.
  */
-import { type Locator, type Page } from "@playwright/test";
+import { type Locator, type Page, expect } from "@playwright/test";
 import { GamePanelBasePage } from "./GamePanelBasePage";
 import { GAME_PANEL_FILES } from "../../utils/selectors";
 
@@ -59,10 +59,23 @@ export class GamePanelFilesPage extends GamePanelBasePage {
     await this.fileEntry(name).waitFor({ state: "visible", timeout: 10_000 });
   }
 
+  /**
+   * Выбрать строку по имени. Vuetify-чекбокс в v-data-table: реальный <input> скрыт и
+   * управляется обёрткой .v-selection-control, а таблица асинхронно ре-рендерит строки —
+   * из-за чего .check({force}) флоил ("did not change its state": mouse-click попадал в
+   * момент ре-рендера, нативный toggle терялся). Санкционированный паттерн репо
+   * (TEST_GUIDELINES §7.5 / VpsPanelMediaPage): dispatchEvent('click') — синтетический
+   * клик прямо в узел, без скролла и гонки actionability — + web-first verify.
+   */
+  private async selectRow(name: string): Promise<void> {
+    const checkbox = this.fileRow(name).locator(GAME_PANEL_FILES.rowCheckbox).first();
+    await checkbox.dispatchEvent("click");
+    await expect(checkbox).toBeChecked({ timeout: 5_000 });
+  }
+
   /** Удалить запись: чекбокс строки → нижний Delete → подтверждение. */
   async deleteEntry(name: string): Promise<void> {
-    const row = this.fileRow(name);
-    await row.locator(GAME_PANEL_FILES.rowCheckbox).first().check({ force: true });
+    await this.selectRow(name);
     await this.page
       .locator(`${GAME_PANEL_FILES.footerActionGroup} button`)
       .filter({ hasText: /^\s*Delete\s*$/ })
@@ -192,8 +205,7 @@ export class GamePanelFilesPage extends GamePanelBasePage {
 
   /** Восстановить запись из корзины: чекбокс строки → bulk "Restore". Self-cleaning в спеке. */
   async restoreEntry(name: string): Promise<void> {
-    const row = this.fileRow(name);
-    await row.locator(GAME_PANEL_FILES.rowCheckbox).first().check({ force: true });
+    await this.selectRow(name);
     // Restore — отдельная кнопка вне footerActionGroup; .click() дождётся снятия disabled после выбора.
     await this.page.locator(GAME_PANEL_FILES.recycleRestoreButton).first().click();
     await this.fileEntry(name).waitFor({ state: "hidden", timeout: 10_000 }).catch(() => {});

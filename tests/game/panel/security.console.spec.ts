@@ -34,7 +34,9 @@ test.describe("@regression [game-panel] Security — инъекция в кон�
   let dialogFired = false;
 
   test.beforeAll(async ({ browser }) => {
-    test.setTimeout(480_000); // боот сервера до готовности консоли — щедро
+    // Бюджет хука ≥ суммы ожиданий (ensureOnline 360 + waitForConsoleReady 360 = 720) — иначе
+    // хук падал на медленном старте сервера (version-fetch лаг) раньше готовности консоли.
+    test.setTimeout(780_000);
     await loginAndSaveGameSession(browser);
     context = await browser.newContext({ storageState: GAME_STORAGE_STATE_PATH });
     page = await context.newPage();
@@ -45,7 +47,7 @@ test.describe("@regression [game-panel] Security — инъекция в кон�
     });
     srv = new GamePanelServerPage(page, GAME_SERVER_CONSOLE_UUID);
     await srv.goto();
-    await srv.ensureOnline(300_000);
+    await srv.ensureOnline(360_000);
     await srv.waitForConsoleReady(360_000);
   });
 
