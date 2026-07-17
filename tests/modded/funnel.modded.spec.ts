@@ -38,14 +38,30 @@ test.beforeAll(async ({ browser }: { browser: Browser }) => {
  * момент авто-перехода на step 2 (флоки, воспроизводилось ~1 из 4).
  */
 async function ensurePastAuthStep(page: Page, cartPage: CartPage): Promise<void> {
-  const reachedStep2 = await page
-    .waitForURL(VueCartStep2Pattern, { timeout: 12_000 })
+  // Валидная сессия авто-проскакивает auth-блок на step2. Ждём ЩЕДРО (30с; было 12с): за это
+  // время ТРАНЗИЕНТНЫЙ auth-блок (мелькает даже у залогиненного) давно исчезает, поэтому fallback
+  // по нему больше НЕ триггерится — это и флокало (форма детачилась в момент авто-перехода).
+  if (await reachedStep2(page, 30_000)) return;
+
+  // 30с прошло, step2 нет. Если auth-блока НЕ видно — авто-переход ещё в процессе, дожидаемся.
+  if (!(await cartPage.isAuthBlockVisible())) {
+    await reachedStep2(page, 15_000);
+    return;
+  }
+
+  // Настоящий (стойкий) auth-блок → нужен ручной логин. Не роняем на гонке: авто-проскок мог
+  // случиться прямо во время попытки — финально перепроверяем step2.
+  await cartPage.loginAndAwaitStep2(Credentials.email, Credentials.password);
+  const onStep2 = await reachedStep2(page, 15_000);
+  expect(onStep2, "ожидали переход на ?step=2 после fallback-логина").toBeTruthy();
+}
+
+/** waitForURL(step2) → boolean (не бросает). */
+function reachedStep2(page: Page, timeout: number): Promise<boolean> {
+  return page
+    .waitForURL(VueCartStep2Pattern, { timeout })
     .then(() => true)
     .catch(() => false);
-  if (reachedStep2) return;
-  if (!(await cartPage.isAuthBlockVisible())) return;
-  const advanced = await cartPage.loginAndAwaitStep2(Credentials.email, Credentials.password);
-  expect(advanced, "ожидали переход на ?step=2 после fallback-логина").toBeTruthy();
 }
 
 test.describe("Воронка покупки modded (стоп на странице оплаты)", () => {
