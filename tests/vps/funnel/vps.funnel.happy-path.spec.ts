@@ -37,8 +37,9 @@ test.describe("@smoke @critical VPS-воронка — полный happy path",
         expect(page.url()).toMatch(/productId=\d+/);
       });
 
-      await test.step("Step 2: Billing — выбрать 1 Month → Next Step → Configure", async () => {
-        await cart.billing.selectCycle("1 Month");
+      await test.step("Step 2: Billing — выбрать 3 Months → Next Step → Configure", async () => {
+        // У первого VPS-плана 1-месячного периода нет (только 3/6/12) — берём минимальный доступный.
+        await cart.billing.selectCycle("3 Months");
         await cart.order.clickNextStep();
         await config.waitForConfigureStep();
       });

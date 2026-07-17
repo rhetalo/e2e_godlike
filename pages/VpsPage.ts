@@ -25,19 +25,23 @@ export class VpsPage {
     await new CookieBanner(this.page).dismissAll().catch(() => {});
   }
 
-  /** All plan cards on the page */
+  // ⚠️ Лендинг перестроили: планы разбиты на группы/категории, и БОЛЬШОЙ блок карточек скрыт
+  // по умолчанию (display:none). В DOM ~25 `a.deploy-btn`, но видимы только последние (напр.
+  // Nitro 1-7 на индексах 18-24). Поэтому берём ТОЛЬКО видимые (`:visible`) — иначе `.first()`
+  // ловил скрытую карточку (индекс 0) → «element hidden». Confirmed live-recon 17-Jul-2026.
+  /** Видимые plan cards. */
   get planCards(): Locator {
-    return this.page.locator(".vps-vds-dedi__plans-item");
+    return this.page.locator(".vps-vds-dedi__plans-item:visible");
   }
 
-  /** All "Deploy Now" buttons/links */
+  /** Видимые «Deploy Now» кнопки/ссылки. */
   get deployButtons(): Locator {
-    return this.page.locator("a.deploy-btn");
+    return this.page.locator("a.deploy-btn:visible");
   }
 
-  /** First "Deploy Now" link */
+  /** Первая ВИДИМАЯ «Deploy Now» ссылка. */
   get firstDeployButton(): Locator {
-    return this.page.locator("a.deploy-btn").first();
+    return this.deployButtons.first();
   }
 
   /** Plan card title */

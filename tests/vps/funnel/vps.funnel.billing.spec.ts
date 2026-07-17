@@ -18,7 +18,10 @@ import {
   parsePrice,
 } from "./vps.funnel.helpers";
 
-const PERIODS = ["1 Month", "3 Months", "6 Months", "12 Months"];
+// ⚠️ Первый VPS-план (Nitro 1) предлагает только 3/6/12 мес — 1-месячный период для него убрали
+// на проде (deploy-URL по умолчанию billingCycle=quarterly; confirmed live-recon 17-Jul-2026).
+// Воронка деплоит именно ПЕРВЫЙ план, поэтому проверяем его реальный набор периодов (без «1 Month»).
+const PERIODS = ["3 Months", "6 Months", "12 Months"];
 
 test.describe.configure({ mode: "serial" });
 
@@ -41,14 +44,14 @@ test.describe("@regression VPS-воронка — шаг Billing Cycle", () => {
     await context.close();
   });
 
-  test("периоды: 4 видны, цены ненулевые и уникальны, есть бейджи скидки", async () => {
-    await test.step("все 4 периода видны", async () => {
+  test("периоды: 3 видны, цены ненулевые и уникальны", async () => {
+    await test.step("все периоды (3/6/12) видны", async () => {
       for (const label of PERIODS) {
         await expect(cart.billing.period(label)).toBeVisible();
       }
     });
 
-    await test.step("у каждого периода ненулевая цена, все 4 уникальны", async () => {
+    await test.step("у каждого периода ненулевая цена, все уникальны", async () => {
       const prices: number[] = [];
       for (const label of PERIODS) {
         const priceEl = cart.billing.periodPrice(label);
@@ -58,16 +61,12 @@ test.describe("@regression VPS-воронка — шаг Billing Cycle", () => {
         expect(val, `${label}: цена 0`).toBeGreaterThan(0);
         prices.push(val);
       }
-      expect(new Set(prices).size, "у периодов должны быть разные цены").toBe(4);
+      expect(new Set(prices).size, "у периодов должны быть разные цены").toBe(PERIODS.length);
     });
 
-    await test.step("у периодов есть бейдж скидки (VPS20)", async () => {
-      const badges = cart.billing.discountBadges;
-      expect(await badges.count()).toBeGreaterThanOrEqual(1);
-      for (const t of await badges.allInnerTexts()) {
-        expect(t.trim()).toMatch(/\d+%/);
-      }
-    });
+    // Шаг «бейдж скидки на периоде» убран: прод удалил per-period discount-бейджи
+    // (.period__discount) с VPS-корзины (confirmed live-recon 17-Jul-2026). Скидка VPS20
+    // отражается в самих ценах; отдельного бейджа на карточке периода больше нет.
   });
 
   test("выбор периода отражается в summary; NEXT STEP активна", async () => {
@@ -75,7 +74,8 @@ test.describe("@regression VPS-воронка — шаг Billing Cycle", () => {
 
     await test.step("каждый выбранный период попадает в Billing cycle summary", async () => {
       await expect(caption).toBeVisible({ timeout: 10_000 });
-      for (const label of ["3 Months", "6 Months", "12 Months", "1 Month"]) {
+      // 1-месячного периода у первого плана нет (см. PERIODS) — перебираем доступные.
+      for (const label of ["6 Months", "12 Months", "3 Months"]) {
         await cart.billing.selectCycle(label);
         await expect(caption).toContainText(label);
       }
@@ -87,25 +87,26 @@ test.describe("@regression VPS-воронка — шаг Billing Cycle", () => {
     });
   });
 
-  test("итоговая стоимость ненулевая и растёт с 1 до 12 месяцев", async () => {
+  test("итоговая стоимость ненулевая и растёт с 3 до 12 месяцев", async () => {
     const total = cart.order.pricingPrice;
     await expect(total).toBeVisible({ timeout: 10_000 });
 
-    let total1m = NaN;
+    let total3m = NaN;
 
-    await test.step("1 Month → стоимость > 0", async () => {
-      await cart.billing.selectCycle("1 Month");
+    // Базой берём 3 месяца — минимальный доступный период у первого плана (1-месячного нет).
+    await test.step("3 Months → стоимость > 0", async () => {
+      await cart.billing.selectCycle("3 Months");
       await expect
         .poll(async () => parsePrice(await total.innerText()), { timeout: 5_000 })
         .toBeGreaterThan(0);
-      total1m = parsePrice(await total.innerText());
+      total3m = parsePrice(await total.innerText());
     });
 
-    await test.step("12 Months → стоимость за весь период больше, чем за 1 месяц", async () => {
+    await test.step("12 Months → стоимость за весь период больше, чем за 3 месяца", async () => {
       await cart.billing.selectCycle("12 Months");
       await expect
         .poll(async () => parsePrice(await total.innerText()), { timeout: 5_000 })
-        .toBeGreaterThan(total1m);
+        .toBeGreaterThan(total3m);
     });
   });
 });
