@@ -43,17 +43,24 @@ async function ensurePastAuthStep(page: Page, cartPage: CartPage): Promise<void>
   // по нему больше НЕ триггерится — это и флокало (форма детачилась в момент авто-перехода).
   if (await reachedStep2(page, 30_000)) return;
 
+  const authVisible = await cartPage.isAuthBlockVisible();
+  // Диагностика для VPS-прогона (локально не воспроизводится): состояние на 30с.
+  console.log(`[modded-auth] step2 не достигнут за 30с | authBlockVisible=${authVisible} | url=${page.url()}`);
+
   // 30с прошло, step2 нет. Если auth-блока НЕ видно — авто-переход ещё в процессе, дожидаемся.
-  if (!(await cartPage.isAuthBlockVisible())) {
+  if (!authVisible) {
     await reachedStep2(page, 15_000);
     return;
   }
 
-  // Настоящий (стойкий) auth-блок → нужен ручной логин. Не роняем на гонке: авто-проскок мог
-  // случиться прямо во время попытки — финально перепроверяем step2.
+  // Настоящий (стойкий) auth-блок → ручной логин. Сначала снимаем flash-sale/промо-оверлей —
+  // на свежих (VPS) сессиях он перехватывает клики по форме логина. Не роняем на гонке:
+  // авто-проскок мог случиться во время попытки — финально перепроверяем step2.
+  await cartPage.cookieBanner.dismissAll().catch(() => {});
   await cartPage.loginAndAwaitStep2(Credentials.email, Credentials.password);
   const onStep2 = await reachedStep2(page, 15_000);
-  expect(onStep2, "ожидали переход на ?step=2 после fallback-логина").toBeTruthy();
+  console.log(`[modded-auth] fallback-логин выполнен | onStep2=${onStep2} | url=${page.url()}`);
+  expect(onStep2, `ожидали ?step=2 после fallback-логина (url=${page.url()})`).toBeTruthy();
 }
 
 /** waitForURL(step2) → boolean (не бросает). */
@@ -109,10 +116,11 @@ test.describe("Воронка покупки modded (стоп на страни�
         // Идём до payment-URL через все Vue-шаги (billing → Configure/location), не хардкодя
         // их число (между billing и WHMCS появился шаг «Configure your server»).
         await cartPage.advanceToPayment();
+        console.log(`[modded] после advanceToPayment | url=${page.url()}`);
       });
 
       await test.step("на странице оплаты: видны шлюзы; Continue НЕ жмём", async () => {
-        expect(checkoutPage.isOnPaymentStep()).toBeTruthy();
+        expect(checkoutPage.isOnPaymentStep(), `не дошли до payment-URL: ${page.url()}`).toBeTruthy();
         await expect(checkoutPage.reviewHeading()).toBeVisible();
         await expect(checkoutPage.paymentMethodHeading()).toBeVisible();
         expect(await checkoutPage.gatewayPanels().count()).toBeGreaterThanOrEqual(1);
