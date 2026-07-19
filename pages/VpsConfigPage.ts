@@ -31,9 +31,14 @@ export class VpsConfigPage {
 
   /** Click a location by its label text */
   async selectLocation(name: string): Promise<void> {
+    // hasText — подстрока, и активная карточка несёт тот же класс `configure-server__location`
+    // → по имени может совпасть НЕСКОЛЬКО (активная + базовая, возможен responsive-дубль/несколько
+    // «USA»-регионов). Берём ВИДИМУЮ карточку с ТОЧНЫМ именем и первую — иначе strict-violation
+    // «resolved to 2 elements». (В части окружений локаций с «USA» две; live 17-Jul-2026.)
     await this.page
-      .locator(".configure-server__location")
-      .filter({ hasText: name })
+      .locator(".configure-server__location:visible")
+      .filter({ hasText: new RegExp(`^\\s*${name}\\s*$`) })
+      .first()
       .click();
     // Детерминированный сигнал применения: выбранная локация стала активной.
     await expect(this.activeLocation).toContainText(name);
