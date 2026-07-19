@@ -88,8 +88,8 @@ test.describe("Воронка покупки modded (стоп на страни�
         const installBtn = modded.installButtonByIndex(0);
         await expect(installBtn).toBeVisible();
         const m = await modded.readInstallMeta(installBtn);
-        expect(m.productId).toMatch(/^\d+$/);
-        expect(m.modpackId).toBeTruthy();
+        expect(m.productId, `productId install-кнопки не число: "${m.productId}"`).toMatch(/^\d+$/);
+        expect(m.modpackId, `modpackId пуст на install-кнопке лендинга: "${m.modpackId}"`).toBeTruthy();
         return m;
       });
 
@@ -102,7 +102,9 @@ test.describe("Воронка покупки modded (стоп на страни�
           installBtn.click({ force: true }),
         ]);
         await cartPage.cookieBanner.dismissAll();
-        expect(page.url()).toContain(`productId=${meta.productId}`);
+        expect(page.url(), `в URL корзины нет productId=${meta.productId}: ${page.url()}`).toContain(
+          `productId=${meta.productId}`,
+        );
       });
 
       await test.step("auth-block: авто-проскок сессией, иначе fallback-логин → step 2", async () => {
@@ -123,14 +125,17 @@ test.describe("Воронка покупки modded (стоп на страни�
         expect(checkoutPage.isOnPaymentStep(), `не дошли до payment-URL: ${page.url()}`).toBeTruthy();
         await expect(checkoutPage.reviewHeading()).toBeVisible();
         await expect(checkoutPage.paymentMethodHeading()).toBeVisible();
-        expect(await checkoutPage.gatewayPanels().count()).toBeGreaterThanOrEqual(1);
+        expect(
+          await checkoutPage.gatewayPanels().count(),
+          `нет платёжных шлюзов на ${page.url()}`,
+        ).toBeGreaterThanOrEqual(1);
 
         // SAFETY NET: финальная Continue должна присутствовать, но мы её НЕ жмём.
         const continueBtn = checkoutPage.placeOrderButton();
         if (await continueBtn.count()) {
           await expect(continueBtn.first()).toBeVisible();
         }
-        expect(checkoutPage.isOnPaymentStep()).toBeTruthy();
+        expect(checkoutPage.isOnPaymentStep(), `ушли со страницы оплаты: ${page.url()}`).toBeTruthy();
       });
     } finally {
       await context.close();
@@ -151,10 +156,10 @@ test.describe("Воронка покупки modded (стоп на страни�
       const calc = await test.step("калькулятор: читаем выбранный тариф + цену", async () => {
         await modded.open();
         const c = await modded.readCalculatorCartParams();
-        expect(c.productId).toMatch(/^\d+$/);
-        expect(c.modpackId).toBeTruthy();
+        expect(c.productId, `productId калькулятора не число: "${c.productId}"`).toMatch(/^\d+$/);
+        expect(c.modpackId, `modpackId калькулятора пуст: "${c.modpackId}"`).toBeTruthy();
         const price = await modded.readCalculatorPrice();
-        expect(price.current).toMatch(/[€$]\s?\d/);
+        expect(price.current, `цена калькулятора не распознана: "${price.current}"`).toMatch(/[€$]\s?\d/);
         return c;
       });
 
@@ -165,9 +170,9 @@ test.describe("Воронка покупки modded (стоп на страни�
         ]);
         await cartPage.cookieBanner.dismissAll();
         const url = new URL(page.url());
-        expect(url.pathname).toMatch(/\/cart-modded-new/);
-        expect(url.searchParams.get("productId")).toBe(calc.productId);
-        expect(url.searchParams.get("promo")).toBeTruthy();
+        expect(url.pathname, `не /cart-modded-new: ${url.pathname}`).toMatch(/\/cart-modded-new/);
+        expect(url.searchParams.get("productId"), `productId в URL ≠ ${calc.productId}`).toBe(calc.productId);
+        expect(url.searchParams.get("promo"), `нет promo в URL: ${page.url()}`).toBeTruthy();
       });
 
       await test.step("новый UI корзины смонтировался (план-селект + Order Now)", async () => {
