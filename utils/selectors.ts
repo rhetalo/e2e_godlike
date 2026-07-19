@@ -224,6 +224,37 @@ export const CART_MODDED_NEW = {
   orderButton: "button.form__button--primary", // "Order Now" (⚠️ оформляет заказ — НЕ жать)
 } as const;
 
+/* ===== Modpack Constructor (/custom-minecraft-modpacks-constructor/) ===== */
+// ⚠️ Web-component на Shadow DOM (build:embed) + ЛЕНИВАЯ гидрация: приложение
+// монтируется в #modpack-constructor.shadowRoot только после пользовательского
+// mouse-нуджа (см. ModpackConstructorPage.waitReady). Playwright сам пробивает
+// open shadow DOM для css/text/role-локаторов. Внутри — Tailwind (нестабильные
+// классы), поэтому опираемся на host-id + текст/роль. Confirmed live recon 10-Jul-2026.
+export const MODPACK_CONSTRUCTOR = {
+  host: "#modpack-constructor",
+  searchInput: "#modpack-constructor input[type='text']", // поиск срабатывает по Enter
+  // Кнопки идентифицируем по тексту через getByRole в Page Object:
+  //   Install / Uninstall / Clear All / Change Configuration / Save & Continue /
+  //   Compilation (Dry-Run) / Proceed with test run / Start 3-hour Demo / Download Client Mods
+  installedPanelRe: /Installed\s*\(\d+\)/i,
+  // API-эндпоинты (panel.godlike.host отдаёт CORS для origin godlike.host):
+  apiCatalog: "/api/v2/minecraft/mod-configurator", // ?provider=modrinth&search=&page=1
+  apiClientMods: "/api/v2/minecraft/mod-configurator/client-mods", // 200 zip | 400 {success:false}
+  apiTestSessions: "/api/v2/minecraft/mod-configurator/test-sessions",
+} as const;
+
+/* ===== Cart: Modpack Constructor (/cart-modpack-constructor/) ===== */
+// Vue-приложение монтируется в #app-cart; внешние данные приходят через data-* атрибуты
+// (data-billing-url / data-panel-url / data-product-group-id), НЕ из .env. Приложение
+// наполняется только в контексте воронки (?mod_test_session_id=..&location_id=..) и после
+// логина; при прямом заходе — форма login/register. Confirmed live recon 10-Jul-2026.
+export const CART_MODPACK_CONSTRUCTOR = {
+  root: "#app-cart",
+  loginEmail: "#loginFormEmail",
+  loginPassword: "#loginFormPassword",
+  urlPattern: /\/cart-modpack-constructor/,
+} as const;
+
 /* ===== Game Servers ===== */
 export const GAME_SERVERS = {
   filterTabs: '[class*="filter"]',
