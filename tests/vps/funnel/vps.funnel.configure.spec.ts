@@ -35,11 +35,13 @@ test.describe("@regression VPS-воронка — Configure", () => {
 
   test.describe("локации", () => {
     test("локации загружены, есть USA и Europe, одна активна; NEXT STEP активна", async () => {
-      await test.step("локации загружены (>= 1) и среди них USA и Europe", async () => {
+      await test.step("локации загружены (>= 1) и среди них есть US и Europe", async () => {
         expect(await config.locationItems.count()).toBeGreaterThanOrEqual(1);
         const titles = (await config.locationItems.allInnerTexts()).map((t) => t.trim());
-        expect(titles).toContain("USA");
-        expect(titles).toContain("Europe");
+        // Прод разбил USA на регионы ("USA (west)"/"USA (east)") → проверяем НАЛИЧИЕ US и Europe
+        // подстрокой, не точным равенством. (live 17-Jul-2026)
+        expect(titles.some((t) => /USA/i.test(t)), `нет US-локации в ${JSON.stringify(titles)}`).toBeTruthy();
+        expect(titles.some((t) => /Europe/i.test(t)), `нет Europe в ${JSON.stringify(titles)}`).toBeTruthy();
       });
 
       await test.step("одна локация активна по умолчанию", async () => {
@@ -53,15 +55,20 @@ test.describe("@regression VPS-воронка — Configure", () => {
     });
 
     test("смена локации меняет активную и обновляет Location в summary", async () => {
-      await test.step("USA → активна + summary Location = USA", async () => {
-        await config.selectLocation("USA");
-        expect(await config.getActiveLocationName()).toBe("USA");
+      // Имя US-локации берём из реального списка (регионы: "USA (west)"/"USA (east)"), не хардкодим
+      // «USA» — его точного больше нет. Ассерты — подстрокой (toContain), не toBe.
+      const titles = (await config.locationItems.allInnerTexts()).map((t) => t.trim());
+      const usName = titles.find((t) => /USA/i.test(t)) ?? "USA";
+
+      await test.step(`${usName} → активна + summary Location = US`, async () => {
+        await config.selectLocation(usName);
+        expect(await config.getActiveLocationName()).toContain("USA");
         await expect(config.orderLocation).toContainText("USA");
       });
 
       await test.step("Europe → активна + summary Location = Europe", async () => {
         await config.selectLocation("Europe");
-        expect(await config.getActiveLocationName()).toBe("Europe");
+        expect(await config.getActiveLocationName()).toContain("Europe");
         await expect(config.orderLocation).toContainText("Europe");
       });
     });
