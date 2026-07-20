@@ -244,6 +244,22 @@ export class ModpackConstructorPage extends BasePage {
     return resp;
   }
 
+  /**
+   * Дождаться готовности демо-сервера (компиляция ~2-5 мин): в модалке появляется "Server ready".
+   * Дефолтный таймаут 6 мин с запасом. Успех = сборка модпака скомпилировалась и сервер поднялся.
+   */
+  async waitForServerReady(timeoutMs = 360_000): Promise<void> {
+    await this.host()
+      .getByText(/Server ready/i)
+      .first()
+      .waitFor({ state: "visible", timeout: timeoutMs });
+  }
+
+  /** Закрыть модалку (Compatibility Check / Server ready). */
+  async closeModal(): Promise<void> {
+    await this.button(/^Close$/i).click();
+  }
+
   /** ⚠️ "Start 3-hour Demo" — уводит в воронку /cart-modpack-constructor/. */
   async startDemo(): Promise<void> {
     await this.button(/Start 3-hour Demo/i).click();

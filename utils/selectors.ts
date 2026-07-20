@@ -253,6 +253,8 @@ export const CART_MODPACK_CONSTRUCTOR = {
   loginEmail: "#loginFormEmail",
   loginPassword: "#loginFormPassword",
   urlPattern: /\/cart-modpack-constructor/,
+  // Успешное оформление триалки → редирект в биллинг на созданную услугу.
+  trialProductDetailsUrl: /\/clientarea\/clientarea\.php\?action=productdetails&id=\d+/,
 } as const;
 
 /* ===== Game Servers ===== */
