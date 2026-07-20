@@ -191,18 +191,27 @@ export class CartPage extends BasePage {
 
   /**
    * Пройти оставшиеся Vue-шаги корзины кликами «Next step», пока не уйдём на WHMCS-оплату.
-   * Между billing (step 2) и оплатой есть шаг «Configure your server» (location/тип) — число
-   * промежуточных шагов может меняться, поэтому не хардкодим N кликов, а идём до /clientarea/.
-   * Прежняя версия падала: waitForURL(u!=before) резолвился на промежуточном хопе, затем
-   * clickNextStep звался уже на WHMCS (кнопки Next нет) → таймаут. Теперь стоп ловит /clientarea/,
-   * а clickNextStep сам выходит при попадании на WHMCS.
+   * Между billing (step 2) и оплатой есть шаг «Configure your server» (location/тип сервера).
+   *
+   * ⚠️ Гоча шага Configure (подтверждено live-recon 20-Jul-2026, modded productId=346): step 3 не
+   * «созревает» мгновенно — пока Vue догружает список типов сервера, шаг считается невалидным и
+   * приложение ОТБРАСЫВАЕТ URL обратно на step=2 (наблюдался отскок step3→step2 через ~400 мс).
+   * Прежняя версия ждала `waitForURL(u !== before)` и засчитывала этот отскок step3→step2 как
+   * прогресс: на медленном CI осцилляция step2↔step3 проедала бюджет из N кликов, до оплаты дело
+   * не доходило → тест «застревал на step=3» (флоки, только CI). Поэтому ждём ИМЕННО уход на
+   * `/clientarea/` (bounce больше НЕ прогресс) и ретраим клик Next по реальному time-budget, а не
+   * по счётчику шагов: сколько бы отскоков ни случилось, как только конфиг догрузился — клик
+   * «прилипает» и уводит на оплату. `clickNextStep` сам выходит при попадании на WHMCS.
    */
-  async advanceToPayment(maxSteps = 4): Promise<void> {
-    for (let i = 0; i < maxSteps && !this.reachedPaymentArea(); i++) {
-      const before = this.page.url();
+  async advanceToPayment(timeoutMs = 90_000): Promise<void> {
+    const deadline = Date.now() + timeoutMs;
+    while (!this.reachedPaymentArea() && Date.now() < deadline) {
       await this.clickNextStep();
+      // Ждём ИМЕННО уход на WHMCS (все payment-URL — под /clientarea/), а не «URL сменился»:
+      // так отскок step3→step2 не считается прогрессом (см. JSDoc выше). Таймаут короткий —
+      // это лишь пауза между попытками клика в пределах общего time-budget.
       await this.page
-        .waitForURL((u) => u.toString() !== before, { timeout: 60_000 })
+        .waitForURL(/\/clientarea\//, { timeout: 6_000 })
         .catch(() => {});
     }
   }
