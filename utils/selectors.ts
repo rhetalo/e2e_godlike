@@ -255,6 +255,8 @@ export const CART_MODPACK_CONSTRUCTOR = {
   urlPattern: /\/cart-modpack-constructor/,
   // Успешное оформление триалки → редирект в биллинг на созданную услугу.
   trialProductDetailsUrl: /\/clientarea\/clientarea\.php\?action=productdetails&id=\d+/,
+  // Бэкенд-эндпоинт оформления триалки: 2xx success:true | 409 "active trial already exists".
+  trialApi: /product_features\.php\?action=trial/i,
 } as const;
 
 /* ===== Game Servers ===== */
@@ -788,7 +790,35 @@ export const GAME_PANEL_EXTENSIONS = {
   filterItem: ".server__extensions__filter-item",   // Category / Author
   sortBy: ".server__extensions__sort-by",
   body: ".server__extensions__body",
-  installButton: 'button:has-text("Install")',      // per-item (НЕ жать)
+  bodyContent: ".server__extensions__body__content",
+  installButton: 'button:has-text("Install")',      // per-item (НЕ жать без risk-decision)
+  // Карточка каталога (подтв. live DOM 20-Jul-2026). ⚠️ data-v-* НЕ использовать (динамич.).
+  card: ".server__extensions__extension-card",
+  cardTitle: ".server__extensions__extension-card__title",
+  cardSubtitle: ".server__extensions__extension-card__subtitle", // "by {author}"
+  cardMeta: ".server__extensions__extension-card__meta",
+  cardProviderIcon: ".server__extensions__extension-card__provider-icon",
+  // Install-модалка (Vuetify v-dialog). Заголовок "Install plugins"; список версий;
+  // кнопки Cancel / Install; закрытие — Esc. Подтв. live DOM 20-Jul-2026.
+  installDialog: ".server__dialogs__action-dialog",
+  installDialogTitle: ".server__dialogs__action-dialog__title",
+} as const;
+
+/**
+ * api/v2-контракты каталога расширений (game panel). Ключевые для регресса Inc 3
+ * (plugins surrogate refactor): публичная идентичность = provider + external_id (сырой
+ * провайдерский id в поле `id`), НЕ внутренний PK. Подтв. live network 20-Jul-2026.
+ *   list:      GET /servers/{uuid}/minecraft/{plugins|mods}?provider&search&loader&mc_version&page&per_page&sort_by
+ *   versions:  GET /servers/{uuid}/minecraft/plugins/{provider}-{external_id}/versions  (порядок newest-first)
+ *   installed: GET /servers/{uuid}/minecraft/plugins/installed  (детекция по файлу; provider=null у не-каталожных)
+ */
+export const GAME_PANEL_EXTENSIONS_API = {
+  pluginsList: /\/api\/v2\/servers\/[^/]+\/minecraft\/plugins\?/,
+  modsList: /\/api\/v2\/servers\/[^/]+\/minecraft\/mods\?/,
+  pluginVersions: /\/api\/v2\/servers\/[^/]+\/minecraft\/plugins\/[^/]+\/versions/,
+  modVersions: /\/api\/v2\/servers\/[^/]+\/minecraft\/mods\/[^/]+\/versions/,
+  pluginsInstalled: /\/api\/v2\/servers\/[^/]+\/minecraft\/plugins\/installed/,
+  modsInstalled: /\/api\/v2\/servers\/[^/]+\/minecraft\/mods\/installed/,
 } as const;
 
 // Referral (/referral). Глобальная страница (default_layout), не server-scoped.
