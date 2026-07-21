@@ -13,12 +13,12 @@
  * terminate через 72ч). Триалка одна на клиента, поэтому финал принимает ДВА исхода как успех:
  *   - редирект в биллинг на услугу (/clientarea/clientarea.php?action=productdetails&id=N), либо
  *   - "An active trial already exists for this client." (409, когда триалка уже активна — обычно
- *     при daily-прогоне, т.к. terminate через 72ч > суток).
- * Тест ГЕЙТИТСЯ env-флагом RUN_MODPACK_FUNNEL (в общий CI не входит; daily-джоба). Компиляция
- * занимает минуты → большой таймаут. Confirmed live 20-Jul-2026.
+ *     на частых прогонах, т.к. terminate через 72ч).
+ * Бежит в общем прогоне (по решению владельца, live-prod). Компиляция занимает минуты → большой
+ * таймаут; тег @slow. Confirmed live 20-Jul-2026.
  *
  * Запуск:
- *   RUN_MODPACK_FUNNEL=1 npx playwright test tests/funnels/funnel.modpack-constructor.spec.ts --project=storefront
+ *   npx playwright test tests/funnels/funnel.modpack-constructor.spec.ts --project=storefront
  */
 import { test, expect } from "../../fixtures/base";
 import { ModpackConstructorPage } from "../../pages/ModpackConstructorPage";
@@ -26,17 +26,10 @@ import { CartModpackConstructorPage } from "../../pages/CartModpackConstructorPa
 import { CART_MODPACK_CONSTRUCTOR } from "../../utils/selectors";
 import { Credentials } from "../../fixtures/test-data";
 
-const RUN = !!process.env.RUN_MODPACK_FUNNEL;
-
 // Набор совместимых с Fabric 1.21.1 модов (у всех есть файл под версию).
 const MODS = ["Fabric API", "Lithium", "Athena"] as const;
 
 test.describe("Воронка конструктора модпаков — компиляция + happy-path до оплаты", () => {
-  test.skip(
-    !RUN,
-    "Мутирует прод (демо-сервер + триальная услуга); включается RUN_MODPACK_FUNNEL для daily-прогона",
-  );
-
   test("@critical @slow сборка компилируется и доводит до оформления триалки", async ({ page }) => {
     test.setTimeout(540_000); // компиляция ~2-5 мин + провижининг + воронка
 
