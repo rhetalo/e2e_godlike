@@ -29,7 +29,7 @@ export class ModpackConstructorPage extends BasePage {
   }
   /** Кнопка конструктора по её видимому тексту (getByRole пробивает shadow DOM). */
   button(name: RegExp): Locator {
-    return this.host().getByRole("button", { name });
+    return this.host().getByRole("button", { name }).first();
   }
   downloadButton(): Locator {
     return this.button(/Download Client Mods/i);
@@ -63,25 +63,86 @@ export class ModpackConstructorPage extends BasePage {
     await input.press("Enter");
   }
 
-  /** Снять фильтр "Hide incompatible" (он прячет моды, несовместимые с конфигом). */
+  /**
+   * Снять/поставить фильтр "Hide incompatible" (прячет моды, несовместимые с конфигом).
+   * Чекбокс — sr-only внутри <label>, поэтому переключаем кликом по видимому label.
+   */
   async setHideIncompatible(on: boolean): Promise<void> {
-    const cb = this.host()
-      .locator("label")
-      .filter({ hasText: /Hide incompatible/i })
-      .locator("input[type='checkbox']");
-    if ((await cb.isChecked()) !== on) await cb.click();
+    const checked = await this.host().evaluate((hostEl) => {
+      const root = (hostEl as HTMLElement & { shadowRoot: ShadowRoot }).shadowRoot ?? hostEl;
+      const cb = [...root.querySelectorAll<HTMLInputElement>("input[type=checkbox]")].find((c) =>
+        /incompat/i.test(c.closest("label")?.textContent ?? ""),
+      );
+      return cb ? cb.checked : null;
+    });
+    if (checked !== null && checked !== on) {
+      await this.host().getByText("Hide incompatible", { exact: false }).first().click();
+    }
   }
 
-  /** Карточка каталога/установленного по имени мода (ближайший предок с кнопкой). */
-  private card(name: string): Locator {
-    return this.host()
-      .getByText(name, { exact: true })
-      .locator("xpath=ancestor::*[.//button][1]");
+  /** Кол-во установленных модов (из лейбла "Installed (N)"). */
+  async installedCount(): Promise<number> {
+    return this.host().evaluate((hostEl) => {
+      const root = (hostEl as HTMLElement & { shadowRoot: ShadowRoot }).shadowRoot ?? hostEl;
+      const m = (root.textContent ?? "").match(/Installed\s*\((\d+)\)/i);
+      return m ? Number(m[1]) : 0;
+    });
   }
 
-  /** Установить мод по точному имени (после searchMod). */
+  /**
+   * Установить мод по точному имени (после searchMod). Клик по Install в карточке с этим
+   * заголовком (Shadow DOM + Tailwind → выбор карточки через evaluate надёжнее xpath/классов),
+   * затем ждём роста счётчика Installed — детерминированно, без waitForTimeout.
+   */
   async installMod(name: string): Promise<void> {
-    await this.card(name).getByRole("button", { name: /^Install$/i }).click();
+    const before = await this.installedCount();
+    // Дождаться, пока отфильтрованные результаты поиска отрендерят карточку мода.
+    await this.page.waitForFunction(
+      (modName) => {
+        const host = document.querySelector("#modpack-constructor") as
+          | (HTMLElement & { shadowRoot: ShadowRoot })
+          | null;
+        const root = host?.shadowRoot;
+        if (!root) return false;
+        return [...root.querySelectorAll("*")].some(
+          (e) => e.children.length === 0 && (e.textContent ?? "").trim() === modName,
+        );
+      },
+      name,
+      { timeout: 15_000 },
+    );
+    const clicked = await this.host().evaluate((hostEl, modName) => {
+      const root = (hostEl as HTMLElement & { shadowRoot: ShadowRoot }).shadowRoot ?? hostEl;
+      const title = [...root.querySelectorAll("*")].find(
+        (e) => e.children.length === 0 && (e.textContent ?? "").trim() === modName,
+      );
+      let card: Element | null = title ?? null;
+      for (let i = 0; i < 6 && card; i++) {
+        const btn = [...card.querySelectorAll("button")].find((b) =>
+          /^install$/i.test((b.textContent ?? "").trim()),
+        );
+        if (btn) {
+          btn.click();
+          return true;
+        }
+        card = card.parentElement;
+      }
+      return false;
+    }, name);
+    if (!clicked) throw new Error(`installMod: карточка мода "${name}" с кнопкой Install не найдена`);
+    await this.page.waitForFunction(
+      (prev) => {
+        const host = document.querySelector("#modpack-constructor") as
+          | (HTMLElement & { shadowRoot: ShadowRoot })
+          | null;
+        const root = host?.shadowRoot;
+        if (!root) return false;
+        const m = (root.textContent ?? "").match(/Installed\s*\((\d+)\)/i);
+        return !!m && Number(m[1]) > prev;
+      },
+      before,
+      { timeout: 15_000 },
+    );
   }
 
   async clearAll(): Promise<void> {
@@ -107,6 +168,33 @@ export class ModpackConstructorPage extends BasePage {
 
   async isDownloadEnabled(): Promise<boolean> {
     return !(await this.downloadButton().isDisabled());
+  }
+
+  /** Текст блока Setup Status в панели Estimation: напр. "GOOD" | "WARNING". */
+  async setupStatus(): Promise<string> {
+    return this.host().evaluate((hostEl) => {
+      const root = (hostEl as HTMLElement & { shadowRoot: ShadowRoot }).shadowRoot ?? hostEl;
+      const m = (root.textContent ?? "").match(/Setup Status\s*([A-Za-z]+)/i);
+      return m ? m[1].trim() : "";
+    });
+  }
+
+  /** Помечен ли установленный мод бейджем "Incompatible" (несовместим с выбранной версией). */
+  async isInstalledModIncompatible(name: string): Promise<boolean> {
+    return this.host().evaluate((hostEl, modName) => {
+      const root = (hostEl as HTMLElement & { shadowRoot: ShadowRoot }).shadowRoot ?? hostEl;
+      const nameNode = [...root.querySelectorAll("*")].find(
+        (e) => e.children.length === 0 && (e.textContent ?? "").trim() === modName,
+      );
+      if (!nameNode) return false;
+      // подняться до строки установленного мода и поискать бейдж
+      let row: Element | null = nameNode;
+      for (let i = 0; i < 4 && row; i++) {
+        if (/incompatible/i.test(row.textContent ?? "")) return true;
+        row = row.parentElement;
+      }
+      return false;
+    }, name);
   }
 
   /**
@@ -154,6 +242,22 @@ export class ModpackConstructorPage extends BasePage {
       this.button(/Proceed with test run/i).click(),
     ]);
     return resp;
+  }
+
+  /**
+   * Дождаться готовности демо-сервера (компиляция ~2-5 мин): в модалке появляется "Server ready".
+   * Дефолтный таймаут 6 мин с запасом. Успех = сборка модпака скомпилировалась и сервер поднялся.
+   */
+  async waitForServerReady(timeoutMs = 360_000): Promise<void> {
+    await this.host()
+      .getByText(/Server ready/i)
+      .first()
+      .waitFor({ state: "visible", timeout: timeoutMs });
+  }
+
+  /** Закрыть модалку (Compatibility Check / Server ready). */
+  async closeModal(): Promise<void> {
+    await this.button(/^Close$/i).click();
   }
 
   /** ⚠️ "Start 3-hour Demo" — уводит в воронку /cart-modpack-constructor/. */

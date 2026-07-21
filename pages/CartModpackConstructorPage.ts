@@ -52,15 +52,34 @@ export class CartModpackConstructorPage extends BasePage {
     return this.page.locator(SEL.loginEmail);
   }
 
-  /** Логин в форме корзины (креды — из fixtures/test-data Credentials). */
+  /**
+   * Логин в форме корзины (креды — из fixtures/test-data Credentials). Форма login/register —
+   * во вкладках; если поле email скрыто (активна вкладка Register), сначала жмём вкладку Login.
+   * Дожидается пропадания формы (успешный вход).
+   */
   async login(email: string, password: string): Promise<void> {
-    await this.page.locator(SEL.loginEmail).fill(email);
+    const emailInput = this.page.locator(SEL.loginEmail);
+    if (!(await emailInput.isVisible().catch(() => false))) {
+      await this.root().getByText(/^Login$/i).first().click();
+    }
+    await emailInput.fill(email);
     await this.page.locator(SEL.loginPassword).fill(password);
     await this.root().getByRole("button", { name: /^Login$/i }).click();
+    await emailInput.waitFor({ state: "detached", timeout: 20_000 }).catch(() => {});
   }
 
   /** Текст шага "Start your modpack trial" (loader/версия/моды/тариф) — для структурных проверок. */
   async summaryText(): Promise<string> {
     return ((await this.root().textContent()) ?? "").replace(/\s+/g, " ").trim();
+  }
+
+  /** Кнопка "Start 3-hour demo" на странице триалки (⚠️ оформляет триальную услугу). */
+  startTrialButton(): Locator {
+    return this.root().getByRole("button", { name: /3-hour demo/i });
+  }
+
+  /** Сообщение об уже активной триалке (409 при повторном оформлении). */
+  trialAlreadyExistsMessage(): Locator {
+    return this.root().getByText(/active trial already exists/i);
   }
 }
