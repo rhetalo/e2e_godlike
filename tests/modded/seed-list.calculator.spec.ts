@@ -113,7 +113,14 @@ test.describe("Новый seed-калькулятор (/minecraft-seeds/)", () =
 
     const picked = await seedList.calculator.pickSearchResult(0);
     expect(picked.length).toBeGreaterThan(0);
-    expect(cartParams(await seedList.calculator.ctaHref()).get("seedId")).toBeTruthy();
+    // CTA data-href обновляется АСИНХРОННО после клика по результату (recon 21-Jul: seedId
+    // появляется через +35..318мс, на нагруженном CI дольше). Как чип/кастом-тесты, ждём
+    // применения выбора через poll — не читаем href «сразу» (иначе seedId ещё пуст → CI-флак).
+    await expect
+      .poll(async () => cartParams(await seedList.calculator.ctaHref()).get("seedId"), {
+        timeout: 5_000,
+      })
+      .toBeTruthy();
   });
 
   test("@regression кастомный сид пробрасывается в URL как есть", async () => {
