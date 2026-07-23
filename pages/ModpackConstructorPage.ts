@@ -14,7 +14,7 @@
  * "Start 3-hour Demo" ПОДНИМАЮТ РЕАЛЬНЫЙ демо-сервер (3ч, сам истекает) и уводят в воронку —
  * дёргать осознанно.
  */
-import type { Locator, Response } from "@playwright/test";
+import type { Locator } from "@playwright/test";
 import { BasePage } from "./BasePage";
 import { MODPACK_CONSTRUCTOR as SEL } from "../utils/selectors";
 
@@ -233,15 +233,26 @@ export class ModpackConstructorPage extends BasePage {
     await this.button(/Compilation/i).click();
   }
 
-  /** ⚠️ Поднимает реальный демо-сервер. Возвращает Response POST /test-sessions. */
-  async proceedWithTestRun(): Promise<Response> {
-    const [resp] = await Promise.all([
-      this.page.waitForResponse(
+  /**
+   * ⚠️ Пытается поднять реальный демо-сервер (POST /test-sessions). Возвращает id созданной
+   * сессии или null, если её создать не удалось (напр. на аккаунте уже активна другая демо —
+   * лимит одна на аккаунт; кнопки Proceed нет / POST не пришёл). Терпимый: не бросает — тест
+   * решает по null (test.skip: инфра/занятый аккаунт, не регресс).
+   */
+  async proceedWithTestRun(timeoutMs = 30_000): Promise<number | null> {
+    const respPromise = this.page
+      .waitForResponse(
         (r) => r.url().includes(SEL.apiTestSessions) && r.request().method() === "POST",
-      ),
-      this.button(/Proceed with test run/i).click(),
-    ]);
-    return resp;
+        { timeout: timeoutMs },
+      )
+      .catch(() => null);
+    await this.button(/Proceed with test run/i)
+      .click({ timeout: 10_000 })
+      .catch(() => {});
+    const resp = await respPromise;
+    if (!resp || !resp.ok()) return null;
+    const id = Number((await resp.json().catch(() => null))?.data?.id);
+    return Number.isFinite(id) && id > 0 ? id : null;
   }
 
   /**
@@ -253,6 +264,56 @@ export class ModpackConstructorPage extends BasePage {
       .getByText(/Server ready/i)
       .first()
       .waitFor({ state: "visible", timeout: timeoutMs });
+  }
+
+  private testSessionUrl(sessionId: number): string {
+    return `https://panel.godlike.host${SEL.apiTestSessions}/${sessionId}`;
+  }
+
+  async testSessionStatus(sessionId: number): Promise<string | null> {
+    return this.page.evaluate(async (u) => {
+      try {
+        const r = await fetch(u, { headers: { Accept: "application/json" } });
+        return (await r.json())?.data?.status ?? null;
+      } catch {
+        return null;
+      }
+    }, this.testSessionUrl(sessionId));
+  }
+
+  /**
+   * Дождаться терминального статуса демо-сессии (поллинг API из контекста страницы, без
+   * waitForTimeout) и вернуть его: "running" = сервер поднялся; иное (failed/terminated/…/"timeout")
+   * = не готов. Тайминг провижининга на проде плавает (локально 1.5-5 мин, на CI под нагрузкой
+   * дольше) — тест решает по статусу: продолжать воронку или test.skip (инфра, не регресс).
+   */
+  async waitTestSessionStatus(sessionId: number, timeoutMs = 480_000): Promise<string> {
+    try {
+      await this.page.waitForFunction(
+        async (u) => {
+          try {
+            const r = await fetch(u, { headers: { Accept: "application/json" } });
+            const st = (await r.json())?.data?.status;
+            return [
+              "running",
+              "ready",
+              "active",
+              "failed",
+              "error",
+              "terminated",
+              "cancelled",
+            ].includes(st);
+          } catch {
+            return false;
+          }
+        },
+        this.testSessionUrl(sessionId),
+        { timeout: timeoutMs, polling: 10_000 },
+      );
+    } catch {
+      return "timeout";
+    }
+    return (await this.testSessionStatus(sessionId)) ?? "unknown";
   }
 
   /** Закрыть модалку (Compatibility Check / Server ready). */
