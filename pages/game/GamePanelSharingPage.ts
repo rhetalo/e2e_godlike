@@ -91,4 +91,14 @@ export class GamePanelSharingPage extends GamePanelBasePage {
   async getAuditText(): Promise<string> {
     return (await this.auditList.innerText().catch(() => "")) ?? "";
   }
+
+  /**
+   * Нормализованные строки Audit Log: каждая = «<actor email> <timestamp> <server:action.key>»
+   * в одну строку (schema-agnostic, пробелы схлопнуты). Для структурной проверки формы записей
+   * без завязки на конкретное действие/лаг индексации лога.
+   */
+  async getAuditEntries(): Promise<string[]> {
+    const rows = await this.auditRows().allInnerTexts().catch(() => []);
+    return rows.map((r) => r.replace(/\s+/g, " ").trim()).filter(Boolean);
+  }
 }

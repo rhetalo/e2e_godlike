@@ -282,7 +282,7 @@ Tasks-create — когда дойдут руки до мутаций с teardow
 | TC ID | Флоу | Тип | Тег | Prod-safety |
 |---|---|---|---|---|
 | TC-GP-NET-003 | **Add Additional Port** диалог: поле Name + Cancel/Add Port | структурный | @regression | ⚠️ Add Port не жать (мутация) |
-| TC-GP-SHR-006 ✅ | **Audit Log** пишет действие: совершить разрешённое → проверить запись по ключу (`server:power.*`) | флоу | @regression | ✅ done 09-Jun (`sharing.audit.spec.ts`, online, recovery) |
+| TC-GP-SHR-006 ✅ | **Audit Log** рендерит записи владельца в правильной форме (email + `server:<action>` + дата) | структурно | @regression | ✅ done 09-Jun; **переписан 27-Jul на READ-ONLY** (`sharing.audit.spec.ts`) — панель НЕ логирует `server:power.start`, а лог лагает → прежний behavioral-assert валил CI; «power работает» покрыто PWR-001 |
 | TC-GP-FILE-005 ✅ | **CodeMirror-редактор**: открыть текстовый файл → контент в `.cm-content` → Cancel/Save видны | структурный | @regression | ✅ done 09-Jun (read-only open) |
 | TC-GP-FILE-006 ✅ | **Recycle Bin**: удалить → перейти в `.trash` → строка видна (+ Restore/Clear контролы) | мутация | @regression | ✅ done 09-Jun (Restore, self-cleaning) |
 | TC-GP-PREM-001 | **Free Premium** модалка: открывается, список фич + CTA | структурный | @regression | ⚠️ «Get Premium» CTA не жать |

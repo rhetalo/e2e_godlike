@@ -11,11 +11,23 @@
 import { type Browser } from "@playwright/test";
 import * as path from "path";
 
-export const GAME_PANEL_URL = "https://ultra.panel.godlike.host";
+// URL панели — из env, чтобы переключаться prod ↔ stage одним флагом (GAME_PANEL_URL).
+// ⚠️ stage-логин может идти через GitLab-OAuth (наш email/password-флоу там не сработает) —
+// тогда положить заранее снятый storageState и указать GAME_PANEL_STORAGE_STATE (см. ниже).
+export const GAME_PANEL_URL = process.env.GAME_PANEL_URL ?? "https://ultra.panel.godlike.host";
 
 export const GAME_EMAIL = process.env.GAME_PANEL_EMAIL ?? "test@testmail.com";
 export const GAME_PASSWORD = process.env.GAME_PANEL_PASSWORD ?? "test@testmail.com";
-export const GAME_STORAGE_STATE_PATH = path.join(__dirname, "..", "storageState.game.json");
+export const GAME_STORAGE_STATE_PATH =
+  process.env.GAME_PANEL_STORAGE_STATE ?? path.join(__dirname, "..", "storageState.game.json");
+
+/**
+ * Пропустить UI-логин и взять уже готовый storageState (GAME_PANEL_SKIP_LOGIN=1).
+ * Нужен для stage, где регистрация идёт через GitLab-OAuth и наш email/password-флоу не
+ * применим: логинишься руками в браузере, сохраняешь storageState в GAME_PANEL_STORAGE_STATE,
+ * запускаешь тесты с GAME_PANEL_SKIP_LOGIN=1 — они переиспользуют эту сессию.
+ */
+export const GAME_PANEL_SKIP_LOGIN = process.env.GAME_PANEL_SKIP_LOGIN === "1";
 
 /** Канонический тестовый сервер (Minecraft, Paper). UUID + имя заданы в .env → CI; фолбэки
  *  синхронизированы с ними. ⚠️ Реинстолл 07-Jun сбросил имя test_e2e на авто-имя
@@ -135,6 +147,12 @@ let gameInviteeSessionReady = false;
 /** Логин основного аккаунта → storageState.game.json (реально логинится один раз за прогон). */
 export async function loginAndSaveGameSession(browser: Browser): Promise<void> {
   if (gameSessionReady) return;
+  // stage-fallback: сессия снята вручную (GitLab-OAuth) → не логинимся, доверяем storageState.
+  if (GAME_PANEL_SKIP_LOGIN) {
+    console.log(`[INFO] GAME_PANEL_SKIP_LOGIN=1 → переиспользую ${GAME_STORAGE_STATE_PATH}`);
+    gameSessionReady = true;
+    return;
+  }
   await loginGameUser(browser, GAME_EMAIL, GAME_PASSWORD, GAME_STORAGE_STATE_PATH);
   gameSessionReady = true;
 }

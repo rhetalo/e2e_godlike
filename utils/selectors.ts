@@ -522,6 +522,17 @@ export const GAME_PANEL_TOUR = {
   close: 'button:has-text("Skip"), button:has-text("Close"), button:has-text("Got it"), button[aria-label="Close"]',
 } as const;
 
+// Giveaway/промо-модалка панели (Vuetify-диалог `.giveaway-modal`, напр. «Trustpilot Review»).
+// Всплывает ~1×/сессию поверх контента; её бэкдроп `.v-overlay__scrim` перехватывает клики
+// (ловил клик Start в live-recon 27-Jul-2026 → флоки power/panel-тестов). Гасится централизованно
+// в GamePanelBasePage.open() через components/game/GiveawayModal. CTA (Trustpilot) НЕ трогаем —
+// внешняя ссылка; закрываем крестиком, фолбэк «Maybe later».
+export const GAME_PANEL_GIVEAWAY = {
+  modal: ".giveaway-modal",
+  close: ".giveaway-modal__close",
+  later: ".giveaway-modal__later",
+} as const;
+
 export const GAME_PANEL_DASHBOARD = {
   heading: 'h1, h2',                       // filter by /My Servers/ in the page object
   server: '.dashboard__servers .server',

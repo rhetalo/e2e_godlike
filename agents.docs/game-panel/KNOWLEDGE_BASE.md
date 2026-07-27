@@ -68,6 +68,11 @@ Audit Log, кнопка **«Send Invite»**.
 1. **Onboarding-оверлей shepherd.js** (`.shepherd-modal-is-visible` / `.shepherd-modal-overlay-container`)
    перехватывает клики. Гасится через `ShepherdTour.dismissIfPresent()` (вызывается в
    `GamePanelBasePage.open()`). Аналог cookie-баннера storefront'а.
+   ⚠️ **Giveaway/промо-модалка** (`.giveaway-modal`, Vuetify-диалог, напр. «Trustpilot Review») —
+   всплывает ~1×/сессию; её бэкдроп `.v-overlay__scrim` тоже перехватывает клики (ловил клик Start →
+   флоки power/panel, recon 27-Jul-2026). Гасится централизованно `GiveawayModal.dismissIfPresent()` в
+   `GamePanelBasePage.open()` (крестик, фолбэк «Maybe later»; CTA-ссылку Trustpilot НЕ трогаем) + страховка
+   `neutralizeOverlays` делает её overlay click-through, если всплывёт по таймеру уже после навигации.
 2. **`networkidle` не наступает** на странице сервера (websocket-консоль) — навигация ждёт его
    с `.catch()` и затем конкретный элемент (power-кнопка/заголовок).
 3. **Карточки серверов — не ссылки**, а `div` с router-переходом по клику.
@@ -353,6 +358,38 @@ Moderator/Member + счётчики), **Members**, **Audit Log**.
 - ⚠️ Install = мутация (добавляет мод/плагин; обратимо через uninstall, но тяжело). Тест —
   структурный; install/uninstall — отдельный self-cleaning кейс с осторожностью.
 
+#### 7b-bis. Каталог/install/versions/uninstall — детали (подтв. live DOM + network 20-Jul-2026, сервер `93521c70`)
+
+Снято recon'ом под задачу **Inc 3** (plugins → surrogate PK + модернизация парсеров). Публичный
+контракт по замыслу Inc 3 **не меняется** — это baseline для регресса.
+
+- **Карточка каталога:** `.server__extensions__body__content` → карточки `.server__extensions__extension-card`
+  с `__title` / `__subtitle` («by {author}») / `__meta` / `__provider-icon`. ⚠️ У элементов
+  `data-v-*` (динамические) — НЕ использовать.
+- **Install-флоу:** клик Install на карточке → Vuetify-диалог **`.server__dialogs__action-dialog`**
+  (заголовок `.server__dialogs__action-dialog__title` = «Install plugins»; предупреждения
+  «Incompatible with your Minecraft version / loader», «Insufficient RAM»; список версий строкой,
+  напр. «PixelPrinter V1.0.46»; кнопки **Cancel / Install**; закрытие — Esc). Подтверждение Install
+  = мутация (POST).
+- **Uninstall:** фильтр **Installed** → на карточке кнопка **Uninstall** (единственная) → путь
+  self-cleaning отката.
+- **api/v2-контракты** (см. `GAME_PANEL_EXTENSIONS_API` в `utils/selectors.ts`):
+  - list: `GET /servers/{uuid}/minecraft/{plugins|mods}?provider&search&loader&mc_version&page&per_page&sort_by`
+    → `data[]`: `{id, name, author, downloads, description, url, icon_url, path, is_installed,
+    is_supported, ram, provider, is_optimized, categories[]}`. **`id` = сырой провайдерский id**
+    (напр. `"98985"`) — это `external_id` в терминах Inc 3; в ответе обязан остаться провайдерским,
+    НЕ суррогатным PK (DoD Inc 3).
+  - versions: `GET .../minecraft/plugins/{provider}-{external_id}/versions` (напр. `curseforge-98985`)
+    → `data[]`: `{id (file id), name, game_versions[], download_url}`; **порядок newest-first**
+    (= `newestFirst()` из Inc 3). CurseForge отдаёт непустой `game_versions`; Hangar/Spigot/Polymart
+    исторически хардкодят `[]` (это Inc 3 и чинит — проверять фикстурными парсер-тестами на бэке).
+  - installed: `GET .../minecraft/plugins/installed` → отдельный эндпоинт, детекция **по файлу**;
+    у не-каталожных jar-ов `provider/project_id/...=null` (на серваке уже стоит системный
+    `godlikemetrics-1.0.0.jar`).
+- ⚠️ `installButton` в selectors как `button:has-text("Install")` — фильтр Installed-кнопки от
+  type-переключателя тем же текстом «Installed»; в PO различать по контейнеру (карточка vs
+  `__extension-type__button`).
+
 ### 7c. Boost / Upgrade `/server/{uuid}/upgrade?promocode=UPGRADE50F` (НЕ покрыто) — ПЛАТЁЖНЫЙ ФЛОУ
 - Кнопка **«Boost my server»** (overview, `current__tariff-button`) ведёт сюда с промокодом.
 - Контент: карточка текущего плана **`current-plan-card__*`** + карточки планов на выбор
@@ -499,12 +536,16 @@ Copy Port & IP) + **Additional Ports** (Add Additional Port). BEM `server__subdo
 ### 9b. Sharing — Audit Log + опции роли (дополнение к §5e)
 - **Invite role-select** (`.sharing__invite-form-select`) опции: **Co-owner / Moderator / Member**
   (Owner через инвайт НЕ выдаётся — соответствует модели §5i).
-- **Audit Log** реально пишет действия: таблица `.sharing__audit-list`, строка **`.sharing__audit-row`** =
-  actor (`test@testmail.com`) + время + **ключ-действие** (`server:power.start` / `server:power.stop` / ...).
-  ✅ **Покрыто SHR-006** (`sharing.audit.spec.ts`, `@regression`, online): baseline Offline → Start (=действие
-  `server:power.start`) → Audit Log показывает запись от владельца. Ридеры `GamePanelSharingPage.auditList/
-  auditRows/getAuditText`, селекторы `GAME_PANEL_SHARING.auditList/auditRow`. Обновляется через reload
-  (poll + `goto()`, как роли §5e). Recovery: `ensureOffline` в afterAll.
+- **Audit Log** пишет действия: таблица `.sharing__audit-list`, строка **`.sharing__audit-row`** =
+  actor (`test@testmail.com`) + время + **ключ-действие** (`server:power.stop` / `server:console.command` / ...).
+  ⚠️ **Находка live-recon 27-Jul-2026:** панель **НЕ логирует `server:power.start`** — 20 строк за 3 дня, 0 стартов
+  (стопы и console.command пишутся; старт РАБОТАЕТ, но в лог не попадает). Плюс у лога заметный **лаг индексации**.
+  ✅ **Покрыто SHR-006** (`sharing.audit.spec.ts`, `@regression`, **READ-ONLY, структурно**): проверяем, что лог
+  не пуст и содержит запись владельца в правильной форме (email + ключ `server:<action>` + дата) — БЕЗ завязки на
+  конкретное действие/лаг. Ридер `GamePanelSharingPage.getAuditEntries` (+ `auditList/auditRows/getAuditText`),
+  селекторы `GAME_PANEL_SHARING.auditList/auditRow`. Мутаций/serial/recovery нет. Что power-действие реально
+  отрабатывает — покрыто PWR-001 (по кнопке состояния). _(Прежний assert на `server:power.start` валил CI 3/3 —
+  проверял то, чего продукт не делает; переписан.)_
 - Карты раскрываются кнопкой `sharing__card-show-btn` («Show more»). Счётчики ролей в
   `sharing__overview-block` (Owner/Co-owner/Moderator/Member + числа).
 
