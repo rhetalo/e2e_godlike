@@ -90,8 +90,14 @@ Restart/Kill — отдельные кнопки. ⚠️ **Раньше** отк
 (подтверждено вживую 19-Jun-2026). `clickRestart`/`clickKill` подтверждают диалог **best-effort**
 (`confirmDialogIfPresent`) — если модалка вернётся, тест не сломается.
 
-- **Статус Online = «Running»** (не «Online»); Offline = «Offline». Надёжнее ориентироваться
-  на тоггл: `Shut Down` виден ⇒ online, `Start` виден ⇒ offline.
+- **Статус Online = «Running»** (не «Online»); Offline = «Offline». Тоггл: `Shut Down` виден ⇒
+  online, `Start` виден ⇒ offline.
+  ⚠️ **Баг реактивности кнопки (recon 27-Jul-2026):** тоггл-кнопка ИНОГДА НЕ флипается в
+  «Shut Down», хотя сервер уже Running (в логе `Server marked as running…`) → `waitForOnline`
+  по одной кнопке таймаутил (уронил PWR-001 и CON-001 в CI). Обход: `waitForOnline` теперь
+  ловит **кнопку ИЛИ маркер запуска в консоли** (`ONLINE_CONSOLE_RE`) и при залипшей кнопке
+  делает **reload (`goto`)** — перезагрузка синхронизирует UI с реальным состоянием.
+  Независимый от кнопки сигнал: `isOnlineByConsole()` / `waitForServerRunning()`.
 - **EULA (первый старт):** диалог «Accept Minecraft® EULA», кнопка `button.dialog__button-primary`
   («I Accept»). Пишет `eula=true` в `eula.txt` файлового менеджера. `clickStart()` принимает сам.
 - **Restart:** клик по «Restart» рестартит **сразу** (модалки подтверждения больше нет — 19-Jun-2026; если вернётся: confirm = `button.dialog__button-primary`).

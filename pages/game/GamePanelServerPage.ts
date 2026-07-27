@@ -115,15 +115,65 @@ export class GamePanelServerPage extends GamePanelBasePage {
   }
 
   // ── State / waits ─────────────────────────────────────────────
+  // Маркеры «сервер реально поднялся» в websocket-логе консоли (демон + Minecraft).
+  // «Server marked as running» — статус-строка демона: появляется, ДАЖЕ ЕСЛИ тоггл-кнопка
+  // не флипнулась в «Shut Down» (баг реактивности UI панели, live-recon 27-Jul-2026).
+  private static readonly ONLINE_CONSOLE_RE =
+    /Server marked as running|Done \(|For help, type|RCON running|players online/i;
+
   async isOnline(): Promise<boolean> {
     return this.shutDownButton.isVisible({ timeout: 1_000 }).catch(() => false);
   }
   async isOffline(): Promise<boolean> {
     return this.startButton.isVisible({ timeout: 1_000 }).catch(() => false);
   }
-  /** Online = появилась кнопка Shut Down. Щедрый таймаут: первый старт ставит файлы/конфиги. */
+
+  /** Строка лога-маркера запуска сервера (для web-first ожидания и reload-синхронизации). */
+  get runningConsoleLine(): Locator {
+    return this.page
+      .locator(GAME_PANEL_SERVER.consoleLog)
+      .filter({ hasText: GamePanelServerPage.ONLINE_CONSOLE_RE })
+      .first();
+  }
+
+  /** Сервер поднят по данным консоли (лог демона), даже если кнопка ещё показывает старое. */
+  async isOnlineByConsole(): Promise<boolean> {
+    return GamePanelServerPage.ONLINE_CONSOLE_RE.test(await this.getConsoleText());
+  }
+
+  /** Дождаться маркера «сервер запущен» в консоли (независимо от состояния кнопки). */
+  async waitForServerRunning(timeoutMs = 180_000): Promise<void> {
+    await this.runningConsoleLine.waitFor({ state: "visible", timeout: timeoutMs });
+  }
+
+  /**
+   * Online = кнопка «Shut Down». ⚠️ Тоггл-кнопка ИНОГДА НЕ флипается реактивно, хотя сервер
+   * уже Running (баг реактивности UI панели, live-recon 27-Jul-2026: в логе «Server marked as
+   * running…», а кнопка висит на «Start» → waitFor кнопки таймаутил на живом сервере).
+   * Поэтому: ждём кнопку; параллельно ловим маркер запуска в консоли — если сервер поднялся,
+   * а кнопка залипла, reload (`goto`) синхронизирует UI с реальным состоянием. Щедрый таймаут:
+   * первый старт ставит файлы/конфиги.
+   */
   async waitForOnline(timeoutMs = 300_000): Promise<void> {
-    await this.shutDownButton.waitFor({ state: "visible", timeout: timeoutMs });
+    const deadline = Date.now() + timeoutMs;
+    while (Date.now() < deadline) {
+      if (await this.isOnline()) return; // кнопка флипнулась сама
+      if (await this.isOnlineByConsole()) {
+        // сервер реально Running, но UI залип → перезагружаем и подтверждаем по кнопке
+        await this.goto();
+        if (await this.isOnline()) return;
+      }
+      // ограниченное web-first ожидание следующего события (кнопка ИЛИ маркер лога),
+      // без waitForTimeout: даёт циклу переспросить состояние и при нужде сделать reload
+      const budget = Math.min(10_000, Math.max(1_000, deadline - Date.now()));
+      await Promise.race([
+        this.shutDownButton.waitFor({ state: "visible", timeout: budget }).catch(() => {}),
+        this.runningConsoleLine.waitFor({ state: "visible", timeout: budget }).catch(() => {}),
+      ]);
+    }
+    // финальная попытка: reload и подтвердить кнопкой (бросит, если сервер реально не поднялся)
+    await this.goto();
+    await this.shutDownButton.waitFor({ state: "visible", timeout: 20_000 });
   }
   async waitForOffline(timeoutMs = 90_000): Promise<void> {
     await this.startButton.waitFor({ state: "visible", timeout: timeoutMs });

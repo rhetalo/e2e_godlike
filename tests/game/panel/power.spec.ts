@@ -54,9 +54,19 @@ test.describe("@critical [game-panel] Жизненный цикл питания
       await srv.clickStart();
     });
 
-    await test.step("дожидаемся Online", async () => {
+    await test.step("дожидаемся Online (кнопка + подтверждение в консоли)", async () => {
       await srv.waitForOnline(330_000);
       expect(await srv.isOnline()).toBe(true);
+    });
+
+    await test.step("консоль подтверждает реальный запуск (не полагаемся на одну кнопку)", async () => {
+      // независимый от тоггл-кнопки сигнал: демон/сервер отметил запуск в websocket-логе
+      // («Server marked as running…» / «Done (…)» / «For help, type…»). Кнопка панели иногда
+      // не флипается реактивно (баг UI) — поэтому проверяем ещё и вывод консоли.
+      await srv.waitForServerRunning(180_000);
+      expect(await srv.getConsoleText()).toMatch(
+        /Server marked as running|Done \(|For help, type/i,
+      );
     });
   });
 
