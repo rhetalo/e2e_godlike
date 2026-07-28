@@ -1,6 +1,7 @@
 import { Reporter, TestCase, TestResult, FullConfig, Suite } from '@playwright/test/reporter';
 import * as https from 'https';
 import * as path from 'path';
+import { describeFailure, failureHeadline } from './reporterFailure';
 
 /**
  * Slack-репортер зі ЗВЕДЕННЯМ ПО ФУНКЦІОНАЛЬНИХ БЛОКАХ.
@@ -46,6 +47,7 @@ interface Failure {
   title: string;
   file: string;
   error: string;
+  headline: string; // содержательная шапка: шаг · локация · попытка · таймаут
 }
 
 interface BlockResult {
@@ -89,10 +91,20 @@ class PerFileSlackReporter implements Reporter {
       res.skipped++;
     } else {
       res.failed++;
+      let headline = '';
+      let reason = result.errors.length > 0 ? result.errors[0].message || '' : 'Unknown error';
+      try {
+        const info = describeFailure(test, result);
+        headline = failureHeadline(info);
+        reason = info.reason || reason;
+      } catch {
+        /* обогащение best-effort — падение репортёра недопустимо */
+      }
       res.failures.push({
         title: test.title,
         file: path.basename(test.location.file),
-        error: result.errors.length > 0 ? result.errors[0].message || '' : 'Unknown error',
+        error: reason,
+        headline,
       });
     }
   }
@@ -155,9 +167,10 @@ class PerFileSlackReporter implements Reporter {
       const r = this.blocks.get(name);
       if (!r || r.failures.length === 0) continue;
       const failLines = r.failures.map((f) => {
-        const cleanError = f.error ? f.error.split('\n').slice(0, 10).join('\n') : 'Unknown error';
+        const cleanError = f.error ? f.error.split('\n').slice(0, 12).join('\n') : 'Unknown error';
         const link = jobUrl ? ` <${jobUrl}/artifacts/file/playwright-report/index.html|лог>` : '';
-        return `*❌ ${f.file} › ${f.title}*${link}\n\`\`\`${cleanError}\`\`\``;
+        const head = f.headline ? `\n${f.headline}` : '';
+        return `*❌ ${f.file} › ${f.title}*${link}${head}\n\`\`\`${cleanError}\`\`\``;
       });
       allBlocks.push({ type: 'divider' });
       this.chunkTextToBlocks(`*🐞 ${name} — баги:*`, failLines, '\n\n').forEach((b) => allBlocks.push(b));

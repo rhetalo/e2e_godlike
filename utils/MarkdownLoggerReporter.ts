@@ -8,6 +8,7 @@ import {
 } from '@playwright/test/reporter';
 import fs from 'fs';
 import path from 'path';
+import { describeFailure } from './reporterFailure';
 
 class MarkdownLoggerReporter implements Reporter {
   private logContent: string[] = [];
@@ -66,6 +67,26 @@ class MarkdownLoggerReporter implements Reporter {
     this.logContent.push(`\n## ${statusEmoji} Тест: ${test.title}`);
     this.logContent.push(`- **Статус:** ${result.status.toUpperCase()}`);
     this.logContent.push(`- **Длительность:** ${(result.duration / 1000).toFixed(1)}s`);
+
+    // Содержательный контекст падения: шаг / локация / попытка / таймаут / снимок страницы.
+    if (result.status !== 'passed' && result.status !== 'skipped') {
+      try {
+        const info = describeFailure(test, result);
+        if (info.failingStep) this.logContent.push(`- **Упал на шаге:** ${info.failingStep}`);
+        if (info.location) this.logContent.push(`- **Локация:** ${info.location}`);
+        this.logContent.push(
+          `- **Попытка:** ${info.attempt}` +
+            (info.isFlaky ? ' (флоки — прошёл на ретрае)' : '') +
+            (info.timedOut ? ' · ⏱ таймаут' : ''),
+        );
+        if (info.pageSnapshot) {
+          this.logContent.push(`\n**Состояние страницы на момент падения (ARIA-snapshot):**`);
+          this.logContent.push('```\n' + info.pageSnapshot + '\n```');
+        }
+      } catch {
+        /* обогащение best-effort — не роняем репортёр */
+      }
+    }
 
     const logs = this.testLogs.get(test) || [];
     if (logs.length > 0) {

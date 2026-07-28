@@ -62,7 +62,12 @@ export default defineConfig({
     actionTimeout: 15_000,
     navigationTimeout: 60_000,
 
-    trace: 'on-first-retry',
+    // Артефакты ТОЛЬКО на падении (на зелёный прогон и флоу — ноль эффекта):
+    //  - screenshot: PNG момента падения; trace: полный trace для trace-viewer.
+    //  - error-context (ARIA-snapshot страницы) Playwright пишет сам → его инлайнит
+    //    MarkdownLoggerReporter в лог, чтобы падение было содержательным и без открытия артефактов.
+    trace: 'retain-on-failure',
+    screenshot: 'only-on-failure',
 
     viewport: { width: 1800, height: 900 },
     deviceScaleFactor: 1,
