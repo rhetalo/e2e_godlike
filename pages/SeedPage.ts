@@ -71,9 +71,15 @@ export class SeedPage extends BasePage {
     return this.page.url();
   }
 
-  /** Big "BUY A SERVER" card CTA above the calculator. */
+  /**
+   * Big "BUY A SERVER" card CTA above the calculator.
+   * ⚠️ Таргетим по стабильному id `#cartDefaultBtn`, НЕ по `.single-seed-card__button`.first():
+   * прод добавил вторую кнопку с тем же классом — «Open in Seed Map»
+   * (`.single-seed-card__map-button`, несёт `data-seed-map-url`, БЕЗ `data-url`) — и она идёт в DOM
+   * первой, поэтому `.first()` цеплял её → `data-url`=null (регресс, live-recon 22-Jul-2026).
+   */
   buyServerButton(): Locator {
-    return this.page.locator("button.single-seed-card__button").first();
+    return this.page.locator("#cartDefaultBtn").first();
   }
 
   /** The cart URL the BUY button will navigate to (read directly from data-url). */

@@ -46,6 +46,11 @@ export abstract class GamePanelBasePage {
    * Ставим `pointer-events:none` через <style>: стиль живёт весь lifecycle страницы и применится
    * к оверлею, даже если он появится позже (надёжнее разового клика/таймаута). Клики проходят
    * сквозь оверлей к целевым элементам. Подтверждено recon 26-Jun-2026.
+   *
+   * ⚠️ 22-Jul-2026: на панель добавили cookie-consent CookieYes (`.cky-consent-container`,
+   * бокс в углу с «Accept All» = `.cky-btn-accept`) — его pointer-events перехватывали клики
+   * (напр. Restore в Recycle Bin, files.recycle). Гасим тем же click-through способом (не жмём
+   * «Accept All» — не принимаем необязательные cookie; для теста достаточно снять перехват).
    */
   private async neutralizeOverlays(): Promise<void> {
     await this.page
@@ -55,7 +60,9 @@ export abstract class GamePanelBasePage {
           // giveaway-модалка может всплыть по таймеру уже после open() → её overlay
           // (scrim + content) делаем click-through. Таргет `:has(.giveaway-modal)` не
           // задевает реальные диалоги (EULA/confirm их не содержат).
-          " .v-overlay:has(.giveaway-modal) { pointer-events: none !important; }",
+          " .v-overlay:has(.giveaway-modal)," +
+          // CookieYes consent-бокс (и его возможный full-screen scrim) — click-through.
+          " .cky-consent-container, .cky-overlay { pointer-events: none !important; }",
       })
       .catch(() => {});
   }

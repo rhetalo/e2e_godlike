@@ -420,3 +420,24 @@ CI (гидрация дольше) осцилляция step2↔step3 проед
 
 Фикс: в тесте поиска перед чтением href добавлен `expect.poll(seedId).toBeTruthy()` (5с) — как в
 соседних тестах. tsc 0; файл 7/7.
+
+## Сессия 22-Jul — два прод-регресса (не флак): вторая seed-кнопка + новый cookie-баннер
+
+Оба стабильные (3/3), «вчера ок, сегодня нет» → изменения прода, не флоки. Recon перед правкой.
+
+**(1) `slider.seed.spec.ts › @critical BUY-A-SERVER` — `data-url`=null.** Прод добавил на сид-страницу
+вторую кнопку с тем же классом `.single-seed-card__button` — «Open in Seed Map»
+(`.single-seed-card__map-button`, несёт `data-seed-map-url`, БЕЗ `data-url`), и она идёт в DOM
+ПЕРВОЙ. `buyServerButton()` брал `.single-seed-card__button`.first() → цеплял кнопку карты →
+`getAttribute("data-url")`=null. Фикс ([`SeedPage`](../pages/SeedPage.ts)): таргет по стабильному
+id **`#cartDefaultBtn`** (у BUY он есть). Урок: `.first()` по классу хрупок — как только прод
+добавляет соседний элемент с тем же классом, ломается; предпочитать стабильный id. slider.seed 6/6.
+
+**(2) `files.recycle.spec.ts` (game panel) — клик Restore перехватывал cookie-баннер.** На
+ultra.panel добавили CookieYes: `.cky-consent-container` (бокс `cky-box-bottom-left` с «Accept
+All» = `.cky-btn-accept`) — его pointer-events съедали клик Restore (bottom-left зона). Фикс
+([`GamePanelBasePage.neutralizeOverlays`](../pages/game/GamePanelBasePage.ts)): добавил
+`.cky-consent-container, .cky-overlay` в click-through CSS (тем же способом, что shepherd/giveaway;
+«Accept All» НЕ жмём — не принимаем необязательные cookie). Покрывает ВСЕ game-panel страницы
+(общая база). files.recycle 1/1. ⚠️ Storefront cky (если появится) уже ловится
+`CookieBanner.dismissAll` (`button:has-text("Accept All")`).
