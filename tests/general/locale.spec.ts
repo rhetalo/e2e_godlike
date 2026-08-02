@@ -20,10 +20,15 @@ const LANG_CODES = ["ua", "es", "de", "pl", "fr", "pt", "it"] as const;
 // Свитчер — десктопный (.desktop-only). Фиксируем desktop-viewport, чтобы он рендерился.
 test.use({ viewport: { width: 1440, height: 900 } });
 
+// Навигация главной ждёт domcontentloaded, НЕ "load": переделанная шапка (23-Jul-2026) тянет
+// картинки игр, и событие "load" под нагрузкой CI выходило за 60с → транзиентный goto-timeout
+// (LOC-002). Шапка приходит в серверном HTML, элементы ждём web-first — полный "load" не нужен.
+const DOM_READY = "domcontentloaded" as const;
+
 test.describe("[storefront] Переключатель языка и валюты", () => {
   test("@regression TC-LOC-001 | свитчер показывает текущую локаль и ссылки на все языки", async ({ page }) => {
     const header = new Header(page);
-    await page.goto("/");
+    await page.goto("/", { waitUntil: DOM_READY });
 
     await test.step("триггер показывает '{lang} | {CUR}'", async () => {
       await expect(header.localeTrigger).toBeVisible();
@@ -39,7 +44,7 @@ test.describe("[storefront] Переключатель языка и валют�
 
   test("@critical TC-LOC-002 | переключение языка меняет URL-префикс и контент", async ({ page }) => {
     const header = new Header(page);
-    await page.goto("/");
+    await page.goto("/", { waitUntil: DOM_READY });
     const enTitle = await page.title();
 
     await test.step("клик по 'de' → URL /de/ + язык в триггере 'de'", async () => {
@@ -66,7 +71,7 @@ test.describe("[storefront] Переключатель языка и валют�
     // валютный JS, похоже, завязан на headed-окружение. Поведенческий тест отложен (нужен
     // headed-lane либо иной триггер). Метод Header.switchCurrency сохранён для будущего headed-прогона.
     const header = new Header(page);
-    await page.goto("/");
+    await page.goto("/", { waitUntil: DOM_READY });
 
     await test.step("базовая цена видна с символом валюты", async () => {
       await expect(header.samplePrice).toBeVisible();
