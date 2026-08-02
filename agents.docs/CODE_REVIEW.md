@@ -441,3 +441,18 @@ All» = `.cky-btn-accept`) — его pointer-events съедали клик Res
 «Accept All» НЕ жмём — не принимаем необязательные cookie). Покрывает ВСЕ game-panel страницы
 (общая база). files.recycle 1/1. ⚠️ Storefront cky (если появится) уже ловится
 `CookieBanner.dismissAll` (`button:has-text("Accept All")`).
+
+## Сессия 23-Jul — прод-регресс (не флак): переделали шапку, пропал ценник валюты
+
+`locale.spec.ts › @regression TC-LOC-003` шаг «базовая цена видна с символом валюты»:
+`.main-header__games-tariff__price-discount` → element not found (стабильно 3/3, «вчера ок»).
+
+**Корень (live-recon 23-Jul):** прод переделал шапку — блок `.main-header__games-tariff` **удалён
+целиком**. Цены игр теперь рендерятся в хедер-меню как `.header-menu__subitem-game__captions-price`
+(«Starting at €5.11») — Playwright-visible сразу, без ховера; это единственные видимые цены с
+символом валюты на главной. Фикс ([`LOCALE_SWITCHER.samplePrice`](../utils/selectors.ts)): селектор
+→ `.header-menu__subitem-game__captions-price` (мобильный вариант — отдельный класс `__mobile__`,
+не матчит). Интент теста сохранён (цена с символом валюты видна). locale 3/3.
+
+⚠️ Третий подряд прод-регресс за неделю от редизайнов storefront (seed-кнопка 22-Jul, cky-баннер
+22-Jul, шапка 23-Jul) — все ловились live-recon'ом «вчера ок → сегодня стабильный fail = прод».

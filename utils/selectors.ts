@@ -38,7 +38,11 @@ export const LOCALE_SWITCHER = {
   langItem: ".lang_chooser_header.desktop-only .lang-list-li a",          // <a href="/{code}/"> — фильтр по тексту code
   currencyItem: ".lang_chooser_header.desktop-only .currency-item",       // <li> "$USD"/"€EUR"/... — JS-переключение
   langListInner: ".lang_chooser_header.desktop-only .lang-list__inner",   // выпадающий список (visibility:hidden→visible по :hover)
-  samplePrice: ".main-header__games-tariff__price-discount",              // цена на главной (проверка смены валюты)
+  // Цена с символом валюты в шапке (sanity «цена рендерится в валюте»). ⚠️ 23-Jul-2026 прод
+  // переделал шапку: блок `.main-header__games-tariff` удалён; цены игр теперь в хедер-меню как
+  // `.header-menu__subitem-game__captions-price` («Starting at €5.11») — Playwright-visible сразу,
+  // без ховера (live-recon 23-Jul). Мобильный вариант — отдельный класс `__mobile__` (не матчит).
+  samplePrice: ".header-menu__subitem-game__captions-price",
 } as const;
 
 /* ===== Storefront / Product Cards ===== */
