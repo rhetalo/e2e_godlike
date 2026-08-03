@@ -43,6 +43,14 @@ function blockForFile(file: string): string {
   return OTHER_BLOCK;
 }
 
+/** Для флоки-теста: на якій спробі він позеленів, напр. «2/3». */
+function passingAttempt(test: TestCase): string {
+  const total = (test.retries ?? 0) + 1;
+  const passed = test.results.find((r) => r.status === 'passed');
+  const at = passed ? passed.retry + 1 : total;
+  return `${at}/${total}`;
+}
+
 interface Failure {
   title: string;
   file: string;
@@ -50,18 +58,26 @@ interface Failure {
   headline: string; // содержательная шапка: шаг · локация · попытка · таймаут
 }
 
+interface FlakyItem {
+  title: string;
+  file: string;
+  attempt: string; // на какой попытке позеленел, напр. «2/3»
+}
+
 interface BlockResult {
-  passed: number;
-  failed: number;
+  passed: number; // финальный исход expected|flaky (флоки тоже прошёл — входит в passed)
+  failed: number; // только реально красные (упали ВСЕ ретраи)
   skipped: number;
+  flaky: number; // подмножество passed: упал и прошёл на ретрае
   failures: Failure[];
+  flakies: FlakyItem[];
 }
 
 /** Slack Block Kit-блок: структура довільна, типізуємо як об'єкт (не any). */
 type SlackBlock = Record<string, unknown>;
 
 class PerFileSlackReporter implements Reporter {
-  private blocks = new Map<string, BlockResult>();
+  private rootSuite: Suite | undefined;
   private totalDurationMs = 0;
   private webhookUrl: string;
   private meta: { key: string; value: string }[];
@@ -71,64 +87,93 @@ class PerFileSlackReporter implements Reporter {
     this.meta = options.meta || [];
   }
 
-  onBegin(_config: FullConfig, _suite: Suite) {
-    this.blocks.clear();
+  onBegin(_config: FullConfig, suite: Suite) {
+    this.rootSuite = suite;
   }
 
-  onTestEnd(test: TestCase, result: TestResult) {
-    const blockName = blockForFile(test.location.file);
-    let res = this.blocks.get(blockName);
-    if (!res) {
-      res = { passed: 0, failed: 0, skipped: 0, failures: [] };
-      this.blocks.set(blockName, res);
-    }
-
+  // Считаем/классифицируем НЕ здесь: onTestEnd зовётся на КАЖДУЮ попытку (ретрай = отдельный
+  // результат), поэтому по-попыточный подсчёт раздувал «Впало» и метил флоки как «стабільне
+  // падіння» (isFlaky вычислялся до ретрая). Итоги строим в onEnd по ФИНАЛЬНОМУ исходу теста
+  // (test.outcome()). Здесь — только суммарная длительность.
+  onTestEnd(_test: TestCase, result: TestResult) {
     this.totalDurationMs += result.duration;
+  }
 
-    if (result.status === 'passed') {
-      res.passed++;
-    } else if (result.status === 'skipped') {
-      res.skipped++;
-    } else {
-      res.failed++;
-      let headline = '';
-      let reason = result.errors.length > 0 ? result.errors[0].message || '' : 'Unknown error';
-      try {
-        const info = describeFailure(test, result);
-        headline = failureHeadline(info);
-        reason = info.reason || reason;
-      } catch {
-        /* обогащение best-effort — падение репортёра недопустимо */
+  /** Итоги по блокам из дерева тестов, классификация по финальному test.outcome(). */
+  private collectBlocks(): Map<string, BlockResult> {
+    const blocks = new Map<string, BlockResult>();
+    const ensure = (name: string): BlockResult => {
+      let r = blocks.get(name);
+      if (!r) {
+        r = { passed: 0, failed: 0, skipped: 0, flaky: 0, failures: [], flakies: [] };
+        blocks.set(name, r);
       }
-      res.failures.push({
-        title: test.title,
-        file: path.basename(test.location.file),
-        error: reason,
-        headline,
-      });
+      return r;
+    };
+
+    for (const test of this.rootSuite?.allTests() ?? []) {
+      const r = ensure(blockForFile(test.location.file));
+      const file = path.basename(test.location.file);
+      const outcome = test.outcome(); // 'skipped'|'expected'|'unexpected'|'flaky' — финальный
+
+      if (outcome === 'skipped') {
+        r.skipped++;
+      } else if (outcome === 'expected') {
+        r.passed++;
+      } else if (outcome === 'flaky') {
+        r.passed++; // флоки в итоге ПРОШЁЛ — не «Впало»
+        r.flaky++;
+        r.flakies.push({ title: test.title, file, attempt: passingAttempt(test) });
+      } else {
+        // 'unexpected' — упали ВСЕ ретраи
+        r.failed++;
+        const last = test.results[test.results.length - 1];
+        let headline = '';
+        let reason = last?.errors?.[0]?.message || 'Unknown error';
+        try {
+          if (last) {
+            const info = describeFailure(test, last);
+            headline = failureHeadline(info);
+            reason = info.reason || reason;
+          }
+        } catch {
+          /* обогащение best-effort — падение репортёра недопустимо */
+        }
+        r.failures.push({ title: test.title, file, error: reason, headline });
+      }
     }
+    return blocks;
   }
 
   async onEnd() {
     if (!this.webhookUrl) return;
-    if (this.blocks.size === 0) return;
+    const blocks = this.collectBlocks();
+    if (blocks.size === 0) return;
 
-    // Загальні підсумки
+    // Загальні підсумки (за фінальним исходом тесту; flaky входить у passed, не в failed)
     let totalPassed = 0;
     let totalFailed = 0;
     let totalSkipped = 0;
-    for (const r of this.blocks.values()) {
+    let totalFlaky = 0;
+    for (const r of blocks.values()) {
       totalPassed += r.passed;
       totalFailed += r.failed;
       totalSkipped += r.skipped;
+      totalFlaky += r.flaky;
     }
     const totalAll = totalPassed + totalFailed + totalSkipped;
 
     const branch = this.meta.find((m) => m.key === 'Branch')?.value || 'local';
     const jobUrl = this.meta.find((m) => m.key === 'Job URL')?.value;
-    const headEmoji = totalFailed === 0 ? '✅' : '❌';
+    // Червоно лише при реальних падіннях; жовто, якщо чисто, але були флоки; інакше зелено.
+    const headEmoji = totalFailed > 0 ? '❌' : totalFlaky > 0 ? '⚠️' : '✅';
     const durMin = Math.floor(this.totalDurationMs / 60000);
     const durSec = Math.floor((this.totalDurationMs % 60000) / 1000);
+
+    const summaryLine =
+      `*Всього:* ${totalAll}   ✅ *Пройдено:* ${totalPassed}   ❌ *Впало:* ${totalFailed}` +
+      (totalFlaky ? `   ⚠️ *Флоки:* ${totalFlaky}` : '') +
+      (totalSkipped ? `   ⏭️ *Пропущено:* ${totalSkipped}` : '');
 
     const allBlocks: SlackBlock[] = [
       {
@@ -139,11 +184,7 @@ class PerFileSlackReporter implements Reporter {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: [
-            `*Всього:* ${totalAll}   ✅ *Пройдено:* ${totalPassed}   ❌ *Впало:* ${totalFailed}` +
-              (totalSkipped ? `   ⏭️ *Пропущено:* ${totalSkipped}` : ''),
-            `*Гілка:* ${branch}   *Час:* ${durMin}m ${durSec}s`,
-          ].join('\n'),
+          text: [summaryLine, `*Гілка:* ${branch}   *Час:* ${durMin}m ${durSec}s`].join('\n'),
         },
       },
       { type: 'divider' },
@@ -153,18 +194,19 @@ class PerFileSlackReporter implements Reporter {
     const orderedNames = [...BLOCKS.map((b) => b.name), OTHER_BLOCK];
     const statusLines: string[] = [];
     for (const name of orderedNames) {
-      const r = this.blocks.get(name);
+      const r = blocks.get(name);
       if (!r) continue;
       const total = r.passed + r.failed + r.skipped;
       const emoji = r.failed === 0 ? '✅' : '❌';
       const skipNote = r.skipped ? ` (⏭️ ${r.skipped})` : '';
-      statusLines.push(`${emoji} *${name}* — пройдено ${r.passed} з ${total}${skipNote}`);
+      const flakyNote = r.flaky ? ` (⚠️ ${r.flaky} флоки)` : '';
+      statusLines.push(`${emoji} *${name}* — пройдено ${r.passed} з ${total}${skipNote}${flakyNote}`);
     }
     this.chunkTextToBlocks('', statusLines).forEach((b) => allBlocks.push(b));
 
     // Деталі впалих — лише під блоками з падіннями (повний стектрейс, як раніше).
     for (const name of orderedNames) {
-      const r = this.blocks.get(name);
+      const r = blocks.get(name);
       if (!r || r.failures.length === 0) continue;
       const failLines = r.failures.map((f) => {
         const cleanError = f.error ? f.error.split('\n').slice(0, 12).join('\n') : 'Unknown error';
@@ -174,6 +216,20 @@ class PerFileSlackReporter implements Reporter {
       });
       allBlocks.push({ type: 'divider' });
       this.chunkTextToBlocks(`*🐞 ${name} — баги:*`, failLines, '\n\n').forEach((b) => allBlocks.push(b));
+    }
+
+    // Флоки — окремою секцією (пройшли на ретраї; НЕ падіння, але варті уваги). Без стектрейсу.
+    const flakyLines: string[] = [];
+    for (const name of orderedNames) {
+      const r = blocks.get(name);
+      if (!r || r.flakies.length === 0) continue;
+      for (const fl of r.flakies) {
+        flakyLines.push(`• *${fl.file} › ${fl.title}* — пройшов на спробі ${fl.attempt} _(${name})_`);
+      }
+    }
+    if (flakyLines.length) {
+      allBlocks.push({ type: 'divider' });
+      this.chunkTextToBlocks('*⚠️ Флоки (пройшли на ретраї):*', flakyLines).forEach((b) => allBlocks.push(b));
     }
 
     await this.sendBlocksInChunks(allBlocks);
