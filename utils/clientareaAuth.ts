@@ -46,11 +46,12 @@ export async function loginClientareaAndSaveSession(
     await page.locator("#inputPassword").fill(password);
     await Promise.all([
       page.waitForURL("**/clientarea/clientarea.php", { timeout: 60_000 }),
-      // timeout 60с (не дефолтный actionTimeout 15с): click авто-ждёт пост-клик навигацию
-      // (редирект логина WHMCS), а он под нагрузкой бывает > 15с → транзиентный таймаут клика
-      // в beforeAll воронок (тест падал на 1-й попытке, проходил на ретрае). Равняем на
-      // waitForURL-бюджет. (23-Jul-2026)
-      page.locator("#login").click({ timeout: 60_000 }),
+      // noWaitAfter: клик по submit НЕ ждёт пост-клик навигацию — её ждёт waitForURL выше (свой
+      // бюджет). Иначе click авто-ждал редирект логина WHMCS в пределах actionTimeout (15с), и
+      // редкий медленный редирект под нагрузкой давал транзиентный таймаут клика в beforeAll
+      // воронок (падало на 1-й попытке, проходило на ретрае). Логин обычно быстрый — 60с тут ни к
+      // чему; убираем лишнее ожидание, а не растягиваем таймаут. (23-Jul-2026)
+      page.locator("#login").click({ noWaitAfter: true }),
     ]);
     await page.context().storageState({ path: statePath });
     console.log(`[INFO] Clientarea login OK → ${statePath}`);
