@@ -46,7 +46,11 @@ export async function loginClientareaAndSaveSession(
     await page.locator("#inputPassword").fill(password);
     await Promise.all([
       page.waitForURL("**/clientarea/clientarea.php", { timeout: 60_000 }),
-      page.locator("#login").click(),
+      // timeout 60с (не дефолтный actionTimeout 15с): click авто-ждёт пост-клик навигацию
+      // (редирект логина WHMCS), а он под нагрузкой бывает > 15с → транзиентный таймаут клика
+      // в beforeAll воронок (тест падал на 1-й попытке, проходил на ретрае). Равняем на
+      // waitForURL-бюджет. (23-Jul-2026)
+      page.locator("#login").click({ timeout: 60_000 }),
     ]);
     await page.context().storageState({ path: statePath });
     console.log(`[INFO] Clientarea login OK → ${statePath}`);
