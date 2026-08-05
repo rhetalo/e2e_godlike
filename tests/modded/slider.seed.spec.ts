@@ -71,14 +71,7 @@ test.describe("Сид-страница Sky-haven (Vuetify-калькулятор
     expect(params.get("modpackId")).toBeTruthy();
   });
 
-  // ⚠️ КАРАНТИН (прод-баг, live-recon 05-Aug-2026): слайдер сид-калькулятора ДВИГАЕТСЯ
-  // (aria-valuenow 0→100 и скрытый #fieldPlayersCount 0→100), но НЕ пересчитывает тариф —
-  // цена (€182.39) и productId в Host Now (715) застыли одинаковыми на min/mid/max (sky-haven).
-  // Модед-калькулятор в тот же период мигрировал на новый Inc 6-виджет и работает; сид остался
-  // на старом Vuetify и потерял связь «слайдер → тариф». Баг-репорт: <вставить ссылку на тикет>.
-  // Снять skip после фикса прода. НЕ ослаблять ассерт (проверка реальна — прод сломан).
-  // eslint-disable-next-line playwright/no-skipped-test
-  test.skip("@critical сдвиг слайдера меняет productId в /cart-seed [КАРАНТИН: прод-баг]", async () => {
+  test("@critical сдвиг слайдера меняет productId в /cart-seed", async () => {
     await seed.calculator.toMin();
     const productMin = cartParams(await seed.hostNowToCartUrl()).get("productId") ?? "";
 
