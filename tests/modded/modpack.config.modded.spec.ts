@@ -29,24 +29,29 @@ test.describe("Modded: конфигурация модпака", () => {
     const initial = await modded.readCalculatorCartParams();
     expect(initial.modpackId).toBeTruthy();
 
-    // Берём quick-pick, чьё имя не входит в текущий modpackId.
-    const target = QuickPickModpacks.find(
-      (name) =>
-        !initial.modpackId?.toLowerCase().includes(name.toLowerCase().replace(/\s+/g, "-")),
-    );
-    expect(target, "ожидали хотя бы один отличный quick-pick").toBeTruthy();
+    // modpackId теперь ЧИСЛОВОЙ (curseforge:925200:…) — по имени quick-pick не сопоставить, какой
+    // из них выбран по умолчанию. Поэтому кликаем quick-pick'и по очереди, пока modpackId в ссылке
+    // корзины не сменится (дефолтный клик ничего не меняет — пропускаем и берём следующий).
+    let after: Awaited<ReturnType<typeof modded.readCalculatorCartParams>> | null = null;
+    for (const name of QuickPickModpacks) {
+      await modded.quickPickButton(name).click();
+      const changed = await expect
+        .poll(async () => (await modded.readCalculatorCartParams()).modpackId, {
+          timeout: 4_000,
+          intervals: [200, 400, 800],
+        })
+        .not.toBe(initial.modpackId)
+        .then(() => true)
+        .catch(() => false);
+      if (changed) {
+        after = await modded.readCalculatorCartParams();
+        break;
+      }
+    }
 
-    await modded.quickPickButton(target!).click();
-
-    await expect
-      .poll(async () => (await modded.readCalculatorCartParams()).modpackId, {
-        timeout: 10_000,
-        intervals: [200, 400, 800],
-      })
-      .not.toBe(initial.modpackId);
-
-    const after = await modded.readCalculatorCartParams();
-    expect(after.productId).toMatch(/^\d+$/);
+    expect(after, "ожидали, что хотя бы один quick-pick сменит modpackId").toBeTruthy();
+    expect(after!.modpackId).not.toBe(initial.modpackId);
+    expect(after!.productId).toMatch(/^\d+$/);
   });
 
   test("@regression автокомплит модпаков открывается (≥5 опций) + поле версии рядом", async () => {

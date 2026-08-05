@@ -456,3 +456,27 @@ All» = `.cky-btn-accept`) — его pointer-events съедали клик Res
 
 ⚠️ Третий подряд прод-регресс за неделю от редизайнов storefront (seed-кнопка 22-Jul, cky-баннер
 22-Jul, шапка 23-Jul) — все ловились live-recon'ом «вчера ок → сегодня стабильный fail = прод».
+
+## Сессия 05-Aug — Inc 6-виджет докатился до модед-калькулятора (12 тестов легли)
+
+Прод заменил Vuetify `#plan-calculator` новым веб-компонентом `<plan-calculator-widget>` (Inc 6,
+открытый Shadow DOM, без Vuetify) — старый `[role="slider"]` исчез → `PlanCalculator.waitMounted`
+таймаутил 30с → легли ВСЕ 12 тестов через PlanCalculator (slider.modded, modpack.config.modded,
+funnel.modded, cart.modded-new, smoke.pages). **Не A/B и не USA-IP** (воспроизводится 100% локально);
+409/429 в консоли — посторонние (ipapi/redtrack). Live-recon подтвердил полную раскатку.
+
+Миграция page objects (Playwright пробивает открытый Shadow DOM обычными CSS):
+- `PlanCalculator.sliderThumb` = `[role="slider"], input[type=range].ui-slider__input` (seed остался
+  Vuetify 0..100, modded — НАТИВНЫЙ range 0..N дискретно); `readSlider` ветвится (input.value vs aria-*).
+- `ModdedHostingPage`: модпак `.ui-autocomplete__trigger` (опции `.ui-autocomplete__option`), версия
+  `.ui-select__trigger`, quick-pick `.ui-button--chip`. CTA `a.plan-calculator__checkout__button`,
+  цена `.plan-calculator__pricing__price__value(--old)`, grid `.modpacks-body__install`,
+  скрытый `#planCalculatorFieldPlayersCount` — КЛАССЫ/ID СОХРАНИЛИСЬ (в shadow), не менял.
+- `slider.modded`: ассерты 0..100 → динамический `max` (слайдер стал 0..8 дискретный); quick-pick тест
+  — modpackId теперь ЧИСЛОВОЙ (`curseforge:925200:…`), выбор target по имени не работает → кликаем
+  quick-pick'и, пока modpackId не сменится.
+
+Проверено: slider.modded 5/5, modpack.config 3/3, funnel.modded 2/2, cart.modded-new 4/4, smoke 4/4; tsc 0.
+⚠️ Сид-калькулятор (`#seed-calculator`) НЕ мигрирован (всё ещё Vuetify). Отдельно: `slider.seed:84` —
+слайдер двигается (aria 0→100), но productId фиксирован (715) min↔max для sky-haven → либо сид стал
+одно-тарифным (ассерт устарел), либо прод-баг; нужен risk-decision владельца (не чинил).

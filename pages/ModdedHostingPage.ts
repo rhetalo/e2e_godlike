@@ -1,18 +1,21 @@
 /**
  * ModdedHostingPage — /modded-minecraft-server-hosting/
  *
- * Verified DOM shape (see inspection/modded.* in the original godlike-e2e
- * project for the raw dumps):
+ * ⚠️ 23-Jul-2026: калькулятор мигрировал на НОВЫЙ веб-компонент `<plan-calculator-widget>`
+ * (Inc 6, открытый Shadow DOM, без Vuetify). Playwright пробивает открытый shadow обычными
+ * CSS-локаторами, поэтому селекторы ниже указываем через корень `#plan-calculator`.
+ * Подтверждено live DOM recon 23-Jul-2026.
  *
- *   #plan-calculator                                ← Vuetify v-app root
- *     #planCalculatorFieldModpack                   ← v-autocomplete input
- *     #planCalculatorFieldModpackVersion            ← v-autocomplete input
- *     #planCalculatorFieldPlayersCount              ← hidden numeric input
- *     [role="slider"]                               ← v-slider thumb
- *     button.v-btn.rounded-pill                     ← quick-pick modpack pills
- *     a.plan-calculator__checkout__button[href]     ← "Host Now" → /cart-modded-new/?…
+ *   #plan-calculator > plan-calculator-widget#shadow      ← новый виджет (Shadow DOM)
+ *     .ui-autocomplete__trigger                           ← модпак (combobox); опции .ui-autocomplete__option
+ *     .ui-select__trigger                                 ← версия модпака (combobox)
+ *     #planCalculatorFieldPlayersCount                    ← скрытый numeric input (сохранился в shadow)
+ *     input[type=range].ui-slider__input                  ← НАТИВНЫЙ слайдер (0..N дискретно)
+ *     .ui-button--chip                                    ← quick-pick модпаки (ATM 10, BMC 4, …)
+ *     a.plan-calculator__checkout__button[href]           ← "Host Now" → /cart-modded-new/?… (класс сохранён)
+ *     .plan-calculator__pricing__price__value(--old)      ← цена (классы сохранены)
  *
- *   button.modpacks-body__install                   ← grid install buttons
+ *   button.modpacks-body__install                         ← grid install buttons (LIGHT DOM, не менялись)
  *     [data-product-id], [data-modpack-id], [data-promo]
  *
  * Quick-pick pills are: "ATM 10", "BMC 4", "Prominence II", "RLCraft", "ATMons".
@@ -51,11 +54,13 @@ export class ModdedHostingPage extends BasePage {
   // ─── calculator ────────────────────────────────────────────────────────────
 
   modpackInput(): Locator {
-    return this.page.locator("#planCalculatorFieldModpack");
+    // Новый виджет: combobox-триггер модпака (в Shadow DOM, пробивается через корень).
+    return this.calculator.root().locator(".ui-autocomplete__trigger").first();
   }
 
   modpackVersionInput(): Locator {
-    return this.page.locator("#planCalculatorFieldModpackVersion");
+    // Новый виджет: combobox-триггер версии модпака.
+    return this.calculator.root().locator(".ui-select__trigger").first();
   }
 
   /** Hidden players-count input (in sync with the slider). */
@@ -63,11 +68,11 @@ export class ModdedHostingPage extends BasePage {
     return this.page.locator("#planCalculatorFieldPlayersCount");
   }
 
-  /** Quick-pick rounded-pill buttons (e.g. "ATM 10"). */
+  /** Quick-pick chip buttons (e.g. "ATM 10") — новый виджет: .ui-button--chip. */
   quickPickButton(name: QuickPickModpack | string): Locator {
     return this.calculator
       .root()
-      .locator(`button.v-btn.rounded-pill:has-text("${name}")`)
+      .locator(".ui-button--chip", { hasText: name })
       .first();
   }
 
@@ -117,17 +122,12 @@ export class ModdedHostingPage extends BasePage {
   /** Open the modpack autocomplete and return the visible option titles. */
   async listModpackOptions(limit = 10): Promise<string[]> {
     await this.modpackInput().click();
-    await this.page
-      .locator(".v-autocomplete__content .v-list-item-title")
-      .first()
-      .waitFor({ state: "visible", timeout: 15_000 });
-    return this.page
-      .locator(".v-overlay-container .v-list-item")
-      .evaluateAll(
-        (nodes, n) =>
-          nodes.slice(0, n).map((el) => (el.textContent || "").trim()),
-        limit,
-      );
+    const options = this.calculator.root().locator(".ui-autocomplete__option");
+    await options.first().waitFor({ state: "visible", timeout: 15_000 });
+    return options.evaluateAll(
+      (nodes, n) => nodes.slice(0, n).map((el) => (el.textContent || "").trim()),
+      limit,
+    );
   }
 
   // ─── modpack grid ──────────────────────────────────────────────────────────

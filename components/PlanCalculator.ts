@@ -1,20 +1,22 @@
 /**
- * PlanCalculator — Vuetify v-slider widget shared by:
- *   - /modded-minecraft-server-hosting/ (#plan-calculator)
- *   - /minecraft-seeds/<slug>/         (#seed-calculator)
+ * PlanCalculator — слайдер тарифа, ОБЩИЙ для двух РАЗНЫХ бандлов:
+ *   - /modded-minecraft-server-hosting/ (#plan-calculator) — ⚠️ с 23-Jul-2026 это НОВЫЙ
+ *     веб-компонент `<plan-calculator-widget>` (Inc 6, открытый Shadow DOM, без Vuetify).
+ *     Слайдер — НАТИВНЫЙ `input[type=range].ui-slider__input`, диапазон 0..N ДИСКРЕТНЫЙ
+ *     (наблюдалось 0..8, step=1 — по числу тарифных ступеней), значение = input.value.
+ *   - /minecraft-seeds/<slug>/ (#seed-calculator) — ВСЁ ЕЩЁ старый Vuetify v-slider:
+ *     ARIA-thumb (aria-valuemin=0 / aria-valuemax=100), значение = aria-valuenow.
  *
- * Both bundles render a Vuetify v-slider whose ARIA-compliant thumb has
- * aria-valuemin=0 / aria-valuemax=100 and steps in uniform ticks. Pressing
- * ArrowRight on the thumb increments aria-valuenow by exactly one tick.
+ * Playwright пробивает открытый Shadow DOM обычными CSS-локаторами, поэтому
+ * `#plan-calculator input.ui-slider__input` находит слайдер внутри веб-компонента.
+ * sliderThumb()/readSlider() поддерживают ОБА варианта (native range ИЛИ aria).
+ * Клавиши (Arrow/Home/End) работают и для нативного range, и для Vuetify-thumb.
  *
- * ⚠️ Число делений (тиров) задаётся страницей и МЕНЯЕТСЯ: наблюдалось 8 шагов
- * (шаг 12.5), затем 6 шагов (шаг 16.667 = 100/6). Поэтому размер шага НЕ
- * хардкодим — вычисляем из DOM через stepSize().
+ * ⚠️ Число ступеней задаётся страницей и МЕНЯЕТСЯ (0..100 у seed, 0..8 у modded) — НЕ
+ * хардкодим ни max, ни размер шага (вычисляем из DOM: readSlider().max, stepSize()).
  *
- * The modded calculator additionally exposes a Vuetify v-autocomplete for the
- * modpack and modpack version, plus a row of quick-pick "rounded-pill" buttons
- * (ATM 10, BMC 4, Prominence II, RLCraft, ATMons). Those modpack-specific
- * controls live on ModdedHostingPage so the seed calculator stays minimal.
+ * Модпак-специфичные контролы нового виджета (autocomplete/version/quick-pick) живут на
+ * ModdedHostingPage (там же обновлены под новые классы .ui-*).
  */
 import type { Locator, Page } from "@playwright/test";
 
@@ -57,7 +59,8 @@ export class PlanCalculator {
   // ─── slider ────────────────────────────────────────────────────────────────
 
   sliderThumb(): Locator {
-    return this.root().locator('[role="slider"]').first();
+    // Новый modded-виджет: нативный range .ui-slider__input; старый seed-Vuetify: [role=slider].
+    return this.root().locator('[role="slider"], input[type="range"].ui-slider__input').first();
   }
 
   /** Hidden input that backs the slider (different ID per bundle). */
@@ -69,17 +72,22 @@ export class PlanCalculator {
   }
 
   async readSlider(): Promise<SliderState> {
-    const thumb = this.sliderThumb();
-    const [now, min, max] = await Promise.all([
-      thumb.getAttribute("aria-valuenow"),
-      thumb.getAttribute("aria-valuemin"),
-      thumb.getAttribute("aria-valuemax"),
-    ]);
-    return {
-      value: Number(now ?? 0),
-      min: Number(min ?? 0),
-      max: Number(max ?? 100),
-    };
+    // Нативный range (modded) → value/min/max самого input; Vuetify-thumb (seed) → aria-*.
+    return this.sliderThumb().evaluate((el) => {
+      const inp = el as HTMLInputElement;
+      if (inp.tagName === "INPUT" && inp.type === "range") {
+        return {
+          value: Number(inp.value || 0),
+          min: Number(inp.min || 0),
+          max: Number(inp.max || 100),
+        };
+      }
+      const num = (a: string, d: number) => {
+        const v = el.getAttribute(a);
+        return v === null ? d : Number(v);
+      };
+      return { value: num("aria-valuenow", 0), min: num("aria-valuemin", 0), max: num("aria-valuemax", 100) };
+    });
   }
 
   /** Press ArrowRight on the thumb `steps` times. */
