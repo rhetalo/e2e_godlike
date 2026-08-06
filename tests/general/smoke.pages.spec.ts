@@ -31,7 +31,7 @@ test.describe("@smoke страницы godlike.host загружаются", () 
     await test.step("URL modded-хостинга и калькулятор смонтирован", async () => {
       await expect(page).toHaveURL(/modded-minecraft-server-hosting/);
       await expect(modded.calculator.sliderThumb()).toBeVisible();
-      await expect(modded.calculatorCheckoutLink()).toHaveAttribute("href", /productId=\d+/);
+      await expect(modded.calculatorCheckoutLink()).toHaveAttribute("data-cart-url", /productId=\d+/);
       expect(await modded.installButtons().count()).toBeGreaterThanOrEqual(1);
     });
   });

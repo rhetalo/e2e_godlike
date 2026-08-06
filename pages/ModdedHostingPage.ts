@@ -12,7 +12,7 @@
  *     #planCalculatorFieldPlayersCount                    ← скрытый numeric input (сохранился в shadow)
  *     input[type=range].ui-slider__input                  ← НАТИВНЫЙ слайдер (0..N дискретно)
  *     .ui-button--chip                                    ← quick-pick модпаки (ATM 10, BMC 4, …)
- *     a.plan-calculator__checkout__button[href]           ← "Host Now" → /cart-modded-new/?… (класс сохранён)
+ *     button.plan-calculator__checkout__button[data-cart-url]  ← "Host Now" → /cart-modded-new/?… (06-Aug: был <a href>, стал <button data-cart-url>)
  *     .plan-calculator__pricing__price__value(--old)      ← цена (классы сохранены)
  *
  *   button.modpacks-body__install                         ← grid install buttons (LIGHT DOM, не менялись)
@@ -77,23 +77,26 @@ export class ModdedHostingPage extends BasePage {
   }
 
   /**
-   * The calculator's "Host Now" CTA. The href changes whenever the slider,
-   * modpack or version are touched — reading it is the single most reliable
-   * way to assert calculator state.
+   * The calculator's "Host Now" CTA. Синхронна выбору (слайдер/модпак/версия) — чтение её
+   * URL корзины самый надёжный способ проверить состояние калькулятора.
+   * ⚠️ 06-Aug-2026: прод сменил CTA с `<a href>` на `<button data-cart-url>` (тег + атрибут).
+   * Селектор tag-agnostic (`.plan-calculator__checkout__button`), URL берём из `data-cart-url`.
+   * Кнопка появляется чуть позже слайдера (после billing-запроса) — getAttribute авто-ждёт её.
    */
   calculatorCheckoutLink(): Locator {
     return this.calculator
       .root()
-      .locator("a.plan-calculator__checkout__button");
+      .locator(".plan-calculator__checkout__button")
+      .first();
   }
 
-  /** Parse the calculator's checkout link href into typed params. */
+  /** Parse the calculator's checkout cart URL (data-cart-url) into typed params. */
   async readCalculatorCartParams(): Promise<CalculatorCartParams> {
-    const href = await this.calculatorCheckoutLink().getAttribute("href");
-    if (!href) {
-      throw new Error("calculator checkout link has no href");
+    const cartUrl = await this.calculatorCheckoutLink().getAttribute("data-cart-url");
+    if (!cartUrl) {
+      throw new Error("calculator checkout button has no data-cart-url");
     }
-    const url = new URL(href, "https://godlike.host");
+    const url = new URL(cartUrl, "https://godlike.host");
     const get = (k: string) => url.searchParams.get(k);
     return {
       productId: get("productId"),
@@ -101,7 +104,7 @@ export class ModdedHostingPage extends BasePage {
       billingCycle: get("billingCycle"),
       promo: get("promo"),
       discount: get("discount"),
-      href,
+      href: cartUrl,
     };
   }
 
