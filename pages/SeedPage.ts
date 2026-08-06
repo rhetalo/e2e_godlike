@@ -1,21 +1,20 @@
 /**
  * SeedPage — /minecraft-seeds/sky-haven-island-atm-10-seed/
  *
- * Verified DOM (see inspection/seed.* in the original godlike-e2e project):
+ * ⚠️ 06-Aug-2026: сид-калькулятор мигрировал с Vuetify `#seed-calculator` на НОВЫЙ Inc 6
+ * веб-компонент (открытый Shadow DOM, без Vuetify), как модед-калькулятор. Playwright пробивает
+ * открытый shadow обычными CSS-локаторами. Подтверждено live-recon 06-Aug-2026.
  *
- *   #seed-calculator                                ← Vuetify v-app root
- *     [data-cart-base-url="https://godlike.host/cart"]
- *     [data-modpack-id="curseforge-925200-7852998"]
- *     [data-seed-id="-214726972146453730"]
- *     [data-promocode="SEED"] [data-discount="40"]
+ *   .single-seed-calculator                                ← новый корень
+ *     [data-vue-app="seed-calculator"][data-config="{JSON}"] ← конфиг (seedId/modpackId/promocode/
+ *                                                              discount/cartBaseUrl/gid) в JSON
+ *     input[type=range].ui-slider__input#fieldPlayersCount  ← НАТИВНЫЙ слайдер (0..N дискретно)
+ *     .ui-slider__tick-label                                ← деления (1-2 … 50+)
+ *     button[type=submit].seed-calculator__btn              ← "Host Now" (класс сохранён)
+ *     .seed-calculator__plan__title / .seed-calculator__price--current(--old) ← план/цена
  *
- *     #fieldPlayersCount                            ← hidden numeric input
- *     [role="slider"]                               ← v-slider thumb (0..100, равномерные тики; шаг задаётся страницей)
- *     button[type="submit"].seed-calculator__btn    ← "Host Now" CTA inside the calc
- *
- *   button.single-seed-card__button                 ← "BUY A SERVER" card CTA
- *     [data-url="https://godlike.host/cart/?productId=…&seedId=…&modpackId=…"]
- *     [data-promocode="VANILLA20"]
+ *   button#cartDefaultBtn.single-seed-card__button          ← "BUY A SERVER" (LIGHT DOM)
+ *     [data-url="https://godlike.host/cart-seed/?productId=…&seedId=…&modpackId=…"]
  */
 import type { Locator } from "@playwright/test";
 import { BasePage } from "./BasePage";
@@ -31,7 +30,7 @@ export interface SeedCalculatorMeta {
 }
 
 export class SeedPage extends BasePage {
-  readonly calculator = new PlanCalculator(this.page, "#seed-calculator");
+  readonly calculator = new PlanCalculator(this.page, ".single-seed-calculator");
 
   async open(): Promise<void> {
     await this.goto(Urls.seedSkyHaven);
@@ -39,15 +38,28 @@ export class SeedPage extends BasePage {
     await this.cookieBanner.dismissAll();
   }
 
-  /** Read the data-* attributes baked onto the seed-calculator root. */
+  /**
+   * Мета калькулятора. ⚠️ 06-Aug-2026: раньше — data-* на корне `#seed-calculator`; теперь конфиг
+   * приходит ОДНИМ JSON-блобом в `[data-vue-app="seed-calculator"]` data-config (Inc 6). Парсим его.
+   */
   async readCalculatorMeta(): Promise<SeedCalculatorMeta> {
-    const root = this.calculator.root();
+    const raw = await this.page
+      .locator('[data-vue-app="seed-calculator"]')
+      .first()
+      .getAttribute("data-config");
+    let cfg: Record<string, unknown> = {};
+    try {
+      cfg = raw ? (JSON.parse(raw) as Record<string, unknown>) : {};
+    } catch {
+      cfg = {};
+    }
+    const str = (v: unknown): string | null => (v == null ? null : String(v));
     return {
-      cartBaseUrl: await root.getAttribute("data-cart-base-url"),
-      modpackId: await root.getAttribute("data-modpack-id"),
-      seedId: await root.getAttribute("data-seed-id"),
-      promocode: await root.getAttribute("data-promocode"),
-      discount: await root.getAttribute("data-discount"),
+      cartBaseUrl: str(cfg.cartBaseUrl),
+      modpackId: str(cfg.modpackId),
+      seedId: str(cfg.seedId),
+      promocode: str(cfg.promocode),
+      discount: str(cfg.discount),
     };
   }
 

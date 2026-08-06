@@ -1,19 +1,21 @@
 /**
  * slider.seed.spec.ts
  * ───────────────────
- * Одиночная seed-страница /minecraft-seeds/sky-haven-island-atm-10-seed/ (Vuetify #seed-calculator).
+ * Одиночная seed-страница /minecraft-seeds/sky-haven-island-atm-10-seed/.
+ *
+ * ⚠️ 06-Aug-2026: калькулятор мигрировал на новый Inc 6 веб-компонент (Shadow DOM), как модед.
+ * Слайдер теперь НАТИВНЫЙ input[type=range] с ДИСКРЕТНЫМ диапазоном 0..N (не ARIA 0..100); id
+ * #fieldPlayersCount и класс кнопки .seed-calculator__btn сохранились. Мета — в data-config (JSON).
  *
  * Покрываем слайдер тарифа и передачу выбранного тарифа/сида/модпака в воронку /cart-seed:
- *   - слайдер: ARIA-диапазон 0..100, равномерный шаг, скрытый #fieldPlayersCount;
+ *   - слайдер: диапазон 0..max, равномерный шаг, скрытый #fieldPlayersCount повторяет значение;
  *   - Host Now: позиция слайдера определяет productId в URL корзины (покупаем ВЫБРАННЫЙ тариф),
  *     seedId/modpackId совпадают с meta калькулятора;
- *   - BUY-A-SERVER (data-url): фикс. productId (Quadra, первый тариф) + seedId + modpackId + promo;
- *   - data-атрибуты promocode/discount на корне калькулятора.
+ *   - BUY-A-SERVER (data-url): фикс. productId + seedId + modpackId + promo;
+ *   - data-config несёт promocode/discount.
  *
- * Тот же Vuetify v-slider, что и на modded-калькуляторе (0..100, равномерные тики; число делений
- * задаёт страница). modpackId у Host Now приходит с двоеточиями (curseforge:…), у BUY — с дефисами
- * (curseforge-…) → проверяем структурно, не по разделителю. Read-only: дальше /cart-seed (step 1)
- * не идём, оплату не оформляем. Confirmed via recon 18-Jun-2026.
+ * Read-only: дальше /cart-seed (step 1) не идём, оплату не оформляем. Не хардкодим max/шаг —
+ * читаем из DOM. Confirmed via live-recon 06-Aug-2026.
  */
 import { test, expect } from "../../fixtures/base";
 import { SeedPage } from "../../pages/SeedPage";
@@ -31,26 +33,28 @@ test.describe("Сид-страница Sky-haven (Vuetify-калькулятор
     await seed.open();
   });
 
-  test("@regression слайдер отдаёт ARIA-диапазон 0..100", async () => {
+  test("@regression слайдер отдаёт диапазон и стартует внутри [min, max]", async () => {
     const state = await seed.calculator.readSlider();
     expect(state.min).toBe(0);
-    expect(state.max).toBe(100);
+    expect(state.max).toBeGreaterThan(0); // max = число тарифных ступеней (не хардкодим)
+    expect(state.value).toBeGreaterThanOrEqual(state.min);
+    expect(state.value).toBeLessThanOrEqual(state.max);
   });
 
   test("@regression ArrowRight двигает слайдер на один равномерный шаг", async () => {
     // Не хардкодим размер шага: число делений задаётся страницей и меняется. Проверяем контракт:
-    // один ArrowRight = один равномерный тик, увеличивающий значение, и тик делит 0..100 нацело.
+    // один ArrowRight = один равномерный тик, увеличивающий значение, и тик делит [0..max] нацело.
     await seed.calculator.toMin();
     const v0 = (await seed.calculator.readSlider()).value;
     await seed.calculator.stepRight(1);
     const v1 = (await seed.calculator.readSlider()).value;
     await seed.calculator.stepRight(1);
-    const v2 = (await seed.calculator.readSlider()).value;
+    const s2 = await seed.calculator.readSlider();
     const step = v1 - v0;
 
     expect(step).toBeGreaterThan(0);
-    expect(v2 - v1).toBeCloseTo(step, 1);
-    const ticks = 100 / step;
+    expect(s2.value - v1).toBeCloseTo(step, 1);
+    const ticks = s2.max / step;
     expect(ticks).toBeCloseTo(Math.round(ticks), 1);
   });
 
@@ -98,7 +102,7 @@ test.describe("Сид-страница Sky-haven (Vuetify-калькулятор
     expect(params.get("promo")).toBeTruthy();
   });
 
-  test("@regression корень калькулятора несёт data-атрибуты promocode и discount", async () => {
+  test("@regression data-config калькулятора несёт promocode и discount", async () => {
     const meta = await seed.readCalculatorMeta();
     expect(meta.promocode).toBeTruthy();
     expect(Number(meta.discount)).toBeGreaterThan(0);

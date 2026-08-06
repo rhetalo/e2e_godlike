@@ -1,26 +1,24 @@
 /**
- * PlanCalculator — слайдер тарифа, ОБЩИЙ для двух РАЗНЫХ бандлов:
- *   - /modded-minecraft-server-hosting/ (#plan-calculator) — ⚠️ с 23-Jul-2026 это НОВЫЙ
- *     веб-компонент `<plan-calculator-widget>` (Inc 6, открытый Shadow DOM, без Vuetify).
- *     Слайдер — НАТИВНЫЙ `input[type=range].ui-slider__input`, диапазон 0..N ДИСКРЕТНЫЙ
- *     (наблюдалось 0..8, step=1 — по числу тарифных ступеней), значение = input.value.
- *   - /minecraft-seeds/<slug>/ (#seed-calculator) — ВСЁ ЕЩЁ старый Vuetify v-slider:
- *     ARIA-thumb (aria-valuemin=0 / aria-valuemax=100), значение = aria-valuenow.
+ * PlanCalculator — слайдер тарифа, ОБЩИЙ для двух калькуляторов (оба — Inc 6 веб-компоненты,
+ * открытый Shadow DOM, без Vuetify; Playwright пробивает открытый shadow обычными CSS-локаторами):
+ *   - /modded-minecraft-server-hosting/ (#plan-calculator > plan-calculator-widget) — с 23-Jul-2026.
+ *   - /minecraft-seeds/<slug>/ (.single-seed-calculator > [data-vue-app=seed-calculator]) — с 06-Aug-2026
+ *     (раньше Vuetify #seed-calculator).
  *
- * Playwright пробивает открытый Shadow DOM обычными CSS-локаторами, поэтому
- * `#plan-calculator input.ui-slider__input` находит слайдер внутри веб-компонента.
- * sliderThumb()/readSlider() поддерживают ОБА варианта (native range ИЛИ aria).
- * Клавиши (Arrow/Home/End) работают и для нативного range, и для Vuetify-thumb.
+ * У обоих слайдер — НАТИВНЫЙ `input[type=range].ui-slider__input`, диапазон 0..N ДИСКРЕТНЫЙ
+ * (по числу тарифных ступеней; наблюдалось 0..8, step=1), значение = input.value.
+ * sliderThumb()/readSlider() поддерживают И native range, И (на всякий) старый ARIA-thumb.
+ * Клавиши (Arrow/Home/End) работают для нативного range.
  *
- * ⚠️ Число ступеней задаётся страницей и МЕНЯЕТСЯ (0..100 у seed, 0..8 у modded) — НЕ
- * хардкодим ни max, ни размер шага (вычисляем из DOM: readSlider().max, stepSize()).
+ * ⚠️ Число ступеней задаётся страницей и МЕНЯЕТСЯ — НЕ хардкодим ни max, ни размер шага
+ * (вычисляем из DOM: readSlider().max, stepSize()).
  *
- * Модпак-специфичные контролы нового виджета (autocomplete/version/quick-pick) живут на
- * ModdedHostingPage (там же обновлены под новые классы .ui-*).
+ * Модпак-специфичные контролы модед-виджета (autocomplete/version/quick-pick) живут на
+ * ModdedHostingPage (под классами .ui-*).
  */
 import type { Locator, Page } from "@playwright/test";
 
-export type CalculatorRoot = "#plan-calculator" | "#seed-calculator";
+export type CalculatorRoot = "#plan-calculator" | ".single-seed-calculator";
 
 export interface SliderState {
   /** aria-valuenow as a number (0..100). */
