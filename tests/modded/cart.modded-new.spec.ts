@@ -61,11 +61,13 @@ test.describe("Воронка /cart-modded-new — конфигурация че
     await context.close();
   });
 
-  test("@regression три дропдауна (план/биллинг/локация) и Order Now видны", async () => {
-    await test.step("дропдауны и кнопка Order Now видимы", async () => {
+  test("@regression дропдауны (план/биллинг) и Order Now видны", async () => {
+    // ⚠️ Локацию НЕ проверяем: поле локации гео-условно и СКРЫТО для USA-гео, а CI гоняет на
+    // VPS США → на CI дропдаунов два, локально три. Смену локации, если поле есть, проверяет
+    // отдельный тест ниже (с гео-гардом). (06-Aug-2026)
+    await test.step("дропдауны плана/биллинга и кнопка Order Now видимы", async () => {
       await expect(cart.planSelect()).toBeVisible();
       await expect(cart.billingSelect()).toBeVisible();
-      await expect(cart.locationSelect()).toBeVisible();
       await expect(cart.orderButton()).toBeVisible();
       await expect(cart.orderButton()).toHaveText(/order now/i);
     });
@@ -104,6 +106,11 @@ test.describe("Воронка /cart-modded-new — конфигурация че
   });
 
   test("@regression смена локации меняет выбор", async () => {
+    // Поле локации скрыто для USA-гео (CI на VPS США) — тогда менять нечего, пропускаем.
+    // Локально/не-USA поле есть → тест отрабатывает полноценно.
+    const noLocation = (await cart.locationSelect().count()) === 0;
+    test.skip(noLocation, "поле локации скрыто (напр. USA-гео) — менять нечего");
+
     const locBefore = await cart.toggleText(cart.locationSelect());
     const chosen = await cart.selectDifferentOption(cart.locationSelect());
 
