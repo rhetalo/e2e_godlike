@@ -7,10 +7,13 @@ import { CookieBanner } from "../components/CookieBanner";
  * WordPress SSR page. Completely different BEM structure from game server pages.
  *
  * Plan cards: .vps-vds-dedi__plans-item (NOT .storefront__tariff)
- * Deploy button: a.deploy-btn.vps-vds-dedi__plans-item__button (link, not button element)
- * Cart URL after click: /cart-vps/?productId=...&billingCycle=...&service=managed|unmanaged
+ * ⚠️ 06-Aug-2026: лендинг перестроили. Deploy-кнопки планов теперь `<button class="deploy-btn
+ * vps-vds-dedi__plans-item__button">Deploy Now</button>` — БЕЗ href (URL /cart-vps строится на
+ * клик JS-ом). Единственный `<a class="deploy-btn" href="#plans">` — это ГЕРО-кнопка «Choose Your
+ * Plan» (скролл к планам), НЕ deploy → её нельзя цеплять. Поэтому берём `button.deploy-btn`.
+ * Клик → /cart-vps/?productId=...&billingCycle=...&currency=... (подтверждено live-recon 06-Aug).
  *
- * Confirmed via debug spec 17-Apr-2026.
+ * Confirmed via debug spec 17-Apr-2026; deploy→button migration live-recon 06-Aug-2026.
  */
 export class VpsPage {
   static readonly url = "/vps-hosting/";
@@ -34,9 +37,11 @@ export class VpsPage {
     return this.page.locator(".vps-vds-dedi__plans-item:visible");
   }
 
-  /** Видимые «Deploy Now» кнопки/ссылки. */
+  /** Видимые «Deploy Now» кнопки планов. ⚠️ Именно `button.deploy-btn` (план), НЕ `a.deploy-btn`
+   * (гéро «Choose Your Plan» → #plans). Тогглы Standard/Highest + Unmanaged/Managed прячут часть
+   * карточек → берём `:visible`. */
   get deployButtons(): Locator {
-    return this.page.locator("a.deploy-btn:visible");
+    return this.page.locator("button.deploy-btn:visible");
   }
 
   /** Первая ВИДИМАЯ «Deploy Now» ссылка. */
