@@ -107,6 +107,9 @@ test.describe("Воронка покупки сида (стоп на стран�
         const players = Number(await seed.calculator.hiddenPlayerInput().inputValue());
         expect(players).toBeGreaterThan(0);
 
+        // Осадка перед Host Now: калькулятор пересчитывает цель после сдвига слайдера с задержкой,
+        // клик сразу обгоняет пересчёт → навигации нет (см. SeedPage.settleAfterSliderMove).
+        await seed.settleAfterSliderMove();
         await Promise.all([
           page.waitForURL(SEED_CART_PRODUCT, { timeout: 30_000 }),
           seed.hostNowSubmit().click(),

@@ -34,6 +34,11 @@ export class SeedPage extends BasePage {
 
   async open(): Promise<void> {
     await this.goto(Urls.seedSkyHaven);
+    // ⚠️ Новый Inc 6 сид-калькулятор гидрируется ЛЕНИВО (как листинговый NewSeedCalculator):
+    // без реального pointer-события обработчики (в т.ч. submit Host Now) не всегда доцепляются,
+    // особенно при ПЕРЕоткрытии страницы. Мышь-нудж будит гидрацию. (06-Aug-2026)
+    await this.page.mouse.move(400, 400);
+    await this.page.mouse.move(650, 480);
     await this.calculator.waitMounted();
     await this.cookieBanner.dismissAll();
   }
@@ -76,11 +81,24 @@ export class SeedPage extends BasePage {
    * ⚠️ Дальше воронку/оплату НЕ ведём.
    */
   async hostNowToCartUrl(): Promise<string> {
+    await this.settleAfterSliderMove();
     await Promise.all([
       this.page.waitForURL(/\/cart-seed/, { timeout: 30_000 }),
       this.hostNowSubmit().click(),
     ]);
     return this.page.url();
+  }
+
+  /**
+   * ⚠️ Осадка перед кликом Host Now. Новый Inc 6 сид-калькулятор реактивно пересчитывает цель
+   * Host Now ПОСЛЕ сдвига слайдера с задержкой; клик сразу за toMin/toMax часто не даёт навигации
+   * (submit обгоняет пересчёт → страница остаётся на сиде). Наблюдение владельца 06-Aug-2026:
+   * руками работает, в headless клик слишком быстрый. Санкционированное исключение из
+   * no-wait-for-timeout (капризный сторонний виджет; детерминированного сигнала «готов» он не даёт).
+   */
+  async settleAfterSliderMove(): Promise<void> {
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await this.page.waitForTimeout(800);
   }
 
   /**
