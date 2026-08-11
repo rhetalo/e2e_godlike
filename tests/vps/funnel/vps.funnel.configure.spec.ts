@@ -9,8 +9,9 @@
  * Deploy→Billing→Configure (goToConfigureStep) делаются один раз в beforeAll
  * (раньше каждый из 5 тестов проходил воронку заново). Configure — общее
  * изменяемое состояние; единственная «свежая» проверка — дефолтный тип ОС
- * (Games) — валидна только пока тесты локаций ОС не трогают, поэтому
+ * (Ubuntu) — валидна только пока тесты локаций ОС не трогают, поэтому
  * declaration-order (локации → дефолт ОС → смена ОС) важен.
+ * ⚠️ 06-Aug-2026: прод переставил OS-плитки — дефолт стал Ubuntu (был Games, его перенесли в конец).
  */
 import { test, expect, type BrowserContext } from "@playwright/test";
 import { VpsConfigPage } from "../../../pages/VpsConfigPage";
@@ -75,16 +76,17 @@ test.describe("@regression VPS-воронка — Configure", () => {
   });
 
   test.describe("ОС", () => {
-    // Этот сценарий проверяет дефолтный тип ОС (Games) — должен идти ДО тестов,
-    // меняющих ОС (Ubuntu / Rocky / WordPress ниже). Тесты локаций ОС не трогают.
-    test("типы ОС загружены, Games активна по умолчанию, Server type в summary", async () => {
+    // Этот сценарий проверяет дефолтный тип ОС (Ubuntu) — должен идти ДО тестов,
+    // меняющих ОС (Rocky / WordPress ниже). Тесты локаций ОС не трогают.
+    test("типы ОС загружены, Ubuntu активна по умолчанию, Server type в summary", async () => {
       await test.step("контейнер типов ОС виден, в списке >= 1 типа", async () => {
         await expect(config.osTypesContainer).toBeVisible();
         expect(await config.osTypeItems.count()).toBeGreaterThanOrEqual(1);
       });
 
-      await test.step("по умолчанию активна Games", async () => {
-        expect(await config.getActiveOsTypeName()).toBe("Games");
+      await test.step("по умолчанию активна Ubuntu", async () => {
+        // 06-Aug-2026: прод переставил OS-плитки → дефолт Ubuntu (был Games, перенесён в конец).
+        expect(await config.getActiveOsTypeName()).toBe("Ubuntu");
       });
 
       await test.step("summary содержит непустой Server type", async () => {
