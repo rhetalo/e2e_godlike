@@ -12,7 +12,8 @@
  * починка Modrinth-парсера — недетерминированы/невидимы через прод-UI.
  *
  * Экран /extensions — ОДИН компонент .server__extensions (фильтр Mods/Plugins/All/Installed).
- * Подтверждено live DOM + network 20-Jul-2026 (сервер 93521c70). ⚠️ Install = мутация:
+ * Подтверждено live DOM + network 20-Jul-2026 (на сервере 93521c70; с 18-Aug-2026 он удалён —
+ * тесты переехали на GAME_PANEL_PLUGIN_SERVER_UUID, см. ниже). ⚠️ Install = мутация:
  * install→uninstall self-cleaning кейс env-гейтнут (RUN_PLUGIN_INSTALL=1), serial + откат в finally.
  */
 import { test, expect, type BrowserContext, type Page } from "@playwright/test";
@@ -20,8 +21,14 @@ import { GamePanelExtensionsPage } from "../../../pages/game/GamePanelExtensions
 import { loginAndSaveGameSession, GAME_STORAGE_STATE_PATH } from "../../../utils/gameAuth";
 import { GAME_PANEL_EXTENSIONS_API } from "../../../utils/selectors";
 
-/** Сервер под recon/тесты плагинов (Minecraft/Paper), выделен владельцем. Из env с фолбэком. */
-const PLUGIN_SERVER_UUID = process.env.GAME_PANEL_PLUGIN_SERVER_UUID ?? "93521c70";
+/**
+ * Сервер под recon/тесты плагинов и модов (Minecraft), выделен владельцем. Из env с фолбэком.
+ * ⚠️ 18-Aug-2026: прежний фолбэк `93521c70` (recon 20-Jul-2026) БОЛЬШЕ НЕ СУЩЕСТВУЕТ — сервер
+ * удалён. Симптом дрейфа: /extensions не рендерит каталог → полоса type-фильтров не появляется
+ * (клик «Plugins» падает по actionTimeout), запрос /minecraft/{plugins,mods} вообще не летит.
+ * Если тесты снова так упадут — В ПЕРВУЮ ОЧЕРЕДЬ проверь, жив ли сервер, а не таймауты.
+ */
+const PLUGIN_SERVER_UUID = process.env.GAME_PANEL_PLUGIN_SERVER_UUID ?? "0c743c25";
 const RUN_INSTALL = process.env.RUN_PLUGIN_INSTALL === "1";
 // Каталог plugins/versions агрегируется из внешних провайдеров (Modrinth/Hangar/Spigot/Polymart)
 // и стал отвечать дольше 30s → стабильные таймауты на CI. Даём запас (в пределах test timeout 120s).

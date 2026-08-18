@@ -10,14 +10,16 @@
  * (modrinth:abc, curseforge:abc) → разные суррогаты, персистенс/парсеры.
  *
  * ⚠️ Install мода = мутация → env-гейт RUN_PLUGIN_INSTALL=1 (общий флаг с plugins), serial + откат.
- * Подтверждено live network 20-Jul-2026 (сервер 93521c70).
+ * Подтверждено live network 20-Jul-2026 (на сервере 93521c70; с 18-Aug-2026 он удалён — тесты
+ * переехали на GAME_PANEL_PLUGIN_SERVER_UUID).
  */
 import { test, expect, type BrowserContext, type Page } from "@playwright/test";
 import { GamePanelExtensionsPage } from "../../../pages/game/GamePanelExtensionsPage";
 import { loginAndSaveGameSession, GAME_STORAGE_STATE_PATH } from "../../../utils/gameAuth";
 import { GAME_PANEL_EXTENSIONS_API } from "../../../utils/selectors";
 
-const PLUGIN_SERVER_UUID = process.env.GAME_PANEL_PLUGIN_SERVER_UUID ?? "93521c70";
+/** Тот же сервер, что в plugins.spec (общий env-ключ). ⚠️ Про дрейф `93521c70` → см. plugins.spec. */
+const PLUGIN_SERVER_UUID = process.env.GAME_PANEL_PLUGIN_SERVER_UUID ?? "0c743c25";
 const RUN_INSTALL = process.env.RUN_PLUGIN_INSTALL === "1";
 // Каталог mods/versions агрегируется из внешних провайдеров (Modrinth/CurseForge/…) и стал
 // отвечать дольше 30s → стабильные таймауты на CI. Даём запас (в пределах test timeout 120s).
