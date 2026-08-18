@@ -115,4 +115,25 @@ export class GamePanelExtensionsPage extends GamePanelBasePage {
   uninstallButton(index = 0): Locator {
     return this.cards().nth(index).locator("button", { hasText: /^\s*Uninstall\s*$/i }).first();
   }
+
+  /** Installed-карточка по имени расширения (для точечного отката — НЕ по индексу). */
+  cardByName(name: string): Locator {
+    return this.cards().filter({ hasText: name }).first();
+  }
+
+  /**
+   * ⚠️ МУТАЦИЯ + self-cleaning: снять ИМЕННО указанное расширение в фильтре Installed нужного типа.
+   * Важно: `Installed` контекстен типу — сначала выбрать Mods/Plugins, потом Installed, иначе увидишь
+   * installed другого типа и не найдёшь свою карточку (баг отката, пойман 30-Jul на 33cc5e92).
+   * Системные плагины (provider=null, напр. godlikemetrics) не трогаем — таргетим строго по имени.
+   */
+  async uninstallByName(type: "Mods" | "Plugins", name: string): Promise<boolean> {
+    await this.filterTo(type);
+    await this.filterTo("Installed");
+    const card = this.cardByName(name);
+    if (!(await card.isVisible().catch(() => false))) return false;
+    await card.locator("button", { hasText: /uninstall/i }).first().click();
+    await card.waitFor({ state: "hidden", timeout: 20_000 }).catch(() => {});
+    return true;
+  }
 }

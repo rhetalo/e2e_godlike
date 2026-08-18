@@ -17,11 +17,16 @@
  */
 import { test, expect, type BrowserContext, type Page } from "@playwright/test";
 import { GamePanelExtensionsPage } from "../../../pages/game/GamePanelExtensionsPage";
-import { loginAndSaveGameSession, GAME_STORAGE_STATE_PATH } from "../../../utils/gameAuth";
+import { loginAndSaveGameSession, GAME_STORAGE_STATE_PATH, GAME_SERVER_UUID } from "../../../utils/gameAuth";
 import { GAME_PANEL_EXTENSIONS_API } from "../../../utils/selectors";
 
-/** Сервер под recon/тесты плагинов (Minecraft/Paper), выделен владельцем. Из env с фолбэком. */
-const PLUGIN_SERVER_UUID = process.env.GAME_PANEL_PLUGIN_SERVER_UUID ?? "93521c70";
+/**
+ * Сервер под тесты плагинов (Minecraft/Paper). ⚠️ Прежний выделенный 93521c70 удалён владельцем
+ * (API 400 «resource does not exist» → страница /extensions рисовала ошибку, падал TC-001 на type-
+ * кнопке Plugins). Каталог Mods/Plugins есть на любом Minecraft-сервере аккаунта → дефолтимся на
+ * канонический GAME_SERVER_UUID (подтв. live-recon 18-Aug-2026). Переопределяемо env.
+ */
+const PLUGIN_SERVER_UUID = process.env.GAME_PANEL_PLUGIN_SERVER_UUID ?? GAME_SERVER_UUID;
 const RUN_INSTALL = process.env.RUN_PLUGIN_INSTALL === "1";
 
 /** Позиция элемента каталога/версии в ответе api/v2 (публичный shape). */
@@ -178,6 +183,12 @@ test.describe("@regression [game-panel] Plugins (каталог + api/v2 кон�
     });
   });
 
+  // ⚠️ ФЛАК-ГОЧА (30-Jul-2026): панель клиентски придерживает установку, если у плагина чипы
+  // «Incompatible with Minecraft version» + «Insufficient RAM» — POST /minecraft/plugins тогда НЕ
+  // уходит (кнопка Install активна, версия предвыбрана, но клик = no-op). Первый плагин по downloads
+  // (PixelPrinter, 6144MB, старый MC) как раз такой → install-POST флакает. Контракт подтверждён при
+  // совместимом/лёгком плагине. Откат (finally) безусловный, поэтому сервер остаётся чистым в любом
+  // исходе. Для стабильного прогона нужен заведомо совместимый плагин под конкретный сервер.
   test("TC-GP-PLG-006 | install → installed → uninstall (МУТАЦИЯ, self-cleaning)", async () => {
     test.skip(!RUN_INSTALL, "мутирует общий прод-сервер; включать только RUN_PLUGIN_INSTALL=1 с ведома владельца");
 
@@ -216,15 +227,12 @@ test.describe("@regression [game-panel] Plugins (каталог + api/v2 кон�
         expect(hit).toBe(true);
       });
     } finally {
-      // откат: снять всё, что удалось установить
-      if (installed) {
-        await ext.gotoExtensions();
-        await ext.filterTo("Installed");
-        const btn = ext.uninstallButton(0);
-        if (await btn.isVisible().catch(() => false)) {
-          await btn.click().catch(() => {});
-        }
-      }
+      // Безусловный откат: снять ИМЕННО наш плагин по имени (Plugins→Installed), даже если POST-wait
+      // отвалился по таймауту (плагин мог установиться). Системные (provider=null) не трогаем.
+      void installed;
+      await ext.gotoExtensions();
+      const removed = await ext.uninstallByName("Plugins", target.name);
+      console.log(`[cleanup] uninstall "${target.name}": ${removed ? "removed" : "нечего снимать"}`);
     }
   });
 });

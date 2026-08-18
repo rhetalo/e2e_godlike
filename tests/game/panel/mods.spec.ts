@@ -14,10 +14,14 @@
  */
 import { test, expect, type BrowserContext, type Page } from "@playwright/test";
 import { GamePanelExtensionsPage } from "../../../pages/game/GamePanelExtensionsPage";
-import { loginAndSaveGameSession, GAME_STORAGE_STATE_PATH } from "../../../utils/gameAuth";
+import { loginAndSaveGameSession, GAME_STORAGE_STATE_PATH, GAME_SERVER_UUID } from "../../../utils/gameAuth";
 import { GAME_PANEL_EXTENSIONS_API } from "../../../utils/selectors";
 
-const PLUGIN_SERVER_UUID = process.env.GAME_PANEL_PLUGIN_SERVER_UUID ?? "93521c70";
+// ⚠️ Выделенный plugin-сервер 93521c70 удалён владельцем (API отдаёт 400 «resource does not
+// exist», страница /extensions рисует ошибку → падали TC-001/002). Каталог Mods/Plugins есть на
+// ЛЮБОМ Minecraft-сервере аккаунта, поэтому дефолтимся на канонический GAME_SERVER_UUID
+// (подтв. live-recon 18-Aug-2026: root + 15 карточек + mods API 200). Переопределяемо env.
+const PLUGIN_SERVER_UUID = process.env.GAME_PANEL_PLUGIN_SERVER_UUID ?? GAME_SERVER_UUID;
 const RUN_INSTALL = process.env.RUN_PLUGIN_INSTALL === "1";
 
 interface CatalogItem {
@@ -166,14 +170,11 @@ test.describe("@regression [game-panel] Mods (каталог + api/v2 контр
         expect(hit).toBe(true);
       });
     } finally {
-      if (installed) {
-        await ext.gotoExtensions();
-        await ext.filterTo("Installed");
-        const btn = ext.uninstallButton(0);
-        if (await btn.isVisible().catch(() => false)) {
-          await btn.click().catch(() => {});
-        }
-      }
+      // Безусловный откат по имени (Mods→Installed), даже если POST-wait отвалился по таймауту.
+      void installed;
+      await ext.gotoExtensions();
+      const removed = await ext.uninstallByName("Mods", target.name);
+      console.log(`[cleanup] uninstall "${target.name}": ${removed ? "removed" : "нечего снимать"}`);
     }
   });
 });

@@ -100,6 +100,25 @@ export class MobileCartPage {
       () => document.querySelector('.cart-page__title') || document.querySelector('.auth-page'),
       { timeout: 15_000 }
     );
+    await this.neutralizeOverlays();
+  }
+
+  /**
+   * Нейтрализует cookie-consent CookieYes (`.cky-consent-container`, бокс в углу с «Accept All»),
+   * появившийся на storefront при редизайне. ⚠️ Этот спек ведёт корзину в своём browser.newContext()
+   * и импортит @playwright/test напрямую (а не fixtures/base) → авто-дисмисс баннеров НЕ применяется.
+   * На мобильном вьюпорте (390px) бокс баннера снизу перекрывал клик по опции периода оплаты
+   * (.custom-select__billing-option) → падал TC «смена периода» с pointer-events intercept.
+   * Гасим тем же click-through способом, что GamePanelBasePage.neutralizeOverlays: <style> с
+   * pointer-events:none живёт весь lifecycle страницы и применится к баннеру, даже если он всплывёт
+   * позже по setTimeout (надёжнее клика по «Accept All» — и необязательные cookie не принимаем).
+   */
+  private async neutralizeOverlays(): Promise<void> {
+    await this.page
+      .addStyleTag({
+        content: '.cky-consent-container, .cky-overlay, .cky-modal { pointer-events: none !important; }',
+      })
+      .catch(() => undefined);
   }
 
   /** Check if auth wall is shown and handle login if needed. */
