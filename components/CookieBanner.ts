@@ -10,6 +10,8 @@
  *   3. The "I accept and continue" terms modal — pops up during the cart flow.
  *   4. Weekend / sale promotion banners — appear on vf-panel and public site
  *      during promotional campaigns (weekends, holidays).
+ *   5. CookieYes consent box (`.cky-consent-container`) — не закрываем, а делаем
+ *      click-through (см. CONSENT_CLICKTHROUGH_CSS).
  *
  * All methods are best-effort — if the overlay isn't on the page, nothing
  * happens. Never throws.
@@ -109,6 +111,26 @@ const PROMO_CLOSE_SELECTORS: readonly string[] = [
 ];
 
 /**
+ * CookieYes consent-бокс — click-through вместо клика «Accept All».
+ *
+ * ⚠️ 18-Aug-2026: CookieYes доехал с панели и на storefront (`.cky-consent-container`,
+ * бокс `cky-box-bottom-left` «We value your privacy») и его pointer-events съедали клики —
+ * лёг `funnel.mobile` на выборе периода оплаты (в мобильном вьюпорте 390×844 бокс накрывает
+ * дропдаун Billing Period). Локально не воспроизводилось: там уже стоит consent-cookie.
+ *
+ * Гасим ровно тем же способом, что на game-панели (`GamePanelBasePage.neutralizeOverlays`):
+ * `pointer-events:none` через <style>. Почему стилем, а не кликом «Accept All»:
+ *   1) необязательные cookie не принимаем — тесту достаточно снять перехват;
+ *   2) стиль живёт весь lifecycle страницы → сработает и если бокс всплывёт ПОЗЖЕ dismissAll()
+ *      (сторонний скрипт CookieYes грузится асинхронно) — разовый клик такое не ловит.
+ */
+const CONSENT_CLICKTHROUGH_CSS = `
+  .cky-consent-container, .cky-overlay, .cky-modal-overlay {
+    pointer-events: none !important;
+  }
+`;
+
+/**
  * CSS injected to permanently hide promo banners after close attempt.
  * Prevents re-appearance without reloading the page.
  */
@@ -183,16 +205,28 @@ export class CookieBanner {
   }
 
   /**
+   * Снять перехват кликов у CookieYes-бокса (см. CONSENT_CLICKTHROUGH_CSS). Идемпотентно,
+   * не бросает; безопасно звать до появления бокса — стиль применится к нему позже.
+   */
+  async neutralizeConsentBox(): Promise<void> {
+    await this.page.addStyleTag({ content: CONSENT_CLICKTHROUGH_CSS }).catch(() => undefined);
+  }
+
+  /**
    * Run all dismissals at once. Each branch is wrapped in `.catch` because
    * none of these overlays are guaranteed to exist on every page.
    *
    * Order:
+   *   0. CookieYes consent box → click-through CSS (не жмём «Accept All»)
    *   1. Cookie banner (one-shot)
    *   2. Flash-sale / promo modal (up to 3 retries + CSS kill)
    *   3. Weekend / campaign banner (close + CSS kill)
    *   4. Terms modal (one-shot)
    */
   async dismissAll(): Promise<void> {
+    // 0. CookieYes — click-through (переживает позднее появление бокса)
+    await this.neutralizeConsentBox();
+
     // 1. Cookie banner
     const cookieBtn = this.acceptCookieButton();
     if (await cookieBtn.isVisible({ timeout: 1500 }).catch(() => false)) {

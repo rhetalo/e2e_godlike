@@ -480,3 +480,65 @@ funnel.modded, cart.modded-new, smoke.pages). **Не A/B и не USA-IP** (во�
 ⚠️ Сид-калькулятор (`#seed-calculator`) НЕ мигрирован (всё ещё Vuetify). Отдельно: `slider.seed:84` —
 слайдер двигается (aria 0→100), но productId фиксирован (715) min↔max для sky-haven → либо сид стал
 одно-тарифным (ассерт устарел), либо прод-баг; нужен risk-decision владельца (не чинил).
+
+## Сессия 18-Aug — два независимых прод-регресса из ночного прогона (652 теста, 3 упавших файла)
+
+Отчёт: 632 passed / 3 failed / 17 skipped, 76m. Все три падения — **стабильные 3/3** («упало на
+последней попытке» = не флак). Гипотеза владельца была «каталог модов/плагинов стал медленнее
+подгружаться → таймауты» — **не подтвердилась**: причины разные и таймауты тут не при чём.
+
+### (1) `mods.spec` + `plugins.spec` (game panel) — тестовый сервер ПРОПАЛ с аккаунта
+
+Симптомы выглядели как два разных бага, а корень один:
+- `TC-GP-MOD-001` — `page.waitForResponse` 30с на `/minecraft/mods?` не дождался ответа;
+- `TC-GP-PLG-001` — клик по type-фильтру `Plugins` таймаутил 15с (кнопки не существует).
+
+**Корень:** оба спека ходили на `GAME_PANEL_PLUGIN_SERVER_UUID` = `93521c70` — этот сервер сняли с
+аккаунта. `/server/93521c70/extensions` больше не рендерит `.server__extensions` → нет ни
+type-кнопок, ни запросов api/v2. Отсюда и «таймауты»: ждать было нечего. Поднятие таймаутов ничего
+бы не починило — классика «симптом ≠ причина».
+
+Почему диагноз был мутным: `GamePanelExtensionsPage.gotoExtensions()` глушил ожидание корня
+`.catch(() => {})` (тот самый silent-catch, который CLAUDE.md запрещает в setup) → падало не там,
+где сломалось, а на два шага глубже. **Убрал `.catch`** в `gotoExtensions`/`gotoModpacks`: теперь
+мёртвый сервер читается сразу — «waiting for `.server__extensions`».
+
+**Фикс:** сервер перенесён на основной игровой (`0c743c25`, решение владельца 18-Aug). Хардкод
+`93521c70`, дублировавшийся в двух спеках, вынесен в `utils/gameAuth.ts` →
+[`GAME_SERVER_PLUGIN_UUID`](../utils/gameAuth.ts) (env `GAME_PANEL_PLUGIN_SERVER_UUID`, как
+остальные выделенные серверы); задокументирован в `.env.example` вместе с `RUN_PLUGIN_INSTALL`.
+
+⚠️ **Не верифицировано на живой панели** — у сессии не было сетевого доступа к
+`ultra.panel.godlike.host` (политика окружения, CONNECT 403). Предполагается, что `0c743c25` —
+Minecraft/Paper с доступным табом Extensions; если это не так, оба спека упадут теперь ЯВНО
+(«waiting for `.server__extensions`») — тогда нужен другой Minecraft-сервер в env.
+
+### (2) `funnel.mobile.spec` — CookieYes доехал до storefront (CI-only, локально зелено)
+
+`@critical смена периода оплаты` шаг «период 3 Months»: клик по опции перехватывал
+`<div class="cky-consent-container cky-box-bottom-left">` («We use cookies to enhance your
+browsing experience…»). Это тот же CookieYes, что 22-Jul появился на панели (см. сессию 22-Jul),
+теперь и на `godlike.host`.
+
+**Почему только в CI:** локально в профиле уже стоит consent-cookie → бокса нет. **Почему не спас
+авто-дисмисс:** `funnel.mobile` импортирует `test` из `@playwright/test` (не из `fixtures/base`) и
+поднимает свой `browser.newContext()` для мобильного вьюпорта, а `MobileCartPage` **не наследует
+`BasePage`** → дисмисс оверлеев не вызывался НИ откуда. В вьюпорте 390×844 бокс bottom-left
+накрывает дропдаун Billing Period — на десктопных 1800×900 он мимо, поэтому лёг только мобильный.
+
+**Фикс (переиспользование, без новой абстракции):**
+- [`CookieBanner`](../components/CookieBanner.ts): `CONSENT_CLICKTHROUGH_CSS` +
+  `neutralizeConsentBox()`, вызывается шагом 0 в `dismissAll()`. Способ — тот же
+  `pointer-events:none` через `<style>`, что и `GamePanelBasePage.neutralizeOverlays`: «Accept All»
+  НЕ жмём (необязательные cookie не принимаем), а стиль живёт весь lifecycle страницы → ловит бокс,
+  даже если сторонний скрипт CookieYes отрисует его ПОЗЖЕ дисмисса. Разовый клик такое не ловит.
+- [`MobileCartPage.goto()`](../pages/MobileCartPage.ts): зовёт `cookieBanner.dismissAll()` после
+  `waitForReady()` (до — возможный редирект на auth снёс бы `<style>`).
+
+Побочно закрыто для ВСЕХ storefront/vf-panel тестов через `fixtures/base` и `BasePage`.
+
+**Проверки:** `npx tsc --noEmit` = 0 ошибок, `eslint` по изменённым файлам = 0 ошибок (4 warning
+`no-conditional-in-test` — предсуществующие, в `finally`-откате install-кейсов, не трогал).
+⚠️ Прогнать спеки из этой сессии было НЕЛЬЗЯ: сеть до `godlike.host` / `ultra.panel` / `vf-panel`
+закрыта политикой окружения (CONNECT 403 на все три). Нужен прогон
+`--project=game-panel -g "Plugins|Mods"` + `funnel.mobile.spec.ts` с машины/CI с доступом.

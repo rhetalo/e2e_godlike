@@ -10,14 +10,18 @@
  * (modrinth:abc, curseforge:abc) → разные суррогаты, персистенс/парсеры.
  *
  * ⚠️ Install мода = мутация → env-гейт RUN_PLUGIN_INSTALL=1 (общий флаг с plugins), serial + откат.
- * Подтверждено live network 20-Jul-2026 (сервер 93521c70).
+ * Подтверждено live network 20-Jul-2026 (тогда — сервер 93521c70; он снят с аккаунта, с
+ * 18-Aug-2026 тесты идут на GAME_SERVER_PLUGIN_UUID).
  */
 import { test, expect, type BrowserContext, type Page } from "@playwright/test";
 import { GamePanelExtensionsPage } from "../../../pages/game/GamePanelExtensionsPage";
-import { loginAndSaveGameSession, GAME_STORAGE_STATE_PATH } from "../../../utils/gameAuth";
+import {
+  loginAndSaveGameSession,
+  GAME_STORAGE_STATE_PATH,
+  GAME_SERVER_PLUGIN_UUID,
+} from "../../../utils/gameAuth";
 import { GAME_PANEL_EXTENSIONS_API } from "../../../utils/selectors";
 
-const PLUGIN_SERVER_UUID = process.env.GAME_PANEL_PLUGIN_SERVER_UUID ?? "93521c70";
 const RUN_INSTALL = process.env.RUN_PLUGIN_INSTALL === "1";
 
 interface CatalogItem {
@@ -45,7 +49,7 @@ test.describe("@regression [game-panel] Mods (каталог + api/v2 контр
     await loginAndSaveGameSession(browser);
     context = await browser.newContext({ storageState: GAME_STORAGE_STATE_PATH });
     page = await context.newPage();
-    ext = new GamePanelExtensionsPage(page, PLUGIN_SERVER_UUID);
+    ext = new GamePanelExtensionsPage(page, GAME_SERVER_PLUGIN_UUID);
   });
 
   test.afterAll(async () => {

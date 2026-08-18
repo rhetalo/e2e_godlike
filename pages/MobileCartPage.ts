@@ -1,5 +1,6 @@
 import { type Locator, type Page, expect } from '@playwright/test';
 import { MOBILE_CART } from '../utils/selectors';
+import { CookieBanner } from '../components/CookieBanner';
 
 /**
  * MobileCartPage — Page Object for /mobile-cart/?is_cart_opened=true
@@ -59,6 +60,7 @@ import { MOBILE_CART } from '../utils/selectors';
  */
 export class MobileCartPage {
   readonly page: Page;
+  readonly cookieBanner: CookieBanner;
   readonly pageTitle: Locator;
   readonly gameSelect: Locator;
   readonly gameSearchInput: Locator;
@@ -74,6 +76,7 @@ export class MobileCartPage {
 
   constructor(page: Page) {
     this.page = page;
+    this.cookieBanner = new CookieBanner(page);
     this.pageTitle = page.locator(MOBILE_CART.pageTitle);
     this.gameSelect = page.locator(MOBILE_CART.gameSelect);
     this.gameSearchInput = page.locator(MOBILE_CART.gameSelectSearchInput);
@@ -88,9 +91,20 @@ export class MobileCartPage {
     this.promoResult = page.locator(MOBILE_CART.promocodeDisplayPrice);
   }
 
+  /**
+   * ⚠️ Этот PO НЕ наследует BasePage и спек (funnel.mobile) поднимает свой browser.newContext()
+   * вместо фикстуры fixtures/base → авто-дисмисса оверлеев не было НИ откуда. 18-Aug-2026 это
+   * стрельнуло: CookieYes-бокс `.cky-consent-container` (bottom-left) в мобильном вьюпорте
+   * 390×844 накрыл дропдаун Billing Period и съел клик по «3 Months» (CI фейл, локально зелено —
+   * там consent-cookie уже стоит). Дисмиссим ЗДЕСЬ, переиспользуя общий CookieBanner: он же
+   * ставит click-through-стиль, который переживает позднее появление бокса.
+   */
   async goto(): Promise<void> {
     await this.page.goto('/mobile-cart/?is_cart_opened=true');
+    // Сначала waitForReady (страница может редиректнуть на auth — редирект снёс бы <style>),
+    // потом дисмисс: click-through-стиль ставится на УЖЕ финальный документ.
     await this.waitForReady();
+    await this.cookieBanner.dismissAll().catch(() => undefined);
   }
 
   async waitForReady(): Promise<void> {

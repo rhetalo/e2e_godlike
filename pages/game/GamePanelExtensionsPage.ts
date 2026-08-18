@@ -19,15 +19,20 @@ export class GamePanelExtensionsPage extends GamePanelBasePage {
     super(page);
   }
 
-  /** Каталог Plugins/Mods. */
+  /**
+   * Каталог Plugins/Mods. Ждём корень `.server__extensions` БЕЗ проглатывания ошибки: если
+   * экран не отрендерился (напр. сервер снят с аккаунта — было 18-Aug-2026 с `93521c70`),
+   * падаем здесь с внятным «waiting for .server__extensions», а не глубже — мутным таймаутом
+   * клика по type-фильтру или 30-секундным waitForResponse, который никогда не придёт.
+   */
   async gotoExtensions(): Promise<void> {
     await this.open(`/server/${this.uuid}/extensions`);
-    await this.root.waitFor({ state: "visible", timeout: 20_000 }).catch(() => {});
+    await this.root.waitFor({ state: "visible", timeout: 20_000 });
   }
-  /** Каталог Modpacks (тот же компонент). */
+  /** Каталог Modpacks (тот же компонент). Тот же fail-fast по корню, см. gotoExtensions(). */
   async gotoModpacks(): Promise<void> {
     await this.open(`/server/${this.uuid}/modpacks`);
-    await this.root.waitFor({ state: "visible", timeout: 20_000 }).catch(() => {});
+    await this.root.waitFor({ state: "visible", timeout: 20_000 });
   }
 
   get root(): Locator {

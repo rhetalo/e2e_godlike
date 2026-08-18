@@ -79,6 +79,21 @@ export const GAME_SERVER_RENAME_NAME =
 export const GAME_STEAM_SERVER_UUID =
   process.env.GAME_PANEL_STEAM_SERVER_UUID ?? "cc25cea1";
 
+/**
+ * Сервер под каталог расширений — plugins/mods (`/server/{uuid}/extensions`, api/v2
+ * `/minecraft/{plugins|mods}`). Short-UUID (как в `/api/v2/servers/{short}`).
+ *
+ * ⚠️ 18-Aug-2026: прежний сервер `93521c70` ПРОПАЛ с аккаунта (услуга снята) → `/extensions`
+ * не рендерил `.server__extensions`, api/v2 не звался, и `mods.spec` + `plugins.spec` легли
+ * стабильным таймаутом (3/3). Это НЕ «каталог стал медленнее» — таймауты поднимать не надо.
+ * Перенесено на основной игровой сервер (решение владельца, 18-Aug-2026). Серверы НЕ вечные:
+ * если и этот снимут — менять env `GAME_PANEL_PLUGIN_SERVER_UUID` (и фолбэк ниже).
+ *
+ * Тесты каталога read-only; мутирующий install/uninstall гейтнут `RUN_PLUGIN_INSTALL=1`.
+ */
+export const GAME_SERVER_PLUGIN_UUID =
+  process.env.GAME_PANEL_PLUGIN_SERVER_UUID ?? "0c743c25";
+
 /** Второй аккаунт для тестов шеринга/ролей (Фаза 4). Приглашён на GAME_SERVER_UUID. */
 export const GAME_INVITEE_EMAIL =
   process.env.GAME_PANEL_INVITEE_EMAIL ?? "dan.ica.althe.i.aa@gmail.com";

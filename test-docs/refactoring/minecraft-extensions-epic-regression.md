@@ -29,7 +29,8 @@ PK суррогатный (клиенту невидим), legacy React не т�
 - `GAME_PANEL_STORAGE_STATE` — путь к готовому storageState.
 - `GAME_PANEL_SKIP_LOGIN=1` — не логиниться, взять готовую сессию (**обход кривого stage-OAuth**:
   залогиниться руками в браузере → сохранить storageState → указать путь + этот флаг).
-- `GAME_PANEL_PLUGIN_SERVER_UUID` — сервер под плагин/мод-тесты (дефолт `93521c70`).
+- `GAME_PANEL_PLUGIN_SERVER_UUID` — сервер под плагин/мод-тесты (дефолт `0c743c25`;
+  ⚠️ прежний `93521c70` сняли с аккаунта — 18-Aug оба спека легли таймаутом, перенесено).
 - `RUN_PLUGIN_INSTALL=1` — включить мутирующие install/uninstall-кейсы (по умолчанию OFF).
 
 **Stage-fallback по шагам:** если OAuth не проходит автоматически —
@@ -37,7 +38,7 @@ PK суррогатный (клиенту невидим), legacy React не т�
 2) выгрузить storageState (Playwright codegen `--save-storage` или devtools);
 3) `GAME_PANEL_URL=<stage> GAME_PANEL_STORAGE_STATE=<path> GAME_PANEL_SKIP_LOGIN=1 npx playwright test --project=game-panel`.
 
-## 2. Baselines, снятые сегодня (prod, сервер 93521c70)
+## 2. Baselines, снятые сегодня (prod, сервер 93521c70 — снят с аккаунта 18-Aug, тесты на `0c743c25`)
 
 Сверять после деплоя — эти shape'ы должны остаться идентичными.
 
@@ -107,7 +108,7 @@ PK суррогатный (клиенту невидим), legacy React не т�
 ## 5. Live-prod safety
 
 - Мутации (install/uninstall) — self-cleaning, `serial`, откат в `finally`/`afterAll`, env-gate OFF по умолчанию.
-- Сервер под тесты — `GAME_PANEL_PLUGIN_SERVER_UUID` (дефолт `93521c70`), из env.
+- Сервер под тесты — `GAME_PANEL_PLUGIN_SERVER_UUID` (дефолт `0c743c25` с 18-Aug), из env.
 - Деструктив (reinstall, смена версии/ядра, дроп) — НЕ трогаем; это отдельный risk-decision.
 - Промо/цены/контент каталога недетерминированы → **структурные** ассерты, не точный текст.
 
@@ -151,6 +152,7 @@ PK суррогатный (клиенту невидим), legacy React не т�
 ## 6. Открытые вопросы к владельцу (утро)
 
 1. Окружение прогона: stage (кривой OAuth) или прод-для-тест-юзера?
-2. Разрешены ли мутации install/uninstall для mods/modpacks (как для plugins) на `93521c70`?
+2. Разрешены ли мутации install/uninstall для mods/modpacks (как для plugins) на текущем
+   `GAME_PANEL_PLUGIN_SERVER_UUID` (`0c743c25`)?
 3. Нужен ли staff-аккаунт, чтобы вообще увидеть `modpack-catalog-v2` для Inc 1d (иначе — только PHPUnit)?
 4. Есть ли у разработчиков «кроки QA» в MR (godlike-mr) — сверить наш net с их ручным чек-листом.

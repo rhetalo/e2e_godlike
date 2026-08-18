@@ -364,10 +364,18 @@ Moderator/Member + счётчики), **Members**, **Audit Log**.
 - ⚠️ Install = мутация (добавляет мод/плагин; обратимо через uninstall, но тяжело). Тест —
   структурный; install/uninstall — отдельный self-cleaning кейс с осторожностью.
 
-#### 7b-bis. Каталог/install/versions/uninstall — детали (подтв. live DOM + network 20-Jul-2026, сервер `93521c70`)
+#### 7b-bis. Каталог/install/versions/uninstall — детали (подтв. live DOM + network 20-Jul-2026)
 
 Снято recon'ом под задачу **Inc 3** (plugins → surrogate PK + модернизация парсеров). Публичный
 контракт по замыслу Inc 3 **не меняется** — это baseline для регресса.
+
+> ⚠️ **Сервер под эти тесты — из env `GAME_PANEL_PLUGIN_SERVER_UUID`**
+> (`GAME_SERVER_PLUGIN_UUID` в `utils/gameAuth.ts`). Recon 20-Jul снимался на `93521c70`; этот
+> сервер **сняли с аккаунта**, и 18-Aug `mods.spec` + `plugins.spec` легли стабильным таймаутом —
+> `/extensions` не рендерил `.server__extensions`, api/v2 не звался (это НЕ «каталог стал
+> медленнее», таймауты не поднимать). С 18-Aug дефолт — основной игровой сервер `0c743c25`.
+> Симптом «пропал тестовый сервер» теперь читается сразу: `gotoExtensions()` падает на ожидании
+> корня `.server__extensions` (silent-catch убран).
 
 - **Карточка каталога:** `.server__extensions__body__content` → карточки `.server__extensions__extension-card`
   с `__title` / `__subtitle` («by {author}») / `__meta` / `__provider-icon`. ⚠️ У элементов
