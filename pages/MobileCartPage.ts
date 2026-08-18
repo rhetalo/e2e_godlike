@@ -1,5 +1,6 @@
 import { type Locator, type Page, expect } from '@playwright/test';
 import { MOBILE_CART } from '../utils/selectors';
+import { CookieBanner } from '../components/CookieBanner';
 
 /**
  * MobileCartPage — Page Object for /mobile-cart/?is_cart_opened=true
@@ -71,9 +72,11 @@ export class MobileCartPage {
   readonly orderButton: Locator;
   readonly promocodeToggle: Locator;
   readonly promoResult: Locator;
+  private readonly banner: CookieBanner;
 
   constructor(page: Page) {
     this.page = page;
+    this.banner = new CookieBanner(page);
     this.pageTitle = page.locator(MOBILE_CART.pageTitle);
     this.gameSelect = page.locator(MOBILE_CART.gameSelect);
     this.gameSearchInput = page.locator(MOBILE_CART.gameSelectSearchInput);
@@ -91,6 +94,13 @@ export class MobileCartPage {
   async goto(): Promise<void> {
     await this.page.goto('/mobile-cart/?is_cart_opened=true');
     await this.waitForReady();
+    // ⚠️ Спек мобильной воронки импортит @playwright/test и создаёт свой browser.newContext(),
+    // поэтому НЕ получает авто-дисмисс баннеров из fixtures/base.ts. Гасим здесь тем же
+    // хелпером, что и весь storefront: CookieYes-баннер (`.cky-consent-container`, бокс
+    // bottom-left) иначе перехватывает клик по опции периода/тарифа (стабильно падает на CI,
+    // где чистый профиль → consent ещё не принят). Accept All персистит согласие на весь
+    // контекст, так что повторные goto() баннера уже не увидят. dismissAll best-effort, не бросает.
+    await this.banner.dismissAll();
   }
 
   async waitForReady(): Promise<void> {

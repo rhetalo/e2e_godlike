@@ -19,6 +19,10 @@ import { GAME_PANEL_EXTENSIONS_API } from "../../../utils/selectors";
 
 const PLUGIN_SERVER_UUID = process.env.GAME_PANEL_PLUGIN_SERVER_UUID ?? "93521c70";
 const RUN_INSTALL = process.env.RUN_PLUGIN_INSTALL === "1";
+// Каталог mods/versions агрегируется из внешних провайдеров (Modrinth/CurseForge/…) и стал
+// отвечать дольше 30s → стабильные таймауты на CI. Даём запас (в пределах test timeout 120s).
+// installed — локальное файловое сканирование, быстрое → его таймаут не трогаем. (18-Aug-2026)
+const CATALOG_LOAD_TIMEOUT = 60_000;
 
 interface CatalogItem {
   id: string;
@@ -55,7 +59,7 @@ test.describe("@regression [game-panel] Mods (каталог + api/v2 контр
   test("TC-GP-MOD-001 | Каталог модов: рендер + контракт списка api/v2", async () => {
     // /extensions грузит Mods по умолчанию
     const [resp] = await Promise.all([
-      page.waitForResponse((r) => GAME_PANEL_EXTENSIONS_API.modsList.test(r.url()), { timeout: 30_000 }),
+      page.waitForResponse((r) => GAME_PANEL_EXTENSIONS_API.modsList.test(r.url()), { timeout: CATALOG_LOAD_TIMEOUT }),
       ext.gotoExtensions(),
     ]);
     const json = (await resp.json()) as { success: boolean; data: CatalogItem[] };
@@ -84,13 +88,13 @@ test.describe("@regression [game-panel] Mods (каталог + api/v2 контр
 
   test("TC-GP-MOD-002 | Идентичность мода резолвится по {provider}-{external_id} (/versions)", async () => {
     const [listResp] = await Promise.all([
-      page.waitForResponse((r) => GAME_PANEL_EXTENSIONS_API.modsList.test(r.url()), { timeout: 30_000 }),
+      page.waitForResponse((r) => GAME_PANEL_EXTENSIONS_API.modsList.test(r.url()), { timeout: CATALOG_LOAD_TIMEOUT }),
       ext.gotoExtensions(),
     ]);
     const first = ((await listResp.json()) as { data: CatalogItem[] }).data[0];
 
     const [verResp] = await Promise.all([
-      page.waitForResponse((r) => GAME_PANEL_EXTENSIONS_API.modVersions.test(r.url()), { timeout: 30_000 }),
+      page.waitForResponse((r) => GAME_PANEL_EXTENSIONS_API.modVersions.test(r.url()), { timeout: CATALOG_LOAD_TIMEOUT }),
       ext.openInstallDialog(0),
     ]);
     const versions = (await verResp.json()) as { success: boolean; data: VersionItem[] };
@@ -133,7 +137,7 @@ test.describe("@regression [game-panel] Mods (каталог + api/v2 контр
     test.skip(!RUN_INSTALL, "мутирует общий прод-сервер; включать только RUN_PLUGIN_INSTALL=1 с ведома владельца");
 
     const [listResp] = await Promise.all([
-      page.waitForResponse((r) => GAME_PANEL_EXTENSIONS_API.modsList.test(r.url()), { timeout: 30_000 }),
+      page.waitForResponse((r) => GAME_PANEL_EXTENSIONS_API.modsList.test(r.url()), { timeout: CATALOG_LOAD_TIMEOUT }),
       ext.gotoExtensions(),
     ]);
     const target = ((await listResp.json()) as { data: CatalogItem[] }).data[0];

@@ -36,6 +36,11 @@ const COOKIE_ACCEPT_SELECTORS: readonly string[] = [
   "#wt-cli-accept-all-btn",
   "#cookie_action_close_header",
   "#cn-accept-cookie",
+  // CookieYes (`.cky-consent-container`, бокс в углу) — точечные селекторы кнопки «Accept All»
+  // приоритетнее текстовых: баннер появляется с задержкой и его scrim перехватывает клики
+  // (подтв. на storefront /mobile-cart и на game-panel, см. GamePanelBasePage.neutralizeOverlays).
+  ".cky-btn-accept",
+  '[data-cky-tag="accept-button"]',
   'button:has-text("Accept all")',
   'button:has-text("Accept All")',
   'button:has-text("Accept")',

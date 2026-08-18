@@ -23,6 +23,10 @@ import { GAME_PANEL_EXTENSIONS_API } from "../../../utils/selectors";
 /** Сервер под recon/тесты плагинов (Minecraft/Paper), выделен владельцем. Из env с фолбэком. */
 const PLUGIN_SERVER_UUID = process.env.GAME_PANEL_PLUGIN_SERVER_UUID ?? "93521c70";
 const RUN_INSTALL = process.env.RUN_PLUGIN_INSTALL === "1";
+// Каталог plugins/versions агрегируется из внешних провайдеров (Modrinth/Hangar/Spigot/Polymart)
+// и стал отвечать дольше 30s → стабильные таймауты на CI. Даём запас (в пределах test timeout 120s).
+// installed — локальное файловое сканирование, быстрое → его таймаут не трогаем. (18-Aug-2026)
+const CATALOG_LOAD_TIMEOUT = 60_000;
 
 /** Позиция элемента каталога/версии в ответе api/v2 (публичный shape). */
 interface CatalogItem {
@@ -62,7 +66,7 @@ test.describe("@regression [game-panel] Plugins (каталог + api/v2 кон�
     await ext.gotoExtensions();
 
     const [resp] = await Promise.all([
-      page.waitForResponse((r) => GAME_PANEL_EXTENSIONS_API.pluginsList.test(r.url()), { timeout: 30_000 }),
+      page.waitForResponse((r) => GAME_PANEL_EXTENSIONS_API.pluginsList.test(r.url()), { timeout: CATALOG_LOAD_TIMEOUT }),
       ext.filterTo("Plugins"),
     ]);
 
@@ -93,7 +97,7 @@ test.describe("@regression [game-panel] Plugins (каталог + api/v2 кон�
   test("TC-GP-PLG-002 | Идентичность плагина резолвится по {provider}-{external_id} (/versions)", async () => {
     // список плагинов → первый элемент {provider, id}
     const [listResp] = await Promise.all([
-      page.waitForResponse((r) => GAME_PANEL_EXTENSIONS_API.pluginsList.test(r.url()), { timeout: 30_000 }),
+      page.waitForResponse((r) => GAME_PANEL_EXTENSIONS_API.pluginsList.test(r.url()), { timeout: CATALOG_LOAD_TIMEOUT }),
       ext.gotoExtensions().then(() => ext.filterTo("Plugins")),
     ]);
     const list = (await listResp.json()) as { data: CatalogItem[] };
@@ -101,7 +105,7 @@ test.describe("@regression [game-panel] Plugins (каталог + api/v2 кон�
 
     // клик Install по карточке триггерит запрос версий для этого плагина (мутации нет)
     const [verResp] = await Promise.all([
-      page.waitForResponse((r) => GAME_PANEL_EXTENSIONS_API.pluginVersions.test(r.url()), { timeout: 30_000 }),
+      page.waitForResponse((r) => GAME_PANEL_EXTENSIONS_API.pluginVersions.test(r.url()), { timeout: CATALOG_LOAD_TIMEOUT }),
       ext.openInstallDialog(0),
     ]);
     const versions = (await verResp.json()) as { success: boolean; data: VersionItem[] };
@@ -129,7 +133,7 @@ test.describe("@regression [game-panel] Plugins (каталог + api/v2 кон�
 
     await test.step("Plugins → запрос /minecraft/plugins", async () => {
       const [r] = await Promise.all([
-        page.waitForResponse((res) => GAME_PANEL_EXTENSIONS_API.pluginsList.test(res.url()), { timeout: 30_000 }),
+        page.waitForResponse((res) => GAME_PANEL_EXTENSIONS_API.pluginsList.test(res.url()), { timeout: CATALOG_LOAD_TIMEOUT }),
         ext.filterTo("Plugins"),
       ]);
       expect(r.status()).toBe(200);
@@ -183,7 +187,7 @@ test.describe("@regression [game-panel] Plugins (каталог + api/v2 кон�
 
     // выбрать первый плагин
     const [listResp] = await Promise.all([
-      page.waitForResponse((r) => GAME_PANEL_EXTENSIONS_API.pluginsList.test(r.url()), { timeout: 30_000 }),
+      page.waitForResponse((r) => GAME_PANEL_EXTENSIONS_API.pluginsList.test(r.url()), { timeout: CATALOG_LOAD_TIMEOUT }),
       ext.gotoExtensions().then(() => ext.filterTo("Plugins")),
     ]);
     const target = ((await listResp.json()) as { data: CatalogItem[] }).data[0];

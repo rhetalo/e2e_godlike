@@ -19,15 +19,28 @@ export class GamePanelExtensionsPage extends GamePanelBasePage {
     super(page);
   }
 
+  // Рендер «chrome» компонента (корень + полоса type-фильтров) отделён от загрузки САМОГО
+  // каталога: каталог агрегируется из внешних провайдеров (Modrinth/CurseForge/Hangar/Spigot/
+  // Polymart) и стал грузиться дольше — раньше медленные данные задерживали появление тулбара,
+  // и клик по type-кнопке падал по actionTimeout (15s). Ждём тулбар отдельно и с запасом;
+  // данные каталога ждёт уже спек через waitForResponse. (bump+split, 18-Aug-2026.)
+  static readonly CHROME_TIMEOUT = 30_000;
+
+  /** Корень + полоса type-фильтров отрисованы (не дожидаясь загрузки данных каталога). */
+  private async waitForCatalogChrome(): Promise<void> {
+    await this.root.waitFor({ state: "visible", timeout: GamePanelExtensionsPage.CHROME_TIMEOUT });
+    await this.typeButtons().first().waitFor({ state: "visible", timeout: GamePanelExtensionsPage.CHROME_TIMEOUT });
+  }
+
   /** Каталог Plugins/Mods. */
   async gotoExtensions(): Promise<void> {
     await this.open(`/server/${this.uuid}/extensions`);
-    await this.root.waitFor({ state: "visible", timeout: 20_000 }).catch(() => {});
+    await this.waitForCatalogChrome();
   }
   /** Каталог Modpacks (тот же компонент). */
   async gotoModpacks(): Promise<void> {
     await this.open(`/server/${this.uuid}/modpacks`);
-    await this.root.waitFor({ state: "visible", timeout: 20_000 }).catch(() => {});
+    await this.waitForCatalogChrome();
   }
 
   get root(): Locator {
@@ -60,6 +73,9 @@ export class GamePanelExtensionsPage extends GamePanelBasePage {
    */
   async filterTo(type: "Mods" | "Plugins" | "All" | "Installed"): Promise<void> {
     const btn = this.typeButtons().filter({ hasText: new RegExp(`^\\s*${type}\\s*$`, "i") }).first();
+    // Ждём видимость с запасом (не полагаясь на дефолтный actionTimeout 15s): полоса type-фильтров
+    // может дорисоваться позже при медленном каталоге. См. waitForCatalogChrome.
+    await btn.waitFor({ state: "visible", timeout: GamePanelExtensionsPage.CHROME_TIMEOUT });
     await btn.click();
   }
 
