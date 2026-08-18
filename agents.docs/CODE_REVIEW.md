@@ -537,6 +537,30 @@ browsing experience…»). Это тот же CookieYes, что 22-Jul появ�
 
 Побочно закрыто для ВСЕХ storefront/vf-panel тестов через `fixtures/base` и `BasePage`.
 
+### (3) `version.spec.ts` (Inc 0) — существовал ТОЛЬКО локально, в репо его не было
+
+Локальный прогон владельца показал третье падение — `version.spec.ts › TC-GP-VER-001`
+(`/minecraft/version`, `waitForResponse` 30с). В репо этого файла **не было ни в одной ветке**
+(`git log --all` пусто), как и ключа `GAME_PANEL_EXTENSIONS_API.minecraftVersion`, который он
+использовал: работа предыдущей сессии осталась несохранённой на машине владельца. Сходится по
+счёту: локально 77 тестов в game-панели против 76 в ночном прогоне на VPS (VPS делает
+`git reset --hard origin/main` — файл там не появился бы никогда).
+
+Причина падения — **та же**, что у mods/plugins: ходил через `gotoExtensions()` на снятый сервер.
+
+**Восстановлен в репо** (`tests/game/panel/version.spec.ts`) на `GAME_SERVER_PLUGIN_UUID`, плюс
+`minecraftVersion` добавлен в `GAME_PANEL_EXTENSIONS_API`. Отличия от локальной версии:
+- ассерты **структурные** (тип/версия непустые, `version` содержит цифру), а не сверка с
+  baseline «26.2»/«285825» — билд Paper на живом проде дрейфует, прибитое значение легло бы
+  на первом апдейте сервера;
+- хвост `(?:\?|$)` в regex — без него он матчил бы и `/minecraft/versions`, и
+  `.../plugins/{id}/versions` (проверено на 5 формах URL: каждый паттерн ловит ровно свою);
+- ID кейса → **`TC-GP-VERAPI-001`**: `TC-GP-VER-001` уже занят UI-тестом экрана Versions в
+  `versions.spec.ts` (коллизия пришла из playbook'а Inc 0, там оба названы TC-GP-VER-001/002).
+
+⚠️ Открыто: Inc 0 TC-GP-VER-002 («бейдж версии/лоадера в панели рендерит то же значение») —
+не построен, нужен live-recon селектора бейджа.
+
 **Проверки:** `npx tsc --noEmit` = 0 ошибок, `eslint` по изменённым файлам = 0 ошибок (4 warning
 `no-conditional-in-test` — предсуществующие, в `finally`-откате install-кейсов, не трогал).
 ⚠️ Прогнать спеки из этой сессии было НЕЛЬЗЯ: сеть до `godlike.host` / `ultra.panel` / `vf-panel`

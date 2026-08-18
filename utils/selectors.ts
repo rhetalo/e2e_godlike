@@ -834,6 +834,12 @@ export const GAME_PANEL_EXTENSIONS_API = {
   modVersions: /\/api\/v2\/servers\/[^/]+\/minecraft\/mods\/[^/]+\/versions/,
   pluginsInstalled: /\/api\/v2\/servers\/[^/]+\/minecraft\/plugins\/installed/,
   modsInstalled: /\/api\/v2\/servers\/[^/]+\/minecraft\/mods\/installed/,
+  // Inc 0 (loader/version single source): GET /servers/{uuid}/minecraft/version →
+  // {success, data:{minecraft_version, minecraft_type, minecraft_build, egg}}. Зовётся при
+  // открытии /extensions (каталог фильтрует расширения по версии сервера).
+  // ⚠️ Хвост `(?:\?|$)` обязателен: без него regex матчил бы и `/minecraft/versions` —
+  // и `pluginVersions`/`modVersions` (`.../plugins/{id}/versions`) ложно срабатывали бы здесь.
+  minecraftVersion: /\/api\/v2\/servers\/[^/]+\/minecraft\/version(?:\?|$)/,
 } as const;
 
 // Referral (/referral). Глобальная страница (default_layout), не server-scoped.
