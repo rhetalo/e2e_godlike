@@ -143,11 +143,37 @@ export class ModdedHostingPage extends BasePage {
     return this.installButtons().nth(index);
   }
 
+  /**
+   * Прочитать productId/modpackId/promo с install-кнопки грида.
+   *
+   * DEV-400: кнопка больше не несёт три отдельных data-* — она несёт готовый URL воронки
+   * в `data-modpack-funnel` (и код таймера в `data-promo-timer`):
+   *
+   *   data-modpack-funnel=".../cart-modded-new/?productId=343&billingCycle=monthly
+   *                         &modpackId=curseforge:579095:2495475"
+   *
+   * Оба варианта поддерживаем одновременно, и это не запас на будущее: на страницах игр
+   * воронку за сутки успели включить и откатить, так что «какая сейчас разметка» — вопрос
+   * к странице, а не константа. Старые атрибуты в приоритете: если они есть, значит
+   * страница ещё на прежней схеме и URL воронки может отсутствовать.
+   */
   async readInstallMeta(button: Locator): Promise<InstallButtonMeta> {
-    return {
+    const legacy = {
       productId: await button.getAttribute("data-product-id"),
       modpackId: await button.getAttribute("data-modpack-id"),
       promo: await button.getAttribute("data-promo"),
+    };
+    if (legacy.productId !== null || legacy.modpackId !== null) return legacy;
+
+    const funnelUrl = await button.getAttribute("data-modpack-funnel");
+    if (funnelUrl === null) return legacy;
+
+    // base нужен на случай относительного href; абсолютный URL его игнорирует.
+    const params = new URL(funnelUrl, "https://godlike.host").searchParams;
+    return {
+      productId: params.get("productId"),
+      modpackId: params.get("modpackId"),
+      promo: params.get("promo") ?? (await button.getAttribute("data-promo-timer")),
     };
   }
 }

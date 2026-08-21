@@ -56,7 +56,6 @@ export const STOREFRONT = {
   tariffTitle: ".storefront__tariff-title",
   tariffPrice: ".storefront__tariff-footer",
   tariffAddToCart: ".storefront__tariff-action__cart",
-  viewAllPlans: 'a[href*="minecraft-java-servers-hosting"], a:has-text("View all plans")',
   gameTitle: "a.game__title",
   customizeButton: "button.storefront__tariff-action__cart",
   discountBadge: ".storefront__tariffs-discount__percentage",

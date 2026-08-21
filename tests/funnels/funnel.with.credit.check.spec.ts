@@ -20,7 +20,7 @@
 // expect - используется для проверки assertions (утверждений о состоянии элементов/страницы)
 // Зависимость: @playwright/test (указана в package.json в секции devDependencies)
 import { test, expect } from "../../fixtures/base";
-import { Credentials } from "../../fixtures/test-data";
+import { Credentials, Urls } from "../../fixtures/test-data";
 import { CartPage } from "../../pages/CartPage";
 
 /**
@@ -81,25 +81,19 @@ test("@critical оформление заказа с кредитным бала
   // await - ожидает, пока страница полностью загрузится, перед переходом к следующему шагу
   await page.goto("https://godlike.host");
 
-  // ШАГ 2: Поиск и клик по ссылке "Minecraft Server Hosting" в шапке сайта
-  // page.getByRole('banner') - ищет элемент с ролью 'banner' (это header/шапка сайта)
-  // getByRole ищет элементы по их ARIA роли, что является хорошей практикой accessibility
-  // .getByRole('link', {name: 'Minecraft Server Hosting'}) - внутри баннера ищет ссылку с текстом "Minecraft Server Hosting"
-  // {name: ...} - атрибут для поиска по видимому тексту или accessible name
-  // .click() - выполняет клик левой кнопкой мыши по найденной ссылке
-  // Это действие перенаправляет пользователя на страницу выбора тарифов Minecraft хостинга
-  await page
-    .getByRole("banner")
-    .getByRole("link", { name: "Minecraft Server Hosting" })
-    .click();
+  // ШАГ 2: Переход на лендинг тарифов Minecraft Java
+  //
+  // Раньше здесь был клик по ссылке в шапке — page.getByRole("banner").getByRole("link",
+  // {name: "Minecraft Server Hosting"}). Ссылка живёт в выпадашке, которая раскрывается по
+  // ховеру, и клик перехватывает плашка .main-header__intro-stripe: URL оставался на
+  // главной, и проверка ниже падала 62 раза подряд. Идём прямым URL.
+  await page.goto(Urls.minecraftJava);
 
-  // ПРОВЕРКА 1: Проверка, что URL изменился на страницу с тарифами Minecraft
+  // ПРОВЕРКА 1: Проверка, что мы на странице с тарифами Minecraft
   // expect(page).toHaveURL() - assertion (утверждение), проверяющее текущий URL страницы
   // /minecraft-java-servers-hosting/i - регулярное выражение (RegExp):
   //   - 'minecraft-java-servers-hosting' - искомая часть URL
   //   - 'i' - флаг, делающий поиск нечувствительным к регистру (i = insensitive)
-  // Тест провалится (упадет), если URL не содержит указанную строку
-  // Это подтверждает, что мы действительно перешли на страницу Minecraft тарифов
   await expect(page).toHaveURL(/minecraft-java-servers-hosting/i);
 
   // ШАГ 3: Поиск кнопки "Add to Cart" (Добавить в корзину)
