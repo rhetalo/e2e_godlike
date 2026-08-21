@@ -9,8 +9,14 @@
  */
 import type { Locator } from "@playwright/test";
 import { BasePage } from "./BasePage";
-import { STOREFRONT, PROMO } from "../utils/selectors";
+import { STOREFRONT, FUNNEL } from "../utils/selectors";
 import { Urls } from "../fixtures/test-data";
+
+/** Игра из fixtures/games.json: имя карточки в каталоге + URL её лендинга. */
+export interface GameRef {
+  name: string;
+  landing: string;
+}
 
 /**
  * Билинг-период для чтения промокода:
@@ -22,11 +28,9 @@ export type PromoPeriod = "monthly" | "longTerm";
 
 export interface TariffPromoResult {
   title: string;
-  /** применённый промокод (значение инпута): напр. "MONTHLY75" (акция) / "VANILLA20" (дефолт) */
-  code: string | null;
-  /** показан success-label с текстом «Activated promocode» */
+  /** Промо принято бекендом и дало ненулевую скидку. */
   activated: boolean;
-  /** текст success/error-лейбла промокода */
+  /** Вердикт для отчёта: «VANILLA30: already_used» / «MONTHLY75: 75%». */
   text: string;
 }
 
@@ -43,24 +47,23 @@ export class GameStorefrontPage extends BasePage {
   }
 
   /**
-   * Открыть страницу игры, прокликать каждый тариф с «Add to Cart» и прочитать результат
-   * промокода на выбранном периоде. Между тарифами возвращается на страницу игры.
-   * `period="longTerm"` переключает корзину на 3 месяца (вне акции) перед чтением.
+   * Открыть лендинг игры, прокликать каждый тариф с «Add to Cart» и прочитать, применилась
+   * ли скидка на выбранном периоде. Между тарифами возвращается на лендинг.
+   * `period="longTerm"` переключает воронку на 3 месяца (вне акции) перед чтением.
    * ОДНО чтение на тариф (не дубль) — держим скорость в бюджете таймаута теста.
-   * Вердикт (должен/не должен активироваться) — на стороне спека.
+   * Вердикт (должна/не должна быть скидка) — на стороне спека.
+   *
+   * DEV-402: лендинг открываем прямым URL из fixtures/games.json, а не кликом по карточке
+   * каталога. Карточка туда больше не ведёт: у неё нет href, остался только onclick в
+   * воронку (`window.location.href='/cart-game-servers/?productId=…'`), поэтому и клик
+   * уходил мимо тарифов, и getAttribute("href") возвращал null.
    */
   async collectTariffPromoResults(
-    gameName: string,
+    game: GameRef,
     period: PromoPeriod = "monthly",
   ): Promise<TariffPromoResult[]> {
-    await this.open();
-
-    const link = this.gameLink(gameName);
-    await link.waitFor({ state: "visible", timeout: 60_000 });
-    await link.scrollIntoViewIfNeeded();
-    const gamePageUrl = (await link.getAttribute("href")) ?? Urls.gameServers;
-    await link.click();
-    await this.page.waitForLoadState("domcontentloaded", { timeout: 60_000 });
+    const gamePageUrl = game.landing || Urls.gameServers;
+    await this.goto(gamePageUrl);
 
     const cards = this.page.locator(STOREFRONT.tariffCard);
     await cards.first().waitFor({ state: "visible", timeout: 60_000 });
@@ -81,16 +84,17 @@ export class GameStorefrontPage extends BasePage {
     const results: TariffPromoResult[] = [];
     for (const { btn, title } of targets) {
       await btn.scrollIntoViewIfNeeded();
+      // Слушатель ставим ДО клика: воронка валидирует промо сразу после перехода, и
+      // ответ прилетает раньше, чем мы успели бы начать его ждать.
+      const verdict = this.promoVerdict();
       await btn.click();
 
-      // longTerm → уводим корзину с акционного monthly на 3 месяца (вне акции) перед чтением.
-      // Транзиент оптимистичного success→error бывает при СМЕНЕ периода → там нужна усиленная
-      // стабилизация; на monthly (без смены) достаточно лёгкой (иначе валид-тест по играм с
-      // множеством тарифов вылетал за таймаут).
+      // longTerm → уводим воронку с акционного monthly на 3 месяца: акции MONTHLY75 там
+      // нет, значит остаётся дефолтный одноразовый промо — его и проверяет invalid-спек.
       if (period === "longTerm") {
         await this.selectCartPeriod(LONG_TERM_PERIOD_LABEL);
       }
-      results.push({ title, ...(await this.readPromo(period === "longTerm")) });
+      results.push({ title, ...(await verdict) });
 
       await this.page.goto(gamePageUrl, { waitUntil: "domcontentloaded", timeout: 60_000 });
     }
@@ -99,66 +103,69 @@ export class GameStorefrontPage extends BasePage {
   }
 
   /**
-   * Прочитать состояние промокода: виден success («Activated…») или error. Читаем АТОМАРНО в
-   * браузере (waitForFunction), берём видимость+текст лейбла в одном тике.
+   * Вердикт по промокоду — из ответа бекенда, а не из вёрстки.
    *
-   * ⚠️ Ждём СТАБИЛИЗАЦИИ состояния (одинаковое ≥4 замеров подряд ≈1.2с). При смене периода клиент
-   * оптимистично показывает success для дефолтного промо ДО ответа бэка, а затем — если промо уже
-   * израсходован — переключает на error «already been used». Без стабилизации poll ловил этот
-   * транзиентный success и ложно давал activated=true (подтверждено live-recon 09-Jul-2026:
-   * Project Zomboid/Ultra на 3 мес устаканивается в error). Ни success, ни error за таймаут →
-   * activated=false, text="".
+   * DEV-402: старая корзина показывала лейбл «Activated promocode» / «already been used»,
+   * новая воронка блок промокода не рендерит вообще. Пробовать читать цену нельзя: на
+   * не-месячном периоде зачёркнутая цена — это месячная × N, поэтому «скидка» там есть
+   * всегда, от самой ступеньки периода, и промо в ней не видно.
+   *
+   * Воронка валидирует промо запросом `api-cart.php?sync=<pid>&syncPromo=<code>`, и его
+   * ответ содержит ровно нужный вердикт: `promoError` = null | not_found | already_used,
+   * `promo.value` = процент скидки. Это ТОЧНЕЕ прежнего лейбла — различает «промокода нет»
+   * и «уже израсходован».
+   *
+   * Запрос кешируется по productId+promo и от периода НЕ зависит (см. useGetCartQuery),
+   * поэтому ждать его достаточно один раз — до переключения периода.
+   *
+   * Промо у тарифа может не быть вовсе: тогда воронка запрос не делает, ждать нечего →
+   * activated=false. Отсюда короткий таймаут, а не полный: иначе каждый такой тариф
+   * съедал бы бюджет теста.
    */
-  private async readPromo(stabilize: boolean): Promise<Omit<TariffPromoResult, "title">> {
-    // Порог стабильности: longTerm (смена периода → транзиент success→error) требует больше
-    // одинаковых замеров подряд; monthly — лёгкий порог, чтобы не жечь бюджет таймаута теста.
-    const needStable = stabilize ? 4 : 2;
-    const handle = await this.page
-      .waitForFunction(
-        ({ sel, need }) => {
-          const vis = (el: Element | null) => !!el && (el as HTMLElement).offsetParent !== null;
-          const s = document.querySelector(sel.success);
-          const e = document.querySelector(sel.error);
-          const state = vis(s)
-            ? { activated: (s?.textContent ?? "").includes("Activated promocode"), text: (s?.textContent ?? "").trim() }
-            : vis(e)
-              ? { activated: false, text: (e?.textContent ?? "").trim() }
-              : null;
-          const w = window as unknown as { __ps?: string; __pn?: number };
-          if (!state) {
-            w.__pn = 0;
-            w.__ps = undefined;
-            return false;
-          }
-          const sig = (state.activated ? "A|" : "E|") + state.text;
-          if (w.__ps === sig) w.__pn = (w.__pn ?? 0) + 1;
-          else {
-            w.__ps = sig;
-            w.__pn = 0;
-          }
-          return (w.__pn ?? 0) >= need ? state : false;
-        },
-        { sel: { success: PROMO.successLabel, error: PROMO.errorLabel }, need: needStable },
-        { timeout: 60_000, polling: 300 },
+  private promoVerdict(): Promise<Omit<TariffPromoResult, "title">> {
+    return this.page
+      .waitForResponse(
+        (r) => r.request().method() === "GET" && /api-cart\.php\?sync=/.test(r.url()),
+        { timeout: 20_000 },
       )
-      .catch(() => null);
-    const label = handle
-      ? ((await handle.jsonValue()) as { activated: boolean; text: string })
-      : { activated: false, text: "" };
-    const code =
-      (await this.page.locator(PROMO.input).first().inputValue().catch(() => "")) || null;
-    return { code, ...label };
+      .then(async (r) => {
+        const code = new URL(r.url()).searchParams.get("syncPromo") ?? "";
+        const body = (await r.json()) as {
+          promo?: { value?: string } | string | null;
+          promoError?: string | null;
+        };
+        const promo = body.promo;
+        const discount =
+          promo && typeof promo === "object" ? Number(promo.value) || 0 : 0;
+        const error = body.promoError ?? null;
+        return {
+          activated: error === null && discount > 0,
+          text: error ? `${code}: ${error}` : `${code}: ${discount}%`,
+        };
+      })
+      .catch(() => ({ activated: false, text: "промо не запрашивался" }));
   }
 
   /**
-   * Переключить билинг-период в корзине (клик по `.period` с нужным лейблом) и дождаться, пока
-   * (1) период применился — `billingCycle` в URL сменился (происходит всегда, не зависит от акции),
-   * (2) промо переоценился — значение промо-инпута стабилизировалось (2 равных замера подряд).
-   * Так избегаем чтения устаревшего (monthly) лейбла после переключения. Web-first, без waitForTimeout.
+   * Переключить билинг-период в воронке и дождаться, пока
+   * (1) период применился — `billingCycle` в URL сменился (воронка держит его в query
+   *     через useRouteQuery, поэтому признак надёжный и не зависит от акции),
+   * (2) цена пересчиталась — итоговая цена стабилизировалась (2 равных замера подряд).
+   * Так избегаем чтения устаревшей (monthly) цены после переключения. Web-first, без
+   * waitForTimeout.
+   *
+   * DEV-402: период здесь — CustomSelect, а не список `.period` старой корзины: сначала
+   * раскрываем тоггл, потом кликаем вариант по тексту.
    */
   private async selectCartPeriod(label: string): Promise<void> {
     const cycleBefore = new URL(this.page.url()).searchParams.get("billingCycle") ?? "";
-    await this.page.locator(`.period:has-text("${label}")`).first().click();
+    const select = this.page.locator(FUNNEL.billingCycleSelect).locator("..");
+    await select.locator(FUNNEL.selectToggle).first().click();
+    await select
+      .locator(FUNNEL.selectOption)
+      .filter({ hasText: label })
+      .first()
+      .click();
     await this.page
       .waitForFunction(
         (prev) => (new URL(location.href).searchParams.get("billingCycle") ?? "") !== prev,
@@ -169,20 +176,21 @@ export class GameStorefrontPage extends BasePage {
     await this.page
       .waitForFunction(
         (sel) => {
-          const el = document.querySelector(sel) as HTMLInputElement | null;
+          const el = document.querySelector(sel);
           const w = window as unknown as { __pv?: string; __pc?: number };
           if (!el) {
             w.__pc = 0;
             return false;
           }
-          if (w.__pv === el.value) w.__pc = (w.__pc ?? 0) + 1;
+          const v = (el.textContent ?? "").trim();
+          if (w.__pv === v) w.__pc = (w.__pc ?? 0) + 1;
           else {
-            w.__pv = el.value;
+            w.__pv = v;
             w.__pc = 0;
           }
           return (w.__pc ?? 0) >= 2;
         },
-        PROMO.input,
+        FUNNEL.priceFinal,
         { timeout: 15_000, polling: 300 },
       )
       .catch(() => {});

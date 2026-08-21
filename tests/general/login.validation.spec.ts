@@ -10,13 +10,14 @@
 import { test, expect, type Page } from "../../fixtures/base";
 import { CartPage } from "../../pages/CartPage";
 import { VueCartStep2Pattern, CartAuthValidationPath } from "../../fixtures/test-data";
+import { AUTH } from "../../utils/selectors";
 
 async function gotoCart(page: Page): Promise<CartPage> {
   const cart = new CartPage(page);
   await page.goto(CartAuthValidationPath, { waitUntil: "domcontentloaded", timeout: 60_000 });
   await cart.cookieBanner.dismissAll();
   await expect(
-    page.locator(".auth-block").first(),
+    page.locator(AUTH.anyBlock).first(),
     "auth-block must mount on cart step 1",
   ).toBeVisible({ timeout: 20_000 });
   await cart.switchToLoginTab();

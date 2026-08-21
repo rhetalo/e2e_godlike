@@ -30,7 +30,8 @@ async function reachCheckout(page: Page): Promise<void> {
   await home.addFirstTariffToCart();
   await expect(page).toHaveURL(/\/cart\/?/);
 
-  await expect(page.locator(".auth-block").first()).toBeVisible({ timeout: 20_000 });
+  // DEV-402: класс блока авторизации зависит от корзины — спрашиваем page object.
+  await expect.poll(() => cart.isAuthBlockVisible(), { timeout: 20_000 }).toBe(true);
   const advanced = await cart.loginAndAwaitStep2();
   expect(advanced, "ожидали переход на step 2 после логина").toBeTruthy();
 

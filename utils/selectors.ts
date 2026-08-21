@@ -77,6 +77,35 @@ export const AUTH = {
   socialDiscord: ".auth-block__block-button__social_discord",
   socialTwitch: ".auth-block__block-button__social_twitch",
   socialApple: ".auth-block__block-button__social_apple",
+
+  /* DEV-402: у новой воронки свой блок авторизации — `.auth-page` вместо `.auth-block`,
+   * и формы логина/регистрации живут рядом под `v-show` (в DOM обе сразу), поэтому поля
+   * адресуем по id, а не по типу инпута: иначе `.first()` мог взять скрытую форму.
+   *
+   * Ниже `any*` — объединения обеих вёрсток. Старая /cart/ жива: страницы, не построенные
+   * на шаблоне storefront.php, по-прежнему ведут туда, так что обе нужны одновременно. */
+  pageBlock: ".auth-page",
+  pageTab: ".auth-page__tab",
+  pageTabActive: ".auth-page__tab-active",
+
+  anyBlock: ".auth-block, .auth-page",
+  anyTab: ".auth-block__header-inner, .auth-page__tab",
+  anyTabActive: ".auth-block__header-inner__active, .auth-page__tab-active",
+  anyLoginEmail: '.auth-block input[type="email"], #loginFormEmail',
+  anyLoginPassword: '.auth-block input[type="password"], #loginFormPassword',
+  anyLoginSubmit: '.login__form-bottom__button, .login-form__actions button[type="submit"]',
+  anyLoginError:
+    '.auth-block .error, .auth-block [class*="error" i], .login__form-error, .login-form__error, .v-snackbar',
+  anyRegisterEmail: '.auth-block input[type="email"], #registerFormEmail',
+  anyRegisterUsername:
+    '.auth-block input[name="username"], .auth-block input[type="text"], #registerFormUsername',
+  // Порядок важен: индекс 0 — пароль, 1 — подтверждение (см. CartPage.registerPassword).
+  anyRegisterPassword:
+    '.auth-block input[type="password"], #registerFormPassword, #registerFormPasswordConfirmation',
+  // Скоупим по .register-form__actions: LoginForm и RegisterForm лежат в DOM ОБЕ (v-show),
+  // поэтому `.auth-page form button[type=submit]` брал первой скрытую кнопку логина.
+  anyRegisterSubmit:
+    '.auth-block button[type="submit"], .register-form__actions button[type="submit"]',
 } as const;
 
 /* ===== Cart — Step 2: Billing & Promo (Vue SPA) ===== */
@@ -100,6 +129,32 @@ export const PROMO = {
   applyButton: ".promocode__button",
   successLabel: ".promocode__label-success",
   errorLabel: ".promocode__label-error",
+} as const;
+
+/* ===== Новая воронка (бандл cart-modpack): /cart-main/, /cart-modpack/, /cart-game-servers/ =====
+ *
+ * DEV-402: страницы игр после Add to Cart ведут СЮДА, а не в старую /cart/. Это другая
+ * вёрстка: одна форма вместо трёх шагов, свои классы блока авторизации, и — важно —
+ * НЕТ блока промокода. Ни на одной из трёх страниц не выставлен
+ * data-allow-promocode-entry, поэтому `showPromoInput` = false и селекторы PROMO выше
+ * здесь не находят ничего. Факт применения промо читается по цене: есть зачёркнутая
+ * старая цена выше итоговой — значит скидка применилась.
+ */
+export const FUNNEL = {
+  root: ".cart-page",
+  gameBadge: ".cart-page__game",
+  ramSelect: "#cartFormRam",
+  billingCycleSelect: "#cartFormBillingCycle",
+  locationSelect: "#cartFormLocation",
+  // CustomSelect: значение в кнопке-тоггле, варианты — в раскрытом списке.
+  selectRoot: ".custom-select",
+  selectToggle: ".custom-select__toggle",
+  selectValue: ".custom-select__toggle__value",
+  selectOption: ".custom-select__option",
+  priceFinal: ".cart__pricing__price",
+  priceOld: ".cart__pricing__price--old",
+  renewal: ".cart__renewal",
+  submitButton: 'form.cart-form button[type="submit"]',
 } as const;
 
 // Кастомайзер тарифа «Customize server» на storefront game-страницах (slider-блоки).
