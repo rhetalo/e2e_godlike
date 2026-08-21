@@ -9,7 +9,7 @@
  */
 import type { Locator } from "@playwright/test";
 import { BasePage } from "./BasePage";
-import { STOREFRONT, FUNNEL } from "../utils/selectors";
+import { STOREFRONT, FUNNEL, BILLING, PROMO } from "../utils/selectors";
 import { Urls } from "../fixtures/test-data";
 
 /** Игра из fixtures/games.json: имя карточки в каталоге + URL её лендинга. */
@@ -94,12 +94,72 @@ export class GameStorefrontPage extends BasePage {
       if (period === "longTerm") {
         await this.selectCartPeriod(LONG_TERM_PERIOD_LABEL);
       }
-      results.push({ title, ...(await verdict) });
+
+      // Какой сигнал читать — решает страница, а не наши ожидания. В воронке промо-блока
+      // нет, там вердикт только из ответа бекенда. В старой корзине лейбл есть, и он
+      // ЛУЧШЕ: промо переоценивается ПОСЛЕ смены периода, а слушатель ответа взведён до
+      // клика и поймал бы ещё месячный. Лейбл же читается сейчас, то есть уже на 3 месяцах.
+      const onFunnel = (await this.page.locator(FUNNEL.billingCycleSelect).count()) > 0;
+      const armed = await verdict; // всегда снимаем взведённое ожидание, чтобы не висело
+      results.push({
+        title,
+        ...(onFunnel ? armed : await this.readPromoLabel(period === "longTerm")),
+      });
 
       await this.page.goto(gamePageUrl, { waitUntil: "domcontentloaded", timeout: 60_000 });
     }
 
     return results;
+  }
+
+  /**
+   * Вердикт по промокоду в СТАРОЙ корзине — по success/error-лейблу. Читаем АТОМАРНО в
+   * браузере (waitForFunction), берём видимость+текст лейбла в одном тике.
+   *
+   * ⚠️ Ждём СТАБИЛИЗАЦИИ состояния (одинаковое ≥4 замеров подряд ≈1.2с). При смене периода
+   * клиент оптимистично показывает success для дефолтного промо ДО ответа бэка, а затем —
+   * если промо уже израсходован — переключает на error «already been used». Без стабилизации
+   * poll ловил этот транзиентный success и ложно давал activated=true (подтверждено
+   * live-recon 09-Jul-2026: Project Zomboid/Ultra на 3 мес устаканивается в error). Ни
+   * success, ни error за таймаут → activated=false, text="".
+   */
+  private async readPromoLabel(stabilize: boolean): Promise<Omit<TariffPromoResult, "title">> {
+    // Порог стабильности: longTerm (смена периода → транзиент success→error) требует больше
+    // одинаковых замеров подряд; monthly — лёгкий порог, чтобы не жечь бюджет таймаута теста.
+    const needStable = stabilize ? 4 : 2;
+    const handle = await this.page
+      .waitForFunction(
+        ({ sel, need }) => {
+          const vis = (el: Element | null) => !!el && (el as HTMLElement).offsetParent !== null;
+          const s = document.querySelector(sel.success);
+          const e = document.querySelector(sel.error);
+          const state = vis(s)
+            ? { activated: (s?.textContent ?? "").includes("Activated promocode"), text: (s?.textContent ?? "").trim() }
+            : vis(e)
+              ? { activated: false, text: (e?.textContent ?? "").trim() }
+              : null;
+          const w = window as unknown as { __ps?: string; __pn?: number };
+          if (!state) {
+            w.__pn = 0;
+            w.__ps = undefined;
+            return false;
+          }
+          const sig = (state.activated ? "A|" : "E|") + state.text;
+          if (w.__ps === sig) w.__pn = (w.__pn ?? 0) + 1;
+          else {
+            w.__ps = sig;
+            w.__pn = 0;
+          }
+          return (w.__pn ?? 0) >= need ? state : false;
+        },
+        { sel: { success: PROMO.successLabel, error: PROMO.errorLabel }, need: needStable },
+        { timeout: 60_000, polling: 300 },
+      )
+      .catch(() => null);
+    const label = handle
+      ? ((await handle.jsonValue()) as { activated: boolean; text: string })
+      : { activated: false, text: "" };
+    return label;
   }
 
   /**
@@ -147,25 +207,33 @@ export class GameStorefrontPage extends BasePage {
   }
 
   /**
-   * Переключить билинг-период в воронке и дождаться, пока
-   * (1) период применился — `billingCycle` в URL сменился (воронка держит его в query
-   *     через useRouteQuery, поэтому признак надёжный и не зависит от акции),
-   * (2) цена пересчиталась — итоговая цена стабилизировалась (2 равных замера подряд).
+   * Переключить билинг-период и дождаться, пока
+   * (1) период применился — `billingCycle` в URL сменился (обе корзины держат его в query,
+   *     поэтому признак надёжный и не зависит от акции),
+   * (2) состояние пересчиталось — значение стабилизировалось (2 равных замера подряд).
    * Так избегаем чтения устаревшей (monthly) цены после переключения. Web-first, без
    * waitForTimeout.
    *
-   * DEV-402: период здесь — CustomSelect, а не список `.period` старой корзины: сначала
-   * раскрываем тоггл, потом кликаем вариант по тексту.
+   * Работает с ОБЕИМИ корзинами, и это не запас на будущее: страницы игр за сутки успели
+   * уехать в новую воронку и вернуться обратно на /cart/, пока каталог остался на новой.
+   * Так что «какая корзина сейчас» — не константа, а то, что надо спросить у страницы.
+   *
+   * Отличий два: период в старой корзине — список `.period`, в воронке — CustomSelect; и
+   * пересчёт видно по разным местам — в старой по значению промо-инпута, в воронке по
+   * итоговой цене (промо-блока там нет вообще).
    */
   private async selectCartPeriod(label: string): Promise<void> {
     const cycleBefore = new URL(this.page.url()).searchParams.get("billingCycle") ?? "";
-    const select = this.page.locator(FUNNEL.billingCycleSelect).locator("..");
-    await select.locator(FUNNEL.selectToggle).first().click();
-    await select
-      .locator(FUNNEL.selectOption)
-      .filter({ hasText: label })
-      .first()
-      .click();
+    const isFunnel = (await this.page.locator(FUNNEL.billingCycleSelect).count()) > 0;
+
+    if (isFunnel) {
+      const select = this.page.locator(FUNNEL.billingCycleSelect).locator("..");
+      await select.locator(FUNNEL.selectToggle).first().click();
+      await select.locator(FUNNEL.selectOption).filter({ hasText: label }).first().click();
+    } else {
+      await this.page.locator(`${BILLING.period}:has-text("${label}")`).first().click();
+    }
+
     await this.page
       .waitForFunction(
         (prev) => (new URL(location.href).searchParams.get("billingCycle") ?? "") !== prev,
@@ -173,6 +241,7 @@ export class GameStorefrontPage extends BasePage {
         { timeout: 30_000 },
       )
       .catch(() => {});
+
     await this.page
       .waitForFunction(
         (sel) => {
@@ -182,7 +251,8 @@ export class GameStorefrontPage extends BasePage {
             w.__pc = 0;
             return false;
           }
-          const v = (el.textContent ?? "").trim();
+          const v =
+            el instanceof HTMLInputElement ? el.value : (el.textContent ?? "").trim();
           if (w.__pv === v) w.__pc = (w.__pc ?? 0) + 1;
           else {
             w.__pv = v;
@@ -190,7 +260,7 @@ export class GameStorefrontPage extends BasePage {
           }
           return (w.__pc ?? 0) >= 2;
         },
-        FUNNEL.priceFinal,
+        isFunnel ? FUNNEL.priceFinal : PROMO.input,
         { timeout: 15_000, polling: 300 },
       )
       .catch(() => {});

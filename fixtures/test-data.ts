@@ -19,6 +19,16 @@ export const Urls = {
   /** Каталог игровых серверов (game-servers) — вход для promo-проверок по играм. */
   gameServers: "/game-servers-en/",
 
+  /**
+   * Лендинг Minecraft Java — вход в воронку для funnel/registration-спеков.
+   *
+   * Раньше они попадали сюда кликом «View all plans» с главной. Такой кнопки на
+   * главной больше нет: единственная ссылка осталась в выпадашке хедера, которая
+   * раскрывается по ховеру, и клик по ней перехватывает плашка
+   * .main-header__intro-stripe («Stripe Climate Member»). Ходим прямым URL.
+   */
+  minecraftJava: "/minecraft-java-servers-hosting/",
+
   /** Vue cart used by both modpack-grid install buttons and seed BUY buttons. */
   cart: "/cart",
 
@@ -53,6 +63,14 @@ export const PaymentUrlPatterns = [
 
 /** A URL is "Vue cart step 2 (billing cycle)" if it matches this. */
 export const VueCartStep2Pattern = /\/cart\?[^#]*step=2/i;
+
+/**
+ * Корзина, куда ведёт install-кнопка грида модпаков, — с productId в query.
+ *
+ * DEV-400: раньше это была только старая /cart?…, теперь кнопка ведёт в
+ * /cart-modded-new/?…. Держим оба: страницы уже показали, что могут вернуться назад.
+ */
+export const ModdedCartProductPattern = /\/cart(-modded-new)?\/?\?[^#]*productId=/i;
 
 /** Vue-cart путь с тарифом для проверки auth-block (login.validation.spec.ts). */
 export const CartAuthValidationPath =

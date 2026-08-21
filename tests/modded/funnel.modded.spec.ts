@@ -13,7 +13,7 @@ import { ModdedHostingPage } from "../../pages/ModdedHostingPage";
 import { CartPage } from "../../pages/CartPage";
 import { CartModdedNewPage } from "../../pages/CartModdedNewPage";
 import { CheckoutPage } from "../../pages/CheckoutPage";
-import { Credentials, VueCartStep2Pattern } from "../../fixtures/test-data";
+import { Credentials, VueCartStep2Pattern, ModdedCartProductPattern } from "../../fixtures/test-data";
 import { loginClientareaAndSaveSession } from "../../utils/clientareaAuth";
 
 const storageStatePath = "storageState.modded.json";
@@ -96,7 +96,7 @@ test.describe("Воронка покупки modded (стоп на страни�
       await test.step("install → Vue-корзина с тем же productId", async () => {
         const installBtn = modded.installButtonByIndex(0);
         await Promise.all([
-          page.waitForURL(/\/cart\?[^#]*productId=/, { timeout: 30_000 }),
+          page.waitForURL(ModdedCartProductPattern, { timeout: 30_000 }),
           // force: install-кнопка грида — Vue-обработчик, нативный клик не всегда проходит actionability.
           // eslint-disable-next-line playwright/no-force-option
           installBtn.click({ force: true }),
