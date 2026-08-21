@@ -34,7 +34,7 @@ for (const game of games) {
     const page = await context.newPage();
 
     try {
-      const results = await new GameStorefrontPage(page).collectTariffPromoResults(game.name);
+      const results = await new GameStorefrontPage(page).collectTariffPromoResults(game);
 
       await test.step("найдены тарифы с Add to Cart", async () => {
         expect(results.length, `нет тарифов с Add to Cart для ${game.name}`).toBeGreaterThan(0);

@@ -26,19 +26,18 @@
 import type { Locator } from "@playwright/test";
 import { BasePage } from "./BasePage";
 import { Credentials, VueCartStep2Pattern, PaymentUrlPatterns } from "../fixtures/test-data";
+import { AUTH, FUNNEL } from "../utils/selectors";
 
 export class CartPage extends BasePage {
   // ─── step 1 (auth-block) ──────────────────────────────────────────────────
 
   authTab(name: "Register" | "Login"): Locator {
-    return this.page
-      .locator(".auth-block__header-inner", { hasText: name })
-      .first();
+    return this.page.locator(AUTH.anyTab, { hasText: name }).first();
   }
 
   isAuthBlockVisible(): Promise<boolean> {
     return this.page
-      .locator(".auth-block")
+      .locator(AUTH.anyBlock)
       .first()
       .isVisible()
       .catch(() => false);
@@ -49,54 +48,45 @@ export class CartPage extends BasePage {
     // Если auth-block уже исчез (валидная сессия авто-проскочила на step 2) — переключать нечего.
     // Защита от флоки: вкладка Login детачится из DOM в момент авто-перехода (см. funnel.modded).
     if (!(await this.isAuthBlockVisible())) return;
-    const activeLogin = this.page.locator(
-      ".auth-block__header-inner__active",
-      { hasText: "Login" },
-    );
+    const activeLogin = this.page.locator(AUTH.anyTabActive, { hasText: "Login" });
     if (await activeLogin.count()) return;
     await this.authTab("Login").click();
     await this.loginEmail().waitFor({ state: "visible", timeout: 10_000 });
   }
 
   loginEmail(): Locator {
-    return this.page.locator('.auth-block input[type="email"]').first();
+    return this.page.locator(AUTH.anyLoginEmail).first();
   }
 
   loginPassword(): Locator {
-    return this.page.locator('.auth-block input[type="password"]').first();
+    return this.page.locator(AUTH.anyLoginPassword).first();
   }
 
   loginSubmit(): Locator {
-    return this.page.locator(".login__form-bottom__button").first();
+    return this.page.locator(AUTH.anyLoginSubmit).first();
   }
 
   loginErrorMessage(): Locator {
-    return this.page
-      .locator(
-        '.auth-block .error, .auth-block [class*="error" i], .login__form-error, .v-snackbar',
-      )
-      .first();
+    return this.page.locator(AUTH.anyLoginError).first();
   }
 
   // ─── step 1 (auth-block — Register tab, активна по умолчанию) ──────────────
 
   registerEmail(): Locator {
-    return this.page.locator('.auth-block input[type="email"]').first();
+    return this.page.locator(AUTH.anyRegisterEmail).first();
   }
 
   registerUsername(): Locator {
-    return this.page
-      .locator('.auth-block input[name="username"], .auth-block input[type="text"]')
-      .first();
+    return this.page.locator(AUTH.anyRegisterUsername).first();
   }
 
   /** Поля пароля Register-таба: index 0 — пароль, 1 — подтверждение. */
   registerPassword(index: 0 | 1): Locator {
-    return this.page.locator('.auth-block input[type="password"]').nth(index);
+    return this.page.locator(AUTH.anyRegisterPassword).nth(index);
   }
 
   registerSubmit(): Locator {
-    return this.page.locator('.auth-block button[type="submit"]').first();
+    return this.page.locator(AUTH.anyRegisterSubmit).first();
   }
 
   /** Кнопка «Accept» в модалке условий — всплывает после сабмита регистрации. */
@@ -119,9 +109,13 @@ export class CartPage extends BasePage {
   }
 
   /**
-   * Convenience: log in via the cart's auth-block and wait for the cart to
-   * advance to step 2. Returns true on success, false on timeout (caller
-   * decides what to assert).
+   * Convenience: log in via the cart's auth-block and wait for the cart to move past auth.
+   * Returns true on success, false on timeout (caller decides what to assert).
+   *
+   * DEV-402: имя оставлено прежним — на него ссылается полдесятка спеков, — но признак
+   * успеха теперь шире, чем `?step=2`. У новой воронки шагов в URL нет: после логина
+   * вместо auth-блока просто появляется форма заказа (.cart-page). Ждём то ИЛИ другое,
+   * что первым, поэтому метод одинаково годится для обеих корзин.
    */
   async loginAndAwaitStep2(
     email: string = Credentials.email,
@@ -130,7 +124,10 @@ export class CartPage extends BasePage {
   ): Promise<boolean> {
     await this.loginViaCart(email, password);
     try {
-      await this.page.waitForURL(VueCartStep2Pattern, { timeout: timeoutMs });
+      await Promise.race([
+        this.page.waitForURL(VueCartStep2Pattern, { timeout: timeoutMs }),
+        this.page.locator(FUNNEL.root).first().waitFor({ state: "visible", timeout: timeoutMs }),
+      ]);
       return true;
     } catch {
       return false;
@@ -147,10 +144,18 @@ export class CartPage extends BasePage {
     return this.page.locator(".promocode__button").first();
   }
 
-  /** "Next step" button — advances from step 2 to the WHMCS payment page. */
+  /**
+   * Кнопка, уводящая корзину дальше — к WHMCS-оплате.
+   *
+   * DEV-402: в старой корзине это «Next step» (шаг 2 → 3 → оплата), в новой воронке шагов
+   * нет вообще: одна форма и сразу «Order Now» → /clientarea/cart.php?a=checkout. Обе в
+   * одном локаторе, поэтому advanceToPayment ниже работает без изменений: он крутит клики,
+   * пока не окажется на /clientarea/, а сколько кликов для этого нужно — одна или три —
+   * ему безразлично.
+   */
   nextStepButton(): Locator {
     return this.page
-      .locator(".order__button-order, button:has-text('Next step')")
+      .locator(`.order__button-order, button:has-text('Next step'), ${FUNNEL.submitButton}`)
       .first();
   }
 

@@ -25,7 +25,11 @@ test("@smoke @critical базовая воронка покупки", async ({ p
   });
 
   await test.step("логин в корзине → step 2", async () => {
-    await expect(page.locator(".auth-block").first()).toBeVisible({ timeout: 20_000 });
+    // DEV-402: класс блока авторизации зависит от корзины (.auth-block у старой /cart/,
+    // .auth-page у новой воронки) — спрашиваем page object, а не конкретный класс.
+    await expect
+      .poll(() => cart.isAuthBlockVisible(), { timeout: 20_000 })
+      .toBe(true);
     const advanced = await cart.loginAndAwaitStep2();
     expect(advanced, "ожидали переход на step 2 после логина").toBeTruthy();
   });

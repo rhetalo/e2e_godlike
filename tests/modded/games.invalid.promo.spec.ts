@@ -40,7 +40,7 @@ for (const game of games) {
     try {
       // Читаем на long-term (3 мес) — там акции MONTHLY75 нет никогда (см. ниже).
       const results = await new GameStorefrontPage(page).collectTariffPromoResults(
-        game.name,
+        game,
         "longTerm",
       );
 
