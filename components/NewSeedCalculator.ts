@@ -128,9 +128,32 @@ export class NewSeedCalculator {
 
   // ─── версии ──────────────────────────────────────────────────────────────
 
-  /** Выбрать версию по value (mc:… для Minecraft, mp:curseforge-… для модпака ATM10). */
+  /** Выбрать версию по value (mc:… для Minecraft, mp:… для модпака). */
   async selectVersionValue(value: string): Promise<void> {
     await this.gameVersionSelect().selectOption(value);
+  }
+
+  /**
+   * Выбрать первую модпак-версию (option с префиксом `mp:`) и вернуть её value.
+   *
+   * Намеренно НЕ хардкодим значение. Оно уже дважды уезжало: формат id сменился с
+   * `curseforge-925200-7852998` на `curseforge:925200:7852998` (DEV-400, составные id),
+   * а сами версии ATM10 обновляются сами по себе. Тест проверяет «модпак-версия
+   * пробрасывает modpackId», а не «конкретно v6.2.1 существует», поэтому берём то, что
+   * страница предлагает сейчас.
+   *
+   * Возвращает null, если модпак-версий в списке нет — спек решает, падать или скипать.
+   */
+  async selectFirstModpackVersion(): Promise<string | null> {
+    const select = this.gameVersionSelect();
+    await select.waitFor({ state: "attached", timeout: 15_000 });
+    const value = await select.evaluate((el) => {
+      const options = [...(el as HTMLSelectElement).options];
+      return options.find((o) => o.value.startsWith("mp:"))?.value ?? null;
+    });
+    if (value === null) return null;
+    await select.selectOption(value);
+    return value;
   }
 
   // ─── сид: чипы / поиск / кастом ────────────────────────────────────────────
