@@ -19,8 +19,6 @@
 import { test, expect } from "../../fixtures/base";
 import { SeedListPage } from "../../pages/SeedListPage";
 
-const ATM10_VERSION = "mp:curseforge-925200-7852998"; // ATM10 v6.2.1 (модпак-версия)
-
 /** Параметры URL корзины из data-href CTA. */
 function cartParams(href: string): URLSearchParams {
   return new URL(href).searchParams;
@@ -138,7 +136,8 @@ test.describe("Новый seed-калькулятор (/minecraft-seeds/)", () =
     });
 
     await test.step("ATM10: modpackId проброшен + summary отражает версию", async () => {
-      await seedList.calculator.selectVersionValue(ATM10_VERSION);
+      const version = await seedList.calculator.selectFirstModpackVersion();
+      expect(version, "в списке версий нет ни одной модпак-опции (mp:…)").toBeTruthy();
       await expect
         .poll(() => seedList.calculator.readSummary().then((s) => s.version), { timeout: 10_000 })
         .toMatch(/ATM10/i);
