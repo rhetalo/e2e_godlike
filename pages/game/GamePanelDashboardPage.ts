@@ -70,7 +70,16 @@ export class GamePanelDashboardPage extends GamePanelBasePage {
   }
   /** Переключить вид списка серверов: nth(0)=list, nth(1)=grid. */
   async setView(mode: "list" | "grid"): Promise<void> {
-    await this.viewToggleButtons.nth(mode === "grid" ? 1 : 0).click();
+    // ⚠️ 20-Aug-2026: на дашборде всплыл новый онбординг-диалог «Choose how to start your server /
+    // SERVER SETUP GUIDE» (Vuetify v-dialog, `v-overlay--active`), его `.v-overlay__scrim`
+    // перехватывает клик по view-toggle. Это НЕ giveaway → neutralizeOverlays() его не гасит.
+    // Гасим скрим (Escape) и кликаем через dispatchEvent — он идёт мимо hit-test оверлея
+    // (тот же приём, что openAccountMenu ниже). Класс раскладки переключается Vue-хендлером и так.
+    await this.page.keyboard.press("Escape").catch(() => {});
+    await this.page.locator(".v-overlay__scrim").first().waitFor({ state: "hidden", timeout: 3_000 }).catch(() => {});
+    const btn = this.viewToggleButtons.nth(mode === "grid" ? 1 : 0);
+    await btn.scrollIntoViewIfNeeded().catch(() => {});
+    await btn.dispatchEvent("click");
   }
   /** Адреса серверов «srv*.godlike.club:PORT» в карточках. */
   get serverAddresses(): Locator {

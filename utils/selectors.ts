@@ -932,14 +932,17 @@ export const GAME_PANEL_THROTTLING = {
   titleText: /Lag+\s*Detected/i,
 } as const;
 
-// Free Premium модалка. Кнопка "What is a Free Premium?" (на страницах сервера) → premium__dialog
-// со списком премиум-фич + CTA "Get Premium (3-Days Trial)". Confirmed via MCP recon 06-Jun-2026.
+// Free Premium. ⚠️ Редизайн (live-recon 20-Aug-2026): кнопка переименована "What is a Free
+// Premium?" → "See Premium benefits" (на /upgrade), а модалка `.premium__dialog` стала ИНЛАЙН-
+// секцией `.premium-benefits` (появляется по клику триггера, заголовок "Go Premium"), CTA →
+// `.premium-benefits__btn` ("Get Premium (3-Days Free Trial)").
 // ⚠️ CTA = конверсия/триал (ведёт к апгрейду) — НЕ жать; только структура.
 export const GAME_PANEL_PREMIUM = {
-  openButton: 'button:has-text("What is a Free Premium?")',
-  dialog: ".premium__dialog",
-  dialogTitle: ".premium__dialog-title",
-  ctaButton: ".premium__dialog-button",              // "Get Premium (3-Days Trial)" — ⚠️ НЕ жать
+  // ⚠️ v-btn рендерится как <a> (не <button>) → тег-агностичный матч, иначе count=0/таймаут.
+  openButton: ':is(a, button):has-text("See Premium benefits")',
+  dialog: ".premium-benefits",
+  dialogTitle: ".premium-benefits__header-title",     // "Go Premium"
+  ctaButton: ".premium-benefits__btn",                // "Get Premium (3-Days Free Trial)" — ⚠️ НЕ жать
 } as const;
 
 // Console full-page (/server/{uuid}/console). Confirmed via MCP recon 06-Jun-2026.
