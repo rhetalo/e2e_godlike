@@ -246,7 +246,6 @@ export const SEEDS = {
 export const NEW_SEED_CALCULATOR = {
   root: ".godlike-new-seed-calculator",
   gameVersionSelect: "#glike-sc-game-version", // <select> версий игры (Minecraft 1.18…)
-  seedSearch: "#glike-sc-seed-search",
   customSeed: "#glike-sc-custom-seed",
   range: ".godlike-new-seed-calculator__range", // нативный <input type=range>
   playersValue: ".godlike-new-seed-calculator__players-value",
@@ -259,9 +258,11 @@ export const NEW_SEED_CALCULATOR = {
   summaryRow: ".godlike-new-seed-calculator__summary-row",
   sumSeed: "[data-sc-sum-seed]", // summary: выбранный сид
   sumVersion: "[data-sc-sum-version]", // summary: выбранная версия
-  chip: ".godlike-new-seed-calculator__chip", // быстрый выбор сида (data-id); список зависит от версии
+  // ⚠️ recon 22-Sep-2026: чип теперь <a href="/minecraft-seeds/<seed>/"> — НАВИГАЦИЯ на
+  // страницу сида (data-id — catalog-id), а НЕ выбор сида в калькуляторе. Поиск-дропдаун и
+  // выбор-сида-чипом удалены со страницы; seedId в корзину теперь только через customSeed.
+  chip: ".godlike-new-seed-calculator__chip", // <a> на страницу сида; список зависит от версии
   sliderLabel: ".godlike-new-seed-calculator__slider-label", // ступени тарифа (data-step-index 0..N)
-  searchListItem: ".godlike-new-seed-calculator__list-item", // пункт дропдауна поиска сидов
   cta: "a.godlike-new-seed-calculator__cta", // «Create server»; готовый URL корзины — в data-href (синхронен выбору)
 } as const;
 
@@ -871,6 +872,11 @@ export const GAME_PANEL_EXTENSIONS = {
   // кнопки Cancel / Install; закрытие — Esc. Подтв. live DOM 20-Jul-2026.
   installDialog: ".server__dialogs__action-dialog",
   installDialogTitle: ".server__dialogs__action-dialog__title",
+  // Source-фильтр = источник (CurseForge / Modrinth / Hangar / …). Это .filter-item с лейблом
+  // "Source"; выбранное значение дописывается в текст. Опции рендерятся в v-overlay-меню.
+  // Подтв. live DOM 03-Sep-2026 (задача CF/Modrinth source swap).
+  sourceFilterLabel: "Source",
+  overlayOption: ".v-overlay-container .v-list-item, [role='option']", // пункт открытого Vuetify-меню
 } as const;
 
 /**
@@ -884,6 +890,7 @@ export const GAME_PANEL_EXTENSIONS = {
 export const GAME_PANEL_EXTENSIONS_API = {
   pluginsList: /\/api\/v2\/servers\/[^/]+\/minecraft\/plugins\?/,
   modsList: /\/api\/v2\/servers\/[^/]+\/minecraft\/mods\?/,
+  modpacksList: /\/api\/v2\/servers\/[^/]+\/minecraft\/modpacks\?/,
   pluginVersions: /\/api\/v2\/servers\/[^/]+\/minecraft\/plugins\/[^/]+\/versions/,
   modVersions: /\/api\/v2\/servers\/[^/]+\/minecraft\/mods\/[^/]+\/versions/,
   pluginsInstalled: /\/api\/v2\/servers\/[^/]+\/minecraft\/plugins\/installed/,

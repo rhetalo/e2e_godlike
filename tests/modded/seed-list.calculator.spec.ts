@@ -7,14 +7,18 @@
  * Покрываем:
  *   - поля калькулятора: версия заполняет план/RAM/цену/игроков + CTA «Create server»;
  *   - слайдер меняет предлагаемый тариф (план/цена/игроки + productId в URL);
- *   - выбор сида ТРЕМЯ способами (чип / поиск-дропдаун / кастомный) → summary + seedId в URL;
+ *   - кастомный сид → summary + seedId в URL корзины;
+ *   - seed-чипы = ссылки на страницы сидов (клик уводит на /minecraft-seeds/<seed>/);
  *   - версия-модпак ATM10 → modpackId в URL + версия в summary; mc-версия → без modpackId;
  *   - реальный переход «Create server» → /cart-seed с productId+seedId.
  *
  * Готовый URL корзины калькулятор держит в CTA data-href (синхронно выбору) — проверяем его
  * без навигации; один тест делает реальный переход на воронку. Read-only, заказ не оформляем.
- * Confirmed via recon 18-Jun-2026. Amplitude A/B пинится фикстурой base (иначе flash-sale-оверлей
- * перехватывает клики по чипам).
+ *
+ * ⚠️ recon 22-Sep-2026: блок выбора сида переделан. Выбор-сида-чипом (чип обновлял summary +
+ * seedId) и поиск-дропдаун со страницы УДАЛЕНЫ; чип теперь <a> на страницу сида. Единственный
+ * оставшийся способ положить seedId в корзину — кастомный сид (на нём и держится «Create server»).
+ * Amplitude A/B пинится фикстурой base (иначе flash-sale-оверлей перехватывает клики).
  */
 import { test, expect } from "../../fixtures/base";
 import { SeedListPage } from "../../pages/SeedListPage";
@@ -85,40 +89,25 @@ test.describe("Новый seed-калькулятор (/minecraft-seeds/)", () =
     expect(hiProduct).not.toBe(loProduct);
   });
 
-  test("@critical выбор сида чипом → summary + seedId в URL", async () => {
-    await expect(seedList.calculator.seedChips().first()).toBeVisible({ timeout: 10_000 });
-    expect(cartParams(await seedList.calculator.ctaHref()).get("seedId")).toBeFalsy(); // до выбора пусто
+  test("@regression seed-чип — ссылка на страницу сида (клик уводит на /minecraft-seeds/<seed>/)", async ({ page }) => {
+    // recon 22-Sep-2026: чип больше НЕ выбирает сид в калькуляторе (summary/seedId не трогает),
+    // а ведёт на страницу сида. Проверяем структуру ссылки + реальную навигацию.
+    const chip = seedList.calculator.seedChips().first();
+    await expect(chip).toBeVisible({ timeout: 10_000 });
 
-    const { name } = await seedList.calculator.selectSeedChip(0);
-
-    await test.step("summary показывает выбранный сид", async () => {
-      await expect
-        .poll(() => seedList.calculator.readSummary().then((s) => s.seed), { timeout: 5_000 })
-        .toBe(name);
+    const { href, name } = await seedList.calculator.chipInfo(0);
+    await test.step("чип — ссылка вида /minecraft-seeds/<seed>/", async () => {
+      expect(name.length).toBeGreaterThan(0);
+      expect(href).toMatch(/\/minecraft-seeds\/[^/]+\/?$/);
     });
 
-    await test.step("seedId проброшен в URL корзины", async () => {
-      const seedId = cartParams(await seedList.calculator.ctaHref()).get("seedId");
-      expect(seedId).toBeTruthy();
-      expect(seedId!.length).toBeGreaterThan(0);
+    await test.step("клик по чипу реально открывает страницу этого сида", async () => {
+      await Promise.all([
+        page.waitForURL(/\/minecraft-seeds\/[^/]+\/?$/, { timeout: 30_000 }),
+        seedList.calculator.openSeedChip(0),
+      ]);
+      expect(page.url()).toBe(href);
     });
-  });
-
-  test("@regression выбор сида из поиска-дропдауна → seedId в URL", async () => {
-    await seedList.calculator.searchSeed("vi"); // широкий запрос (Village-сиды) — список не пуст
-    await expect(seedList.calculator.searchResults().first()).toBeVisible({ timeout: 5_000 });
-    expect(await seedList.calculator.searchResults().count()).toBeGreaterThan(0);
-
-    const picked = await seedList.calculator.pickSearchResult(0);
-    expect(picked.length).toBeGreaterThan(0);
-    // CTA data-href обновляется АСИНХРОННО после клика по результату (recon 21-Jul: seedId
-    // появляется через +35..318мс, на нагруженном CI дольше). Как чип/кастом-тесты, ждём
-    // применения выбора через poll — не читаем href «сразу» (иначе seedId ещё пуст → CI-флак).
-    await expect
-      .poll(async () => cartParams(await seedList.calculator.ctaHref()).get("seedId"), {
-        timeout: 5_000,
-      })
-      .toBeTruthy();
   });
 
   test("@regression кастомный сид пробрасывается в URL как есть", async () => {
@@ -148,8 +137,12 @@ test.describe("Новый seed-калькулятор (/minecraft-seeds/)", () =
   });
 
   test("@critical Create server реально открывает /cart-seed с productId+seedId", async ({ page }) => {
-    await expect(seedList.calculator.seedChips().first()).toBeVisible({ timeout: 10_000 });
-    await seedList.calculator.selectSeedChip(0);
+    // seedId кладём через кастомный сид (единственный способ после recon 22-Sep-2026: выбор
+    // чипом/поиском удалён). Ждём применения (seedId в data-href) через poll — как в кастом-тесте.
+    await seedList.calculator.setCustomSeed("135792468");
+    await expect
+      .poll(async () => cartParams(await seedList.calculator.ctaHref()).get("seedId"), { timeout: 5_000 })
+      .toBe("135792468");
     const expected = cartParams(await seedList.calculator.ctaHref());
 
     await Promise.all([

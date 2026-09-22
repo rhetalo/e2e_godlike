@@ -156,37 +156,27 @@ export class NewSeedCalculator {
     return value;
   }
 
-  // ─── сид: чипы / поиск / кастом ────────────────────────────────────────────
+  // ─── сид: чипы (навигация) / кастом ─────────────────────────────────────────
+  // ⚠️ recon 22-Sep-2026: выбор-сида-чипом и поиск-дропдаун со страницы удалены.
+  // Чип стал <a> на страницу сида; seedId в корзину теперь только через customSeed.
 
   seedChips(): Locator {
     return this.root().locator(SEL.chip);
   }
 
-  /** Кликнуть seed-чип по индексу; вернуть его catalog-id (data-id) и подпись. */
-  async selectSeedChip(index = 0): Promise<{ id: string | null; name: string }> {
+  /** Атрибуты seed-чипа по индексу: ссылка на страницу сида (href), catalog-id, подпись. */
+  async chipInfo(index = 0): Promise<{ href: string; id: string | null; name: string }> {
     const chip = this.seedChips().nth(index);
-    const id = await chip.getAttribute("data-id");
-    const name = ((await chip.textContent()) ?? "").trim();
-    await chip.click();
-    return { id, name };
+    return {
+      href: (await chip.getAttribute("href")) ?? "",
+      id: await chip.getAttribute("data-id"),
+      name: ((await chip.textContent()) ?? "").trim(),
+    };
   }
 
-  /** Ввести запрос в поиск сидов — открывает дропдаун с результатами. */
-  async searchSeed(query: string): Promise<void> {
-    await this.root().locator(SEL.seedSearch).fill(query);
-  }
-
-  /** Пункты дропдауна поиска сидов. */
-  searchResults(): Locator {
-    return this.root().locator(SEL.searchListItem);
-  }
-
-  /** Выбрать результат поиска по индексу; вернуть его текст. */
-  async pickSearchResult(index = 0): Promise<string> {
-    const item = this.searchResults().nth(index);
-    const txt = ((await item.textContent()) ?? "").trim();
-    await item.click();
-    return txt;
+  /** Кликнуть seed-чип по индексу — это НАВИГАЦИЯ на страницу сида (спек ждёт URL). */
+  async openSeedChip(index = 0): Promise<void> {
+    await this.seedChips().nth(index).click();
   }
 
   /** Ввести произвольный сид в поле кастомного сида (Enter применяет). */
