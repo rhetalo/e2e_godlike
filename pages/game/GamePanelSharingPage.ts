@@ -75,8 +75,18 @@ export class GamePanelSharingPage extends GamePanelBasePage {
       .filter({ hasText: new RegExp(`^${role}$`, "i") })
       .first();
     await opt.waitFor({ state: "visible", timeout: 6_000 });
+    // Слушатель ДО клика: смена роли шлёт POST .../members/change-role. На game-панели живой
+    // websocket (консоль/статус) не даёт networkidle наступить → раньше reload обгонял
+    // сохранение и после него читалась старая роль (флоки/падение TC-GP-SHR-005). Ждём именно
+    // ответ change-role (2xx), а не networkidle, — тогда персист гарантированно доехал до reload.
+    const saved = this.page
+      .waitForResponse(
+        (r) => /\/members\/change-role/.test(r.url()) && r.request().method() === "POST" && r.ok(),
+        { timeout: 15_000 },
+      )
+      .catch(() => null); // no-op смена (роль уже целевая) → POST не летит, не блокируемся
     await opt.click();
-    await this.page.waitForLoadState("networkidle", { timeout: 6_000 }).catch(() => {});
+    await saved;
   }
 
   // --- Audit Log (читатели; история действий участников) ---
