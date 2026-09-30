@@ -55,7 +55,8 @@ export default tseslint.config(
     rules: {
       // Hard rules репо → error:
       "playwright/no-wait-for-timeout": "error", // синхронизация web-first, а не сон
-      "playwright/expect-expect": "error", // каждый тест содержит хотя бы один expect
+      // каждый тест содержит хотя бы один expect; хелперы-ассерты (assert*) считаются валидными
+      "playwright/expect-expect": ["error", { assertFunctionPatterns: ["^assert"] }],
       "playwright/no-focused-test": "error", // забытый .only прячет остальные тесты
       // test.skip(condition, reason) — санкционированный анти-silent-skip паттерн репо;
       // ловим только голый test.skip() без условия.

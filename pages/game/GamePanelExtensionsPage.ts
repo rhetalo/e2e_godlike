@@ -46,6 +46,35 @@ export class GamePanelExtensionsPage extends GamePanelBasePage {
     return this.page.locator(GAME_PANEL_EXTENSIONS.filterItem);
   }
 
+  // ── Source (источник: CurseForge / Modrinth / Hangar / …) ──
+  /** Контрол фильтра Source (по лейблу, не по индексу). */
+  get sourceControl(): Locator {
+    return this.filterItems().filter({ hasText: GAME_PANEL_EXTENSIONS.sourceFilterLabel }).first();
+  }
+  /** Открыть меню Source и вернуть список видимых опций (тексты). */
+  async openSourceMenu(): Promise<void> {
+    await this.sourceControl.click();
+    await this.page.locator(GAME_PANEL_EXTENSIONS.overlayOption).first().waitFor({ state: "visible", timeout: 10_000 });
+  }
+  /** Тексты опций источника для текущей вкладки (Mods/Plugins/Modpacks). */
+  async sourceOptions(): Promise<string[]> {
+    await this.openSourceMenu();
+    const opts = await this.page
+      .locator(GAME_PANEL_EXTENSIONS.overlayOption)
+      .evaluateAll((els) => Array.from(new Set(els.map((e) => (e.textContent || "").trim()).filter(Boolean))));
+    await this.page.keyboard.press("Escape").catch(() => {});
+    return opts;
+  }
+  /** Выбрать источник по имени (CurseForge / Modrinth / …). Меняет provider в запросе списка. */
+  async selectSource(name: string): Promise<void> {
+    await this.openSourceMenu();
+    await this.page
+      .locator(GAME_PANEL_EXTENSIONS.overlayOption)
+      .filter({ hasText: new RegExp(`^\\s*${name}\\s*$`, "i") })
+      .first()
+      .click();
+  }
+
   // ── каталог-карточки (подтв. live DOM 20-Jul-2026) ──
   cards(): Locator {
     return this.page.locator(GAME_PANEL_EXTENSIONS.card);
@@ -131,9 +160,18 @@ export class GamePanelExtensionsPage extends GamePanelBasePage {
     await this.filterTo(type);
     await this.filterTo("Installed");
     const card = this.cardByName(name);
-    if (!(await card.isVisible().catch(() => false))) return false;
-    await card.locator("button", { hasText: /uninstall/i }).first().click();
+    // Installed грузится асинхронно: мгновенный isVisible давал ложное «нечего снимать» и мод/плагин
+    // оставался на общем сервере (30-Sep, MOD-004/PLG-006). Ждём карточку, а после клика — сам DELETE.
+    const present = await card.waitFor({ state: "visible", timeout: 15_000 }).then(() => true, () => false);
+    if (!present) return false;
+    const [del] = await Promise.all([
+      this.page.waitForResponse(
+        (r) => r.request().method() === "DELETE" && /\/minecraft\/(mods|plugins)\//.test(r.url()),
+        { timeout: 30_000 },
+      ),
+      card.locator("button", { hasText: /uninstall/i }).first().click(),
+    ]);
     await card.waitFor({ state: "hidden", timeout: 20_000 }).catch(() => {});
-    return true;
+    return del.ok();
   }
 }
