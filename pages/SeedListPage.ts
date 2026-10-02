@@ -1,20 +1,18 @@
 /**
  * SeedListPage — страница списка сидов /minecraft-seeds/.
  *
- * Содержит новый кастомный калькулятор (NewSeedCalculator) — НЕ путать с одиночной
- * seed-страницей (SeedPage, Vuetify #seed-calculator). Здесь калькулятор подбирает
- * тариф по версии игры + слайдеру и ведёт в воронку /cart-seed.
- *
- * Confirmed via MCP recon 13-Jun-2026.
+ * Содержит Seed finder (SeedFinder) — фильтр сидов по версии/редакции/тегам.
+ * ⚠️ recon 02-Oct-2026: калькулятор тарифа с CTA → /cart-seed отсюда удалён; воронка
+ * осталась на одиночной seed-странице (SeedPage).
  */
 import { BasePage } from "./BasePage";
-import { NewSeedCalculator } from "../components/NewSeedCalculator";
+import { SeedFinder } from "../components/SeedFinder";
 
 export class SeedListPage extends BasePage {
-  readonly calculator = new NewSeedCalculator(this.page);
+  readonly finder = new SeedFinder(this.page);
 
   async open(): Promise<void> {
     await this.goto("/minecraft-seeds/");
-    await this.calculator.waitReady();
+    await this.finder.waitReady();
   }
 }

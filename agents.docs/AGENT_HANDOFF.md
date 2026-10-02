@@ -33,6 +33,8 @@
 
 **Seed-тесты редизайн (ветка `refactor/seed-tests-redesign`):** три пересекавшихся спека
 разведены на 2 корзины + 1 happy-path по recon живого DOM:
+- ⚠️ 02-Oct-2026: калькулятор на /minecraft-seeds/ удалён → спек переписан в `seed-list.finder.spec.ts`
+  (Seed finder, PO `SeedFinder`, селекторы `SEED_FINDER`). Историческая запись ниже:
 - `seed-list.calculator.spec.ts` (/minecraft-seeds/): поля, версии (mc + ATM10-модпак),
   выбор сида чипом/поиском/кастомом, слайдер → проверка `data-href` CTA (productId/seedId/
   modpackId) + 1 реальный переход на /cart-seed.

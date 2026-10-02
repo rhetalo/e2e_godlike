@@ -233,37 +233,31 @@ export const SEEDS = {
   cardImage: ".minecraft-seeds-card__image",
 } as const;
 
-/* ===== New Seed Calculator (/minecraft-seeds/ listing page) ===== */
-// Confirmed via recon 13-Jun + 18-Jun-2026. ⚠️ ОТДЕЛЬНЫЙ виджет, НЕ Vuetify PlanCalculator:
-// кастомный кальк с нативным <input type=range> и инлайн-конфигом window.GodlikeNewSeedCalculator
-// (products[]/seeds[]/versions[], cartBaseUrl="/cart-seed", promocode="SEED").
-// Гидрируется ЛЕНИВО (нужен mouse-нудж, см. NewSeedCalculator.waitReady).
-// Версии: mc:* (Minecraft) и mp:curseforge-… (модпак ATM10 → modpackId в URL).
-// Сид выбирается: чипом (.__chip[data-id]) / поиском (#glike-sc-seed-search → .__list-item) /
-// кастомным полем (#glike-sc-custom-seed). Слайдер + ступени (.__slider-label) двигают тариф.
-// CTA «Create server» держит готовый URL корзины в data-href, синхронный выбору
-// (productId&seedId&modpackId&billingCycle&promo) → /cart-seed.
-export const NEW_SEED_CALCULATOR = {
+/* ===== Seed Finder (/minecraft-seeds/ listing page) ===== */
+// recon 02-Oct-2026: калькулятор тарифа (план/цена/слайдер/CTA → /cart-seed/кастомный сид) со
+// страницы УДАЛЁН. На его месте — «Seed finder» с тем же корневым классом
+// .godlike-new-seed-calculator и инлайн-конфигом window.GodlikeNewSeedCalculator
+// (seeds[]/versions[]/filterGroups[]/platformOptions[]). Фильтрует сиды по версии (mc:* / mp:*),
+// редакции (All/Java/Bedrock) и тегам; карточки рисует JS (гидрация ЛЕНИВАЯ, см. SeedFinder.waitReady).
+// Воронка /cart-seed осталась только на одиночной странице сида (funnel.seed.spec.ts).
+export const SEED_FINDER = {
   root: ".godlike-new-seed-calculator",
-  gameVersionSelect: "#glike-sc-game-version", // <select> версий игры (Minecraft 1.18…)
-  customSeed: "#glike-sc-custom-seed",
-  range: ".godlike-new-seed-calculator__range", // нативный <input type=range>
-  playersValue: ".godlike-new-seed-calculator__players-value",
-  planName: ".godlike-new-seed-calculator__plan-name",
-  planRam: ".godlike-new-seed-calculator__plan-ram",
-  planSlots: ".godlike-new-seed-calculator__plan-slots",
-  priceNew: ".godlike-new-seed-calculator__price-new",
-  priceOld: ".godlike-new-seed-calculator__price-old",
-  priceCycle: ".godlike-new-seed-calculator__price-cycle",
-  summaryRow: ".godlike-new-seed-calculator__summary-row",
-  sumSeed: "[data-sc-sum-seed]", // summary: выбранный сид
-  sumVersion: "[data-sc-sum-version]", // summary: выбранная версия
-  // ⚠️ recon 22-Sep-2026: чип теперь <a href="/minecraft-seeds/<seed>/"> — НАВИГАЦИЯ на
-  // страницу сида (data-id — catalog-id), а НЕ выбор сида в калькуляторе. Поиск-дропдаун и
-  // выбор-сида-чипом удалены со страницы; seedId в корзину теперь только через customSeed.
-  chip: ".godlike-new-seed-calculator__chip", // <a> на страницу сида; список зависит от версии
-  sliderLabel: ".godlike-new-seed-calculator__slider-label", // ступени тарифа (data-step-index 0..N)
-  cta: "a.godlike-new-seed-calculator__cta", // «Create server»; готовый URL корзины — в data-href (синхронен выбору)
+  gameVersionSelect: "#glike-sc-game-version", // <select>: mc:1.18… + mp:curseforge:… (ATM10)
+  editionSegment: ".godlike-new-seed-calculator__segment", // кнопки [data-edition=""|"Java"|"Bedrock"], aria-pressed
+  filterTag: ".godlike-new-seed-calculator__filter-tag", // [data-filter-slug], aria-pressed
+  filterToggle: ".godlike-new-seed-calculator__filter-toggle", // «+N more» в группе тегов
+  clear: "[data-sc-clear]", // «Clear» — hidden, пока нет активных фильтров
+  count: "[data-sc-count]", // «Matching seeds N»
+  meta: "[data-sc-meta]", // подпись активных фильтров («Java», «1 filter»…)
+  empty: "[data-sc-empty]", // «No seeds match…» — hidden, пока есть результаты
+  card: ".godlike-new-seed-calculator__card",
+  cardTitle: "a.godlike-new-seed-calculator__card-title", // ссылка на /minecraft-seeds/<slug>/
+  cardTag: ".godlike-new-seed-calculator__card-tag",
+  cardSeedValue: ".godlike-new-seed-calculator__card-seed-value", // <code> со значением сида
+  cardCopy: "button.godlike-new-seed-calculator__card-btn", // «Copy seed» → clipboard
+  cardOpen: "a.godlike-new-seed-calculator__card-btn--ghost", // «Open seed»
+  more: "[data-sc-more]", // «Show more seeds (N)», N = ещё не показанные
+  less: "[data-sc-less]", // «Show less»
 } as const;
 
 /* ===== New Modded Cart (/cart-modded-new — НОВЫЙ UI воронки) ===== */

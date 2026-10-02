@@ -6,7 +6,8 @@
  * Далее общий хвост: auth (через storageState) → Next step ×2 → WHMCS payment. ⚠ Continue НЕ жмём.
  *
  * Проброс параметров (productId/seedId/modpackId) по входам проверяется отдельно, без глубины:
- *   - /minecraft-seeds/ (Create server)        → tests/modded/seed-list.calculator.spec.ts
+ *   (/minecraft-seeds/ больше не ведёт в корзину: калькулятор заменён Seed finder'ом, 02-Oct-2026 →
+ *    tests/modded/seed-list.finder.spec.ts)
  *   - одиночный сид (Host Now / BUY-A-SERVER)   → tests/modded/slider.seed.spec.ts
  * Здесь — единственный сценарий, доводящий сид-воронку до самой страницы оплаты.
  */
