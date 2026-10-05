@@ -17,7 +17,8 @@
  * отсутствует (нет индикатора «доступна новее версия», нет кнопки Update, нет поля в /installed) -
  * см. test-docs/ultra.panel/cf-modrinth-source-REPORT.md. Появится фича → добавить update-flow тест.
  *
- * Сервер: ac8aa1e0 (Minecraft/Paper, тестовый акк). Подтверждено live network+DOM 03-Sep-2026.
+ * Сервер: d2f7fff5 (Minecraft/Paper 26.2, тестовый акк), env GAME_PANEL_SOURCE_SERVER_UUID.
+ * Подтверждено live network+DOM 03-Sep и 05-Oct-2026.
  */
 import { test, expect, type BrowserContext, type Page, type Response } from "@playwright/test";
 import { GamePanelExtensionsPage } from "../../../pages/game/GamePanelExtensionsPage";
@@ -25,7 +26,8 @@ import { loginAndSaveGameSession, GAME_STORAGE_STATE_PATH } from "../../../utils
 import { GAME_PANEL_EXTENSIONS_API } from "../../../utils/selectors";
 
 // Сервер из ТЗ (источник CF/Modrinth). Переопределяемо env (сервера не вечны).
-const SERVER = process.env.GAME_PANEL_SOURCE_SERVER_UUID ?? "ac8aa1e0";
+// Прежний ac8aa1e0 ушёл в suspended (05-Oct) и ронял весь serial-спек → d2f7fff5 (Paper, тест-акк).
+const SERVER = process.env.GAME_PANEL_SOURCE_SERVER_UUID ?? "d2f7fff5";
 
 interface CatalogItem {
   provider: string;

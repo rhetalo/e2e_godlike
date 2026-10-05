@@ -200,6 +200,9 @@ test.describe("@regression [game-panel] Plugins (каталог + api/v2 кон�
     const target = ((await listResp.json()) as { data: CatalogItem[] }).data[0];
 
     let installed = false;
+    // Имя, под которым плагин виден в Installed. Может отличаться от каталожного: панель
+    // переопределяет провайдера по хешу файла (CF «WorldEdit for Bukkit» → Modrinth «WorldEdit», 05-Oct).
+    let installedName: string | null = null;
     try {
       await test.step(`install "${target.name}" (${target.provider}-${target.id}) — контракт POST несёт provider+external_id`, async () => {
         await ext.openInstallDialog(0);
@@ -221,18 +224,24 @@ test.describe("@regression [game-panel] Plugins (каталог + api/v2 кон�
           ext.filterTo("Installed"),
         ]);
         const json = (await r.json()) as { data: Array<{ path: string | null; name: string | null }> };
-        const hit = json.data.some(
+        const hit = json.data.find(
           (d) => (d.name ?? "").includes(target.name) || (d.path ?? "").toLowerCase().includes(target.name.toLowerCase().slice(0, 6)),
         );
-        expect(hit).toBe(true);
+        installedName = hit?.name ?? null;
+        expect(hit).toBeTruthy();
       });
     } finally {
       // Безусловный откат: снять ИМЕННО наш плагин по имени (Plugins→Installed), даже если POST-wait
       // отвалился по таймауту (плагин мог установиться). Системные (provider=null) не трогаем.
+      // Сначала имя из Installed, затем каталожное (если до Installed не дошли).
       void installed;
-      await ext.gotoExtensions();
-      const removed = await ext.uninstallByName("Plugins", target.name);
-      console.log(`[cleanup] uninstall "${target.name}": ${removed ? "removed" : "нечего снимать"}`);
+      let removed = false;
+      for (const name of [...new Set([installedName, target.name].filter((n): n is string => !!n))]) {
+        await ext.gotoExtensions();
+        removed = await ext.uninstallByName("Plugins", name);
+        if (removed) break;
+      }
+      console.log(`[cleanup] uninstall "${installedName ?? target.name}": ${removed ? "removed" : "нечего снимать"}`);
     }
   });
 });

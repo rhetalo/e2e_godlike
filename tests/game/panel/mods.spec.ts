@@ -143,6 +143,9 @@ test.describe("@regression [game-panel] Mods (каталог + api/v2 контр
     const target = ((await listResp.json()) as { data: CatalogItem[] }).data[0];
 
     let installed = false;
+    // Имя, под которым мод виден в Installed. Может отличаться от каталожного: панель
+    // переопределяет провайдера по хешу файла (CF-мод может определиться как Modrinth-проект).
+    let installedName: string | null = null;
     try {
       await test.step(`install "${target.name}" (${target.provider}-${target.id})`, async () => {
         await ext.openInstallDialog(0);
@@ -164,17 +167,23 @@ test.describe("@regression [game-panel] Mods (каталог + api/v2 контр
           ext.filterTo("Installed"),
         ]);
         const json = (await r.json()) as { data: Array<{ path: string | null; name: string | null }> };
-        const hit = json.data.some(
+        const hit = json.data.find(
           (d) => (d.name ?? "").includes(target.name) || (d.path ?? "").toLowerCase().includes(target.name.toLowerCase().slice(0, 6)),
         );
-        expect(hit).toBe(true);
+        installedName = hit?.name ?? null;
+        expect(hit).toBeTruthy();
       });
     } finally {
       // Безусловный откат по имени (Mods→Installed), даже если POST-wait отвалился по таймауту.
+      // Сначала имя из Installed, затем каталожное (если до Installed не дошли).
       void installed;
-      await ext.gotoExtensions();
-      const removed = await ext.uninstallByName("Mods", target.name);
-      console.log(`[cleanup] uninstall "${target.name}": ${removed ? "removed" : "нечего снимать"}`);
+      let removed = false;
+      for (const name of [...new Set([installedName, target.name].filter((n): n is string => !!n))]) {
+        await ext.gotoExtensions();
+        removed = await ext.uninstallByName("Mods", name);
+        if (removed) break;
+      }
+      console.log(`[cleanup] uninstall "${installedName ?? target.name}": ${removed ? "removed" : "нечего снимать"}`);
     }
   });
 });
