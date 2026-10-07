@@ -26,9 +26,12 @@ import { PaymentUrlPatterns } from "../fixtures/test-data";
 
 export class CheckoutPage extends BasePage {
   reviewHeading(): Locator {
+    // Редизайн чекаута (Oct-2026): в DOM два h1 «Review & Checkout» - старый
+    // `h1.main-header-title` шапки Lagom остался, но скрыт, а видимый заголовок новый.
+    // `.first()` без visible брал скрытый → toBeVisible падал по таймауту.
     return this.page
       .locator("h1, h2, h3")
-      .filter({ hasText: /Review\s*&\s*Checkout/i })
+      .filter({ hasText: /Review\s*&\s*Checkout/i, visible: true })
       .first();
   }
 
