@@ -204,6 +204,8 @@ mindmap
 - [Фичефлаги](registry/flags.md)
 - [Интеграции](registry/integrations.md) - CurseForge, Modrinth, Stripe, Amplitude, eSputnik и др.
 - [MCP-серверы](registry/mcp-tools.md) - SQL к базам, инструменты WP
+- [Внешние доки: Confluence DevOps и поддержки](registry/external-docs.md)
+- [Глоссарий](glossary.md)
 - [Все тикеты](tickets/README.md) · [Схема ID](_meta/id-scheme.md) · [Шаблоны](_meta/templates.md)
 
 ## Что дальше по карте

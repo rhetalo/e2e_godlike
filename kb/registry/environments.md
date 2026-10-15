@@ -37,6 +37,8 @@ sources:
 
 ## stage
 
+> Как stage устроен и разворачивается, описано у DevOps: [внешние доки](external-docs.md#devops---что-пригодится-qa).
+
 | Что | Адрес / факт |
 |---|---|
 | UP панель | https://stage.ultra.panel.godlike.host/ |

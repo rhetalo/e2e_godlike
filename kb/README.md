@@ -40,7 +40,7 @@ owner: r.hetalo
 kb/
   README.md                 # этот файл
   map.md                    # майндкарта проекта (этап 2) ✅
-  glossary.md               # словарь терминов
+  glossary.md               # словарь терминов ✅
   products/
     wpgl/                   # WPGL  - витрина godlike.host (WordPress)
     bil/                    # BIL - биллинг WHMCS (clientarea, корзина, инвойсы)
@@ -56,6 +56,7 @@ kb/
     test-servers.md         # тестовые серверы
     test-accounts.md        # тест-аккаунты по ролям (без секретов)
     integrations.md         # CurseForge, Modrinth, Amplitude, Stripe, eSputnik ...
+    external-docs.md        # страницы Confluence (DevOps, поддержка), на которые ссылается KB
   _meta/
     id-scheme.md            # схема ID и правила ссылок
     templates.md            # шаблоны карточки тикета и страницы фичи
@@ -72,7 +73,7 @@ kb/
 - **Задачи:** [tickets/README.md](tickets/README.md) - 30 карточек: что меняли, итог QA, находки.
 - **Перед тестом:** [окружения](registry/environments.md), [серверы](registry/test-servers.md),
   [аккаунты](registry/test-accounts.md), [флаги](registry/flags.md), [интеграции](registry/integrations.md),
-  [MCP-серверы](registry/mcp-tools.md) (SQL к базам, инструменты WP).
+  [MCP-серверы](registry/mcp-tools.md) (SQL к базам, инструменты WP), [Confluence DevOps и поддержки](registry/external-docs.md), [глоссарий](glossary.md).
 - **Перед коммитом в `kb/`:** прогнать `linkcheck.py` (0 битых ссылок) и пересобрать индекс тикетов.
 
 ## Этапы
@@ -82,5 +83,5 @@ kb/
 | 0 | Инвентаризация + схема ID | ✅ 15-Oct-2026 |
 | 1 | Каркас: реестры, 30 карточек тикетов, обзор UP | ✅ 15-Oct-2026 |
 | 2 | Майндкарта [map.md](map.md) + первые 4 страницы фич UP | ✅ 15-Oct-2026 |
-| 3 | Точечный ресерч GitHub (KB, глоссарии, связанные доки) | следующий |
+| 3 | Ресерч: публикация, проверки, глоссарий, связанные доки ([отчёт](_meta/research-2026-10-15.md), [глоссарий](glossary.md), [Confluence](registry/external-docs.md)) | ✅ 15-Oct-2026 |
 | 4 | Репо продукта: архитектура + матрица «фича ↔ тесты ↔ дыры» | ждёт доступа |
