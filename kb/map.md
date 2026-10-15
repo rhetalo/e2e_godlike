@@ -167,13 +167,16 @@ mindmap
 - 📄 [UP/modals](products/up/modals.md) - каталог всплывающих окон и что с ними делать
 - ⚪ [Сквозные гочи UP](products/up/README.md#сквозные-гочи) · [Пробелы в знаниях](products/up/README.md#пробелы)
 
-### [OLDP - старая клиентская панель](_meta/inventory-2026-10-15.md#2-карта-продукта-черновик-для-майндкарты) ⚪
+### [OLDP - старая клиентская панель](products/oldp/README.md)
 
+- 📄 [Version Changer, Параметры запуска, образы libxrender](products/oldp/README.md#что-известно)
 - 🎫 Version changer - [DEV-486](tickets/DEV-486.md), [DEV-512](tickets/DEV-512.md)
 - 🎫 Startup / Docker image - [DEV-513](tickets/DEV-513.md)
 
-### [ADM - админка panel.godlike.host/admin](_meta/inventory-2026-10-15.md#2-карта-продукта-черновик-для-майндкарты) ⚪
+### [ADM - админка panel.godlike.host/admin](products/adm/README.md)
 
+- 📄 [Startup сервера, каталог модпаков, ноды, флаги](products/adm/README.md#что-известно)
+- 📄 [Правило: ничего без ок владельца](products/adm/README.md#правила)
 - 🎫 Лимиты ресурсов нод - [DEV-477](tickets/DEV-477.md)
 - 🎫 Видимость модпаков `is_listed` - [DEV-532](tickets/DEV-532.md)
 - 🎫 Docker image сервера - [DEV-513](tickets/DEV-513.md)
@@ -205,6 +208,5 @@ mindmap
 
 ## Что дальше по карте
 
-- UP описана целиком (28 страниц фич). Пост-инсталл скан модов намеренно живёт внутри [UP/client-only-mods](products/up/client-only-mods.md).
-- Обзоры продуктов OLDP, ADM (папки `kb/products/<prod>/` пока пустые): когда появятся,
-  ⚪-ссылки на инвентаризацию заменить на них.
+- Все 7 продуктов имеют обзор. Самые тонкие: [OLDP](products/oldp/README.md), [ADM](products/adm/README.md), [BIL](products/bil/README.md) - дополнять по мере задач.
+- Отложено владельцем 15-Oct: витрина серверов `/servers/`, разбор 23 корзин витрины.

@@ -24,7 +24,7 @@ sources:
 > **В двух словах.** Это личный кабинет клиента для игровых серверов: список своих серверов,
 > кнопки Start/Restart/Kill, консоль, файлы, настройки, версии ядра, моды/плагины/модпаки,
 > бэкапы, совместный доступ. Основная игра - Minecraft, но есть PZ, ARK, Rust, Terraria, Arma,
-> Palworld. Оплата и тарифы живут не здесь, а в биллинге (BIL, страница появится в `kb/products/bil/`) - панель туда
+> Palworld. Оплата и тарифы живут не здесь, а в биллинге ([BIL](../bil/README.md)) - панель туда
 > ссылается. Все тесты и QA идут на живом проде, кроме отдельных задач на stage.
 
 ## Как устроено
@@ -51,12 +51,12 @@ Google-OAuth (`stage.panel.godlike.host/oauth2/callback`), сессия живё
   живёт в clientarea productdetails и кросс-доменом открывает модуль отмены в UP (`?canceled=true`);
   Upgrade тянет тарифы через `GET /api/v2/tariffs-new/<service_id>/list`; суффикс имени сервера
   `_NNNNNN` = ID услуги WHMCS; апгрейды на тест-акке оплачиваются кредитным балансом. Источник: KB §2, §7g, §11; tariff-list-400-BUG; memory dev563.
-- **OLDP** (`panel.godlike.host/`): старая клиентская панель на том же бэкенде. Version changer и
+- **[OLDP](../oldp/README.md)** (`panel.godlike.host/`): старая клиентская панель на том же бэкенде. Version changer и
   Startup с Docker image ([DEV-486](../../tickets/DEV-486.md), [DEV-513](../../tickets/DEV-513.md)) проверялись там.
   По умолчанию QA «панели» = только UP (memory panel-scope-new-panel).
-- **ADM** (`panel.godlike.host/admin`): `is_listed` модпаков ([DEV-532](../../tickets/DEV-532.md)), Docker image
+- **[ADM](../adm/README.md)** (`panel.godlike.host/admin`): `is_listed` модпаков ([DEV-532](../../tickets/DEV-532.md)), Docker image
   сервера (DEV-513), инвайты в split. Ничего без явного ок владельца.
-- **PFH**: `playfreehost.com/panel` - дубль UP для free-юзеров, аккаунты синхронны, отдельный
+- **[PFH](../pfh/README.md)**: `playfreehost.com/panel` - дубль UP для free-юзеров, аккаунты синхронны, отдельный
   деплой фронта (отстаёт: без new-panel!558 на 15-Oct). Источник: memory dev563.
 
 ## Карта разделов
