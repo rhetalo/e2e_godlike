@@ -50,10 +50,10 @@ sources:
 | Раздел | Что это | Тикеты | Автотесты | Знания |
 |---|---|---|---|---|
 | Шапка, футер, навигация | см. [Шапка и меню](#шапка-и-меню-live-15-oct) | - | `storefront.breadth`, `valid.links`, `smoke.pages` | ✅ |
-| Языки и валюты | 8 языков URL-префиксом `/{code}/`; **21 валюта** в cookie (live 15-Oct) | - | `locale` (LOC-001..003) | ⚠️ тесты знают 4 валюты |
+| Языки и валюты | 8 языков URL-префиксом `/{code}/`; **21 валюта** в cookie, по умолчанию по IP (live 15-Oct) | - | `locale` (LOC-001..003, все 21 валюта) | ✅ |
 | CookieYes | Баннер `.cky-consent-container`, гасится `CookieBanner.dismissAll` | - | косвенно | ⚠️ поведение не описано |
-| Страницы игр и каталог | `/game-servers-en/` «List of games» - 22 игры (live 15-Oct), тарифы в Vue-cart с 20-Aug | [DEV-402](../../tickets/DEV-402.md) | `games.valid.promo`, `games.invalid.promo`, `game-slider` | ✅ |
-| Каталог серверов игроков | `/servers/` - 34 сервера игроков, фильтры по тегам, версиям, лоадерам, режимам (тип записи `server`) | - | нет | ❌ новое, не разведано |
+| Страницы игр и каталог | 46 лендингов игр, из них 20 в сетке каталога `/game-servers-en/` (live 15-Oct, см. [Игры](#игры-live-15-oct)); тарифы в Vue-cart с 20-Aug | [DEV-402](../../tickets/DEV-402.md) | `games.valid.promo`, `games.invalid.promo`, `game-slider` | ✅ |
+| Витрина серверов игроков | `/servers/` - 34 сервера игроков, фильтры по тегам, версиям, лоадерам, режимам (тип записи `server`) | - | нет | ⏸ отложено владельцем 15-Oct |
 | Инструменты Minecraft | Seed Map `/minecraft-seed-map/`, Circle Generator, Skin Editor `/minecraft-skin-editor/` | - | нет | ❌ |
 | KB сайта (`ht_kb`) | `/knowledgebase-en/`, редизайн проверен на stage 31-Aug | - | нет | ⚠️ |
 | Блог | статьи в корне `/...-blog/`, не под `/blog/*` | [DEV-455](../../tickets/DEV-455.md) | нет | ❌ |
@@ -88,12 +88,25 @@ sources:
 - **Меню хранится в двух местах:** конструктор меню темы (опции `_crb_header_menu_*_<locale>`) и меню WordPress (main_nav, right_nav, footer_nav_1..4) как запасной вариант для языка, где конструктор пуст. Ссылки, зашитые в файлы темы, правятся только деплоем.
 - **Опции меню заведены для 22 локалей** (bg, ca, cs, da, nb, sv, ja ...), но на сайте `hreflang` только 8: en, uk, es, de, pl, fr, pt, it. Остальные - заготовки ❓.
 
-**Список игр каталога (live 15-Oct):** Minecraft, Modded Minecraft, Rust, ARK Survival Evolved, FiveM, Counter Strike 2, Unturned, Terraria,
-Mindustry, Factorio, Conan Exiles, 7 Days to Die, ARMA 3, Don't Starve Together, Vintage Story, The Forest, Team Fortress 2,
-Space Engineers, Quake Live, Valheim, Garry's Mod, Palworld. Отдельно в меню: Minecraft Bedrock, Minecraft Java.
-
 **Валюты (live 15-Oct, 21):** USD, GBP, PLN, EUR, INR, MXN, AUD, CAD, PHP, BRL, ARS, COP, CLP, PEN, IDR, VND, MYR, PKR, TRY, SAR, UAH.
 По умолчанию выбирается по IP (из Украины - UAH).
+
+## Игры (live 15-Oct)
+
+Перепроверено 15-Oct-2026 двумя способами: сетка «List of games» на `/game-servers-en/` и страницы `*-server-hosting` в `page-sitemap.xml`
+(Playwright MCP, только чтение). Все страницы ниже отвечают 200.
+
+- **Лендингов игр - 46** (без VPS, Dedicated и 7 языковых копий YouTube-лендинга `minecraft-server-hosting-doublelag-youtube-*`).
+  Прежняя оценка «~34-38» была занижена.
+- **В сетке каталога - 20 карточек:** Minecraft (ведёт на главную), Rust, ARK Survival Evolved, FiveM, Counter Strike 2, Unturned,
+  Terraria, Mindustry, Factorio, Conan Exiles, 7 Days to Die, ARMA 3, Don't Starve Together, Vintage Story, The Forest,
+  Team Fortress 2, Space Engineers, Quake Live, Valheim, Garry's Mod.
+- **В меню шапки, но не в сетке:** Minecraft Java, Modded Minecraft, Minecraft Bedrock, Palworld.
+- **Только лендинг (нет ни в сетке, ни в меню) - 23:** Abiotic Factor, GTA 5 Alt:V, ARK Survival Ascended, BeamNG, Core Keeper, CS 1.6,
+  CS: Source, DayZ, Enshrouded, Hytale, Killing Floor 2, Left 4 Dead 2, Path of Titans, Project Zomboid, GTA 5 RageMP,
+  Red Dead Redemption 2, RimWorld Together, Satisfactory, SCP: Secret Laboratory, Soulmask, Squad, Starbound, V Rising.
+  Попасть на них можно из поиска, блога или прямой ссылкой. Нужна ли им карточка в каталоге - ❓ вопрос к маркетингу.
+- **Наблюдение (SEO):** у 4 страниц в `<title>` задвоено «Server Servers» - Abiotic Factor, Path of Titans, Project Zomboid, V Rising.
 
 ## Корзины (funnel-страницы)
 
@@ -114,7 +127,7 @@ Space Engineers, Quake Live, Valheim, Garry's Mod, Palworld. Отдельно в
 | `cart-main`, `cart-year`, `cart-youtube` | свои шаблоны | главная, годовая оплата, YouTube-эксперимент |
 | `minecraft-server-hosting-cart`, `ark-survival-*-server-hosting-offer` | storefront-cart*.php | одношаговые офферы |
 
-Какие корзины живые, а какие остались от экспериментов - ❓ (отдельно не разбиралось).
+Какие корзины живые, а какие остались от экспериментов - ❓, разбор отложен владельцем (15-Oct).
 
 ## Промо - как работает
 
@@ -177,7 +190,7 @@ Space Engineers, Quake Live, Valheim, Garry's Mod, Palworld. Отдельно в
 
 ## Что устарело в источниках
 
-0. **Валюты:** память и тест LOC-003 знают 4 (USD / EUR / GBP / PLN), на сайте 15-Oct их 21.
+0. **Валюты:** память и тест LOC-003 знали 4 (USD / EUR / GBP / PLN), на сайте 15-Oct их 21. Тест исправлен 15-Oct: список в `fixtures/test-data.ts` → `StorefrontCurrencies`.
 
 1. QA_TEST_COVERAGE §1.5 «funnel.seed ×3 входа» - сейчас 1 тест, CTA на `/minecraft-seeds/` удалён 02-Oct.
 2. QA_TEST_COVERAGE §1.4 «калькулятор предлагает тариф» - калькулятор на `/minecraft-seeds/` удалён 02-Oct.

@@ -52,7 +52,7 @@ sources:
 |---|---|
 | Футер Terms of Service, Privacy Policy, PayNow Terms ведут на `#`, хотя на них ссылается согласие при регистрации | открыто с 10-Aug |
 | У всех 22 картинок нет `alt` | открыто с 10-Aug |
-| `<html lang="ru-RU">` на английской странице (влияет на SEO и скринридеры) | новое 15-Oct ❓ завести баг |
+| `<html lang="ru-RU">` и `og:locale ru_RU` на английской странице (SEO, скринридеры) | новое 15-Oct, баг собран: [playfreehost-lang-ru-BUG.md](../../../test-docs/godlike.host/playfreehost-lang-ru-BUG.md), Jira-ключ ❓ |
 | Аналитика | ✅ GTM появился (в августе была только Cloudflare Insights); доходят ли события воронки - ❓ не проверено |
 | meta description | ✅ появился |
 
