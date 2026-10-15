@@ -107,7 +107,7 @@ sources:
 - **Лендингов игр в sitemap - 46** (`*-server-hosting`, без VPS, Dedicated и 7 языковых копий YouTube-лендинга), все отвечают 200 (15-Oct).
   Какие из них не попали в сетку (кандидаты: GTA 5 Alt:V, GTA 5 RageMP, CS: Source, RimWorld Together, SCP: Secret Laboratory) - ❓ сверить поштучно.
 - **Открытые вопросы из плана Planner** (`specs/games-catalog-native.md`): у поиска без совпадений нет текста пустого состояния; на странице 3-5
-  ошибок консоли на загрузку (не разбирались); фильтр Console почти пустой.
+  ошибок консоли на загрузку (не разбирались); фильтр Console пустой - 0 карточек, Mobile - 5 (Generator, 16-Oct).
 - **Наблюдение (SEO):** у 4 страниц в `<title>` задвоено «Server Servers» - Abiotic Factor, Path of Titans, Project Zomboid, V Rising.
 
 ## Корзины (funnel-страницы)
