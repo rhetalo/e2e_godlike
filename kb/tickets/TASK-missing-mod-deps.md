@@ -40,5 +40,6 @@ PASS (Fabric, NeoForge, Forge 1.20.1 + CF-мод), 24-25 Sep. Три бага п
 | TASK-missing-mod-deps/O1 | Окно пишет «can start», хотя MonoLib 4.1.0 требует loader ≥ 0.16.9 | наблюдение |
 
 ## Связи
+- Фичи: [UP/missing-mod-deps](../products/up/missing-mod-deps.md)
 - Сервер: [srv:ca326e28](../registry/test-servers.md#ca326e28).
 - Связанные: [DEV-529](DEV-529.md).

@@ -36,6 +36,7 @@ PASS по блокам A-F и H, 20-Aug-2026, stage. Отчёт: [palworld-setti
 | TASK-palworld-settings/O3 | `ExpRate` пишется `2.5` без padding | косметика |
 
 ## Связи
+- Фичи: [UP/game-settings](../products/up/game-settings.md)
 - Серверы: [srv:9f455f13](../registry/test-servers.md#9f455f13) (Palworld), [srv:9efab4bc](../registry/test-servers.md#9efab4bc) (не-Palworld).
 - Окружение: [env:stage](../registry/environments.md#stage).
 

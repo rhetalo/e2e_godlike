@@ -114,14 +114,14 @@ mindmap
 ### [UP - игровая панель ultra.panel + API v2](products/up/README.md)
 
 - ⚪ [Как устроено: Vue SPA, API v2, Pterodactyl, Pennant-флаги](products/up/README.md#как-устроено)
-- ⚪ [Вход и дашборд](products/up/README.md#карта-разделов)
+- 📄 [UP/login-dashboard](products/up/login-dashboard.md) - вход, дашборд My Servers, меню аккаунта
 - Сервер
   - 📄 [UP/server-overview](products/up/server-overview.md) - Server Information, Edit Server: [DEV-562](tickets/DEV-562.md) (Steam Port)
   - 📄 [UP/power](products/up/power.md) - Start, Restart, Kill, EULA; гейт по Java см. [UP/java-detection](products/up/java-detection.md)
   - 📄 [UP/console](products/up/console.md) - лог и команды, палитра Commands
   - 📄 [UP/files](products/up/files.md) - файловый менеджер, Recycle Bin, SFTP
   - 📄 [UP/config](products/up/config.md) - server.properties и Docker/Java
-  - ⚪ [Players](products/up/README.md#карта-разделов)
+  - 📄 [UP/players](products/up/players.md) - админы, whitelist, баны
   - 📄 [UP/versions](products/up/versions.md) - смена ядра и версии: [DEV-506](tickets/DEV-506.md), [DEV-529](tickets/DEV-529.md), [DEV-512](tickets/DEV-512.md)
   - 🎫 Startup / Docker image - [DEV-513](tickets/DEV-513.md) (проверялось в OLDP)
 - Extensions
@@ -139,7 +139,7 @@ mindmap
   - 📄 [UP/modpack-catalog](products/up/modpack-catalog.md) - модпаки: видимость и установка
     - 🎫 [DEV-532](tickets/DEV-532.md) - `is_listed`, [flag:is-listed](registry/flags.md#is-listed)
     - 🎫 [DEV-459](tickets/DEV-459.md) - вход в Custom Modpack Setup
-  - 🎫 Missing mod dependencies - [TASK-missing-mod-deps](tickets/TASK-missing-mod-deps.md)
+  - 📄 [UP/missing-mod-deps](products/up/missing-mod-deps.md) - [TASK-missing-mod-deps](tickets/TASK-missing-mod-deps.md)
 - 📄 [UP/java-detection](products/up/java-detection.md) - требование к Java, попап, гейт старта
   - 🎫 [DEV-472](tickets/DEV-472.md) - автодетект и попап
   - 🎫 [DEV-485](tickets/DEV-485.md) - гейт старта, [flag:java-start-gate](registry/flags.md#java-start-gate)
@@ -148,17 +148,19 @@ mindmap
   - 📄 [UP/sharing-roles](products/up/sharing-roles.md) - инвайты, роли, Audit Log: [TASK-v2-subuser-permissions](tickets/TASK-v2-subuser-permissions.md)
 - Данные
   - 📄 [UP/backups](products/up/backups.md) - бэкапы сервера, базы, папки
-  - ⚪ [Tasks, Databases, Port & Domains](products/up/README.md#карта-разделов)
+  - 📄 [UP/tasks](products/up/tasks.md) - задачи и расписание
+  - 📄 [UP/databases](products/up/databases.md) - базы MySQL (stale, создание падало в июне)
+  - 📄 [UP/ports-domains](products/up/ports-domains.md) - поддомен и порты
   - 📄 [UP/world-backup](products/up/world-backup.md) - [DEV-418](tickets/DEV-418.md), [flag:world-backup](registry/flags.md#world-backup)
 - Монетизация
   - 📄 [UP/upgrade](products/up/upgrade.md) - Boost, тарифы, Free Premium: [TASK-tariff-list-400](tickets/TASK-tariff-list-400.md)
-  - ⚪ [Referral](products/up/README.md#карта-разделов)
+  - 📄 [UP/referral](products/up/referral.md) - реф-ссылка и вывод
   - 📄 [UP/throttling](products/up/throttling.md) - «Lag Detected»: [TASK-throttling-webhook](tickets/TASK-throttling-webhook.md)
   - 📄 [UP/cancel-module](products/up/cancel-module.md) - отмена, пауза, удержание: [DEV-401](tickets/DEV-401.md)
   - 📄 [UP/split-server](products/up/split-server.md) - [TASK-split-server](tickets/TASK-split-server.md)
 - 📄 [UP/free-servers](products/up/free-servers.md) - ограничения free, запрет смены игры: [DEV-563](tickets/DEV-563.md)
-- 🎫 Game settings: Palworld - [TASK-palworld-settings](tickets/TASK-palworld-settings.md)
-- ⚪ [Модалки и оверлеи](products/up/README.md#сквозные-гочи)
+- 📄 [UP/game-settings](products/up/game-settings.md) - Palworld Settings: [TASK-palworld-settings](tickets/TASK-palworld-settings.md)
+- 📄 [UP/modals](products/up/modals.md) - каталог всплывающих окон и что с ними делать
 - ⚪ [Сквозные гочи UP](products/up/README.md#сквозные-гочи) · [Пробелы в знаниях](products/up/README.md#пробелы)
 
 ### [OLDP - старая клиентская панель](_meta/inventory-2026-10-15.md#2-карта-продукта-черновик-для-майндкарты) ⚪
@@ -192,7 +194,6 @@ mindmap
 
 ## Что дальше по карте
 
-- Оставшиеся разделы UP без своей страницы: Вход и дашборд, Players, Tasks, Databases, Port & Domains, Referral,
-  Missing deps, Game settings, модалки, `UP/post-install-mod-scan` (сейчас внутри [UP/client-only-mods](products/up/client-only-mods.md)).
+- UP описана целиком (28 страниц фич). Пост-инсталл скан модов намеренно живёт внутри [UP/client-only-mods](products/up/client-only-mods.md).
 - Обзоры продуктов WPGL, BIL, OLDP, ADM, VPS, PFH (папки `kb/products/<prod>/` пока пустые): когда появятся,
   ⚪-ссылки на инвентаризацию заменить на них.
