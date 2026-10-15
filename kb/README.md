@@ -64,6 +64,8 @@ kb/
   _tools/
     linkcheck.py            # проверка ссылок и якорей: python -I kb/_tools/linkcheck.py .
     tickets_index.py        # пересборка tickets/README.md: python -I kb/_tools/tickets_index.py kb/tickets
+    frontmatter_check.py    # обязательные поля шапки, id, связи фич с тикетами: python -I kb/_tools/frontmatter_check.py .
+    build_map.py            # интерактивная майндкарта kb/map.html (markmap): python -I kb/_tools/build_map.py .
 ```
 
 ## С чего начать
@@ -74,7 +76,7 @@ kb/
 - **Перед тестом:** [окружения](registry/environments.md), [серверы](registry/test-servers.md),
   [аккаунты](registry/test-accounts.md), [флаги](registry/flags.md), [интеграции](registry/integrations.md),
   [MCP-серверы](registry/mcp-tools.md) (SQL к базам, инструменты WP), [Confluence DevOps и поддержки](registry/external-docs.md), [глоссарий](glossary.md).
-- **Перед коммитом в `kb/`:** прогнать `linkcheck.py` (0 битых ссылок) и пересобрать индекс тикетов.
+- **Перед коммитом в `kb/`:** `linkcheck.py` (0 битых ссылок), `frontmatter_check.py` (0 ошибок), пересобрать индекс тикетов; поменял `map.md` - пересобрать `map.html` (`build_map.py`).
 
 ## Этапы
 
