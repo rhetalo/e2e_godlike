@@ -40,16 +40,18 @@ ID требований из старых docx (`REQ-NAV-001`) пересека�
 |---|---|---|---|
 | `new-panel` | `panel/godlike-new-panel` | Фронт новой панели ultra.panel (MR `!5xx`) | [new-panel!557](https://git.godlike.ovh/panel/godlike-new-panel/-/merge_requests/557) |
 | `panel` | `panel/panel-godlike-host` | Бэкенд panel.godlike.host: API v2, админка, старая панель (MR `!16xx`) | [panel!1679](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1679) |
+| `billing` | `billing/billing-godlike-host` | WHMCS-биллинг (BIL) | [billing!718](https://git.godlike.ovh/billing/billing-godlike-host/-/merge_requests/718) |
+| `wp` | `wp/godlike-host` | Витрина WordPress (WPGL) | [wp!704](https://git.godlike.ovh/wp/godlike-host/-/merge_requests/704) |
 | `e2e` | `e2e/godlike-tests` | Этот репо, автотесты | - |
 
-Доступ у владельца есть к панельным репо. Доступ к WP/WHMCS запрашивается при необходимости.
+Доступ у владельца есть к панельным репо. К `billing` и `wp` доступа пока нет. Старые MR без репо (`!445`, `!622`, `!671`) оставляем с ❓, пока не станет ясно, чьи они.
 Деление «фронт в new-panel, бэкенд в panel» выведено по номерам MR и пока не подтверждено.
 
 ## Типы сущностей
 
 | Тип | Формат ID | Пример | Дом |
 |---|---|---|---|
-| Jira-тикет | `<KEY>-<N>` | `DEV-562`, `PROD-134`, `GROWTH-95` | `kb/tickets/DEV-562.md` |
+| Jira-тикет | `<KEY>-<N>` | `DEV-562`, `DEV-418`, `GROWTH-95` | `kb/tickets/DEV-562.md` |
 | Задача без тикета | `TASK-<slug>` | `TASK-split-server` | `kb/tickets/TASK-split-server.md` |
 | Фича | `<PROD>/<slug>` | `UP/java-detection` | `kb/products/up/java-detection.md` |
 | Фичефлаг | `flag:<name>` | `flag:world-backup` | `kb/registry/flags.md#world-backup` |
@@ -96,6 +98,6 @@ ID требований из старых docx (`REQ-NAV-001`) пересека�
 ## Ловушки
 
 - `QA-563` - это имя сервера, а не Jira-ключ. Имена серверов пишем через `srv:`.
-- «PROTD-134» в памяти - опечатка, правильно `PROD-134`.
+- Тикет переехал между проектами Jira - основной **актуальный** ключ, старый пишем как «бывш.». Пример: `DEV-418` (бывш. `PROD-134`, в памяти встречается и опечатка «PROTD-134»).
 - В QA_TEST_COVERAGE ТЗ написаны кириллицей (`ТЗ-...`), а в `agents.docs/tz/` - латиницей
   (`TZ-...`). Канон - латиница.

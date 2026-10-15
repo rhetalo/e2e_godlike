@@ -103,34 +103,34 @@ SkyBlock, на нём воспроизводился баг tariff-list 400. �
 ### 7166c707
 **Одноразовый, деструктив разрешён** (restore, version change и т.п.). 🟢
 
-## World Backup - [PROD-134](../tickets/PROD-134.md)
+## World Backup - [DEV-418](../tickets/DEV-418.md)
 
 ### 85fc5bd9
-PROD-134. 🟡
+DEV-418. 🟡
 
 ### e0ef886f
-PROD-134. 🟡
+DEV-418. 🟡
 
 ### 43ae756d
-PROD-134. После DEV-401 остался в состоянии **PENDING-отмены**. 🔴
+DEV-418. После DEV-401 мог остаться в PENDING-отмене в WHMCS ❓. В панели 15-Oct: платный, активный. 🔴
 
 ### 799c975d
-PROD-134. 🟡
+DEV-418. 🟡
 
 ### 93bbc747
-PROD-134, Bedrock. 🟡
+DEV-418, Bedrock. 🟡
 
 ### 7d7041c8
-PROD-134. 🟡
+DEV-418. 🟡
 
 ### b4089560
-PROD-134. 🟡
+DEV-418. 🟡
 
 ### 09f8d87d
-PROD-134 и [DEV-401](../tickets/DEV-401.md). 🟡
+DEV-418 и [DEV-401](../tickets/DEV-401.md). **Free, suspended** (15-Oct). 🔴
 
 ### feede8c1
-PROD-134 и DEV-401. 🟡
+DEV-418 и [DEV-401](../tickets/DEV-401.md). **Free, suspended** (15-Oct). 🔴
 
 ## Cancel module - [DEV-401](../tickets/DEV-401.md)
 

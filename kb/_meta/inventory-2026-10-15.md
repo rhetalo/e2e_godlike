@@ -60,7 +60,7 @@ sources:
 - Extensions: моды/плагины/модпаки, источники CF/Modrinth/Hangar/Spigot/Polymart (DEV-405/534), фильтр по загрузчику (DEV-498), loader gating (DEV-515), скрытие client-only (DEV-500), пост-инсталл скан (DEV-492), missing deps, каталог модпаков v2 `is_listed` (DEV-532).
 - Java: detection + попап (DEV-472), гейт старта (DEV-485).
 - Sharing и роли (Owner/Co-owner/Moderator/Member), Audit Log, права сабюзеров v2.
-- Port & Domains, Backups, World Backup (PROD-134), Tasks, Databases.
+- Port & Domains, Backups, World Backup (DEV-418), Tasks, Databases.
 - Монетизация: Boost/Upgrade, Free Premium, Referral, Throttling «Lag Detected», Cancel module + retention (DEV-401), Split Server.
 - Не-MC игры: Palworld Settings, PZ, ARK, Rust, Terraria, Arma.
 - Free-серверы: запрет смены egg (DEV-563).
@@ -117,7 +117,7 @@ sources:
 | DEV-534 | Фильтр «All» шлёт `any` (бывш. DEV-405/B6) | UP | PASS 09-Oct |
 | DEV-562 | Steam Port для PZ в Overview | UP | PASS 15-Oct |
 | DEV-563 | Free-серверам запрещена смена egg | UP/PFH | 20 PASS, BUG-1 ждёт деплоя PFH |
-| PROD-134 | World Backup | UP | клиент PASS, открыт DevOps §6 |
+| DEV-418 | World Backup | UP | клиент PASS, открыт DevOps §6 |
 | Упоминания | DEV-145, DEV-275, DEV-315, DEV-321, DEV-441, DEV-523, PROD-126 | - | только ссылки |
 
 Задачи без тикета (получат `TASK-<slug>`): split-server, palworld-settings, smp-oneclick,
@@ -132,7 +132,7 @@ cancel-amplitude, tariff-list-400 (Critical), mc-extensions-epic.
 | `java-start-gate` | Гейт старта DEV-485 | per-server, вкл. на srv:ca326e28 |
 | `java-mismatch-fixer` | Старый Java-попап | вкл. глобально |
 | `extension-compatibility` | `extension_capabilities`, заглушки, префилл фильтров | 3 юзера, ждёт раскатки |
-| `world-backup` | PROD-134 | per-account, вкл. на админ-акке |
+| `world-backup` | DEV-418 | per-account, вкл. на админ-акке |
 | `cancellation-retention-steps` | DEV-401 | только админ-акк |
 | `modpack-catalog-v2` | Каталог v2 | только staff |
 | `affiliate-banner`, `hytale-world`, `inactivity-chat`, `extensions-onboarding`, `admin-panel` | ❓ назначение не описано | on |
@@ -169,7 +169,7 @@ cancel-amplitude, tariff-list-400 (Critical), mc-extensions-epic.
 - Прочие задачи:
   - `45b14521` - DEV-562-MC. `f8e7df56` - баг тарифов.
   - `7166c707` - одноразовый, деструктив ок.
-- PROD-134: `85fc5bd9`, `e0ef886f`, `43ae756d`, `799c975d`, `93bbc747` (Bedrock), `7d7041c8`, `b4089560`, `09f8d87d`, `feede8c1`.
+- DEV-418: `85fc5bd9`, `e0ef886f`, `43ae756d`, `799c975d`, `93bbc747` (Bedrock), `7d7041c8`, `b4089560`, `09f8d87d`, `feede8c1`.
 - DEV-401: `09f8d87d`, `feede8c1`, `7c7745c8` (Rust), `2c8c5f83` (Terraria). `43ae756d` в PENDING-отмене.
 - Cancel Amplitude: `c2b09498`.
 - Split: `1d7d34aa` (main), сабы `0c7b82c3` / `60fdf307`.

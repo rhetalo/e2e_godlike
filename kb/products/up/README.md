@@ -6,7 +6,7 @@ product: UP
 status: draft            # собрано из доков/отчётов/памяти, живой сверки этой страницы не было
 updated: 2026-10-15
 verified_on: null        # у разделов свои даты recon, см. колонку «Источник» и таблицу ниже
-tickets: [DEV-401, DEV-405, DEV-472, DEV-485, DEV-492, DEV-498, DEV-500, DEV-506, DEV-515, DEV-529, DEV-532, DEV-534, DEV-562, DEV-563, PROD-134]
+tickets: [DEV-401, DEV-405, DEV-472, DEV-485, DEV-492, DEV-498, DEV-500, DEV-506, DEV-515, DEV-529, DEV-532, DEV-534, DEV-562, DEV-563, DEV-418]
 flags: [java-start-gate, java-mismatch-fixer, extension-compatibility, world-backup, cancellation-retention-steps, modpack-catalog-v2]
 tests: [tests/game/panel/*.spec.ts]
 sources:
@@ -90,7 +90,7 @@ Google-OAuth (`stage.panel.godlike.host/oauth2/callback`), сессия живё
 | Audit Log | Журнал действий `server:<action>` в Sharing | `UP/audit-log` | - | sharing.audit | ✅ |
 | Port & Domains | Поддомен, порты, Add Additional Port | `UP/ports-domains` | - | network | ✅ |
 | Backups | Server/Database/Folder, квота N/3, Locked, Schedule, Restore | `UP/backups` | - | backups, security (SEC-002) | ✅ |
-| World Backup | Бэкап только мира (Java+Bedrock), попап «Save Your World First?» | `UP/world-backup` | [PROD-134](../../tickets/PROD-134.md) | - | ⚠️ |
+| World Backup | Бэкап только мира (Java+Bedrock), попап «Save Your World First?» | `UP/world-backup` | [DEV-418](../../tickets/DEV-418.md) | - | ⚠️ |
 | Tasks | Send command / Send power action, Configure, Run, расписание | `UP/tasks` | - | tasks | ✅ |
 | Databases | Create Database, таблица кредов | `UP/databases` | - | - | ⚠️ |
 | Upgrade / Boost | `/upgrade?promocode=...`, карточки планов, квиз | `UP/upgrade` | [TASK-tariff-list-400](../../tickets/TASK-tariff-list-400.md) | promo (UPG-001) | ⚠️ |
@@ -188,7 +188,7 @@ Google-OAuth (`stage.panel.godlike.host/oauth2/callback`), сессия живё
 3. **Жизненный цикл сервера со стороны UP:** Suspended/Free/terminated (API «does not exist» для
    terminated), Import Server, Reinstall, Terminate (клиентской кнопки нет) - только обрывки.
 4. **Не-MC игры:** PZ/ARK/Rust/Terraria/Arma/Bedrock/Hytale - что в UP отличается (табы, порты,
-   game settings, `is_ark`/`is_bedrock`), есть только в отчётах DEV-562/PROD-134 и Palworld (stage).
+   game settings, `is_ark`/`is_bedrock`), есть только в отчётах DEV-562/DEV-418 и Palworld (stage).
 5. **Флаги без назначения:** `affiliate-banner`, `hytale-world`, `inactivity-chat`,
    `extensions-onboarding`, `admin-panel`, плюс что именно гейтит `modpack-catalog-v2`.
 6. **Права v2 по ролям:** `edit_startup`, `reinstall`, `change_version` на бэке не верифицированы;
