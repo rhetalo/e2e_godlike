@@ -73,9 +73,9 @@ Google-OAuth (`stage.panel.godlike.host/oauth2/callback`), сессия живё
 | Дашборд | «My Servers (N)», фильтры Suspended/Free, grid/list, группы split | `UP/dashboard` | - | dashboard | ⚠️ |
 | Overview сервера | Server Information (IP, порт, Steam Port), Edit Server (rename/Import/Reinstall), Java-notice | [UP/server-overview](server-overview.md) | [DEV-562](../../tickets/DEV-562.md) | server.overview, edit.server, network.connection-info | ✅ |
 | Power | Start/Shut Down/Restart/Kill, EULA, гейт по Java | [UP/power](power.md) | [DEV-485](../../tickets/DEV-485.md) | power | ✅ |
-| Console | xterm-лог, ввод команд, палитра Commands, Help | `UP/console` | - | console, console.palette, security.console | ✅ |
-| Files | Файл-менеджер, Recycle Bin 24ч, CodeMirror, SFTP, Upload custom modpack | `UP/files` | - | files, files.recycle, files.structure | ✅ |
-| Config | Редактор `server.properties` (автосейв) + блок Docker/Java (Docker Image combobox) | `UP/config` | - | config, security (SEC-004) | ✅ |
+| Console | xterm-лог, ввод команд, палитра Commands, Help | [UP/console](console.md) | - | console, console.palette, security.console | ✅ |
+| Files | Файл-менеджер, Recycle Bin 24ч, CodeMirror, SFTP, Upload custom modpack | [UP/files](files.md) | - | files, files.recycle, files.structure | ✅ |
+| Config | Редактор `server.properties` (автосейв) + блок Docker/Java (Docker Image combobox) | [UP/config](config.md) | - | config, security (SEC-004) | ✅ |
 | Startup / Docker image | Смена образа Java; в UP через Config, `/server/{id}/startup` рендерит пусто | `UP/startup` | [DEV-513](../../tickets/DEV-513.md) (OLDP) | permission.enforcement.api (docker_access) | ❌ |
 | Players | Админы, Players List, Whitelist, Ban List (нужен online) | `UP/players` | - | players | ✅ |
 | Versions | 18 ядер, drill-down версия → билд → Install (+Wipe) | [UP/versions](versions.md) | [DEV-506](../../tickets/DEV-506.md), [DEV-529](../../tickets/DEV-529.md) | versions | ⚠️ |
@@ -89,14 +89,14 @@ Google-OAuth (`stage.panel.godlike.host/oauth2/callback`), сессия живё
 | Sharing и роли | Инвайт, Owner/Co-owner/Moderator/Member, права v2 | [UP/sharing-roles](sharing-roles.md) | [TASK-v2-subuser-permissions](../../tickets/TASK-v2-subuser-permissions.md) | sharing, role.enforcement, permission.enforcement.api | ✅ |
 | Audit Log | Журнал действий `server:<action>` в Sharing | [UP/audit-log](sharing-roles.md) | - | sharing.audit | ✅ |
 | Port & Domains | Поддомен, порты, Add Additional Port | `UP/ports-domains` | - | network | ✅ |
-| Backups | Server/Database/Folder, квота N/3, Locked, Schedule, Restore | `UP/backups` | - | backups, security (SEC-002) | ✅ |
+| Backups | Server/Database/Folder, квота N/3, Locked, Schedule, Restore | [UP/backups](backups.md) | - | backups, security (SEC-002) | ✅ |
 | World Backup | Бэкап только мира (Java+Bedrock), попап «Save Your World First?» | [UP/world-backup](world-backup.md) | [DEV-418](../../tickets/DEV-418.md) | - | ⚠️ |
 | Tasks | Send command / Send power action, Configure, Run, расписание | `UP/tasks` | - | tasks | ✅ |
 | Databases | Create Database, таблица кредов | `UP/databases` | - | - | ⚠️ |
-| Upgrade / Boost | `/upgrade?promocode=...`, карточки планов, квиз | `UP/upgrade` | [TASK-tariff-list-400](../../tickets/TASK-tariff-list-400.md) | promo (UPG-001) | ⚠️ |
-| Free Premium | Модалка «What is a Free Premium?», CTA 3-Days Trial | `UP/free-premium` | - | promo (PREM-001) | ✅ |
+| Upgrade / Boost | `/upgrade?promocode=...`, карточки планов, квиз | [UP/upgrade](upgrade.md) | [TASK-tariff-list-400](../../tickets/TASK-tariff-list-400.md) | promo (UPG-001) | ⚠️ |
+| Free Premium | Модалка «What is a Free Premium?», CTA 3-Days Trial | [UP/free-premium](upgrade.md#где-в-интерфейсе) | - | promo (PREM-001) | ✅ |
 | Referral | `/referral`, реф-ссылка `affiliate.godlike.host/ref/<code>`, Request Withdrawal | `UP/referral` | - | referral | ✅ |
-| Throttling | Вебхук → модалка «Lag Detected» с апгрейдом | `UP/throttling` | [TASK-throttling-webhook](../../tickets/TASK-throttling-webhook.md) | throttling.notification (env-gate) | ⚠️ |
+| Throttling | Вебхук → модалка «Lag Detected» с апгрейдом | [UP/throttling](throttling.md) | [TASK-throttling-webhook](../../tickets/TASK-throttling-webhook.md) | throttling.notification (env-gate) | ⚠️ |
 | Cancel module | Модалка отмены, A/B old/new, pause, retention-экраны | [UP/cancel-module](cancel-module.md) | [DEV-401](../../tickets/DEV-401.md) | - | ⚠️ |
 | Split Server | Main + до 3 сабов, перераспределение RAM/диска | [UP/split-server](split-server.md) | [TASK-split-server](../../tickets/TASK-split-server.md) | - | ⚠️ |
 | Free-серверы | Free-тариф: запрет смены игры (egg) | [UP/free-servers](free-servers.md) | [DEV-563](../../tickets/DEV-563.md) | - | ⚠️ |

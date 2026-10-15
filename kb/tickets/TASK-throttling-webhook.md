@@ -30,6 +30,9 @@ sources:
 ## Покрытие
 `throttling.notification.spec.ts` (TC-GP-THR-001), запуск только с `RUN_THROTTLING_TEST`, сервер из `GAME_PANEL_THROTTLE_SERVER_UUID`.
 
+## Связи
+- Фичи: [UP/throttling](../products/up/throttling.md)
+
 ## Хвосты
 - Условие показа модалки исследует владелец. После этого допилить тест.
 - ❓ Безопасность: вебхук без auth позволяет кому угодно вызвать модалку на чужом сервере (при известном UUID).

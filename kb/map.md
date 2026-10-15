@@ -118,8 +118,10 @@ mindmap
 - Сервер
   - 📄 [UP/server-overview](products/up/server-overview.md) - Server Information, Edit Server: [DEV-562](tickets/DEV-562.md) (Steam Port)
   - 📄 [UP/power](products/up/power.md) - Start, Restart, Kill, EULA; гейт по Java см. [UP/java-detection](products/up/java-detection.md)
-  - ⚪ [Console](products/up/README.md#карта-разделов)
-  - ⚪ [Files, Config, Players](products/up/README.md#карта-разделов)
+  - 📄 [UP/console](products/up/console.md) - лог и команды, палитра Commands
+  - 📄 [UP/files](products/up/files.md) - файловый менеджер, Recycle Bin, SFTP
+  - 📄 [UP/config](products/up/config.md) - server.properties и Docker/Java
+  - ⚪ [Players](products/up/README.md#карта-разделов)
   - 📄 [UP/versions](products/up/versions.md) - смена ядра и версии: [DEV-506](tickets/DEV-506.md), [DEV-529](tickets/DEV-529.md), [DEV-512](tickets/DEV-512.md)
   - 🎫 Startup / Docker image - [DEV-513](tickets/DEV-513.md) (проверялось в OLDP)
 - Extensions
@@ -145,12 +147,13 @@ mindmap
 - Доступ
   - 📄 [UP/sharing-roles](products/up/sharing-roles.md) - инвайты, роли, Audit Log: [TASK-v2-subuser-permissions](tickets/TASK-v2-subuser-permissions.md)
 - Данные
-  - ⚪ [Backups, Tasks, Databases, Port & Domains](products/up/README.md#карта-разделов)
+  - 📄 [UP/backups](products/up/backups.md) - бэкапы сервера, базы, папки
+  - ⚪ [Tasks, Databases, Port & Domains](products/up/README.md#карта-разделов)
   - 📄 [UP/world-backup](products/up/world-backup.md) - [DEV-418](tickets/DEV-418.md), [flag:world-backup](registry/flags.md#world-backup)
 - Монетизация
-  - 🎫 Upgrade / Boost - [TASK-tariff-list-400](tickets/TASK-tariff-list-400.md)
-  - ⚪ [Free Premium, Referral](products/up/README.md#карта-разделов)
-  - 🎫 Throttling «Lag Detected» - [TASK-throttling-webhook](tickets/TASK-throttling-webhook.md)
+  - 📄 [UP/upgrade](products/up/upgrade.md) - Boost, тарифы, Free Premium: [TASK-tariff-list-400](tickets/TASK-tariff-list-400.md)
+  - ⚪ [Referral](products/up/README.md#карта-разделов)
+  - 📄 [UP/throttling](products/up/throttling.md) - «Lag Detected»: [TASK-throttling-webhook](tickets/TASK-throttling-webhook.md)
   - 📄 [UP/cancel-module](products/up/cancel-module.md) - отмена, пауза, удержание: [DEV-401](tickets/DEV-401.md)
   - 📄 [UP/split-server](products/up/split-server.md) - [TASK-split-server](tickets/TASK-split-server.md)
 - 📄 [UP/free-servers](products/up/free-servers.md) - ограничения free, запрет смены игры: [DEV-563](tickets/DEV-563.md)
@@ -189,7 +192,7 @@ mindmap
 
 ## Что дальше по карте
 
-- Страницы фич UP следующей волны: `UP/backups`, `UP/console`, `UP/files`, `UP/config`, `UP/upgrade`, `UP/throttling`,
-  `UP/post-install-mod-scan` (сейчас внутри [UP/client-only-mods](products/up/client-only-mods.md)).
+- Оставшиеся разделы UP без своей страницы: Вход и дашборд, Players, Tasks, Databases, Port & Domains, Referral,
+  Missing deps, Game settings, модалки, `UP/post-install-mod-scan` (сейчас внутри [UP/client-only-mods](products/up/client-only-mods.md)).
 - Обзоры продуктов WPGL, BIL, OLDP, ADM, VPS, PFH (папки `kb/products/<prod>/` пока пустые): когда появятся,
   ⚪-ссылки на инвентаризацию заменить на них.

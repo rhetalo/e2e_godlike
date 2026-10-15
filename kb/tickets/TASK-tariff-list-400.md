@@ -29,6 +29,7 @@ sources:
 FAIL, 09-Oct-2026, prod. Воспроизводится на всех открытых серверах. Баг-репорт: [tariff-list-400-BUG.md](../../test-docs/ultra.panel/tariff-list-400-BUG.md).
 
 ## Связи
+- Фичи: [UP/upgrade](../products/up/upgrade.md)
 - Сервер: [srv:f8e7df56](../registry/test-servers.md#f8e7df56).
 - Найден при [DEV-534](DEV-534.md) (бывш. DEV-405/B2).
 
