@@ -50,6 +50,7 @@ sources:
 
 - **Кто:** аккаунт VPS-панели (VirtFusion).
 - **Env:** `PANEL_EMAIL` / `PANEL_PASSWORD`.
+- **Продукт:** [VPS](../products/vps/README.md), тестовый сервер [srv:9c49ed96](test-servers.md#9c49ed96).
 
 ### dev455-a..f
 

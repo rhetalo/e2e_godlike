@@ -1,6 +1,6 @@
 ---
 id: KB-REG-SERVERS
-title: Тест-серверы игровой панели
+title: Тест-серверы (UP, VPS)
 type: registry
 status: draft
 updated: 2026-10-15
@@ -10,7 +10,7 @@ sources:
   - memory: game-panel-next-focus, ci-and-reporting, отчёты задач (см. карточки тикетов)
 ---
 
-# Тест-серверы игровой панели (UP)
+# Тест-серверы (UP, VPS)
 
 > **В двух словах.** Список серверов, на которых мы тестируем: под что взят каждый, можно ли
 > его ломать и в каком он состоянии. Сервер всегда определяем по **UUID**, а не по имени:
@@ -205,6 +205,19 @@ Palworld (stage). 🟡
 
 ### 62c8289b
 NeoForge `neoforge_test` (stage), проверка unix_args. 🟡
+
+## VPS (VirtFusion)
+
+Серверы VPS-панели ([VPS](../products/vps/README.md)), аккаунт [acc:vps-panel](test-accounts.md#vps-panel).
+
+### 9c49ed96
+Актуальный тестовый VPS, `TEST_SERVER_UUID` в `utils/auth.ts` (с 10-Jun-2026).
+- На нём гоняются power, media, options и реальный rebuild (`vps.panel.rebuild.real`).
+- Трогать: 🟢 для автотестов (serial, возврат в Running). Разрешение на rebuild ❓ явно подтвердить у владельца.
+
+### c13d2e04
+Бывший тестовый VPS (srv-433986), так записан в `agents.docs/vps-panel/*`. В коде заменён 04-Jun-2026.
+- Состояние ❓. Трогать: 🔴, пока не сверен.
 
 ## Правила
 

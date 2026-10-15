@@ -77,6 +77,8 @@ mindmap
       Лимиты нод DEV-477
       is_listed модпаков
     VPS VirtFusion
+      Power и Rebuild
+      Media Network Storage Options
     PFH PlayFreeHost
     Реестры
       Окружения
@@ -174,9 +176,14 @@ mindmap
 - 🎫 Видимость модпаков `is_listed` - [DEV-532](tickets/DEV-532.md)
 - 🎫 Docker image сервера - [DEV-513](tickets/DEV-513.md)
 
-### [VPS - vf-panel (VirtFusion)](../agents.docs/vps-panel/KNOWLEDGE_BASE.md) ⚪
+### [VPS - vf-panel (VirtFusion)](products/vps/README.md)
 
-- ⚪ [Login, Overview, Power + Activity, Media, Network, Options, Rebuild](../agents.docs/vps-panel/KNOWLEDGE_BASE.md) - пока описано только в `agents.docs/vps-panel/`
+- 📄 [Как устроено, связь с биллингом](products/vps/README.md#как-устроено)
+- 📄 [Карта разделов: вход, серверы, Media, Network, Storage, Options](products/vps/README.md#карта-разделов)
+- 📄 [Power: статусы и переходы](products/vps/README.md#статусы-и-переходы)
+- 📄 [Rebuild: переустановка ОС](products/vps/README.md#rebuild-переустановка-ос)
+- 📄 [Гочи: DOM «врёт»](products/vps/README.md#гочи-для-тестирования)
+- Сервер: [srv:9c49ed96](registry/test-servers.md#9c49ed96)
 
 ### [PFH - PlayFreeHost](_meta/inventory-2026-10-15.md#2-карта-продукта-черновик-для-майндкарты) ⚪
 
@@ -195,5 +202,5 @@ mindmap
 ## Что дальше по карте
 
 - UP описана целиком (28 страниц фич). Пост-инсталл скан модов намеренно живёт внутри [UP/client-only-mods](products/up/client-only-mods.md).
-- Обзоры продуктов WPGL, BIL, OLDP, ADM, VPS, PFH (папки `kb/products/<prod>/` пока пустые): когда появятся,
+- Обзоры продуктов WPGL, BIL, OLDP, ADM, PFH (папки `kb/products/<prod>/` пока пустые): когда появятся,
   ⚪-ссылки на инвентаризацию заменить на них.
