@@ -13,8 +13,35 @@
 #    ніколи не хардкодимо вебхук у коді (це секрет).
 # ─────────────────────────────────────────────────────────────────────────────
 stages:
+  - quality
   - deploy
   - test
+
+# ── ГЕЙТ ЯКОСТІ перед деплоєм (15-Oct-2026, agents.docs/DECISIONS.md D-016) ────
+# tsc + eslint (лише помилки, warnings не валять). Впав → deploy_to_vps не стартує,
+# на VPS лишається попередній робочий код і cron ганяє його.
+quality_gate:
+  stage: quality
+  tags:
+    - godlike-vps
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+  script:
+    - npm ci --no-audit --no-fund
+    - npx tsc --noEmit
+    - npx eslint .
+
+# Перевірки бази знань kb/ - інформативно (allow_failure): доки не блокують доставку тестів.
+kb_checks:
+  stage: quality
+  tags:
+    - godlike-vps
+  allow_failure: true
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+  script:
+    - python3 -I kb/_tools/linkcheck.py .
+    - python3 -I kb/_tools/frontmatter_check.py .
 
 # ── ОСНОВНЕ: доставка коду на VPS при push у main ────────────────────────────
 deploy_to_vps:
@@ -47,7 +74,7 @@ deploy_to_vps:
 # ── ОПЦІЙНЕ: запуск тестів у Docker (ручний / за розкладом), report у Artifacts ─
 run_e2e_tests:
   stage: test
-  image: mcr.microsoft.com/playwright:v1.60.0-noble
+  image: mcr.microsoft.com/playwright:v1.64.1-noble
   variables:
     SLACK_WEBHOOK_URL: $SLACK_WEBHOOK_URL
   script:

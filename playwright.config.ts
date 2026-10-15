@@ -108,5 +108,13 @@ export default defineConfig({
       name: 'game-panel',
       testMatch: '**/game/**',
     },
+    {
+      // Playwright Test Agents (init-agents): seed + черновики от Generator до ревью.
+      // default:false (PW 1.64) — в обычный `npx playwright test` не попадает, только явно:
+      // npx playwright test --project=agents
+      name: 'agents',
+      testMatch: ['seed.spec.ts', '**/agents-pilot/**'],
+      default: false,
+    },
   ],
 });
