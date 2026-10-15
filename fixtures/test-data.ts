@@ -54,6 +54,18 @@ export const StorefrontPages = [
   { path: "/minecraft-seeds/", label: "Каталог сидов" },
 ] as const;
 
+/**
+ * Валюты свитчера в шапке витрины: [код, символ] в порядке отображения.
+ * Confirmed live-recon 15-Oct-2026: 21 валюта (было 4 на 10-Jun). Валюта по умолчанию — по IP
+ * (из Украины — UAH), поэтому тесты не завязываются на конкретную дефолтную валюту.
+ */
+export const StorefrontCurrencies = [
+  ["USD", "$"], ["GBP", "£"], ["PLN", "zł"], ["EUR", "€"], ["INR", "₹"],
+  ["MXN", "M$"], ["AUD", "A$"], ["CAD", "C$"], ["PHP", "₱"], ["BRL", "R$"],
+  ["ARS", "AR$"], ["COP", "COL$"], ["CLP", "CLP$"], ["PEN", "S/"], ["IDR", "Rp"],
+  ["VND", "₫"], ["MYR", "RM"], ["PKR", "Rs"], ["TRY", "₺"], ["SAR", "SAR"], ["UAH", "₴"],
+] as const;
+
 /** A URL is "the payment step" if it matches any of these. */
 export const PaymentUrlPatterns = [
   /\/clientarea\/cart\.php\?a=checkout/i,

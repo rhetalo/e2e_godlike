@@ -49,7 +49,7 @@ export class Header {
   languageLink(code: string): Locator {
     return this.page.locator(LOCALE_SWITCHER.langItem).filter({ hasText: new RegExp(`^${code}$`, 'i') }).first();
   }
-  /** Пункт выбора валюты (USD/EUR/GBP/PLN). */
+  /** Пункт выбора валюты по коду (см. StorefrontCurrencies). */
   currencyOption(code: string): Locator {
     return this.page.locator(LOCALE_SWITCHER.currencyItem).filter({ hasText: new RegExp(code, 'i') }).first();
   }

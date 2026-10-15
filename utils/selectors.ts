@@ -30,7 +30,7 @@ export const HEADER = {
 // Триггер .lang-selected показывает "{lang} | {CUR}" (напр. "en | EUR"); список раскрывается по hover.
 // ЯЗЫК = URL-префикс (<a href="https://godlike.host/{code}/">) → контент переводится, prefix в URL.
 // ВАЛЮТА = JS-клик по .currency-item → меняет символ/цену, БЕЗ смены URL, cookie-персист (пережил /de/).
-// Списки: 8 языков (en + ua/es/de/pl/fr/pt/it), 4 валюты (USD $, EUR €, GBP £, PLN zł). Виджет задвоен (desktop+mobile).
+// Списки: 8 языков (en + ua/es/de/pl/fr/pt/it), 21 валюта на 15-Oct-2026 (список в fixtures/test-data.ts → StorefrontCurrencies). Виджет задвоен (desktop+mobile).
 export const LOCALE_SWITCHER = {
   root: ".lang_chooser_header.desktop-only",
   trigger: ".lang_chooser_header.desktop-only .lang-selected",            // "en | EUR" (hover раскрывает)
