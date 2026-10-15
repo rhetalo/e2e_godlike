@@ -70,7 +70,8 @@ kb/
 - **Продукт целиком:** [products/up/README.md](products/up/README.md) - игровая панель (остальные продукты в работе).
 - **Задачи:** [tickets/README.md](tickets/README.md) - 30 карточек: что меняли, итог QA, находки.
 - **Перед тестом:** [окружения](registry/environments.md), [серверы](registry/test-servers.md),
-  [аккаунты](registry/test-accounts.md), [флаги](registry/flags.md), [интеграции](registry/integrations.md).
+  [аккаунты](registry/test-accounts.md), [флаги](registry/flags.md), [интеграции](registry/integrations.md),
+  [MCP-серверы](registry/mcp-tools.md) (SQL к базам, инструменты WP).
 - **Перед коммитом в `kb/`:** прогнать `linkcheck.py` (0 битых ссылок) и пересобрать индекс тикетов.
 
 ## Этапы
