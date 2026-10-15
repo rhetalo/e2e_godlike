@@ -16,6 +16,7 @@ import { test, expect, type BrowserContext, type Page } from "@playwright/test";
 import { GamePanelExtensionsPage } from "../../../pages/game/GamePanelExtensionsPage";
 import { loginAndSaveGameSession, GAME_STORAGE_STATE_PATH, GAME_SERVER_UUID } from "../../../utils/gameAuth";
 import { GAME_PANEL_EXTENSIONS_API } from "../../../utils/selectors";
+import { schemaIssues, ExtensionListResponse, ExtensionVersionsResponse } from "../../../utils/schemas";
 
 // ⚠️ Выделенный plugin-сервер 93521c70 удалён владельцем (API отдаёт 400 «resource does not
 // exist», страница /extensions рисует ошибку → падали TC-001/002). Каталог Mods/Plugins есть на
@@ -81,6 +82,10 @@ test.describe("@regression [game-panel] Mods (каталог + api/v2 контр
       expect(Array.isArray(item.categories)).toBe(true);
     });
 
+    await test.step("все элементы ответа /minecraft/mods соответствуют контракту (zod)", async () => {
+      expect(schemaIssues(ExtensionListResponse, json)).toEqual([]);
+    });
+
     await test.step("каталог отрисовал карточки", async () => {
       expect(await ext.cards().count()).toBeGreaterThan(0);
     });
@@ -112,6 +117,10 @@ test.describe("@regression [game-panel] Mods (каталог + api/v2 контр
       expect(typeof v.name).toBe("string");
       expect(Array.isArray(v.game_versions)).toBe(true);
       expect(typeof v.download_url).toBe("string");
+    });
+
+    await test.step("все версии ответа соответствуют контракту (zod)", async () => {
+      expect(schemaIssues(ExtensionVersionsResponse, versions)).toEqual([]);
     });
 
     await ext.dismissInstallDialog();

@@ -19,6 +19,7 @@ import { test, expect, type BrowserContext, type Page } from "@playwright/test";
 import { GamePanelExtensionsPage } from "../../../pages/game/GamePanelExtensionsPage";
 import { loginAndSaveGameSession, GAME_STORAGE_STATE_PATH, GAME_SERVER_UUID } from "../../../utils/gameAuth";
 import { GAME_PANEL_EXTENSIONS_API } from "../../../utils/selectors";
+import { schemaIssues, ExtensionListResponse, ExtensionVersionsResponse } from "../../../utils/schemas";
 
 /**
  * Сервер под тесты плагинов (Minecraft/Paper). ⚠️ Прежний выделенный 93521c70 удалён владельцем
@@ -90,6 +91,10 @@ test.describe("@regression [game-panel] Plugins (каталог + api/v2 кон�
       expect(Array.isArray(item.categories)).toBe(true);
     });
 
+    await test.step("все элементы ответа /minecraft/plugins соответствуют контракту (zod)", async () => {
+      expect(schemaIssues(ExtensionListResponse, json)).toEqual([]);
+    });
+
     await test.step("каталог отрисовал карточки", async () => {
       expect(await ext.cards().count()).toBeGreaterThan(0);
     });
@@ -124,6 +129,10 @@ test.describe("@regression [game-panel] Plugins (каталог + api/v2 кон�
       expect(typeof v.name).toBe("string");
       expect(Array.isArray(v.game_versions)).toBe(true);
       expect(typeof v.download_url).toBe("string");
+    });
+
+    await test.step("все версии ответа соответствуют контракту (zod)", async () => {
+      expect(schemaIssues(ExtensionVersionsResponse, versions)).toEqual([]);
     });
 
     await ext.dismissInstallDialog();
