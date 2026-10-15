@@ -5,11 +5,12 @@ type: product-overview
 product: WPGL
 status: draft
 updated: 2026-10-15
-verified_on: null              # собрано из памяти, доков и карточек; у разделов свои даты recon
+verified_on: 2026-10-15        # меню, каталог игр, языки, валюты, корзины, sitemap - live recon; остальное из памяти и доков
 tickets: [DEV-400, DEV-402, DEV-455, DEV-458, DEV-459, DEV-532]
 flags: [flash-sale]
 tests: [tests/general/*.spec.ts, tests/funnels/*.spec.ts, tests/modded/*.spec.ts, tests/vps/funnel/*.spec.ts]
 sources:
+  - live recon 15-Oct-2026: MCP godlike-wp (link_inventory, funnel_get, sitemap_inventory) + Claude Browser на /game-servers-en/
   - agents.docs/godlike-mcp-usage.md (03-Sep-2026)
   - agents.docs/QA_TEST_COVERAGE_AND_SPECS.md (срез 17-Jun-2026)
   - kb/_meta/inventory-2026-10-15.md §2
@@ -33,7 +34,7 @@ sources:
 |---|---|---|
 | Стек | WordPress, Polylang (8 языков), Yoast, WP Rocket, Cloudflare | inventory §2, godlike-mcp-usage |
 | Типы записей | `post`, `page`, `ht_kb` (KB сайта), `modpacks`, `seed` | godlike-mcp-usage |
-| Масштаб | ~2613 страниц, ~1800 берут title из шаблона Yoast | godlike-mcp-usage |
+| Масштаб | sitemap 15-Oct: 3143 URL - page 501, post (блог) 436, ht_kb 745, seed 1129, modpacks 45, server 34, категории и таксономии остальное; ~1800 страниц берут title из шаблона Yoast | sitemap_inventory, godlike-mcp-usage |
 | Кеш | WP Rocket чистится кодом, Cloudflare - только руками. Правку HTTP-запросом не проверить: увидите кеш | godlike-mcp-usage |
 | Аналитика | GTM + GA4 через sGTM `analytics.godlike.host`, Amplitude, FB, Reddit, RedTrack. Ecommerce-событий воронки (add_to_cart, begin_checkout) нет | memory dev400, smp-oneclick |
 | MCP | `godlike-wp` пишет в прод, `godlike-wp-sql` - только чтение ([реестр MCP](../../registry/mcp-tools.md)) | godlike-mcp-usage |
@@ -48,10 +49,12 @@ sources:
 
 | Раздел | Что это | Тикеты | Автотесты | Знания |
 |---|---|---|---|---|
-| Шапка, футер, навигация | Mega-menu игр с ценами (`.header-menu__subitem-game__captions-price`, с 23-Jul), legal и соц-ссылки, мобильное меню | - | `storefront.breadth`, `valid.links`, `smoke.pages` | ✅ |
-| Языки и валюты | 8 языков URL-префиксом `/{code}/`, валюты USD / EUR / GBP / PLN в cookie | - | `locale` (LOC-001..003) | ✅ |
+| Шапка, футер, навигация | см. [Шапка и меню](#шапка-и-меню-live-15-oct) | - | `storefront.breadth`, `valid.links`, `smoke.pages` | ✅ |
+| Языки и валюты | 8 языков URL-префиксом `/{code}/`; **21 валюта** в cookie (live 15-Oct) | - | `locale` (LOC-001..003) | ⚠️ тесты знают 4 валюты |
 | CookieYes | Баннер `.cky-consent-container`, гасится `CookieBanner.dismissAll` | - | косвенно | ⚠️ поведение не описано |
-| Страницы игр и каталог | ~34-38 игр ❓, тарифы в Vue-cart с 20-Aug | [DEV-402](../../tickets/DEV-402.md) | `games.valid.promo`, `games.invalid.promo`, `game-slider` | ⚠️ |
+| Страницы игр и каталог | `/game-servers-en/` «List of games» - 22 игры (live 15-Oct), тарифы в Vue-cart с 20-Aug | [DEV-402](../../tickets/DEV-402.md) | `games.valid.promo`, `games.invalid.promo`, `game-slider` | ✅ |
+| Каталог серверов игроков | `/servers/` - 34 сервера игроков, фильтры по тегам, версиям, лоадерам, режимам (тип записи `server`) | - | нет | ❌ новое, не разведано |
+| Инструменты Minecraft | Seed Map `/minecraft-seed-map/`, Circle Generator, Skin Editor `/minecraft-skin-editor/` | - | нет | ❌ |
 | KB сайта (`ht_kb`) | `/knowledgebase-en/`, редизайн проверен на stage 31-Aug | - | нет | ⚠️ |
 | Блог | статьи в корне `/...-blog/`, не под `/blog/*` | [DEV-455](../../tickets/DEV-455.md) | нет | ❌ |
 | Калькулятор modded | `<plan-calculator-widget>` в Shadow DOM (с 05-Aug), данные из panel API `/api/v2/minecraft/modpacks` | [DEV-532](../../tickets/DEV-532.md) | `slider.modded`, `modpack.config.modded` | ✅ |
@@ -64,8 +67,54 @@ sources:
 | Конструктор модпаков и trial | Dry-Run → демо-сервер на 3 часа → `/cart-modpack-constructor/` → trial | - | `funnel.modpack-constructor`, `modpack.constructor` | ⚠️ |
 | Custom Modpack Setup | `/custom-modpack-setup/`, Lite / Pro, 4 входа | [DEV-458](../../tickets/DEV-458.md), [DEV-459](../../tickets/DEV-459.md) | нет | ✅ |
 | Лендинги | Launcher `/launcher/` (черновик), SMP One-Click `/minecraft-smp/` (6 сборок), Modpack Program ❓ | - | нет | ⚠️ |
-| PlayFreeHost | отдельный WP-сайт playfreehost.com, CTA на free-продукт 282 | [DEV-563](../../tickets/DEV-563.md) | нет | ⚠️ ([UP/free-servers](../up/free-servers.md)) |
+| PlayFreeHost | отдельный WP-сайт playfreehost.com - свой обзор [PFH](../pfh/README.md) | [DEV-563](../../tickets/DEV-563.md) | нет | ✅ |
 | Промо | MONTHLY75/50, MODPACK50, VANILLA20 / COMMUNITY40, flash-sale, попап Free Server Gift | [DEV-400](../../tickets/DEV-400.md), [DEV-455](../../tickets/DEV-455.md) | `games.*.promo`, воронки | ✅ |
+
+## Шапка и меню (live 15-Oct)
+
+Шапка (EN), пункты верхнего уровня и что внутри. Источник: MCP `link_inventory` + страница `/game-servers-en/`.
+
+| Пункт | Содержимое |
+|---|---|
+| Host now | кнопка в корзину |
+| Minecraft Server Hosting | Minecraft Java Servers `/minecraft-java-servers-hosting/`, Modded Minecraft Servers |
+| Game servers | Minecraft Bedrock, Vintage Story, Palworld, Terraria, ARK - с ценой «Starting at ...»; «More Games / View all games» → `/game-servers-en/` |
+| PRO Hosting | VPS Hosting `/vps-hosting/`, Dedicated Hosting `/dedicated-server-hosting/`, Gaming VPS `/gaming-vps/` |
+| More | Partnership, Minecraft Seeds, Minecraft Seed Map, Minecraft Circle Generator, Knowledge Base, Vacancies, Blog, Godlike Launcher |
+| Admin Panels | Billing Panel (`/clientarea/`), Game Panel (ultra.panel), VPS Panel (vf-panel), Affiliate panel (`panel-affiliate.godlike.host`) |
+| Язык и валюта | «en \| UAH»: 8 языков, 21 валюта |
+
+- **Футер (EN):** Modded, главная, Seeds, Seed Map, конструктор модпаков, Circle Generator, Skin Editor, страницы игр (Vintage Story, Palworld, ARK, Terraria, Rust), About panel, вход в биллинг и панель, Ping, Discord, тикет в поддержку, Our team, About, Reviews, Contact us.
+- **Меню хранится в двух местах:** конструктор меню темы (опции `_crb_header_menu_*_<locale>`) и меню WordPress (main_nav, right_nav, footer_nav_1..4) как запасной вариант для языка, где конструктор пуст. Ссылки, зашитые в файлы темы, правятся только деплоем.
+- **Опции меню заведены для 22 локалей** (bg, ca, cs, da, nb, sv, ja ...), но на сайте `hreflang` только 8: en, uk, es, de, pl, fr, pt, it. Остальные - заготовки ❓.
+
+**Список игр каталога (live 15-Oct):** Minecraft, Modded Minecraft, Rust, ARK Survival Evolved, FiveM, Counter Strike 2, Unturned, Terraria,
+Mindustry, Factorio, Conan Exiles, 7 Days to Die, ARMA 3, Don't Starve Together, Vintage Story, The Forest, Team Fortress 2,
+Space Engineers, Quake Live, Valheim, Garry's Mod, Palworld. Отдельно в меню: Minecraft Bedrock, Minecraft Java.
+
+**Валюты (live 15-Oct, 21):** USD, GBP, PLN, EUR, INR, MXN, AUD, CAD, PHP, BRL, ARS, COP, CLP, PEN, IDR, VND, MYR, PKR, TRY, SAR, UAH.
+По умолчанию выбирается по IP (из Украины - UAH).
+
+## Корзины (funnel-страницы)
+
+На сайте 23 страницы-корзины (MCP `funnel_get`, 15-Oct). Блок тарифов ведёт в корзину по шаблону страницы; явная привязка группы тарифов есть только у 2 групп из ~370 (YouTube-эксперимент GrowthBook → `cart-youtube`).
+
+| Корзина | Шаблон | Что это |
+|---|---|---|
+| `cart-game-servers` | cart-game-servers.php | игры, новый Vue-cart ([DEV-402](../../tickets/DEV-402.md)) |
+| `cart-modded-new`, `cart-modpack` | cart-modpack.php | модпаки ([DEV-400](../../tickets/DEV-400.md)) |
+| `cart-modpack-constructor` | cart-modpack-constructor.php | конструктор и trial |
+| `cart-seed`, `cart`, `cart-eu`, `cart-modded`, `cart-admitad`, `hytale-cart` | cart.php | классическая Vue-cart |
+| `cart-eu-new` | cart-eu-new.php | ❓ |
+| `mobile-cart` | cart-mobile.php | мобильная |
+| `cart-vps`, `vps-cart-preinstall` | cart_vps2.php | VPS |
+| `cart-game` | cart_vps3.php | ❓ |
+| `cart-dedicated` | cart_dedicated_v2.php | выделенные серверы |
+| `cart-free` | cart_free.php | бесплатный сервер ([BIL](../bil/README.md#free-продукты)) |
+| `cart-main`, `cart-year`, `cart-youtube` | свои шаблоны | главная, годовая оплата, YouTube-эксперимент |
+| `minecraft-server-hosting-cart`, `ark-survival-*-server-hosting-offer` | storefront-cart*.php | одношаговые офферы |
+
+Какие корзины живые, а какие остались от экспериментов - ❓ (отдельно не разбиралось).
 
 ## Промо - как работает
 
@@ -119,7 +168,7 @@ sources:
 
 ## Пробелы
 
-1. Modpack Program, блог, отзывы, партнёрка, ping, контакты - только названия.
+1. Modpack Program, блог, отзывы, партнёрка, ping, контакты, каталог серверов игроков `/servers/`, Gaming VPS, Dedicated - только названия.
 2. CookieYes: режимы согласия не описаны.
 3. Полный список страниц игр и структура меню не задокументированы.
 4. Нет спеков на KB сайта, Launcher, SMP, PlayFreeHost, Custom Modpack Setup, Free Gift.
@@ -127,6 +176,8 @@ sources:
    PlayFreeHost без GA / GTM и с мёртвым футером (10-Aug); таргетинг Free Gift только EN ([DEV-455/F-07](../../tickets/DEV-455.md#находки)).
 
 ## Что устарело в источниках
+
+0. **Валюты:** память и тест LOC-003 знают 4 (USD / EUR / GBP / PLN), на сайте 15-Oct их 21.
 
 1. QA_TEST_COVERAGE §1.5 «funnel.seed ×3 входа» - сейчас 1 тест, CTA на `/minecraft-seeds/` удалён 02-Oct.
 2. QA_TEST_COVERAGE §1.4 «калькулятор предлагает тариф» - калькулятор на `/minecraft-seeds/` удалён 02-Oct.

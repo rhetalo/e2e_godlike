@@ -95,6 +95,7 @@ mindmap
 
 - 📄 [Как устроено: WordPress, Polylang, кеш, аналитика, маршруты](products/wpgl/README.md#как-устроено)
 - 📄 [Карта разделов: навигация, языки, игры, KB сайта, калькуляторы, лендинги](products/wpgl/README.md#карта-разделов)
+- 📄 [Шапка, меню, 22 игры, 21 валюта (live 15-Oct)](products/wpgl/README.md#шапка-и-меню-live-15-oct) · [23 корзины](products/wpgl/README.md#корзины-funnel-страницы)
 - Воронки
   - 🎫 [DEV-400](tickets/DEV-400.md) - страницы модпаков → `cart-modded-new`
   - 🎫 [DEV-402](tickets/DEV-402.md) - страницы игр → Vue-cart
@@ -186,9 +187,11 @@ mindmap
 - 📄 [Гочи: DOM «врёт»](products/vps/README.md#гочи-для-тестирования)
 - Сервер: [srv:9c49ed96](registry/test-servers.md#9c49ed96)
 
-### [PFH - PlayFreeHost](_meta/inventory-2026-10-15.md#2-карта-продукта-черновик-для-майндкарты) ⚪
+### [PFH - PlayFreeHost](products/pfh/README.md)
 
-- 🎫 Free-серверы, отдельный деплой фронта - [DEV-563](tickets/DEV-563.md)
+- 📄 [Лендинг, вход, создание бесплатного сервера](products/pfh/README.md#из-чего-состоит)
+- 📄 [Открытые находки (live 15-Oct)](products/pfh/README.md#открытые-находки-recon-15-oct-2026)
+- 🎫 Панель PFH и запрет смены игры - [DEV-563](tickets/DEV-563.md)
 
 ### Реестры (общие для всех продуктов)
 
@@ -203,5 +206,5 @@ mindmap
 ## Что дальше по карте
 
 - UP описана целиком (28 страниц фич). Пост-инсталл скан модов намеренно живёт внутри [UP/client-only-mods](products/up/client-only-mods.md).
-- Обзоры продуктов OLDP, ADM, PFH (папки `kb/products/<prod>/` пока пустые): когда появятся,
+- Обзоры продуктов OLDP, ADM (папки `kb/products/<prod>/` пока пустые): когда появятся,
   ⚪-ссылки на инвентаризацию заменить на них.
