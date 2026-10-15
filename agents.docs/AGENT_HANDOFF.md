@@ -1,6 +1,6 @@
 # AGENT HANDOFF — godlike.host Playwright E2E Suite
 
-> **Последнее обновление:** 18-Jun-2026
+> **Последнее обновление:** 16-Oct-2026
 > **Стек:** TypeScript · Playwright · Chromium
 > **Репо:** https://github.com/rhetalo/e2e_godlike
 
@@ -14,7 +14,25 @@
 
 ---
 
-## ▶ Продолжаем здесь (18-Jun-2026 · сессия «Serial-рефактор воронок»)
+## ▶ Продолжаем здесь (16-Oct-2026 · Playwright 1.64.1, CI-гейт, zod, пилот Test Agents)
+
+**Состояние:** 657 тестов (+ проект `agents`, не в обычных прогонах). Прогон 654 на 1.64.1: 631 passed, 8 failed →
+все 8 зелёные изолированно (артефакты среды). Всё в `main` (4634da9..c85c70a), запушено origin/replit/gitlab.
+
+**Что изменилось:**
+- Playwright **1.64.1**; CI: образ `v1.64.1-noble`, стадия `quality` перед deploy (`quality_gate`: tsc + eslint; `kb_checks`).
+- Проект `agents` (`default: false`): `tests/seed.spec.ts`, черновики Playwright Test Agents в `tests/agents-pilot/`.
+- zod-контракты `utils/schemas/` (MOD/PLG-001/002); цены витрины по гео `StorefrontPriceRe`; новый спек `tests/general/games.catalog.spec.ts`.
+- Журнал решений `agents.docs/DECISIONS.md`; скилл `godlike-e2e-conventions`; отчёт пилота `agents.docs/PLAYWRIGHT_AGENTS_PILOT.md`.
+
+**Следующее:**
+1. Проверить первый прогон `quality_gate` в GitLab (после пуша 16-Oct).
+2. Перенести черновики сетки каталога B2/B3 (`tests/agents-pilot/b2-*`, `b3-*`) в `games.catalog.spec.ts`, вынеся локаторы в `STOREFRONT` + `GameStorefrontPage`.
+3. zod для других эндпоинтов api/v2 - только по живой пробе ответа.
+
+---
+
+## Прошлая сессия (18-Jun-2026 · сессия «Serial-рефактор воронок»)
 
 **Сделано (ветка `refactor/funnel-serial-shared-session` → main; tsc 0 / eslint 0; live green):**
 - **Воронки переведены на serial + shared session.** `funnel.mobile` (4 теста),
