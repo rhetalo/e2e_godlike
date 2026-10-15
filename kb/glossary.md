@@ -31,7 +31,7 @@ sources:
 | **VPS** | панель VirtFusion `vf-panel.godlike.host` | [VPS](products/vps/README.md) |
 | **PFH** | PlayFreeHost, бренд бесплатных Minecraft-серверов | [PFH](products/pfh/README.md) |
 | **AFF** | партнёрка `affiliate.godlike.host` / `panel-affiliate.godlike.host` | [UP/referral](products/up/referral.md) |
-| **Dedicated** | выделенные серверы, панель `baremetal.godlike.host` | [внешние доки](registry/external-docs.md#antihost---инструкции-поддержки-по-игровым-серверам) |
+| **Dedicated** | выделенные серверы, панель `baremetal.godlike.host`; продукт приостановлен (15-Oct-2026) | [внешние доки](registry/external-docs.md#antihost---инструкции-поддержки-по-игровым-серверам) |
 
 ## Игровая панель
 

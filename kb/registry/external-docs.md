@@ -21,7 +21,7 @@ sources:
 |---|---|---|---|
 | `DevOps` | DevOps | ~100 страниц: ДЦ и стойки, ноды Wings, VirtFusion, бэкапы, мониторинг, stage, еженедельные ревью инцидентов, runbooks | ✅ много |
 | `ANTIHOST` | Antihost Team | ~20 инструкций поддержки по игровым серверам: яйца, Docker-образы, порты, логи, FiveM, ARK, Dedicated | ✅ |
-| `DEV`, `D` | DEV (два пространства) | только домашняя страница | - |
+| `DEV`, `D` | DEV (два пространства) | только шаблонная стартовая страница «Welcome to your new space!» (созданы 06-May и 15-May-2026, не заполнялись; сверено 15-Oct) | - |
 | `L2` | L2 (база знаний) | только домашняя страница | - |
 | `MARKETING`, `AD`, `AAP` | Marketing, Analytics & Design, AI Analytics Platform | только домашние страницы | - |
 
@@ -62,7 +62,7 @@ sources:
 | [Перенос сервера и баз данных](https://antihost.atlassian.net/wiki/spaces/ANTIHOST/pages/12648475) | [UP/databases](../products/up/databases.md) |
 | [Проверка сетевой доступности серверов разных игр](https://antihost.atlassian.net/wiki/spaces/ANTIHOST/pages/12713985) | [UP/ports-domains](../products/up/ports-domains.md) |
 | [Virtfusion](https://antihost.atlassian.net/wiki/spaces/ANTIHOST/pages/12648498) | [VPS](../products/vps/README.md) |
-| [Dedicated Servers - Support Guide](https://antihost.atlassian.net/wiki/spaces/ANTIHOST/pages/17137665) | выделенные серверы, панель `baremetal.godlike.host` - в KB продукта пока нет ❓ |
+| [Dedicated Servers - Support Guide](https://antihost.atlassian.net/wiki/spaces/ANTIHOST/pages/17137665) | выделенные серверы, панель `baremetal.godlike.host` - продукт приостановлен (владелец 15-Oct), в KB не описываем |
 | FiveM: [ошибка 30120](https://antihost.atlassian.net/wiki/spaces/ANTIHOST/pages/36700161), [txAdmin](https://antihost.atlassian.net/wiki/spaces/ANTIHOST/pages/46137348), [vMenu](https://antihost.atlassian.net/wiki/spaces/ANTIHOST/pages/55279618), [скрипты](https://antihost.atlassian.net/wiki/spaces/ANTIHOST/pages/69337089) | не-MC игры в UP ([обзор UP, пробел 4](../products/up/README.md#пробелы)) |
 | ARK: [конфиги](https://antihost.atlassian.net/wiki/spaces/ANTIHOST/pages/70090753), [своя карта](https://antihost.atlassian.net/wiki/spaces/ANTIHOST/pages/86638593) | [UP/game-settings](../products/up/game-settings.md) |
 
