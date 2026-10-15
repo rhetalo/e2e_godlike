@@ -52,7 +52,7 @@ sources:
 | Шапка, футер, навигация | см. [Шапка и меню](#шапка-и-меню-live-15-oct) | - | `storefront.breadth`, `valid.links`, `smoke.pages` | ✅ |
 | Языки и валюты | 8 языков URL-префиксом `/{code}/`; **21 валюта** в cookie, по умолчанию по IP (live 15-Oct) | - | `locale` (LOC-001..003, все 21 валюта) | ✅ |
 | CookieYes | Баннер `.cky-consent-container`, гасится `CookieBanner.dismissAll` | - | косвенно | ⚠️ поведение не описано |
-| Страницы игр и каталог | 46 лендингов игр, из них 20 в сетке каталога `/game-servers-en/` (live 15-Oct, см. [Игры](#игры-live-15-oct)); тарифы в Vue-cart с 20-Aug | [DEV-402](../../tickets/DEV-402.md) | `games.valid.promo`, `games.invalid.promo`, `game-slider` | ✅ |
+| Страницы игр и каталог | сетка каталога ~46 карточек с фильтрами (ведут в корзину) + SEO-список «List of games» на 20 ссылок; 46 лендингов (см. [Игры](#игры-live-15-oct-исправлено-16-oct)); тарифы в Vue-cart с 20-Aug | [DEV-402](../../tickets/DEV-402.md) | `games.valid.promo`, `games.invalid.promo`, `game-slider` | ✅ |
 | Витрина серверов игроков | `/servers/` - 34 сервера игроков, фильтры по тегам, версиям, лоадерам, режимам (тип записи `server`) | - | нет | ⏸ отложено владельцем 15-Oct |
 | Инструменты Minecraft | Seed Map `/minecraft-seed-map/`, Circle Generator, Skin Editor `/minecraft-skin-editor/` | - | нет | ❌ |
 | KB сайта (`ht_kb`) | `/knowledgebase-en/`, редизайн проверен на stage 31-Aug | - | нет | ⚠️ |
@@ -91,21 +91,23 @@ sources:
 **Валюты (live 15-Oct, 21):** USD, GBP, PLN, EUR, INR, MXN, AUD, CAD, PHP, BRL, ARS, COP, CLP, PEN, IDR, VND, MYR, PKR, TRY, SAR, UAH.
 По умолчанию выбирается по IP (из Украины - UAH).
 
-## Игры (live 15-Oct)
+## Игры (live 15-Oct, исправлено 16-Oct)
 
-Перепроверено 15-Oct-2026 двумя способами: сетка «List of games» на `/game-servers-en/` и страницы `*-server-hosting` в `page-sitemap.xml`
-(Playwright MCP, только чтение). Все страницы ниже отвечают 200.
+⚠️ **Исправление 16-Oct-2026.** 15-Oct блок «List of games» (20 ссылок) ошибочно назван сеткой каталога. На `/game-servers-en/`
+**два разных блока** (нашёл родной Playwright Planner, перепроверено в браузере 16-Oct):
 
-- **Лендингов игр - 46** (без VPS, Dedicated и 7 языковых копий YouTube-лендинга `minecraft-server-hosting-doublelag-youtube-*`).
-  Прежняя оценка «~34-38» была занижена.
-- **В сетке каталога - 20 карточек:** Minecraft (ведёт на главную), Rust, ARK Survival Evolved, FiveM, Counter Strike 2, Unturned,
-  Terraria, Mindustry, Factorio, Conan Exiles, 7 Days to Die, ARMA 3, Don't Starve Together, Vintage Story, The Forest,
-  Team Fortress 2, Space Engineers, Quake Live, Valheim, Garry's Mod.
-- **В меню шапки, но не в сетке:** Minecraft Java, Modded Minecraft, Minecraft Bedrock, Palworld.
-- **Только лендинг (нет ни в сетке, ни в меню) - 23:** Abiotic Factor, GTA 5 Alt:V, ARK Survival Ascended, BeamNG, Core Keeper, CS 1.6,
-  CS: Source, DayZ, Enshrouded, Hytale, Killing Floor 2, Left 4 Dead 2, Path of Titans, Project Zomboid, GTA 5 RageMP,
-  Red Dead Redemption 2, RimWorld Together, Satisfactory, SCP: Secret Laboratory, Soulmask, Squad, Starbound, V Rising.
-  Попасть на них можно из поиска, блога или прямой ссылкой. Нужна ли им карточка в каталоге - ❓ вопрос к маркетингу.
+| Блок | Что это | Куда ведёт клик | Покрытие |
+|---|---|---|---|
+| **Сетка каталога** `.games__wrapper` / `.games__block` | ~46 карточек (по Planner; в проверке 16-Oct видно 44 названия), фильтры **View All / PC / Mobile / Console**, поиск, пагинация; карточки рисует JS | прямо в корзину `/cart-game-servers/?productId=N&billingCycle=monthly` (JS-обработчик, `<a>` только у 3 карточек: Modded Minecraft, Dedicated, Gaming VPS) | ❌ тестов нет |
+| **«List of games»** - SEO-текст во вкладке (`li[data-tab=3]`, `.seotext__body a`) | 20 ссылок | на лендинг игры (Minecraft - на главную) | ✅ `tests/general/games.catalog.spec.ts` |
+
+- В сетке есть и игры, которые 15-Oct записаны как «только лендинг»: Hytale, Project Zomboid, DayZ, Soulmask, Squad, V Rising, Core Keeper,
+  Enshrouded, Satisfactory и др., плюс **Arma Reforger** и **RedM**. То, что карточка ведёт в корзину, а не на лендинг, согласуется с
+  [DEV-402](../../tickets/DEV-402.md) и комментарием в `GameStorefrontPage` («у карточки нет href, остался onclick в воронку»).
+- **Лендингов игр в sitemap - 46** (`*-server-hosting`, без VPS, Dedicated и 7 языковых копий YouTube-лендинга), все отвечают 200 (15-Oct).
+  Какие из них не попали в сетку (кандидаты: GTA 5 Alt:V, GTA 5 RageMP, CS: Source, RimWorld Together, SCP: Secret Laboratory) - ❓ сверить поштучно.
+- **Открытые вопросы из плана Planner** (`specs/games-catalog-native.md`): у поиска без совпадений нет текста пустого состояния; на странице 3-5
+  ошибок консоли на загрузку (не разбирались); фильтр Console почти пустой.
 - **Наблюдение (SEO):** у 4 страниц в `<title>` задвоено «Server Servers» - Abiotic Factor, Path of Titans, Project Zomboid, V Rising.
 
 ## Корзины (funnel-страницы)

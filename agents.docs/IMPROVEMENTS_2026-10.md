@@ -6,7 +6,16 @@
 > встроенные Playwright Test Agents дают «планировщик → генератор → лекарь» прямо в Claude Code, а для
 > ручных тасок есть готовая схема exploratory-сессий. Ниже - по приоритету, с тем, где это ляжет в наш код.
 
-Легенда: 🟢 быстро и безопасно · 🟡 нужен пилот · ⚪ на потом. Ничего из списка ещё не внедрено.
+Легенда: 🟢 быстро и безопасно · 🟡 нужен пилот · ⚪ на потом.
+
+**Статус на 15-Oct-2026 (вечер):**
+- ✅ §1 Playwright 1.60 → **1.64.1** (+ CI-образ `v1.64.1-noble`, проект `agents` с `default: false`). `:visible` и 3 `waitForTimeout` - НЕ трогали (решение владельца: тесты работают).
+- ✅ §2 пилот Test Agents → `PLAYWRIGHT_AGENTS_PILOT.md`, правила godlike дописаны в `.claude/agents/*`.
+- ✅ §4 burn-in и `npx playwright trace` → скилл `flaky-triage`; §5 SBTM + SFDIPOT → скилл `spec-to-testplan`.
+- ✅ §6 markmap → `kb/map.html` (`kb/_tools/build_map.py`), проверка шапки → `kb/_tools/frontmatter_check.py`.
+- ✅ §7 свой скилл `godlike-e2e-conventions`.
+- ✅ §3 zod-схемы → `utils/schemas/` (mods/plugins список + версии), шаги в MOD-001/002, PLG-001/002 (16-Oct).
+- ✅ ADR → `agents.docs/DECISIONS.md`; ✅ гейт качества в CI (`quality_gate`, `kb_checks`).
 
 ## 1. Playwright: обновиться 1.60 → 1.64 🟢
 

@@ -32,6 +32,8 @@ already encode hard-won knowledge and override anything generic:
 - `agents.docs/game-panel/` — game panel (ultra.panel) knowledge base + test plan (~64 tests; **Phase 5 закрыта**; next = только **деструктив** — нужен явный risk-decision владельца)
 - `agents.docs/MCP_RECON_VS_CODE.md` — Playwright MCP vs наш код-формат (когда что применять)
 - `agents.docs/AI_AGENTS_NOTES.md` — выжимка best-practices по ИИ-агентам под наш QA-репо
+- `agents.docs/DECISIONS.md` — журнал решений (ADR-lite): что решили, когда и почему. **Не переоткрывай закрытое без новой причины.**
+- `.claude/skills/godlike-e2e-conventions` — конвенции e2e на одной странице + чек-лист ревью (в т.ч. черновиков Playwright Test Agents)
 
 ## Implementation workflow
 

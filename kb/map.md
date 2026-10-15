@@ -96,7 +96,7 @@ mindmap
 
 - 📄 [Как устроено: WordPress, Polylang, кеш, аналитика, маршруты](products/wpgl/README.md#как-устроено)
 - 📄 [Карта разделов: навигация, языки, игры, KB сайта, калькуляторы, лендинги](products/wpgl/README.md#карта-разделов)
-- 📄 [Шапка, меню, 21 валюта (live 15-Oct)](products/wpgl/README.md#шапка-и-меню-live-15-oct) · [46 лендингов игр](products/wpgl/README.md#игры-live-15-oct) · [23 корзины](products/wpgl/README.md#корзины-funnel-страницы)
+- 📄 [Шапка, меню, 21 валюта (live 15-Oct)](products/wpgl/README.md#шапка-и-меню-live-15-oct) · [сетка каталога и 46 лендингов](products/wpgl/README.md#игры-live-15-oct-исправлено-16-oct) · [23 корзины](products/wpgl/README.md#корзины-funnel-страницы)
 - Воронки
   - 🎫 [DEV-400](tickets/DEV-400.md) - страницы модпаков → `cart-modded-new`
   - 🎫 [DEV-402](tickets/DEV-402.md) - страницы игр → Vue-cart
