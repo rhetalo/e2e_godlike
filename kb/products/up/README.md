@@ -71,8 +71,8 @@ Google-OAuth (`stage.panel.godlike.host/oauth2/callback`), сессия живё
 |---|---|---|---|---|---|
 | Вход | Логин/пароль, OAuth WHMCS, Steam, logout | `UP/login` | - | login, auth.logout | ⚠️ пароль ✅, OAuth/Steam ❌ |
 | Дашборд | «My Servers (N)», фильтры Suspended/Free, grid/list, группы split | `UP/dashboard` | - | dashboard | ⚠️ |
-| Overview сервера | Server Information (IP, порт, Steam Port), Edit Server (rename/Import/Reinstall), Java-notice | `UP/server-overview` | [DEV-562](../../tickets/DEV-562.md) | server.overview, edit.server, network.connection-info | ✅ |
-| Power | Start/Shut Down/Restart/Kill, EULA, гейт по Java | `UP/power` | [DEV-485](../../tickets/DEV-485.md) | power | ✅ |
+| Overview сервера | Server Information (IP, порт, Steam Port), Edit Server (rename/Import/Reinstall), Java-notice | [UP/server-overview](server-overview.md) | [DEV-562](../../tickets/DEV-562.md) | server.overview, edit.server, network.connection-info | ✅ |
+| Power | Start/Shut Down/Restart/Kill, EULA, гейт по Java | [UP/power](power.md) | [DEV-485](../../tickets/DEV-485.md) | power | ✅ |
 | Console | xterm-лог, ввод команд, палитра Commands, Help | `UP/console` | - | console, console.palette, security.console | ✅ |
 | Files | Файл-менеджер, Recycle Bin 24ч, CodeMirror, SFTP, Upload custom modpack | `UP/files` | - | files, files.recycle, files.structure | ✅ |
 | Config | Редактор `server.properties` (автосейв) + блок Docker/Java (Docker Image combobox) | `UP/config` | - | config, security (SEC-004) | ✅ |
@@ -86,8 +86,8 @@ Google-OAuth (`stage.panel.godlike.host/oauth2/callback`), сессия живё
 | ↳ Каталог модпаков | Видимость `is_listed`, каталог v2 | [UP/modpack-catalog](modpack-catalog.md) | [DEV-532](../../tickets/DEV-532.md) | - | ⚠️ |
 | ↳ Missing deps | Окно «Missing mod dependencies» после краша | `UP/missing-mod-deps` | [TASK-missing-mod-deps](../../tickets/TASK-missing-mod-deps.md) | - | ⚠️ |
 | Java detection | `required_java`, попап «needs Java N», префлайт и гейт старта | [UP/java-detection](java-detection.md) | [DEV-472](../../tickets/DEV-472.md), [DEV-485](../../tickets/DEV-485.md) | - | ⚠️ |
-| Sharing и роли | Инвайт, Owner/Co-owner/Moderator/Member, права v2 | `UP/sharing-roles` | [TASK-v2-subuser-permissions](../../tickets/TASK-v2-subuser-permissions.md) | sharing, role.enforcement, permission.enforcement.api | ✅ |
-| Audit Log | Журнал действий `server:<action>` в Sharing | `UP/audit-log` | - | sharing.audit | ✅ |
+| Sharing и роли | Инвайт, Owner/Co-owner/Moderator/Member, права v2 | [UP/sharing-roles](sharing-roles.md) | [TASK-v2-subuser-permissions](../../tickets/TASK-v2-subuser-permissions.md) | sharing, role.enforcement, permission.enforcement.api | ✅ |
+| Audit Log | Журнал действий `server:<action>` в Sharing | [UP/audit-log](sharing-roles.md) | - | sharing.audit | ✅ |
 | Port & Domains | Поддомен, порты, Add Additional Port | `UP/ports-domains` | - | network | ✅ |
 | Backups | Server/Database/Folder, квота N/3, Locked, Schedule, Restore | `UP/backups` | - | backups, security (SEC-002) | ✅ |
 | World Backup | Бэкап только мира (Java+Bedrock), попап «Save Your World First?» | [UP/world-backup](world-backup.md) | [DEV-418](../../tickets/DEV-418.md) | - | ⚠️ |
@@ -98,8 +98,8 @@ Google-OAuth (`stage.panel.godlike.host/oauth2/callback`), сессия живё
 | Referral | `/referral`, реф-ссылка `affiliate.godlike.host/ref/<code>`, Request Withdrawal | `UP/referral` | - | referral | ✅ |
 | Throttling | Вебхук → модалка «Lag Detected» с апгрейдом | `UP/throttling` | [TASK-throttling-webhook](../../tickets/TASK-throttling-webhook.md) | throttling.notification (env-gate) | ⚠️ |
 | Cancel module | Модалка отмены, A/B old/new, pause, retention-экраны | [UP/cancel-module](cancel-module.md) | [DEV-401](../../tickets/DEV-401.md) | - | ⚠️ |
-| Split Server | Main + до 3 сабов, перераспределение RAM/диска | `UP/split-server` | [TASK-split-server](../../tickets/TASK-split-server.md) | - | ⚠️ |
-| Free-серверы | Free-тариф: запрет смены игры (egg) | `UP/free-servers` | [DEV-563](../../tickets/DEV-563.md) | - | ⚠️ |
+| Split Server | Main + до 3 сабов, перераспределение RAM/диска | [UP/split-server](split-server.md) | [TASK-split-server](../../tickets/TASK-split-server.md) | - | ⚠️ |
+| Free-серверы | Free-тариф: запрет смены игры (egg) | [UP/free-servers](free-servers.md) | [DEV-563](../../tickets/DEV-563.md) | - | ⚠️ |
 | Game settings | Palworld Settings (UI для `PalWorldSettings.ini`), ARK-аналог | `UP/game-settings` | [TASK-palworld-settings](../../tickets/TASK-palworld-settings.md), DEV-145 (ARK, только упоминание) | - | ⚠️ Palworld, ❌ ARK |
 | Модалки и оверлеи | EULA, giveaway/Trustpilot, shepherd-тур, цепочка модалок модпака | `UP/modals` | - | косвенно (GamePanelBasePage.open) | ✅ |
 

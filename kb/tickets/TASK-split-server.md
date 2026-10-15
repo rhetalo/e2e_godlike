@@ -39,5 +39,6 @@ PASS 13/13, 10-Sep-2026, prod, [acc:admin](../registry/test-accounts.md#admin). 
 | TASK-split-server/BUG-3 | Синк прав не автоматический | by design |
 
 ## Связи
+- Фичи: [UP/split-server](../products/up/split-server.md), [UP/sharing-roles](../products/up/sharing-roles.md)
 - Серверы: [srv:1d7d34aa](../registry/test-servers.md#1d7d34aa) (main), [srv:0c7b82c3](../registry/test-servers.md#0c7b82c3), [srv:60fdf307](../registry/test-servers.md#60fdf307).
 - Jira-ключа нет (разработчик Sergiy Serpichenko, инициатор L2). ❓ ключ.

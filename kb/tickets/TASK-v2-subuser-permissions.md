@@ -39,5 +39,6 @@ sources:
 `permission.enforcement.api.spec.ts` (TC-GP-PERM-API-001, docker_access). ❓ На 15-Oct спек не закоммичен.
 
 ## Связи
+- Фичи: [UP/sharing-roles](../products/up/sharing-roles.md)
 - Аккаунты: [acc:invitee](../registry/test-accounts.md#invitee), [acc:shared-owner](../registry/test-accounts.md#shared-owner).
 - Сервер для деструктивной проверки: [srv:7166c707](../registry/test-servers.md#7166c707) (нужен risk-decision).

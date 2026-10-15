@@ -116,8 +116,9 @@ mindmap
 - ⚪ [Как устроено: Vue SPA, API v2, Pterodactyl, Pennant-флаги](products/up/README.md#как-устроено)
 - ⚪ [Вход и дашборд](products/up/README.md#карта-разделов)
 - Сервер
-  - 🎫 Overview - [DEV-562](tickets/DEV-562.md) (Steam Port)
-  - ⚪ [Power и Console](products/up/README.md#карта-разделов) - гейт по Java см. [UP/java-detection](products/up/java-detection.md)
+  - 📄 [UP/server-overview](products/up/server-overview.md) - Server Information, Edit Server: [DEV-562](tickets/DEV-562.md) (Steam Port)
+  - 📄 [UP/power](products/up/power.md) - Start, Restart, Kill, EULA; гейт по Java см. [UP/java-detection](products/up/java-detection.md)
+  - ⚪ [Console](products/up/README.md#карта-разделов)
   - ⚪ [Files, Config, Players](products/up/README.md#карта-разделов)
   - 📄 [UP/versions](products/up/versions.md) - смена ядра и версии: [DEV-506](tickets/DEV-506.md), [DEV-529](tickets/DEV-529.md), [DEV-512](tickets/DEV-512.md)
   - 🎫 Startup / Docker image - [DEV-513](tickets/DEV-513.md) (проверялось в OLDP)
@@ -142,8 +143,7 @@ mindmap
   - 🎫 [DEV-485](tickets/DEV-485.md) - гейт старта, [flag:java-start-gate](registry/flags.md#java-start-gate)
   - 🎫 [DEV-512](tickets/DEV-512.md) - libxrender при смене версии
 - Доступ
-  - 🎫 Sharing и роли - [TASK-v2-subuser-permissions](tickets/TASK-v2-subuser-permissions.md)
-  - ⚪ [Audit Log](products/up/README.md#карта-разделов)
+  - 📄 [UP/sharing-roles](products/up/sharing-roles.md) - инвайты, роли, Audit Log: [TASK-v2-subuser-permissions](tickets/TASK-v2-subuser-permissions.md)
 - Данные
   - ⚪ [Backups, Tasks, Databases, Port & Domains](products/up/README.md#карта-разделов)
   - 📄 [UP/world-backup](products/up/world-backup.md) - [DEV-418](tickets/DEV-418.md), [flag:world-backup](registry/flags.md#world-backup)
@@ -152,8 +152,8 @@ mindmap
   - ⚪ [Free Premium, Referral](products/up/README.md#карта-разделов)
   - 🎫 Throttling «Lag Detected» - [TASK-throttling-webhook](tickets/TASK-throttling-webhook.md)
   - 📄 [UP/cancel-module](products/up/cancel-module.md) - отмена, пауза, удержание: [DEV-401](tickets/DEV-401.md)
-  - 🎫 Split Server - [TASK-split-server](tickets/TASK-split-server.md)
-- 🎫 Free-серверы: запрет смены egg - [DEV-563](tickets/DEV-563.md)
+  - 📄 [UP/split-server](products/up/split-server.md) - [TASK-split-server](tickets/TASK-split-server.md)
+- 📄 [UP/free-servers](products/up/free-servers.md) - ограничения free, запрет смены игры: [DEV-563](tickets/DEV-563.md)
 - 🎫 Game settings: Palworld - [TASK-palworld-settings](tickets/TASK-palworld-settings.md)
 - ⚪ [Модалки и оверлеи](products/up/README.md#сквозные-гочи)
 - ⚪ [Сквозные гочи UP](products/up/README.md#сквозные-гочи) · [Пробелы в знаниях](products/up/README.md#пробелы)
@@ -189,8 +189,7 @@ mindmap
 
 ## Что дальше по карте
 
-- Страницы фич UP следующей волны: `UP/post-install-mod-scan` (сейчас внутри [UP/client-only-mods](products/up/client-only-mods.md)),
-  `UP/server-overview` ([DEV-562](tickets/DEV-562.md)), `UP/free-servers` ([DEV-563](tickets/DEV-563.md)),
-  `UP/split-server` ([TASK-split-server](tickets/TASK-split-server.md)), `UP/sharing-roles`, `UP/backups`, `UP/power`.
+- Страницы фич UP следующей волны: `UP/backups`, `UP/console`, `UP/files`, `UP/config`, `UP/upgrade`, `UP/throttling`,
+  `UP/post-install-mod-scan` (сейчас внутри [UP/client-only-mods](products/up/client-only-mods.md)).
 - Обзоры продуктов WPGL, BIL, OLDP, ADM, VPS, PFH (папки `kb/products/<prod>/` пока пустые): когда появятся,
   ⚪-ссылки на инвентаризацию заменить на них.
