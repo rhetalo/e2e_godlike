@@ -79,13 +79,13 @@ Google-OAuth (`stage.panel.godlike.host/oauth2/callback`), сессия живё
 | Startup / Docker image | Смена образа Java; в UP через Config, `/server/{id}/startup` рендерит пусто | `UP/startup` | [DEV-513](../../tickets/DEV-513.md) (OLDP) | permission.enforcement.api (docker_access) | ❌ |
 | Players | Админы, Players List, Whitelist, Ban List (нужен online) | `UP/players` | - | players | ✅ |
 | Versions | 18 ядер, drill-down версия → билд → Install (+Wipe) | `UP/versions` | [DEV-506](../../tickets/DEV-506.md), [DEV-529](../../tickets/DEV-529.md) | versions | ⚠️ |
-| Extensions-каталог | Моды/плагины/модпаки, источники CF/Modrinth/Hangar/Spigot/Polymart, фильтры, update | `UP/extensions-catalog` | [DEV-405](../../tickets/DEV-405.md), [DEV-534](../../tickets/DEV-534.md), [DEV-498](../../tickets/DEV-498.md) | extensions, mods, plugins, extension.sources | ⚠️ |
-| ↳ Loader gating | Заглушки и автофильтр по ядру (`extension_capabilities`) | `UP/mods-loader-gating` | [DEV-515](../../tickets/DEV-515.md), [DEV-529](../../tickets/DEV-529.md) | - | ⚠️ |
-| ↳ Client-only моды | Скрытие клиентских модов в каталоге | `UP/client-only-mods` | [DEV-500](../../tickets/DEV-500.md) | - | ⚠️ |
+| Extensions-каталог | Моды/плагины/модпаки, источники CF/Modrinth/Hangar/Spigot/Polymart, фильтры, update | [UP/extensions-catalog](extensions-catalog.md) | [DEV-405](../../tickets/DEV-405.md), [DEV-534](../../tickets/DEV-534.md), [DEV-498](../../tickets/DEV-498.md) | extensions, mods, plugins, extension.sources | ⚠️ |
+| ↳ Loader gating | Заглушки и автофильтр по ядру (`extension_capabilities`) | [UP/mods-loader-gating](mods-loader-gating.md) | [DEV-515](../../tickets/DEV-515.md), [DEV-529](../../tickets/DEV-529.md) | - | ⚠️ |
+| ↳ Client-only моды | Скрытие клиентских модов в каталоге | [UP/client-only-mods](client-only-mods.md) | [DEV-500](../../tickets/DEV-500.md) | - | ⚠️ |
 | ↳ Пост-инсталл скан | Вердикт по jar после установки, отключение на старте | `UP/post-install-mod-scan` | [DEV-492](../../tickets/DEV-492.md) | - | ⚠️ |
 | ↳ Каталог модпаков | Видимость `is_listed`, каталог v2 | `UP/modpack-catalog` | [DEV-532](../../tickets/DEV-532.md) | - | ⚠️ |
 | ↳ Missing deps | Окно «Missing mod dependencies» после краша | `UP/missing-mod-deps` | [TASK-missing-mod-deps](../../tickets/TASK-missing-mod-deps.md) | - | ⚠️ |
-| Java detection | `required_java`, попап «needs Java N», префлайт и гейт старта | `UP/java-detection` | [DEV-472](../../tickets/DEV-472.md), [DEV-485](../../tickets/DEV-485.md) | - | ⚠️ |
+| Java detection | `required_java`, попап «needs Java N», префлайт и гейт старта | [UP/java-detection](java-detection.md) | [DEV-472](../../tickets/DEV-472.md), [DEV-485](../../tickets/DEV-485.md) | - | ⚠️ |
 | Sharing и роли | Инвайт, Owner/Co-owner/Moderator/Member, права v2 | `UP/sharing-roles` | [TASK-v2-subuser-permissions](../../tickets/TASK-v2-subuser-permissions.md) | sharing, role.enforcement, permission.enforcement.api | ✅ |
 | Audit Log | Журнал действий `server:<action>` в Sharing | `UP/audit-log` | - | sharing.audit | ✅ |
 | Port & Domains | Поддомен, порты, Add Additional Port | `UP/ports-domains` | - | network | ✅ |
