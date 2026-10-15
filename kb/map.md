@@ -119,7 +119,7 @@ mindmap
   - 🎫 Overview - [DEV-562](tickets/DEV-562.md) (Steam Port)
   - ⚪ [Power и Console](products/up/README.md#карта-разделов) - гейт по Java см. [UP/java-detection](products/up/java-detection.md)
   - ⚪ [Files, Config, Players](products/up/README.md#карта-разделов)
-  - 🎫 Versions - [DEV-506](tickets/DEV-506.md), [DEV-529](tickets/DEV-529.md)
+  - 📄 [UP/versions](products/up/versions.md) - смена ядра и версии: [DEV-506](tickets/DEV-506.md), [DEV-529](tickets/DEV-529.md), [DEV-512](tickets/DEV-512.md)
   - 🎫 Startup / Docker image - [DEV-513](tickets/DEV-513.md) (проверялось в OLDP)
 - Extensions
   - 📄 [UP/extensions-catalog](products/up/extensions-catalog.md) - каталог модов, плагинов, модпаков
@@ -133,7 +133,9 @@ mindmap
   - 📄 [UP/client-only-mods](products/up/client-only-mods.md) - скрытие и отключение клиентских модов
     - 🎫 [DEV-500](tickets/DEV-500.md) - скрытие в каталоге
     - 🎫 [DEV-492](tickets/DEV-492.md) - скан после установки
-  - 🎫 Каталог модпаков - [DEV-532](tickets/DEV-532.md) (`is_listed`, [flag:is-listed](registry/flags.md#is-listed))
+  - 📄 [UP/modpack-catalog](products/up/modpack-catalog.md) - модпаки: видимость и установка
+    - 🎫 [DEV-532](tickets/DEV-532.md) - `is_listed`, [flag:is-listed](registry/flags.md#is-listed)
+    - 🎫 [DEV-459](tickets/DEV-459.md) - вход в Custom Modpack Setup
   - 🎫 Missing mod dependencies - [TASK-missing-mod-deps](tickets/TASK-missing-mod-deps.md)
 - 📄 [UP/java-detection](products/up/java-detection.md) - требование к Java, попап, гейт старта
   - 🎫 [DEV-472](tickets/DEV-472.md) - автодетект и попап
@@ -144,12 +146,12 @@ mindmap
   - ⚪ [Audit Log](products/up/README.md#карта-разделов)
 - Данные
   - ⚪ [Backups, Tasks, Databases, Port & Domains](products/up/README.md#карта-разделов)
-  - 🎫 World Backup - [DEV-418](tickets/DEV-418.md), [flag:world-backup](registry/flags.md#world-backup)
+  - 📄 [UP/world-backup](products/up/world-backup.md) - [DEV-418](tickets/DEV-418.md), [flag:world-backup](registry/flags.md#world-backup)
 - Монетизация
   - 🎫 Upgrade / Boost - [TASK-tariff-list-400](tickets/TASK-tariff-list-400.md)
   - ⚪ [Free Premium, Referral](products/up/README.md#карта-разделов)
   - 🎫 Throttling «Lag Detected» - [TASK-throttling-webhook](tickets/TASK-throttling-webhook.md)
-  - 🎫 Cancel module и retention - [DEV-401](tickets/DEV-401.md)
+  - 📄 [UP/cancel-module](products/up/cancel-module.md) - отмена, пауза, удержание: [DEV-401](tickets/DEV-401.md)
   - 🎫 Split Server - [TASK-split-server](tickets/TASK-split-server.md)
 - 🎫 Free-серверы: запрет смены egg - [DEV-563](tickets/DEV-563.md)
 - 🎫 Game settings: Palworld - [TASK-palworld-settings](tickets/TASK-palworld-settings.md)
@@ -187,8 +189,8 @@ mindmap
 
 ## Что дальше по карте
 
-- Страницы фич UP следующей волны (по числу тикетов): `UP/versions` ([DEV-506](tickets/DEV-506.md), [DEV-529](tickets/DEV-529.md)),
-  `UP/post-install-mod-scan` (сейчас внутри [UP/client-only-mods](products/up/client-only-mods.md)), `UP/modpack-catalog`
-  ([DEV-532](tickets/DEV-532.md)), `UP/world-backup` ([DEV-418](tickets/DEV-418.md)), `UP/cancel-module` ([DEV-401](tickets/DEV-401.md)).
+- Страницы фич UP следующей волны: `UP/post-install-mod-scan` (сейчас внутри [UP/client-only-mods](products/up/client-only-mods.md)),
+  `UP/server-overview` ([DEV-562](tickets/DEV-562.md)), `UP/free-servers` ([DEV-563](tickets/DEV-563.md)),
+  `UP/split-server` ([TASK-split-server](tickets/TASK-split-server.md)), `UP/sharing-roles`, `UP/backups`, `UP/power`.
 - Обзоры продуктов WPGL, BIL, OLDP, ADM, VPS, PFH (папки `kb/products/<prod>/` пока пустые): когда появятся,
   ⚪-ссылки на инвентаризацию заменить на них.

@@ -78,26 +78,26 @@ Google-OAuth (`stage.panel.godlike.host/oauth2/callback`), сессия живё
 | Config | Редактор `server.properties` (автосейв) + блок Docker/Java (Docker Image combobox) | `UP/config` | - | config, security (SEC-004) | ✅ |
 | Startup / Docker image | Смена образа Java; в UP через Config, `/server/{id}/startup` рендерит пусто | `UP/startup` | [DEV-513](../../tickets/DEV-513.md) (OLDP) | permission.enforcement.api (docker_access) | ❌ |
 | Players | Админы, Players List, Whitelist, Ban List (нужен online) | `UP/players` | - | players | ✅ |
-| Versions | 18 ядер, drill-down версия → билд → Install (+Wipe) | `UP/versions` | [DEV-506](../../tickets/DEV-506.md), [DEV-529](../../tickets/DEV-529.md) | versions | ⚠️ |
+| Versions | 18 ядер, drill-down версия → билд → Install (+Wipe) | [UP/versions](versions.md) | [DEV-506](../../tickets/DEV-506.md), [DEV-529](../../tickets/DEV-529.md) | versions | ⚠️ |
 | Extensions-каталог | Моды/плагины/модпаки, источники CF/Modrinth/Hangar/Spigot/Polymart, фильтры, update | [UP/extensions-catalog](extensions-catalog.md) | [DEV-405](../../tickets/DEV-405.md), [DEV-534](../../tickets/DEV-534.md), [DEV-498](../../tickets/DEV-498.md) | extensions, mods, plugins, extension.sources | ⚠️ |
 | ↳ Loader gating | Заглушки и автофильтр по ядру (`extension_capabilities`) | [UP/mods-loader-gating](mods-loader-gating.md) | [DEV-515](../../tickets/DEV-515.md), [DEV-529](../../tickets/DEV-529.md) | - | ⚠️ |
 | ↳ Client-only моды | Скрытие клиентских модов в каталоге | [UP/client-only-mods](client-only-mods.md) | [DEV-500](../../tickets/DEV-500.md) | - | ⚠️ |
 | ↳ Пост-инсталл скан | Вердикт по jar после установки, отключение на старте | `UP/post-install-mod-scan` | [DEV-492](../../tickets/DEV-492.md) | - | ⚠️ |
-| ↳ Каталог модпаков | Видимость `is_listed`, каталог v2 | `UP/modpack-catalog` | [DEV-532](../../tickets/DEV-532.md) | - | ⚠️ |
+| ↳ Каталог модпаков | Видимость `is_listed`, каталог v2 | [UP/modpack-catalog](modpack-catalog.md) | [DEV-532](../../tickets/DEV-532.md) | - | ⚠️ |
 | ↳ Missing deps | Окно «Missing mod dependencies» после краша | `UP/missing-mod-deps` | [TASK-missing-mod-deps](../../tickets/TASK-missing-mod-deps.md) | - | ⚠️ |
 | Java detection | `required_java`, попап «needs Java N», префлайт и гейт старта | [UP/java-detection](java-detection.md) | [DEV-472](../../tickets/DEV-472.md), [DEV-485](../../tickets/DEV-485.md) | - | ⚠️ |
 | Sharing и роли | Инвайт, Owner/Co-owner/Moderator/Member, права v2 | `UP/sharing-roles` | [TASK-v2-subuser-permissions](../../tickets/TASK-v2-subuser-permissions.md) | sharing, role.enforcement, permission.enforcement.api | ✅ |
 | Audit Log | Журнал действий `server:<action>` в Sharing | `UP/audit-log` | - | sharing.audit | ✅ |
 | Port & Domains | Поддомен, порты, Add Additional Port | `UP/ports-domains` | - | network | ✅ |
 | Backups | Server/Database/Folder, квота N/3, Locked, Schedule, Restore | `UP/backups` | - | backups, security (SEC-002) | ✅ |
-| World Backup | Бэкап только мира (Java+Bedrock), попап «Save Your World First?» | `UP/world-backup` | [DEV-418](../../tickets/DEV-418.md) | - | ⚠️ |
+| World Backup | Бэкап только мира (Java+Bedrock), попап «Save Your World First?» | [UP/world-backup](world-backup.md) | [DEV-418](../../tickets/DEV-418.md) | - | ⚠️ |
 | Tasks | Send command / Send power action, Configure, Run, расписание | `UP/tasks` | - | tasks | ✅ |
 | Databases | Create Database, таблица кредов | `UP/databases` | - | - | ⚠️ |
 | Upgrade / Boost | `/upgrade?promocode=...`, карточки планов, квиз | `UP/upgrade` | [TASK-tariff-list-400](../../tickets/TASK-tariff-list-400.md) | promo (UPG-001) | ⚠️ |
 | Free Premium | Модалка «What is a Free Premium?», CTA 3-Days Trial | `UP/free-premium` | - | promo (PREM-001) | ✅ |
 | Referral | `/referral`, реф-ссылка `affiliate.godlike.host/ref/<code>`, Request Withdrawal | `UP/referral` | - | referral | ✅ |
 | Throttling | Вебхук → модалка «Lag Detected» с апгрейдом | `UP/throttling` | [TASK-throttling-webhook](../../tickets/TASK-throttling-webhook.md) | throttling.notification (env-gate) | ⚠️ |
-| Cancel module | Модалка отмены, A/B old/new, pause, retention-экраны | `UP/cancel-module` | [DEV-401](../../tickets/DEV-401.md) | - | ⚠️ |
+| Cancel module | Модалка отмены, A/B old/new, pause, retention-экраны | [UP/cancel-module](cancel-module.md) | [DEV-401](../../tickets/DEV-401.md) | - | ⚠️ |
 | Split Server | Main + до 3 сабов, перераспределение RAM/диска | `UP/split-server` | [TASK-split-server](../../tickets/TASK-split-server.md) | - | ⚠️ |
 | Free-серверы | Free-тариф: запрет смены игры (egg) | `UP/free-servers` | [DEV-563](../../tickets/DEV-563.md) | - | ⚠️ |
 | Game settings | Palworld Settings (UI для `PalWorldSettings.ini`), ARK-аналог | `UP/game-settings` | [TASK-palworld-settings](../../tickets/TASK-palworld-settings.md), DEV-145 (ARK, только упоминание) | - | ⚠️ Palworld, ❌ ARK |
