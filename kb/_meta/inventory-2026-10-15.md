@@ -213,7 +213,7 @@ cancel-amplitude, tariff-list-400 (Critical), mc-extensions-epic.
 ### 3.5 Гочи, которые экономят recon (переедут на страницы фич)
 
 - **API:**
-  - `panel.godlike.host/api/v2` требует полный UUID, short даёт 400.
+  - `panel.godlike.host/api/v2`: `GET /servers/{short}` работает, но часть ручек (`/allocations`, `/world-backups`, `whmcs/cancel`) требует полный UUID, short там даёт 400.
   - `GET /minecraft/version` → `extension_capabilities` - источник правды по гейтингу модов.
 - **Флаги:** Pennant считается по владельцу сервера.
 - **ultra.panel:**

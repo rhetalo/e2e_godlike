@@ -58,15 +58,27 @@ kb/
     integrations.md         # CurseForge, Modrinth, Amplitude, Stripe, eSputnik ...
   _meta/
     id-scheme.md            # схема ID и правила ссылок
+    templates.md            # шаблоны карточки тикета и страницы фичи
     inventory-2026-10-15.md # этап 0: что знаем и где лежит
+  _tools/
+    linkcheck.py            # проверка ссылок и якорей: python -I kb/_tools/linkcheck.py .
+    tickets_index.py        # пересборка tickets/README.md: python -I kb/_tools/tickets_index.py kb/tickets
 ```
+
+## С чего начать
+
+- **Продукт целиком:** [products/up/README.md](products/up/README.md) - игровая панель (остальные продукты в работе).
+- **Задачи:** [tickets/README.md](tickets/README.md) - 30 карточек: что меняли, итог QA, находки.
+- **Перед тестом:** [окружения](registry/environments.md), [серверы](registry/test-servers.md),
+  [аккаунты](registry/test-accounts.md), [флаги](registry/flags.md), [интеграции](registry/integrations.md).
+- **Перед коммитом в `kb/`:** прогнать `linkcheck.py` (0 битых ссылок) и пересобрать индекс тикетов.
 
 ## Этапы
 
 | # | Этап | Статус |
 |---|---|---|
 | 0 | Инвентаризация + схема ID | ✅ 15-Oct-2026 |
-| 1 | Каркас: реестры (тикеты, флаги, серверы, окружения) + первые страницы продуктов | следующий |
-| 2 | Майндкарта `map.md`, каждый узел - ссылка | |
+| 1 | Каркас: реестры, 30 карточек тикетов, обзор UP | ✅ 15-Oct-2026 |
+| 2 | Майндкарта `map.md`, каждый узел - ссылка | следующий |
 | 3 | Точечный ресерч GitHub (KB, глоссарии, связанные доки) | |
 | 4 | Репо продукта: архитектура + матрица «фича ↔ тесты ↔ дыры» | ждёт доступа |

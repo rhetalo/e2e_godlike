@@ -1,0 +1,84 @@
+---
+id: PROD-134
+title: World Backup - отдельная копия мира Minecraft перед опасными действиями
+type: ticket
+product: [UP]
+features: [UP/world-backup, UP/backups, UP/file-manager]
+status: partial
+qa_verdict: PASS-with-issues
+updated: 2026-10-15
+verified_on: 2026-08-14
+env: [prod]
+jira: https://antihost.atlassian.net/browse/PROD-134
+sources:
+  - agents.docs/game-panel/PROD-134-world-backup-REPORT.md
+  - agents.docs/game-panel/PROD-134-world-backup-testplan.md
+  - memory: prod-134-world-backup
+  - jira: PROD-134 → открывается как DEV-418 «Створення окремої системи бекапів для ігрових світів (World Backup)», status "Готово" (read 2026-10-15)
+---
+
+# PROD-134 - World Backup
+
+> **В двух словах.** Перед действием, которое может стереть мир (переустановка, смена версии с очисткой,
+> установка модпака, удаление папки мира), панель предлагает сделать копию только мира. Копия не занимает
+> обычные слоты бэкапов, живёт 7 дней, её можно восстановить. QA 10-14 Aug-2026: со стороны клиента
+> всё работает на Java и Bedrock. Открыты только проверки DevOps (хранилище, ошибки, очистка через 7 дней).
+
+## Что изменилось
+- Новый тип бэкапа «только мир» для Minecraft Java и Bedrock, кнопка **World Backups** рядом с Recycle Bin в File Manager.
+- Попап-перехватчик **«Save Your World First?»** («Create World Backup» / «Continue Without Backup», предупреждение
+  «world may be permanently lost»): разрушительный запрос не уходит, пока не выбран вариант; Cancel / X отменяет действие.
+- Срабатывает на: Reinstall + Delete files; Change Version + Wipe Server Files; модпак Delete Existing Files и
+  Create Backup and Install; удаление папки `world` или файла в ней (вторым шагом после обычного «Delete File»).
+  Не срабатывает: без delete / wipe, модпак Install Over, файлы вне мира, папки вида `world_old`.
+- Также всплывает при смене игры в cancel-модуле на MC-сервере ([DEV-401](DEV-401.md)).
+
+## Как это работает
+- API: `panel.godlike.host/api/v2/servers/{FULL_UUID}/world-backups` (short-uuid → 400), `POST` = 202,
+  `DELETE /world-backups/{uuid}`, restore = `DELETE /world-backups/restore`. До флага: 404 «World Backups are not available for this account».
+- Состав: Java Paper/Vanilla = `world` + `world_nether` + `world_the_end`; Forge/NeoForge = одна папка уровня;
+  Bedrock = `worlds/<имя>`, `world.variant:"bedrock"`.
+- Лимит по умолчанию 1 копия на сервер, отдельно от обычной квоты (3). Ротация: старая удаляется только после
+  COMPLETED новой (upload-then-delete-oldest). Срок `expires_at` = +7 дней. Rate-limit: 1 копия / 60 с на сервер.
+- Restore очищает мир до состояния архива; mods / plugins / config / `server.jar` (Java), аддоны / allowlist (Bedrock) не трогает.
+- Копия в статусе PENDING («Creating…»): Restore / Delete недоступны, `DELETE` → 409.
+- Хранение: адаптер `wings` (общая шара ноды), как у остальных бэкапов. Исходно писалось на несуществующий диск `s3` - root cause нерабочести до 13-Aug.
+- Флаг [flag:world-backup](../registry/flags.md#world-backup) per-account (Pennant): включение = тумблер + `php artisan pennant:purge world-backup` (CLI, DevOps).
+- Лимит клиента 0/N живёт в бэкенд-админке Pterodactyl (Build), не в клиентской панели.
+
+## Итог QA
+- 10-11 Aug: флаг выкл на обоих аккаунтах; после включения - попап-матрица ✅, но копии висели PENDING → FAILED.
+- 13-Aug: фикс `s3 → wings`, create → COMPLETED, Restore, Delete ✅ (Bedrock, Java). 14-Aug итоговый прогон на 4 свежих серверах ✅,
+  все 4 замечания исправлены. Видео `wb-full`, `wb-clip-*` отданы владельцу.
+- **Клиентская часть PASS (14-Aug-2026, prod, [acc:admin](../registry/test-accounts.md#admin)).** Green light - после DevOps §6.
+- Отчёт: [PROD-134-world-backup-REPORT.md](../../agents.docs/game-panel/PROD-134-world-backup-REPORT.md),
+  ран-бук: [PROD-134-world-backup-testplan.md](../../agents.docs/game-panel/PROD-134-world-backup-testplan.md).
+
+## Находки
+| ID | Суть | Статус |
+|---|---|---|
+| PROD-134/F1 | Воркер не доводил копии: писал на несуществующий диск `s3` (PENDING → FAILED через ~1 ч) | исправлен 13-Aug (`wings`) |
+| PROD-134/F2 | Таймер «Remaining» без цифр («d h left») | исправлен («6d 23h left») |
+| PROD-134/F3 | 429 на повторное создание 5-30 мин без объяснения | исправлен: 1 копия / 60 с с сообщением |
+| PROD-134/F4 | `can_create:false` при готовой копии противоречил POST 202 | исправлен |
+| PROD-134/F5 | Попап срабатывал на `world_old` (по префиксу `world*`) | исправлен |
+| PROD-134/F6 | Legacy-строки `disk=s3` в PENDING через API не удалить, держат слот | открыт, DB-зачистка DevOps (шаг ТЗ) |
+| PROD-134/O1 | Двойной Restore (concurrency-guard) не воспроизведён | не проверен, минор |
+| PROD-134/O2 | Terminate: клиентской кнопки нет (только Billing / WHMCS admin) | DevOps |
+
+## Связи
+- MR: ❓ не записаны.
+- Серверы (все [acc:admin](../registry/test-accounts.md#admin)): итоговый прогон [srv:7d7041c8](../registry/test-servers.md#7d7041c8),
+  [srv:b4089560](../registry/test-servers.md#b4089560), [srv:09f8d87d](../registry/test-servers.md#09f8d87d) (Java Paper),
+  [srv:feede8c1](../registry/test-servers.md#feede8c1) (Bedrock); ранее [srv:85fc5bd9](../registry/test-servers.md#85fc5bd9) (NeoForge),
+  [srv:e0ef886f](../registry/test-servers.md#e0ef886f), [srv:43ae756d](../registry/test-servers.md#43ae756d) (legacy `s3`-строки),
+  [srv:799c975d](../registry/test-servers.md#799c975d) (Paper), [srv:93bbc747](../registry/test-servers.md#93bbc747) (Bedrock).
+  Под деструктив в автотестах: [srv:7166c707](../registry/test-servers.md#7166c707) (Java, одноразовый, деструктив разрешён).
+- Флаги: [flag:world-backup](../registry/flags.md#world-backup).
+- Связанные тикеты: [DEV-401](DEV-401.md) (большой мир на free-шаге показывается только когорте World Backup), DEV-418 (тот же тикет в Jira ❓).
+
+## Хвосты
+- DevOps §6: подтверждены шара-не-SSD (§6.1) и 404 до флага (§6.9). Открыты: ротация при ошибке (старая остаётся),
+  fallback `world_backup_<дата>` при сбое заливки, реальная очистка через 7 дней, Cancel → копия живёт 7 дней / Terminate → удаление,
+  удаление при отсутствующем файле, лимит 0/N, зачистка legacy `s3`.
+- Автотест `tests/game/panel/world-backup.spec.ts` не написан (план в памяти: попап + Cancel матрица, create, ротация, DELETE-PENDING, `/features`).
