@@ -91,26 +91,27 @@ mindmap
 
 ## Карта ссылками
 
-### [WPGL - витрина godlike.host](_meta/inventory-2026-10-15.md#2-карта-продукта-черновик-для-майндкарты) ⚪
+### [WPGL - витрина godlike.host](products/wpgl/README.md)
 
-- ⚪ [Навигация, 8 языков, валюты, CookieYes](_meta/inventory-2026-10-15.md#2-карта-продукта-черновик-для-майндкарты)
-- ⚪ [Страницы игр, каталог игр, KB сайта, блог](_meta/inventory-2026-10-15.md#2-карта-продукта-черновик-для-майндкарты)
-- 🎫 Калькуляторы modded и Seed finder - [DEV-532](tickets/DEV-532.md) (калькулятор modded-страницы)
+- 📄 [Как устроено: WordPress, Polylang, кеш, аналитика, маршруты](products/wpgl/README.md#как-устроено)
+- 📄 [Карта разделов: навигация, языки, игры, KB сайта, калькуляторы, лендинги](products/wpgl/README.md#карта-разделов)
 - Воронки
   - 🎫 [DEV-400](tickets/DEV-400.md) - страницы модпаков → `cart-modded-new`
   - 🎫 [DEV-402](tickets/DEV-402.md) - страницы игр → Vue-cart
   - 🎫 [DEV-459](tickets/DEV-459.md) - Custom Modpack Setup, точки входа
-- ⚪ [Лендинги: Launcher, SMP One-Click, Modpack Program, PlayFreeHost](_meta/inventory-2026-10-15.md#2-карта-продукта-черновик-для-майндкарты)
-- 🎫 Промо и попапы - [DEV-455](tickets/DEV-455.md) (Free Server Gift)
+  - 📄 [VPS-воронка](products/vps/README.md#как-устроено)
+- 📄 [Промо: MONTHLY75, MODPACK50, flash-sale, Free Server Gift](products/wpgl/README.md#промо---как-работает) - [DEV-455](tickets/DEV-455.md)
+- 🎫 Калькулятор modded - [DEV-532](tickets/DEV-532.md)
+- 📄 [Гочи витрины](products/wpgl/README.md#гочи-для-тестирования)
 - Инструменты WP: [MCP godlike-wp](registry/mcp-tools.md#серверы)
 
-### [BIL - биллинг WHMCS](_meta/inventory-2026-10-15.md#2-карта-продукта-черновик-для-майндкарты) ⚪
+### [BIL - биллинг WHMCS](products/bil/README.md)
 
-- ⚪ [Корзина и чекаут, язык чекаута](_meta/inventory-2026-10-15.md#2-карта-продукта-черновик-для-майндкарты)
-- ⚪ [Оплата: Stripe, PayPal, Crypto, кредит](registry/integrations.md)
-- 🎫 Clientarea и отмена - [DEV-401](tickets/DEV-401.md) (Request Cancellation ведёт в cancel-модуль UP)
+- 📄 [Как устроено: WHMCS, эндпоинты, связь с панелью](products/bil/README.md#как-устроено)
+- 📄 [Язык чекаута](products/bil/README.md#язык-чекаута) · [Оплата](products/bil/README.md#оплата)
+- 📄 [Статусы услуги: отмена, пауза, free-план, trial](products/bil/README.md#статусы-и-переходы) - [DEV-401](tickets/DEV-401.md)
+- 📄 [Free-продукты 282 / 1127](products/bil/README.md#free-продукты) - [DEV-455](tickets/DEV-455.md)
 - 🎫 Custom Modpack Setup add-on - [DEV-458](tickets/DEV-458.md)
-- 🎫 Free-продукты и письма - [DEV-455](tickets/DEV-455.md)
 - 🎫 Тарифы для Upgrade - [TASK-tariff-list-400](tickets/TASK-tariff-list-400.md)
 
 ### [UP - игровая панель ultra.panel + API v2](products/up/README.md)
@@ -202,5 +203,5 @@ mindmap
 ## Что дальше по карте
 
 - UP описана целиком (28 страниц фич). Пост-инсталл скан модов намеренно живёт внутри [UP/client-only-mods](products/up/client-only-mods.md).
-- Обзоры продуктов WPGL, BIL, OLDP, ADM, PFH (папки `kb/products/<prod>/` пока пустые): когда появятся,
+- Обзоры продуктов OLDP, ADM, PFH (папки `kb/products/<prod>/` пока пустые): когда появятся,
   ⚪-ссылки на инвентаризацию заменить на них.

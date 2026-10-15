@@ -113,8 +113,8 @@ sources:
 ## Что устарело в источниках
 
 1. **Тестовый сервер:** `agents.docs/vps-panel/*` пишут `c13d2e04` (srv-433986). В коде с 04..10-Jun-2026 сменились
-   `666b12fd` → `3bf4ed84` → **`9c49ed96`** (актуальный). Разрешение «ребилдить можно» дано про тестовый сервер аккаунта; к
-   `9c49ed96` его относим, потому что `rebuild.real` гоняется на нём ❓ подтвердить у владельца.
+   `666b12fd` → `3bf4ed84` → **`9c49ed96`** (актуальный). Переустановка ОС разрешена
+   на всех VPS владельца (подтверждено 15-Oct-2026).
 2. **Имена спеков:** доки упоминают монолиты `vps.funnel.spec.ts` и `vps.panel.rebuild.spec.ts` - они разбиты на
    `vps.funnel.{happy-path,configure,billing}` и `vps.panel.rebuild.{os-selection,selection,real}`.
 3. **`vps.build.spec.ts`, `VpsPanelServerDetailPage`, `VpsPanelServersListPage`** удалены 03-Jun-2026 (legacy с фантомными локаторами).

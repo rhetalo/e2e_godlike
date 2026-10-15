@@ -68,7 +68,7 @@ kb/
 ## С чего начать
 
 - **Карта всего проекта:** [map.md](map.md) - продукты → области → фичи → тикеты, всё ссылками.
-- **Продукт целиком:** [products/up/README.md](products/up/README.md) - игровая панель (28 страниц фич), [products/vps/README.md](products/vps/README.md) - VPS-панель VirtFusion. Остальные продукты в работе.
+- **Продукт целиком:** [products/up/README.md](products/up/README.md) - игровая панель (28 страниц фич), [products/vps/README.md](products/vps/README.md) - VPS-панель VirtFusion, [products/wpgl/README.md](products/wpgl/README.md) - витрина, [products/bil/README.md](products/bil/README.md) - биллинг. OLDP, ADM, PFH - в работе.
 - **Задачи:** [tickets/README.md](tickets/README.md) - 30 карточек: что меняли, итог QA, находки.
 - **Перед тестом:** [окружения](registry/environments.md), [серверы](registry/test-servers.md),
   [аккаунты](registry/test-accounts.md), [флаги](registry/flags.md), [интеграции](registry/integrations.md),
