@@ -22,10 +22,10 @@ sources:
 
 | Источник | Что внутри | Свежесть | Судьба |
 |---|---|---|---|
-| `C:\Playwrite\e2e_browseruse\QA_test_docs\` (docx) | ISTQB-комплект по SF и GP: описание, 85 + 151 требований, 44 + 54 кейсов, чеклисты, RTM | март 2026, реверс по UI | Брать дерево модулей и NFR. Витрина и моды сильно устарели. Отчёт о выполнении в `QA_Documentation_Ultra_Panel` выдуман, не доверять |
-| `agents.docs/game-panel/KNOWLEDGE_BASE.md` | Самое подробное описание GP: вкладки, API v2, модалки, cancel-модуль | 27-Jul, основной recon 03-23 Jun | Главный донор для `products/gp/` |
+| `C:\Playwrite\e2e_browseruse\QA_test_docs\` (docx) | ISTQB-комплект по WPGL и UP: описание, 85 + 151 требований, 44 + 54 кейсов, чеклисты, RTM | март 2026, реверс по UI | Брать дерево модулей и NFR. Витрина и моды сильно устарели. Отчёт о выполнении в `QA_Documentation_Ultra_Panel` выдуман, не доверять |
+| `agents.docs/game-panel/KNOWLEDGE_BASE.md` | Самое подробное описание UP: вкладки, API v2, модалки, cancel-модуль | 27-Jul, основной recon 03-23 Jun | Главный донор для `products/up/` |
 | `agents.docs/vps-panel/*` | VirtFusion: power, media, network, rebuild, гочи | 03-19 Jun | Донор для `products/vps/` |
-| `agents.docs/QA_TEST_COVERAGE_AND_SPECS.md` | Что покрыто автотестами по SF/воронкам/GP | 02-Oct | Донор матрицы покрытия (этап 4) |
+| `agents.docs/QA_TEST_COVERAGE_AND_SPECS.md` | Что покрыто автотестами по WPGL/воронкам/UP | 02-Oct | Донор матрицы покрытия (этап 4) |
 | `agents.docs/tz/TZ-*.md` | Ретро-ТЗ по 25 областям | 17-Jun | Сверить и привязать к фичам |
 | `agents.docs/godlike-mcp-usage.md` | Как устроен WP: 8 локалей, ~2613 страниц, типы постов, Yoast, Cloudflare | 03-Sep | Донор для `products/sf/` |
 | `agents.docs/AGENT_HANDOFF.md` | Auth-флоу, storageState, история сессий | шапка 18-Jun, правки до 02-Oct | Тест-инфра, оставить в agents.docs. Карта файлов устарела |
@@ -34,11 +34,11 @@ sources:
 | Память Claude | ~45 файлов с продуктовым знанием (задачи, гочи, флаги, серверы) | до 15-Oct | Продуктовое переносим в KB, в памяти оставляем ссылку |
 | `tests/**` | ~65 спеков, ~470 тестов: funnels 6, game/panel 31, general 6, modded 9, vps 13 | живое | Матрица «фича ↔ тест» |
 | Корневые `g-*.md`, `vps-*.md`, `wp-hosting-page.md` | aria-дампы **Antihost**, не godlike | Aug-Sep | Не для KB. Antihost отделился (своя команда и QA), дампы перенесены в `C:\Playwrite\antihost-qa\recon-dumps\` |
-| `main-sharing.md` (корень) | aria-дамп Sharing в GP | 10-Sep | Удалить после переноса знания |
+| `main-sharing.md` (корень) | aria-дамп Sharing в UP | 10-Sep | Удалить после переноса знания |
 
 ## 2. Карта продукта (черновик для майндкарты)
 
-**SF - витрина (WordPress)**
+**WPGL - витрина (WordPress)**
 - Шапка/футер/навигация, 8 языков (Polylang), 4 валюты, CookieYes.
 - Страницы игр (~34-38), каталог игр, KB сайта (`ht_kb`), отзывы, партнёрка, ping, контакты, блог.
 - Калькуляторы: modded (Shadow-DOM `<plan-calculator-widget>`), Seed finder `/minecraft-seeds/`.
@@ -54,7 +54,7 @@ sources:
 - Free-продукты 282 (EU) / 1127 (USA). Письма eSputnik.
 - ⚠️ Как продукт почти не описан: жизненный цикл услуги, инвойсы, upgrade, кредит.
 
-**GP - игровая панель ultra.panel (+ API panel.godlike.host/api/v2, Pterodactyl под капотом)**
+**UP - игровая панель ultra.panel (+ API panel.godlike.host/api/v2, Pterodactyl под капотом)**
 - Вход (логин/пароль, OAuth WHMCS, Steam), Dashboard «My Servers».
 - Сервер: Overview (Server information, Steam Port DEV-562, Edit/Import/Reinstall), Power, Console (xterm, палитра Commands), Files (+ Recycle Bin, SFTP), Config, Players, Versions (18 ядер, Arclight/Mohist DEV-506/529), Startup/Docker image.
 - Extensions: моды/плагины/модпаки, источники CF/Modrinth/Hangar/Spigot/Polymart (DEV-405/534), фильтр по загрузчику (DEV-498), loader gating (DEV-515), скрытие client-only (DEV-500), пост-инсталл скан (DEV-492), missing deps, каталог модпаков v2 `is_listed` (DEV-532).
@@ -65,7 +65,7 @@ sources:
 - Не-MC игры: Palworld Settings, PZ, ARK, Rust, Terraria, Arma.
 - Free-серверы: запрет смены egg (DEV-563).
 
-**GPL - старая клиентская панель (panel.godlike.host/)**
+**OLDP - старая клиентская панель (panel.godlike.host/)**
 - Клиент видит в ней свои серверы.
 - Version changer, libxrender (DEV-486), Docker image в Startup (DEV-513).
 - ⚠️ Описания нет.
@@ -94,30 +94,30 @@ sources:
 
 | ID | Суть | Продукт | QA-статус |
 |---|---|---|---|
-| DEV-400 | Страницы модпаков ведут в `cart-modded-new` | SF/BIL | PASS 18/18 |
-| DEV-401 | Cancel retention: экраны Game Rec + Free Plan | GP/BIL | live 14-Aug, часть багов не перепроверена |
-| DEV-402 | Воронка игр под Vue-cart | SF | сделано 20-Aug |
-| DEV-405 | Моды/модпаки прямо из API CF/Modrinth | GP | PASS 05-Oct |
-| DEV-455 / GROWTH-95 | Попап Free Server Gift + письма | SF/BIL | закрыт 15-Oct |
+| DEV-400 | Страницы модпаков ведут в `cart-modded-new` | WPGL/BIL | PASS 18/18 |
+| DEV-401 | Cancel retention: экраны Game Rec + Free Plan | UP/BIL | live 14-Aug, часть багов не перепроверена |
+| DEV-402 | Воронка игр под Vue-cart | WPGL | сделано 20-Aug |
+| DEV-405 | Моды/модпаки прямо из API CF/Modrinth | UP | PASS 05-Oct |
+| DEV-455 / GROWTH-95 | Попап Free Server Gift + письма | WPGL/BIL | закрыт 15-Oct |
 | DEV-458 | Custom Modpack Setup, add-on в биллинге | BIL | блокер: письмо/тикет |
-| DEV-459 | Custom Modpack, точки входа | SF/GP | PASS 28-Sep |
-| DEV-472 | Java detection + попап | GP | закрыт 08-Oct |
+| DEV-459 | Custom Modpack, точки входа | WPGL/UP | PASS 28-Sep |
+| DEV-472 | Java detection + попап | UP | закрыт 08-Oct |
 | DEV-477 | Лимиты ресурсов нод | ADM/INFRA | у DevOps |
-| DEV-485 | Гейт старта по Java | GP | PASS 09-Oct, хвосты: письмо, DoD |
-| DEV-486 | Version changer + libxrender | GPL | PASS 25-Sep |
-| DEV-492 | Пост-инсталл скан модов | GP | закрыт 09-Oct |
-| DEV-498 | Фильтр модов по загрузчику | GP | PASS 25-Sep |
-| DEV-500 | Скрытие client-only модов | GP | PASS 12-Oct |
-| DEV-506 | Откат версии Arclight | GP | Install ок → DEV-529 |
-| DEV-512 | libxrender | GP | закрыт 02-Oct |
-| DEV-513 | Устаревший Docker image в Startup | GPL/ADM | PASS 12-Oct |
-| DEV-515 | Loader gating модов | GP | PASS 07-Oct, снять флаг |
-| DEV-529 | Arclight → Forge после старта; Mohist installed=null | GP | закрыт 08-Oct |
-| DEV-532 | Видимость каталога модпаков `is_listed` | GP/ADM | PASS 08-Oct |
-| DEV-534 | Фильтр «All» шлёт `any` (бывш. DEV-405/B6) | GP | PASS 09-Oct |
-| DEV-562 | Steam Port для PZ в Overview | GP | PASS 15-Oct |
-| DEV-563 | Free-серверам запрещена смена egg | GP/PFH | 20 PASS, BUG-1 ждёт деплоя PFH |
-| PROD-134 | World Backup | GP | клиент PASS, открыт DevOps §6 |
+| DEV-485 | Гейт старта по Java | UP | PASS 09-Oct, хвосты: письмо, DoD |
+| DEV-486 | Version changer + libxrender | OLDP | PASS 25-Sep |
+| DEV-492 | Пост-инсталл скан модов | UP | закрыт 09-Oct |
+| DEV-498 | Фильтр модов по загрузчику | UP | PASS 25-Sep |
+| DEV-500 | Скрытие client-only модов | UP | PASS 12-Oct |
+| DEV-506 | Откат версии Arclight | UP | Install ок → DEV-529 |
+| DEV-512 | libxrender | UP | закрыт 02-Oct |
+| DEV-513 | Устаревший Docker image в Startup | OLDP/ADM | PASS 12-Oct |
+| DEV-515 | Loader gating модов | UP | PASS 07-Oct, снять флаг |
+| DEV-529 | Arclight → Forge после старта; Mohist installed=null | UP | закрыт 08-Oct |
+| DEV-532 | Видимость каталога модпаков `is_listed` | UP/ADM | PASS 08-Oct |
+| DEV-534 | Фильтр «All» шлёт `any` (бывш. DEV-405/B6) | UP | PASS 09-Oct |
+| DEV-562 | Steam Port для PZ в Overview | UP | PASS 15-Oct |
+| DEV-563 | Free-серверам запрещена смена egg | UP/PFH | 20 PASS, BUG-1 ждёт деплоя PFH |
+| PROD-134 | World Backup | UP | клиент PASS, открыт DevOps §6 |
 | Упоминания | DEV-145, DEV-275, DEV-315, DEV-321, DEV-441, DEV-523, PROD-126 | - | только ссылки |
 
 Задачи без тикета (получат `TASK-<slug>`): split-server, palworld-settings, smp-oneclick,
@@ -248,7 +248,7 @@ cancel-amplitude, tariff-list-400 (Critical), mc-extensions-epic.
 3. Rebuild: TEST_PLAN ссылается на несуществующий `vps.panel.rebuild.spec.ts`. На деле есть
    `rebuild.real` / `os-selection` / `selection`.
 4. `AGENT_HANDOFF.md` §2/§5: перечислены удалённые файлы, репо назван GitHub (README - GitLab).
-5. Число тестов GP: «~58» / «~64» / «~65», а по факту 31 спек.
+5. Число тестов UP: «~58» / «~64» / «~65», а по факту 31 спек.
 6. game-panel KB §3 и §7.0: тестовый сервер Paper или NeoForge, серверов ~26 или 30.
    Дописано поверх, не исправлено.
 7. TZ-SEEDS-CALC: AC про калькулятор, хотя калькулятор заменён Seed finder.
@@ -270,7 +270,7 @@ DEV-532 (BMC4 ambiguous_loader), Launcher (og:image), Palworld (кейсы ва�
 4. Stage: страница окружения (URL, ноды, аккаунты, что задеплоено).
 5. Лендинги и конструктор модпаков: знание только в отчётах.
 6. Не-MC игры: разбросано по отчётам.
-7. GP после июля (Java, моды, Arclight/Mohist, tariff-list 400): в отчётах, не сведено в KB.
+7. UP после июля (Java, моды, Arclight/Mohist, tariff-list 400): в отчётах, не сведено в KB.
 8. VPS: Rescue, dashboard, цикл Building → Running.
 
 ## 7. ⚠️ Риск: секреты в репо

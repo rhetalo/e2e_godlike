@@ -42,10 +42,10 @@ kb/
   map.md                    # майндкарта проекта (этап 2)
   glossary.md               # словарь терминов
   products/
-    sf/                     # SF  - витрина godlike.host (WordPress)
+    wpgl/                   # WPGL  - витрина godlike.host (WordPress)
     bil/                    # BIL - биллинг WHMCS (clientarea, корзина, инвойсы)
-    gp/                     # GP  - игровая панель ultra.panel + API panel.godlike.host/api/v2
-    gpl/                    # GPL - старая клиентская панель panel.godlike.host/
+    up/                     # UP  - игровая панель ultra.panel + API panel.godlike.host/api/v2
+    oldp/                   # OLDP - старая клиентская панель panel.godlike.host/
     adm/                    # ADM - админка panel.godlike.host/admin (только админы)
     vps/                    # VPS - vf-panel (VirtFusion)
     pfh/                    # PFH - PlayFreeHost (бесплатный хостинг)

@@ -22,17 +22,17 @@ ID требований из старых docx (`REQ-NAV-001`) пересека�
 
 | Префикс | Что это | Адрес |
 |---|---|---|
-| `SF` | Витрина, WordPress | godlike.host |
-| `BIL` | Биллинг WHMCS: clientarea, корзина, чекаут, инвойсы | godlike.host/billing, clientarea |
-| `GP` | Игровая панель (новая) + её API | ultra.panel.godlike.host, panel.godlike.host/api/v2 |
-| `GPL` | Старая клиентская игровая панель: клиент видит свои серверы | panel.godlike.host/ |
+| `WPGL` | Витрина, WordPress | godlike.host |
+| `BIL` | Биллинг WHMCS: clientarea, корзина, чекаут, инвойсы | godlike.host/clientarea/ |
+| `UP` | Игровая панель (новая) + её API | ultra.panel.godlike.host, panel.godlike.host/api/v2 |
+| `OLDP` | Старая клиентская игровая панель: клиент видит свои серверы | panel.godlike.host/ |
 | `ADM` | Админка. Доступ только у админов с выданной ролью, вход через корп-почту | panel.godlike.host/admin |
 | `VPS` | VPS-панель VirtFusion | vf-panel.godlike.host |
 | `PFH` | PlayFreeHost, бесплатный хостинг | playfreehost |
 | `AFF` | Партнёрка | affiliate.godlike.host |
 | `INFRA` | Ноды, stage, CI, деплой | - |
 
-> ❓ Точный адрес биллинга (`BIL`) ещё не подтверждён.
+> Префиксы в ID пишем заглавными (`UP/java-detection`), папки - строчными (`products/up/`).
 
 ## Репозитории кода (GitLab `git.godlike.ovh`)
 
@@ -51,14 +51,14 @@ ID требований из старых docx (`REQ-NAV-001`) пересека�
 |---|---|---|---|
 | Jira-тикет | `<KEY>-<N>` | `DEV-562`, `PROD-134`, `GROWTH-95` | `kb/tickets/DEV-562.md` |
 | Задача без тикета | `TASK-<slug>` | `TASK-split-server` | `kb/tickets/TASK-split-server.md` |
-| Фича | `<PROD>/<slug>` | `GP/java-detection` | `kb/products/gp/java-detection.md` |
+| Фича | `<PROD>/<slug>` | `UP/java-detection` | `kb/products/up/java-detection.md` |
 | Фичефлаг | `flag:<name>` | `flag:world-backup` | `kb/registry/flags.md#world-backup` |
 | Тест-сервер | `srv:<short8>` | `srv:ebb03adc` | `kb/registry/test-servers.md#ebb03adc` |
 | Тест-аккаунт | `acc:<role>` | `acc:shared-owner`, `acc:admin`, `acc:invitee` | `kb/registry/test-accounts.md#shared-owner` |
 | Окружение | `env:<name>` | `env:prod`, `env:stage` | `kb/registry/environments.md#stage` |
 | Находка / баг / кейс внутри задачи | `<TICKET>/<LOCAL>` | `DEV-492/F5`, `DEV-563/FE-07`, `TASK-split-server/BUG-1` | якорь в отчёте задачи |
-| Тест-кейс автотеста | `TC-<PROD>-<AREA>-NNN` | `TC-GP-PWR-001` | спек (grep по ID) |
-| Требование из старых docx | `REQ-<PROD>-<AREA>-NNN` | `REQ-SF-NAV-001`, `REQ-GP-AUTH-007` | страница фичи |
+| Тест-кейс автотеста | `TC-<PROD>-<AREA>-NNN` | `TC-UP-PWR-001` (в спеках пока старое `TC-GP-*`, это то же самое) | спек (grep по ID) |
+| Требование из старых docx | `REQ-<PROD>-<AREA>-NNN` | `REQ-WPGL-NAV-001`, `REQ-UP-AUTH-007` | страница фичи |
 | Merge request | `<repo>!<N>` | `panel!1672`, `new-panel!547` | ссылка на GitLab (см. «Репозитории кода») |
 | Опубликованный артефакт | `art:<id>` | `art:52DJGadW` | карточка тикета, блок «Артефакты» |
 
