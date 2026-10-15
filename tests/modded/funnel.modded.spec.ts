@@ -13,7 +13,7 @@ import { ModdedHostingPage } from "../../pages/ModdedHostingPage";
 import { CartPage } from "../../pages/CartPage";
 import { CartModdedNewPage } from "../../pages/CartModdedNewPage";
 import { CheckoutPage } from "../../pages/CheckoutPage";
-import { Credentials, VueCartStep2Pattern, ModdedCartProductPattern } from "../../fixtures/test-data";
+import { Credentials, VueCartStep2Pattern, ModdedCartProductPattern, StorefrontPriceRe } from "../../fixtures/test-data";
 import { loginClientareaAndSaveSession } from "../../utils/clientareaAuth";
 
 const storageStatePath = "storageState.modded.json";
@@ -159,7 +159,7 @@ test.describe("Воронка покупки modded (стоп на страни�
         expect(c.productId, `productId калькулятора не число: "${c.productId}"`).toMatch(/^\d+$/);
         expect(c.modpackId, `modpackId калькулятора пуст: "${c.modpackId}"`).toBeTruthy();
         const price = await modded.readCalculatorPrice();
-        expect(price.current, `цена калькулятора не распознана: "${price.current}"`).toMatch(/[€$]\s?\d/);
+        expect(price.current, `цена калькулятора не распознана: "${price.current}"`).toMatch(StorefrontPriceRe);
         return c;
       });
 

@@ -60,6 +60,10 @@ export const STOREFRONT = {
   customizeButton: "button.storefront__tariff-action__cart",
   discountBadge: ".storefront__tariffs-discount__percentage",
   firstPurchaseDiscount: ".storefront__tariffs-first-purchase",
+  // Блок «List of games» на /game-servers-en/ — SEO-текст со ссылками на лендинги игр (live-recon 15-Oct-2026,
+  // пилот Playwright Test Agents). ⚠️ Сам <h2>List of games</h2> внутри имеет высоту 0 (спрятан стилями) —
+  // getByRole('heading') его не видит; якорь — сами ссылки блока, они видимые.
+  gamesListLink: ".seotext__body a",
 } as const;
 
 /* ===== Cart — Auth Step (Vue SPA) ===== */

@@ -55,6 +55,18 @@ export const StorefrontPages = [
 ] as const;
 
 /**
+ * Каталог игр /game-servers-en/, блок «List of games» (live-recon 15-Oct-2026: 20 ссылок).
+ * coreGames — игры, которые точно должны быть (структурная проверка: список может расти).
+ * landing — путь лендинга; у Minecraft ссылка ведёт на главную.
+ */
+export const GamesCatalog = {
+  minLinks: 20,
+  coreGames: ["Rust", "ARK Survival Evolved", "Minecraft", "Terraria", "Valheim"],
+  sample: { name: "Rust", landing: /\/rust-server-hosting\/?(\?.*)?$/ },
+  minecraft: { name: "Minecraft", landing: /^https:\/\/godlike\.host\/(\?.*)?$/ },
+} as const;
+
+/**
  * Валюты свитчера в шапке витрины: [код, символ] в порядке отображения.
  * Confirmed live-recon 15-Oct-2026: 21 валюта (было 4 на 10-Jun). Валюта по умолчанию — по IP
  * (из Украины — UAH), поэтому тесты не завязываются на конкретную дефолтную валюту.
@@ -65,6 +77,18 @@ export const StorefrontCurrencies = [
   ["ARS", "AR$"], ["COP", "COL$"], ["CLP", "CLP$"], ["PEN", "S/"], ["IDR", "Rp"],
   ["VND", "₫"], ["MYR", "RM"], ["PKR", "Rs"], ["TRY", "₺"], ["SAR", "SAR"], ["UAH", "₴"],
 ] as const;
+
+/**
+ * Цена витрины «символ валюты + число» для ЛЮБОЙ валюты свитчера («€5.11», «₴719.00», «AR$1200»).
+ * Валюта по умолчанию зависит от IP (из UA — UAH), поэтому не завязываемся на €/$.
+ * Длинные символы первыми, чтобы «AR$» не матчился как «$».
+ */
+export const StorefrontPriceRe = new RegExp(
+  `(?:${[...StorefrontCurrencies.map(([, symbol]) => symbol)]
+    .sort((a, b) => b.length - a.length)
+    .map((s) => s.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&"))
+    .join("|")})\\s?\\d`,
+);
 
 /** A URL is "the payment step" if it matches any of these. */
 export const PaymentUrlPatterns = [

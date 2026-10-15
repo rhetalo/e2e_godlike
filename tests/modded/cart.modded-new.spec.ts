@@ -24,7 +24,7 @@ import { test, expect, type BrowserContext } from "@playwright/test";
 import { pinAmplitudeExperiments } from "../../utils/amplitude";
 import { ModdedHostingPage } from "../../pages/ModdedHostingPage";
 import { CartModdedNewPage } from "../../pages/CartModdedNewPage";
-import { Credentials } from "../../fixtures/test-data";
+import { Credentials, StorefrontPriceRe } from "../../fixtures/test-data";
 import { loginClientareaAndSaveSession } from "../../utils/clientareaAuth";
 
 const storageStatePath = "storageState.modded.json";
@@ -75,7 +75,7 @@ test.describe("Воронка /cart-modded-new — конфигурация че
     await test.step("≥5 планов в списке и цена отрендерена", async () => {
       const planOpts = await cart.optionTexts(cart.planSelect());
       expect(planOpts.length).toBeGreaterThanOrEqual(5);
-      expect(await cart.priceText()).toMatch(/[€$]\s?\d/);
+      expect(await cart.priceText()).toMatch(StorefrontPriceRe);
     });
   });
 

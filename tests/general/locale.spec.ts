@@ -15,16 +15,11 @@
  */
 import { test, expect } from "../../fixtures/base";
 import { Header } from "../../components/Header";
-import { StorefrontCurrencies } from "../../fixtures/test-data";
+import { StorefrontCurrencies, StorefrontPriceRe } from "../../fixtures/test-data";
 
 const LANG_CODES = ["ua", "es", "de", "pl", "fr", "pt", "it"] as const;
 
-const escapeRe = (s: string): string => s.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&");
 const CURRENCY_CODE_RE = StorefrontCurrencies.map(([code]) => code).join("|");
-// Цена «Starting at ₴575.20» — символ любой валюты свитчера (длинные символы первыми: «AR$» раньше «$»).
-const PRICE_SYMBOL_RE = new RegExp(
-  [...StorefrontCurrencies.map(([, symbol]) => symbol)].sort((a, b) => b.length - a.length).map(escapeRe).join("|"),
-);
 
 // Свитчер — десктопный (.desktop-only). Фиксируем desktop-viewport, чтобы он рендерился.
 test.use({ viewport: { width: 1440, height: 900 } });
@@ -84,7 +79,7 @@ test.describe("[storefront] Переключатель языка и валют�
 
     await test.step("базовая цена видна с символом валюты", async () => {
       await expect(header.samplePrice).toBeVisible();
-      await expect(header.samplePrice).toHaveText(PRICE_SYMBOL_RE);
+      await expect(header.samplePrice).toHaveText(StorefrontPriceRe);
     });
 
     await test.step(`свитчер содержит все ${StorefrontCurrencies.length} валют с их символами`, async () => {

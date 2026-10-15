@@ -39,6 +39,25 @@ export class GameStorefrontPage extends BasePage {
     await this.goto(Urls.gameServers);
   }
 
+  /** Ссылки блока «List of games» (SEO-список лендингов игр). */
+  get gamesListLinks(): Locator {
+    return this.page.locator(STOREFRONT.gamesListLink);
+  }
+
+  /** Прочитать список игр: имя ссылки + href как в разметке. Без ассертов — вердикт в спеке. */
+  async gamesListEntries(): Promise<Array<{ name: string; href: string }>> {
+    await this.gamesListLinks.first().waitFor({ state: "visible" });
+    return this.gamesListLinks.evaluateAll((links) =>
+      links.map((a) => ({ name: (a.textContent ?? "").trim(), href: a.getAttribute("href") ?? "" })),
+    );
+  }
+
+  /** Кликнуть игру в «List of games» по точному имени и дождаться навигации. */
+  async openGameFromList(name: string): Promise<void> {
+    const link = this.gamesListLinks.filter({ hasText: new RegExp(`^\\s*${name}\\s*$`) }).first();
+    await Promise.all([this.page.waitForURL((url) => !url.pathname.startsWith(Urls.gameServers)), link.click()]);
+  }
+
   gameLink(name: string): Locator {
     return this.page
       .locator(STOREFRONT.gameTitle)
