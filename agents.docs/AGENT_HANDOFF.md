@@ -25,10 +25,15 @@
 - zod-контракты `utils/schemas/` (MOD/PLG-001/002); цены витрины по гео `StorefrontPriceRe`; новый спек `tests/general/games.catalog.spec.ts`.
 - Журнал решений `agents.docs/DECISIONS.md`; скилл `godlike-e2e-conventions`; отчёт пилота `agents.docs/PLAYWRIGHT_AGENTS_PILOT.md`.
 
+**Сделано 16-Oct (вечер):**
+- B2/B3 перенесены в `games.catalog.spec.ts` (TC-GAMES-005 фильтры, TC-GAMES-006 поиск), черновики из `agents-pilot` удалены.
+- zod `utils/schemas/minecraftServer.ts`: `minecraft/version` + `server-jar/status`, тест TC-GP-MOD-005 в `mods.spec.ts`.
+  ⚠️ На пробе `extension_capabilities` / `java_preflight` / `details` = null на всех 5 серверах - их внутренности не контрактованы.
+
 **Следующее:**
-1. Проверить первый прогон `quality_gate` в GitLab (после пуша 16-Oct).
-2. Перенести черновики сетки каталога B2/B3 (`tests/agents-pilot/b2-*`, `b3-*`) в `games.catalog.spec.ts`, вынеся локаторы в `STOREFRONT` + `GameStorefrontPage`.
-3. zod для других эндпоинтов api/v2 - только по живой пробе ответа.
+1. Проверить первый прогон `quality_gate` в GitLab.
+2. Уточнить схему `extension_capabilities` / `java_preflight`, когда проба покажет заполненный объект (флаг гейтинга / Start с префлайтом).
+3. Дальше по `agents.docs/IMPROVEMENTS_2026-10.md`.
 
 ---
 

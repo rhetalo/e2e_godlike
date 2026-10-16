@@ -10,7 +10,7 @@
  * ⚠️ Install НЕ жмём (установка мода/плагина = мутация) — структурные/read-only проверки.
  * Методы — действия/читатели; assert'ы в спеке. Подтверждено MCP-recon 06-Jun-2026.
  */
-import { type Locator, type Page } from "@playwright/test";
+import { type Locator, type Page, type Response } from "@playwright/test";
 import { GamePanelBasePage } from "./GamePanelBasePage";
 import { GAME_PANEL_EXTENSIONS } from "../../utils/selectors";
 
@@ -24,6 +24,18 @@ export class GamePanelExtensionsPage extends GamePanelBasePage {
     await this.open(`/server/${this.uuid}/extensions`);
     await this.root.waitFor({ state: "visible", timeout: 20_000 }).catch(() => {});
   }
+  /**
+   * Read-only GET `minecraft/server-jar/status` — UI в покое его не зовёт (только поллинг после Start).
+   * API живёт на другом хосте (panel.godlike.host) с Bearer-токеном SPA, поэтому берём URL и
+   * `authorization` у уже пойманного запроса UI к `minecraft/version` того же сервера.
+   */
+  async fetchServerJarStatus(versionResp: Response): Promise<{ status: number; json: unknown }> {
+    const { authorization = "" } = await versionResp.request().allHeaders();
+    const url = versionResp.url().replace(/\/minecraft\/version\?/, "/minecraft/server-jar/status?");
+    const resp = await this.page.request.get(url, { headers: { accept: "application/json", authorization } });
+    return { status: resp.status(), json: await resp.json() };
+  }
+
   /** Каталог Modpacks (тот же компонент). */
   async gotoModpacks(): Promise<void> {
     await this.open(`/server/${this.uuid}/modpacks`);

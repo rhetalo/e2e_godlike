@@ -64,6 +64,14 @@ export const STOREFRONT = {
   // пилот Playwright Test Agents). ⚠️ Сам <h2>List of games</h2> внутри имеет высоту 0 (спрятан стилями) —
   // getByRole('heading') его не видит; якорь — сами ссылки блока, они видимые.
   gamesListLink: ".seotext__body a",
+  // Сетка карточек каталога /game-servers-en/ (live-recon 16-Oct-2026, пилот Test Agents B2/B3):
+  // фильтры `.games__filter-btn[data-filter=all|pc|mobile|console]` (активный получает класс *active*),
+  // поиск `input.games__search-input`; карточки, скрытые фильтром/поиском, остаются в DOM с display:none,
+  // поэтому считаем только видимые. Имя карточки = alt у `.game__image`.
+  gridFilterBtn: ".games__filter-btn",
+  gridSearchInput: "input.games__search-input",
+  gridCard: ".games__block .game",
+  gridCardImage: ".game__image",
 } as const;
 
 /* ===== Cart — Auth Step (Vue SPA) ===== */
@@ -893,6 +901,9 @@ export const GAME_PANEL_EXTENSIONS_API = {
   modVersions: /\/api\/v2\/servers\/[^/]+\/minecraft\/mods\/[^/]+\/versions/,
   pluginsInstalled: /\/api\/v2\/servers\/[^/]+\/minecraft\/plugins\/installed/,
   modsInstalled: /\/api\/v2\/servers\/[^/]+\/minecraft\/mods\/installed/,
+  // Состояние сервера (live-проба 16-Oct-2026). version зовут Overview / Console / Extensions / Versions;
+  // server-jar/status UI в покое НЕ зовёт - см. GamePanelExtensionsPage.fetchServerJarStatus.
+  minecraftVersion: /\/api\/v2\/servers\/[^/]+\/minecraft\/version\?/,
 } as const;
 
 // Referral (/referral). Глобальная страница (default_layout), не server-scoped.

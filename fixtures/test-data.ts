@@ -64,6 +64,16 @@ export const GamesCatalog = {
   coreGames: ["Rust", "ARK Survival Evolved", "Minecraft", "Terraria", "Valheim"],
   sample: { name: "Rust", landing: /\/rust-server-hosting\/?(\?.*)?$/ },
   minecraft: { name: "Minecraft", landing: /^https:\/\/godlike\.host\/(\?.*)?$/ },
+  /** Сетка карточек (live-recon 16-Oct-2026): порог «не меньше» под View All - каталог растёт, ровно N не сверяем. */
+  grid: {
+    minCards: 40,
+    mobileGames: ["Minecraft Bedrock", "Terraria"],
+    search: {
+      single: { query: "rust", expected: "Rust" },
+      // Пробелы + верхний регистр: поиск обязан обрезать и игнорировать регистр.
+      multi: { query: "  ARK ", needle: "ark", expected: ["ARK Survival Evolved", "ARK: Survival Ascended"] },
+    },
+  },
 } as const;
 
 /**

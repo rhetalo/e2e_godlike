@@ -131,8 +131,8 @@
 Planner - разведчик, который ещё и нашёл ошибку в нашей KB; Generator - черновик, близкий к финалу (остаётся вынести
 локаторы в PO); Healer - чинит тест, но не прячет баги. Решение D-011 (черновики только в `tests/agents-pilot/`, финал после ревью) оставляем.
 
-Черновики B2/B3: `tests/agents-pilot/b2-grid-filter-tabs.spec.ts`, `b3-grid-search.spec.ts` - кандидаты на перенос в
-`tests/general/games.catalog.spec.ts` после выноса локаторов сетки в `STOREFRONT` и `GameStorefrontPage`.
+Черновики B2/B3 перенесены 16-Oct-2026 в `tests/general/games.catalog.spec.ts` (TC-GAMES-005/006): локаторы сетки -
+`STOREFRONT.grid*` + методы `GameStorefrontPage`, данные - `GamesCatalog.grid`; burn-in x5 30/30. Из `agents-pilot` удалены.
 
 ⚠️ Родные агенты запускают тесты через стандартную `test-results/` - во время большого прогона без своего `outputDir`
 они стирают его трейсы (см. ловушку 2). 16-Oct Planner шёл параллельно с прогоном по решению владельца.

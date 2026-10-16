@@ -12,6 +12,7 @@
 import type { z } from "zod";
 
 export * from "./extensions";
+export * from "./minecraftServer";
 
 /** Проблемы валидации как «путь: сообщение» (пустой массив = ответ соответствует схеме). Не больше `limit` строк. */
 export function schemaIssues(schema: z.ZodType, data: unknown, limit = 20): string[] {

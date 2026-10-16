@@ -16,7 +16,13 @@ import { test, expect, type BrowserContext, type Page } from "@playwright/test";
 import { GamePanelExtensionsPage } from "../../../pages/game/GamePanelExtensionsPage";
 import { loginAndSaveGameSession, GAME_STORAGE_STATE_PATH, GAME_SERVER_UUID } from "../../../utils/gameAuth";
 import { GAME_PANEL_EXTENSIONS_API } from "../../../utils/selectors";
-import { schemaIssues, ExtensionListResponse, ExtensionVersionsResponse } from "../../../utils/schemas";
+import {
+  schemaIssues,
+  ExtensionListResponse,
+  ExtensionVersionsResponse,
+  MinecraftVersionResponse,
+  ServerJarStatusResponse,
+} from "../../../utils/schemas";
 
 // ⚠️ Выделенный plugin-сервер 93521c70 удалён владельцем (API отдаёт 400 «resource does not
 // exist», страница /extensions рисует ошибку → падали TC-001/002). Каталог Mods/Plugins есть на
@@ -194,5 +200,24 @@ test.describe("@regression [game-panel] Mods (каталог + api/v2 контр
       }
       console.log(`[cleanup] uninstall "${installedName ?? target.name}": ${removed ? "removed" : "нечего снимать"}`);
     }
+  });
+
+  test("TC-GP-MOD-005 | Контракт состояния сервера: minecraft/version и server-jar/status (zod)", async () => {
+    const [versionResp] = await Promise.all([
+      page.waitForResponse((r) => GAME_PANEL_EXTENSIONS_API.minecraftVersion.test(r.url()), { timeout: 30_000 }),
+      ext.gotoExtensions(),
+    ]);
+
+    await test.step("minecraft/version: 200 и ответ соответствует контракту", async () => {
+      expect(versionResp.status()).toBe(200);
+      expect(schemaIssues(MinecraftVersionResponse, await versionResp.json())).toEqual([]);
+    });
+
+    const jar = await ext.fetchServerJarStatus(versionResp);
+
+    await test.step("server-jar/status: 200 и ответ соответствует контракту", async () => {
+      expect(jar.status).toBe(200);
+      expect(schemaIssues(ServerJarStatusResponse, jar.json)).toEqual([]);
+    });
   });
 });

@@ -6,10 +6,13 @@
  * к конвенциям репо: fixtures/base (гасит баннеры), PO GameStorefrontPage, селекторы из selectors.ts,
  * данные из test-data, структурные проверки (список может расти), URL — regex (прод дописывает ?rtkcid=…).
  *
- * Read-only: только навигация по ссылкам на лендинги, корзину не трогаем.
+ * Блок B (16-Oct-2026): сетка карточек - фильтры PC/Mobile/Console и поиск (черновики B2/B3
+ * из agents-pilot, перенесены сюда). Считаем только ВИДИМЫЕ карточки: скрытые остаются в DOM.
+ *
+ * Read-only: только навигация по ссылкам на лендинги и клики по фильтрам, корзину не трогаем.
  */
 import { test, expect } from "../../fixtures/base";
-import { GameStorefrontPage } from "../../pages/GameStorefrontPage";
+import { GameStorefrontPage, type GridFilter } from "../../pages/GameStorefrontPage";
 import { GamesCatalog, Urls } from "../../fixtures/test-data";
 
 test.describe("[storefront] Каталог игр — List of games", () => {
@@ -73,6 +76,85 @@ test.describe("[storefront] Каталог игр — List of games", () => {
       await catalog.openGameFromList(GamesCatalog.minecraft.name);
       await expect(page).toHaveURL(GamesCatalog.minecraft.landing);
       await expect(catalog.pageHeading()).toContainText(GamesCatalog.minecraft.name);
+    });
+  });
+});
+
+test.describe("[storefront] Каталог игр — сетка, фильтры и поиск", () => {
+  const { grid } = GamesCatalog;
+
+  test("@regression TC-GAMES-005 | фильтры PC / Mobile / Console сужают сетку, View All возвращает её", async ({ page }) => {
+    const catalog = new GameStorefrontPage(page);
+    const counts: Partial<Record<GridFilter | "initial", number>> = {};
+
+    const applyFilter = async (name: GridFilter) => {
+      await catalog.applyGridFilter(name);
+      await expect(catalog.gridFilterButton(name)).toHaveClass(/active/);
+    };
+
+    await test.step(`открыть каталог: под View All не меньше ${grid.minCards} карточек`, async () => {
+      await catalog.open();
+      await expect(catalog.visibleGridCards.first()).toBeVisible();
+      counts.initial = await catalog.visibleGridCount();
+      expect(counts.initial).toBeGreaterThanOrEqual(grid.minCards);
+    });
+
+    await test.step("PC: карточек не больше, чем под View All, и не ноль", async () => {
+      await applyFilter("pc");
+      await expect.poll(() => catalog.visibleGridCount()).toBeLessThanOrEqual(counts.initial!);
+      counts.pc = await catalog.visibleGridCount();
+      expect(counts.pc).toBeGreaterThan(0);
+    });
+
+    await test.step(`Mobile: не больше PC, среди карточек ${grid.mobileGames.join(", ")}`, async () => {
+      await applyFilter("mobile");
+      await expect.poll(() => catalog.visibleGridCount()).toBeLessThanOrEqual(counts.pc!);
+      counts.mobile = await catalog.visibleGridCount();
+      for (const name of grid.mobileGames) await expect(catalog.visibleGridCard(name)).toBeVisible();
+    });
+
+    await test.step("Console: не больше Mobile (пустая сетка допустима)", async () => {
+      await applyFilter("console");
+      await expect.poll(() => catalog.visibleGridCount()).toBeLessThanOrEqual(counts.mobile!);
+    });
+
+    await test.step("View All: сетка возвращается к исходному числу карточек", async () => {
+      await applyFilter("all");
+      await expect.poll(() => catalog.visibleGridCount()).toBe(counts.initial);
+    });
+  });
+
+  test("@regression TC-GAMES-006 | поиск фильтрует сетку без учёта регистра и обрезает пробелы", async ({ page }) => {
+    const catalog = new GameStorefrontPage(page);
+    const { single, multi } = grid.search;
+    let initial = 0;
+
+    await test.step(`открыть каталог: поиск виден, карточек не меньше ${grid.minCards}`, async () => {
+      await catalog.open();
+      await expect(catalog.gridSearchInput).toBeVisible();
+      await expect(catalog.visibleGridCards.first()).toBeVisible();
+      initial = await catalog.visibleGridCount();
+      expect(initial).toBeGreaterThanOrEqual(grid.minCards);
+    });
+
+    await test.step(`'${single.query}': сетка сузилась, карточка ${single.expected} видна`, async () => {
+      await catalog.searchGrid(single.query);
+      await expect.poll(() => catalog.visibleGridNames()).toContain(single.expected);
+      await expect.poll(() => catalog.visibleGridCount()).toBeLessThan(initial);
+      await expect(catalog.visibleGridCard(single.expected)).toBeVisible();
+    });
+
+    await test.step(`'${multi.query}': пробелы и регистр не мешают, все карточки про ${multi.needle}`, async () => {
+      await catalog.searchGrid(multi.query);
+      await expect.poll(() => catalog.visibleGridNames()).toEqual(expect.arrayContaining([...multi.expected]));
+      const names = await catalog.visibleGridNames();
+      expect(names.length).toBeLessThan(initial);
+      for (const name of names) expect(name.toLowerCase(), name).toContain(multi.needle);
+    });
+
+    await test.step("очистка поля: сетка возвращается к исходному числу карточек", async () => {
+      await catalog.searchGrid("");
+      await expect.poll(() => catalog.visibleGridCount()).toBe(initial);
     });
   });
 });

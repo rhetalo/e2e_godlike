@@ -34,6 +34,9 @@ export interface TariffPromoResult {
   text: string;
 }
 
+/** Фильтр сетки каталога = значение `data-filter` у кнопки. */
+export type GridFilter = "all" | "pc" | "mobile" | "console";
+
 export class GameStorefrontPage extends BasePage {
   async open(): Promise<void> {
     await this.goto(Urls.gameServers);
@@ -56,6 +59,47 @@ export class GameStorefrontPage extends BasePage {
   async openGameFromList(name: string): Promise<void> {
     const link = this.gamesListLinks.filter({ hasText: new RegExp(`^\\s*${name}\\s*$`) }).first();
     await Promise.all([this.page.waitForURL((url) => !url.pathname.startsWith(Urls.gameServers)), link.click()]);
+  }
+
+  /* ===== Сетка карточек каталога (фильтры + поиск) ===== */
+
+  /** Кнопка фильтра сетки: View All / PC / Mobile / Console. */
+  gridFilterButton(name: GridFilter): Locator {
+    return this.page.locator(`${STOREFRONT.gridFilterBtn}[data-filter="${name}"]`);
+  }
+
+  /** Поле поиска над сеткой. */
+  get gridSearchInput(): Locator {
+    return this.page.locator(STOREFRONT.gridSearchInput);
+  }
+
+  /** Видимые пользователю карточки: скрытые фильтром/поиском (display:none) не считаются. */
+  get visibleGridCards(): Locator {
+    return this.page.locator(STOREFRONT.gridCard).locator("visible=true");
+  }
+
+  /** Видимая карточка игры по имени (alt картинки). */
+  visibleGridCard(name: string): Locator {
+    return this.visibleGridCards.locator(`${STOREFRONT.gridCardImage}[alt="${name}"]`);
+  }
+
+  async visibleGridCount(): Promise<number> {
+    return this.visibleGridCards.count();
+  }
+
+  /** Имена видимых карточек (alt картинок). */
+  async visibleGridNames(): Promise<string[]> {
+    return this.visibleGridCards
+      .locator(STOREFRONT.gridCardImage)
+      .evaluateAll((imgs) => imgs.map((i) => (i as HTMLImageElement).alt));
+  }
+
+  async applyGridFilter(name: GridFilter): Promise<void> {
+    await this.gridFilterButton(name).click();
+  }
+
+  async searchGrid(query: string): Promise<void> {
+    await this.gridSearchInput.fill(query);
   }
 
   gameLink(name: string): Locator {
