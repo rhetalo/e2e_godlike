@@ -850,6 +850,12 @@ export const GAME_PANEL_VERSIONS = {
   familyTitle: ".server__versions-type__title",    // имя семейства (Vanilla/Paper/NeoForge/...)
   goBack: 'text="Go Back"',                         // в drill-down списке версий (вернуться к семействам)
   snapshotToggle: 'text="Show Snapshot Versions"',  // тогл snapshot-сборок в drill-down
+  // Карточки версий в drill-down ?type=NAME (live-recon 16-Oct-2026, Vanilla): `.server__builds-build`
+  // с __title («26.3») и __type (RELEASE / SNAPSHOT). По умолчанию только RELEASE (97), тогл
+  // Show Snapshot Versions - клиентский фильтр, добавляет SNAPSHOT (852). Клик по карточке → билд → install: НЕ жать.
+  versionCard: ".server__builds-build",
+  versionTitle: ".server__builds-build__title",
+  versionType: ".server__builds-build__type",
 } as const;
 
 // Plugins/Mods (/server/{uuid}/extensions) + Modpacks (/server/{uuid}/modpacks).

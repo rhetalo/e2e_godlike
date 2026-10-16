@@ -140,5 +140,6 @@ Planner - разведчик, который ещё и нашёл ошибку �
 ## Файлы пилота
 
 - План: `specs/games-catalog.md` (сценарий 3.5 - ложная находка Planner, оставлен как пример)
-- Черновики агентов (как есть, после Healer): `tests/agents-pilot/*.spec.ts` - только проект `agents`
+- Черновики агентов (после Healer) жили в `tests/agents-pilot/` (проект `agents`); все 6 перенесены в финал и удалены 16-Oct-2026,
+  папка пустая - Generator создаст её заново (D-011)
 - Финал: `tests/general/games.catalog.spec.ts`, PO `pages/GameStorefrontPage.ts` (`gamesListLinks`, `gamesListEntries`, `openGameFromList`)

@@ -45,6 +45,28 @@ export class GamePanelVersionsPage extends GamePanelBasePage {
     return this.page.locator(GAME_PANEL_VERSIONS.snapshotToggle).first();
   }
 
+  /** Карточки версий в drill-down. ⚠️ Клик по карточке ведёт к install — не кликаем. */
+  versionCards(): Locator {
+    return this.page.locator(GAME_PANEL_VERSIONS.versionCard);
+  }
+
+  /** Уникальные типы видимых версий (RELEASE / SNAPSHOT). */
+  async versionTypes(): Promise<string[]> {
+    const types = await this.page.locator(GAME_PANEL_VERSIONS.versionType).allInnerTexts();
+    return [...new Set(types.map((t) => t.trim()))];
+  }
+
+  /** Переключить тогл Show Snapshot Versions (клиентский фильтр, сервер не меняет). */
+  async toggleSnapshots(): Promise<void> {
+    await this.snapshotToggle.click();
+  }
+
+  /** Go Back из drill-down к сетке семейств. */
+  async backToFamilies(): Promise<void> {
+    await this.goBack.click();
+    await this.grid.waitFor({ state: "visible", timeout: 15_000 });
+  }
+
   /** Открыть список версий семейства (drill-down). ⚠️ install НЕ жмём. */
   async openFamily(name: string): Promise<void> {
     await this.familyByName(name).first().click();

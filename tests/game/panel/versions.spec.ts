@@ -50,12 +50,32 @@ test.describe("@regression [game-panel] Versions (server software)", () => {
     });
   });
 
-  test("TC-GP-VER-002 | drill-down семейства открывает список версий (без установки)", async () => {
+  test("TC-GP-VER-002 | drill-down семейства: список RELEASE-версий, тогл Snapshot расширяет его (без установки)", async () => {
+    let releaseCount = 0;
     await versions.openFamily("Vanilla");
 
-    await test.step("в drill-down видны Go Back и тогл Show Snapshot Versions", async () => {
+    await test.step("drill-down открыт: ?type=VANILLA, Go Back и тогл Show Snapshot Versions видны", async () => {
+      await expect(versions.page).toHaveURL(/[?&]type=VANILLA(&|$)/i);
       await expect(versions.goBack).toBeVisible();
       await expect(versions.snapshotToggle).toBeVisible();
+    });
+
+    await test.step("список версий непустой и по умолчанию только RELEASE", async () => {
+      await expect(versions.versionCards().first()).toBeVisible();
+      releaseCount = await versions.versionCards().count();
+      expect(releaseCount).toBeGreaterThan(0);
+      expect(await versions.versionTypes()).toEqual(["RELEASE"]);
+    });
+
+    await test.step("Show Snapshot Versions: версий больше, появились SNAPSHOT", async () => {
+      await versions.toggleSnapshots();
+      await expect.poll(() => versions.versionCards().count()).toBeGreaterThan(releaseCount);
+      expect(await versions.versionTypes()).toEqual(expect.arrayContaining(["RELEASE", "SNAPSHOT"]));
+    });
+
+    await test.step("Go Back возвращает к сетке семейств", async () => {
+      await versions.backToFamilies();
+      await expect(versions.familyByName("Vanilla").first()).toBeVisible();
     });
   });
 });

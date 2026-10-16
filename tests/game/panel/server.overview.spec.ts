@@ -60,13 +60,17 @@ test.describe("@smoke [game-panel] Обзор сервера", () => {
     }
   });
 
-  test("TC-GP-SRV-003 | Server Information показывает адрес и UUID", async () => {
+  test("TC-GP-SRV-003 | Server Information показывает адрес host:PORT и UUID", async () => {
     const page = await context.newPage();
     const srv = new GamePanelServerPage(page, GAME_SERVER_UUID);
     await srv.goto();
 
-    await test.step("адрес srvN.godlike.club:PORT отображается", async () => {
+    await test.step("адрес в формате host:PORT (IP или srvN.godlike.club), порт в допустимом диапазоне", async () => {
       await expect(srv.addressLabel).toBeVisible();
+      await expect.poll(() => srv.getConnectionHost()).not.toBeNull();
+      const port = Number(await srv.getConnectionPort());
+      expect(port).toBeGreaterThanOrEqual(1024);
+      expect(port).toBeLessThanOrEqual(65535);
     });
 
     await test.step("UUID сервера показан в Server Information", async () => {

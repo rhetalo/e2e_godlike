@@ -21,7 +21,7 @@
 
 **Что изменилось:**
 - Playwright **1.64.1**; CI: образ `v1.64.1-noble`, стадия `quality` перед deploy (`quality_gate`: tsc + eslint; `kb_checks`).
-- Проект `agents` (`default: false`): `tests/seed.spec.ts`, черновики Playwright Test Agents в `tests/agents-pilot/`.
+- Проект `agents` (`default: false`): `tests/seed.spec.ts`, черновики Playwright Test Agents - в `tests/agents-pilot/` (сейчас пусто, всё перенесено в финал).
 - zod-контракты `utils/schemas/` (MOD/PLG-001/002); цены витрины по гео `StorefrontPriceRe`; новый спек `tests/general/games.catalog.spec.ts`.
 - Журнал решений `agents.docs/DECISIONS.md`; скилл `godlike-e2e-conventions`; отчёт пилота `agents.docs/PLAYWRIGHT_AGENTS_PILOT.md`.
 
