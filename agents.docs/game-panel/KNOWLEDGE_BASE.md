@@ -396,6 +396,50 @@ Moderator/Member + счётчики), **Members**, **Audit Log**.
   type-переключателя тем же текстом «Installed»; в PO различать по контейнеру (карточка vs
   `__extension-type__button`).
 
+#### 7b-ter. Modpacks: install-флоу и причины отказа пре-инсталл бэкапа (DEV-452, prod QA 16-Oct-2026)
+
+MR: panel!1581 (backend) + new-panel!515 (front); связка с DEV-484 (panel!1611, throttle). Старая React-панель: нет
+preflight и нет канала причин (known gap, вне scope).
+
+- **Флоу установки** (`/server/<short>/modpacks`): карточка → **Install** → диалог «Install modpacks» (радио
+  Delete / Create Backup and Install / Install Over + поле World Folder) → **Install** → возможный RAM-диалог
+  «This modpack needs more RAM» (Install anyway) → возможный World Backup попап (PROD-134) →
+  `POST /servers/{uuid}/minecraft/modpacks`.
+- **API живёт на `https://panel.godlike.host/api/v2`**, НЕ на origin ultra.panel (там отдаётся SPA HTML).
+  Bearer = `localStorage.access_token`.
+- **Sync-ответы 409 на POST** (проверяются preflight'ом: сначала throttle, потом слоты):
+  - `backup_throttled` - поля `retry_after` (с), `retry_at` (ISO), `throttle_limit`, `throttle_period`.
+    Диалог «Backup Limit Reached» (`ExtensionInstallDialogs.vue`, только крестик, без nav-кнопки). Тексты по
+    полям: «Only one backup per 60 minutes… try again in 37 minutes» (limit 1), «Many» при limit 3,
+    `retry_after` < ~60 с → «in a minute», нет `throttle_period` → generic «…try again in N minutes»,
+    `retry_after` null / limit <= 0 → `BackupThrottled_MessageDisabled` («not allowed… contact support»).
+  - `no_free_backup_slots` - без изменений: диалог «No Free Backup Slots» + кнопка Go To Backups; прогресс-экран
+    не показывается, `modpack_event`/`install_error` остаются null.
+- **Async-канал `modpack_install_error`:** `GET server` отдаёт `modpack_install_error`, фронт (`useModpackInstallError.ts`)
+  показывает тост и сразу делает **`DELETE …/install-error`** (ack; тост ~3 с после загрузки страницы).
+  Enum из **8** значений (был 2): `backup_failed` (теперь только отказ от ноды), `backup_throttled`
+  (async без `retry_after`), `backup_daemon_error`, `backup_timed_out`, `no_free_backup_slots`,
+  `reinstall_not_started`, `install_failed`, `install_timed_out`. Неизвестный код: тоста нет, DELETE нет.
+  Workflow-путь включён на проде (`workflow_runs.workflow_type='godlike-modpack-install'`).
+- **Связь с DEV-484:** решение продукта (15-Sep) - пре-инсталл бэкап исключён из throttle. Строка
+  `backups.is_system_initiated=true` ставится ВСЕГДА (независимо от env) и всегда вне окна throttle; env
+  `GODLIKE_PREINSTALL_BACKUP_EXEMPT_FROM_THROTTLE` (default `true`) лишь включает/выключает саму проверку.
+- ⚠️ **Живой 409 `backup_throttled` на проде не воспроизвести:** ручные бэкапы новой панели пишутся в
+  `backup_instances`, а preflight считает только core `backups`; шаг MR «создать N бэкапов вручную через
+  Backups» для новой панели неверен. Верификация - моком ответа.
+- **Тосты ultra.panel** = `@kyvg/vue3-notification`: селектор **`.vue-notification-wrapper`** (НЕ `v-snackbar`
+  / `role=alert`).
+- **Паттерн мока (page.route):** `page.route` с `try/catch` вокруг `fulfill` + между итерациями
+  `page.unrouteAll({ behavior: 'ignoreErrors' })` (иначе «Route is already handled»). Для POST - fulfill 409 с
+  телом кода; для async-канала - мок `GET server` с нужным `modpack_install_error`. Локаторы: карточка
+  `.v-card` filter hasText title `.last()` → `.server__extensions__extension-card__btn--install`; кнопка в
+  диалоге `.server__extensions__dialog__btn-install`.
+- **Находки (Low):** F1 - ключ i18n `Server_Extensions.Modpack.BackupThrottled_MessageDisabled` отсутствует в
+  таблице MR !515; F2 - инструкция QA в MR !1581 неверна для новой панели (см. ⚠️ выше); F3 - RAM-диалог
+  остаётся открытым под диалогом отказа (stacked modals).
+- **Не покрыто live:** реальный backend 409 throttled, отказ ноды / daemon / таймауты (безопасно не
+  индуцировать), D - delete/overwrite под throttle (деструктив). Ветки бэка покрыты unit-тестами MR.
+
 ### 7c. Boost / Upgrade `/server/{uuid}/upgrade?promocode=UPGRADE50F` (НЕ покрыто) — ПЛАТЁЖНЫЙ ФЛОУ
 - Кнопка **«Boost my server»** (overview, `current__tariff-button`) ведёт сюда с промокодом.
 - Контент: карточка текущего плана **`current-plan-card__*`** + карточки планов на выбор
