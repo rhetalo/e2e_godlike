@@ -17,6 +17,8 @@
 - ✅ §3 zod-схемы → `utils/schemas/` (mods/plugins список + версии), шаги в MOD-001/002, PLG-001/002 (16-Oct).
 - ✅ ADR → `agents.docs/DECISIONS.md`; ✅ гейт качества в CI (`quality_gate`, `kb_checks`).
 
+> **16-Oct-2026:** §1-§5 закрыты. Следующий шаг - `RESEARCH_2026-10-16.md` (фундамент: храповик линта, networkidle в панели, история прогонов).
+
 ## 1. Playwright: обновиться 1.60 → 1.64 🟢
 
 Мы на 1.60. Что даст обновление именно нам (по официальным release notes):
