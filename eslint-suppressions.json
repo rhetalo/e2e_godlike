@@ -1,0 +1,92 @@
+{
+  "tests/funnels/funnel.cart.paypal.spec.ts": {
+    "no-restricted-syntax": {
+      "count": 4
+    },
+    "playwright/no-conditional-expect": {
+      "count": 2
+    },
+    "playwright/no-conditional-in-test": {
+      "count": 1
+    }
+  },
+  "tests/funnels/funnel.with.credit.check.spec.ts": {
+    "no-restricted-syntax": {
+      "count": 4
+    }
+  },
+  "tests/game/panel/dashboard.spec.ts": {
+    "playwright/no-conditional-expect": {
+      "count": 1
+    },
+    "playwright/no-conditional-in-test": {
+      "count": 1
+    }
+  },
+  "tests/game/panel/files.recycle.spec.ts": {
+    "playwright/no-conditional-in-test": {
+      "count": 1
+    }
+  },
+  "tests/game/panel/files.spec.ts": {
+    "playwright/no-conditional-in-test": {
+      "count": 2
+    }
+  },
+  "tests/game/panel/mods.spec.ts": {
+    "playwright/no-conditional-in-test": {
+      "count": 1
+    }
+  },
+  "tests/game/panel/plugins.spec.ts": {
+    "playwright/no-conditional-in-test": {
+      "count": 1
+    }
+  },
+  "tests/general/login.validation.spec.ts": {
+    "no-restricted-syntax": {
+      "count": 1
+    }
+  },
+  "tests/general/storefront.breadth.spec.ts": {
+    "no-restricted-syntax": {
+      "count": 5
+    }
+  },
+  "tests/general/valid.links.spec.ts": {
+    "playwright/no-conditional-in-test": {
+      "count": 16
+    }
+  },
+  "tests/modded/funnel.modded.spec.ts": {
+    "playwright/no-conditional-expect": {
+      "count": 1
+    },
+    "playwright/no-conditional-in-test": {
+      "count": 1
+    }
+  },
+  "tests/modded/game-slider.spec.ts": {
+    "playwright/no-conditional-in-test": {
+      "count": 1
+    }
+  },
+  "tests/modded/modpack.config.modded.spec.ts": {
+    "playwright/no-conditional-expect": {
+      "count": 3
+    },
+    "playwright/no-conditional-in-test": {
+      "count": 1
+    }
+  },
+  "tests/modded/seed-list.finder.spec.ts": {
+    "playwright/prefer-web-first-assertions": {
+      "count": 1
+    }
+  },
+  "tests/vps/panel/vps.panel.media.spec.ts": {
+    "playwright/no-conditional-in-test": {
+      "count": 3
+    }
+  }
+}

@@ -8,6 +8,12 @@
  * Стратегия первого захода — мягкая: правила Playwright и явные запреты репо = error,
  * а legacy-шум (any, неиспользуемые переменные) = warn, чтобы `npm run lint` был полезен,
  * а не превращался в стену красного на старом коде. Ужесточаем позже, по мере чистки.
+ *
+ * Храповик (16-Oct-2026, DECISIONS.md D-021, RESEARCH_2026-10-16 F1): легаси-нарушения правил,
+ * которые раньше были warn, заморожены в eslint-suppressions.json (ESLint bulk suppressions),
+ * сами правила = error, CI гоняет `eslint . --max-warnings 0`. Новое нарушение валит гейт; починил
+ * легаси → `npx eslint . --prune-suppressions` и закоммитить обновлённый файл (счётчик идёт только вниз).
+ * Новые подавления руками НЕ добавлять (`--suppress-all` повторно не запускать) - чинить код.
  */
 import tseslint from "typescript-eslint";
 import playwright from "eslint-plugin-playwright";
@@ -70,29 +76,29 @@ export default tseslint.config(
       // Источник: OTUS «Вы неправильно тестируете асинхронный код» + «5 ошибок в E2E».
       // expect внутри if/try-catch может молча НЕ выполниться (false positive
       // «зелёного» теста) — ровно та боль, что лечит наше правило «≥1 expect на тест».
-      // Пока warn: 4 существующих нарушения в live-prod-спеках (funnel.cart.paypal,
-      // game/panel/dashboard, funnel.modded) — их фикс требует прогона по проду, вынесен
-      // в backlog (test-docs/README.md). После чистки промоутим в error.
-      "playwright/no-conditional-expect": "warn",
+      // error + легаси в eslint-suppressions.json (храповик 16-Oct-2026).
+      "playwright/no-conditional-expect": "error",
+      // if/switch в теле теста — ветка может молча не выполниться. Санкционированный
+      // условный пропуск = test.skip(cond, reason), он правилом не ловится.
+      // error + легаси в eslint-suppressions.json (храповик 16-Oct-2026).
+      "playwright/no-conditional-in-test": "error",
       // expect вне тела теста (в хелпере/верхнем уровне) — почти всегда ошибка структуры.
       "playwright/no-standalone-expect": "error",
       // web-first ассерты (await expect(loc).toBeVisible()) вместо expect(await loc.isVisible()).
-      // Пока warn: ~12 мест в legacy + это hard-rule репо «web-first waits». Промоутим в
-      // error после чистки (см. test-docs/README.md → backlog).
-      "playwright/prefer-web-first-assertions": "warn",
+      // Hard-rule репо «web-first waits». error + легаси в eslint-suppressions.json (16-Oct-2026).
+      "playwright/prefer-web-first-assertions": "error",
       // force:true маскирует реальную проблему UI (анти-паттерн OTUS). Только warn —
       // в репо есть задокументированные легитимные случаи (скрытые custom-UI инпуты,
       // напр. VpsPanelMediaPage), их error сломал бы зря.
       "playwright/no-force-option": "warn",
 
-      // ── Hard-rule «no raw-locators в теле спека» (CLAUDE.md) — пока warn ──
+      // ── Hard-rule «no raw-locators в теле спека» (CLAUDE.md) ──
       // Спек драйвит UI через Page Object/Component; сырой page.locator()/getBy* прямо
       // в спеке — антипаттерн (селектор должен жить в utils/selectors.ts → PO).
-      // Warn, а не error: ~25 легаси-нарушений (funnel.*, storefront.breadth,
-      // login.validation). Промоут в error после чистки. valid.links (краулер) и
-      // *.helpers.ts исключены ниже отдельным блоком.
+      // error + легаси (funnel.*, storefront.breadth, login.validation) в eslint-suppressions.json
+      // (16-Oct-2026). valid.links (краулер) и *.helpers.ts исключены ниже отдельным блоком.
       "no-restricted-syntax": [
-        "warn",
+        "error",
         {
           selector:
             "CallExpression[callee.object.name='page'][callee.property.name=/^(locator|frameLocator|getBy[A-Za-z]+)$/]",
@@ -100,7 +106,31 @@ export default tseslint.config(
             "Сырой локатор в теле спека — заведи его в Page Object/Component (селектор из utils/selectors.ts). Hard-rule CLAUDE.md: спек драйвит UI через PO.",
         },
       ],
+
+      // ── Бесплатные правила плагина (16-Oct-2026, RESEARCH F4: 0 нарушений на момент включения) ──
+      // Теги — ровно наш набор (CLAUDE.md «Tag it»); опечатка или самодельный тег валит линт.
+      "playwright/valid-test-tags": [
+        "error",
+        { allowedTags: ["@smoke", "@critical", "@regression", "@flaky", "@skip", "@slow"] },
+      ],
+      // Каждый тест обязан нести тег (в заголовке или на describe).
+      "playwright/require-tags": "error",
+      // Закомментированный тест = тихо выключенное покрытие; выключать через test.skip(cond, reason).
+      "playwright/no-commented-out-tests": "error",
+      // waitForSelector → web-first expect(locator)/locator.waitFor().
+      "playwright/no-wait-for-selector": "error",
+      // (2.11+) ассерт, который проходит всегда; одинаковые заголовки; annotation без причины.
+      "playwright/no-unnecessary-assertions": "error",
+      "playwright/no-identical-title": "error",
+      "playwright/require-annotation-reason": "error",
     },
+  },
+
+  // seed.spec.ts — не тест, а стартовая страница для Playwright Test Agents (проект `agents`):
+  // тег ему не нужен и не должен затягивать его в --grep-прогоны.
+  {
+    files: ["tests/seed.spec.ts"],
+    rules: { "playwright/require-tags": "off" },
   },
 
   // ── Playwright-правила для Page Objects / Components ─────────────
@@ -108,14 +138,14 @@ export default tseslint.config(
   // в pages/components/tests» держался лишь grep'ом в qa-gate.mjs. Навешиваем линтер и
   // сюда: правило-текст агент трактует, упавший линт он чинит (статья «Clean Architecture
   // и AI», 18-Jun). pages — 0 нарушений; components — 2 санкц. settle в CookieBanner
-  // (помечены eslint-disable). prefer-web-first/no-conditional-expect = warn (ловят дрейф).
+  // (помечены eslint-disable). prefer-web-first/no-conditional-expect = error (0 нарушений, 16-Oct-2026).
   {
     files: ["pages/**/*.ts", "components/**/*.ts"],
     plugins: { playwright },
     rules: {
       "playwright/no-wait-for-timeout": "error",
-      "playwright/prefer-web-first-assertions": "warn",
-      "playwright/no-conditional-expect": "warn",
+      "playwright/prefer-web-first-assertions": "error",
+      "playwright/no-conditional-expect": "error",
     },
   },
 

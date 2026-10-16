@@ -59,6 +59,7 @@ test.describe("@regression [game-panel] Connection-info — Server IP", () => {
     await test.step("отображаемый host = allocation.ip", async () => {
       expect(shownHost).toBe(allocIp);
     });
+
     await test.step("отображаемый host ≠ ip_alias (FQDN ноды клиенту не показываем)", async () => {
       expect(shownHost).not.toBe(allocAlias);
     });

@@ -82,7 +82,7 @@ test("@critical оплата Stripe и PayPal", async ({ page }) => {
  * автоматизации). Гоняется ТОЛЬКО при RUN_LOCAL_ONLY=1 (локально, вручную); на push/CI/VPS-cron —
  * пропускается. Опт-ин флаг, а не CI: VPS-cron НЕ выставляет CI=true, на него полагаться нельзя.
  */
-test("only_local PayPal popup открывает paypal.com (не оплачиваем)", async ({ page }) => {
+test("@regression only_local PayPal popup открывает paypal.com (не оплачиваем)", async ({ page }) => {
   test.skip(
     !process.env.RUN_LOCAL_ONLY,
     "only-local: гоняется ТОЛЬКО при RUN_LOCAL_ONLY=1 (локально); на push/CI/VPS-cron — пропускается",

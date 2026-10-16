@@ -18,8 +18,10 @@ stages:
   - test
 
 # ── ГЕЙТ ЯКОСТІ перед деплоєм (15-Oct-2026, agents.docs/DECISIONS.md D-016) ────
-# tsc + eslint (лише помилки, warnings не валять). Впав → deploy_to_vps не стартує,
-# на VPS лишається попередній робочий код і cron ганяє його.
+# tsc + eslint. Впав → deploy_to_vps не стартує, на VPS лишається попередній робочий код
+# і cron ганяє його. З 16-Oct-2026 (D-021) - храповик: легасі заморожено в eslint-suppressions.json,
+# --max-warnings 0 валить будь-яке НОВЕ порушення (і warning теж). Почистив легасі → закомітити
+# `npx eslint . --prune-suppressions`, інакше гейт впаде на застарілому придушенні.
 quality_gate:
   stage: quality
   tags:
@@ -29,7 +31,7 @@ quality_gate:
   script:
     - npm ci --no-audit --no-fund
     - npx tsc --noEmit
-    - npx eslint .
+    - npx eslint . --max-warnings 0
 
 # Перевірки бази знань kb/ - інформативно (allow_failure): доки не блокують доставку тестів.
 kb_checks:

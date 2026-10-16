@@ -83,6 +83,6 @@ short vs full UUID для части API; Pennant-флаги считаются 
 - [ ] ничего из раздела 3 не нажимается
 - [ ] проверяется **видимое пользователю** (не `toBeAttached` на спрятанном элементе)
 - [ ] ожидаемые значения не подогнаны под текущее поведение прода (если тест «починили» правкой ожидания - это кандидат в баг, а не фикс)
-- [ ] `npx tsc --noEmit` = 0, `npx eslint <файлы>` без новых предупреждений, burn-in зелёный
+- [ ] `npx tsc --noEmit` = 0, `npm run lint` = 0 (храповик D-021: любое новое warning/error валит гейт; почистил легаси → `npm run lint:prune`), burn-in зелёный
 
 Пример полного цикла: `agents.docs/PLAYWRIGHT_AGENTS_PILOT.md` (черновики → `tests/general/games.catalog.spec.ts`).
