@@ -18,11 +18,13 @@ updated: 2026-10-15
 | [DEV-402](DEV-402.md) | Страницы игр подключены к новой воронке (Vue-cart) | WPGL, BIL | done | - | 2026-08-20 |
 | [DEV-405](DEV-405.md) | Источник модов, плагинов и сборок в новой панели - прямые API CurseForge и Modrinth | UP | done | PASS | 2026-10-05 |
 | [DEV-418](DEV-418.md) | World Backup - отдельная копия мира Minecraft перед опасными действиями | UP | partial | PASS-with-issues | 2026-08-14 |
+| [DEV-452](DEV-452.md) | Понятные причины отказа при создании пре-инсталл бэкапа модпака (троттлинг vs остальные) | UP | done | PASS-with-issues | 2026-10-16 |
 | [DEV-455](DEV-455.md) | Попап Free Server Gift и цепочка писем (GROWTH-95) | WPGL, BIL | done | PASS-with-issues | 2026-10-15 |
 | [DEV-458](DEV-458.md) | Custom Modpack Setup как one-time add-on в биллинге | BIL, WPGL | blocked | FAIL | 2026-09-28 |
 | [DEV-459](DEV-459.md) | Custom Modpack Setup - точки входа в воронке и в игровой панели | WPGL, UP | done | PASS | 2026-09-28 |
 | [DEV-472](DEV-472.md) | Автодетект версии Java и попап ошибки Java | UP | done | PASS | 2026-10-08 |
 | [DEV-477](DEV-477.md) | Лимиты ресурсов нод (Unlimited / Percentage / Fixed) вместо overallocation | ADM, INFRA | n/a | - | - |
+| [DEV-484](DEV-484.md) | Единый лимит бэкапов - вывести pre-install бэкап из-под троттлинга и свести счётчики | UP | partial | PASS-with-issues | 2026-10-16 |
 | [DEV-485](DEV-485.md) | Фоновая проверка Java при старте сервера (гейт java-start-gate) | UP | done | PASS-with-issues | 2026-10-09 |
 | [DEV-486](DEV-486.md) | Старый Version Changer ломался на образах yolks-javaNN-libxrender | OLDP | done | PASS | 2026-09-25 |
 | [DEV-492](DEV-492.md) | Определять новые клиентские моды сразу после установки модпака | UP | done | PASS-with-issues | 2026-10-09 |

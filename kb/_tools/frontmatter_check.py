@@ -20,11 +20,13 @@ REQUIRED = {
     "*": ["id", "title", "updated"],
     "feature": ["type", "product", "status", "verified_on", "tickets", "flags", "tests", "sources"],
     "product-overview": ["type", "product", "status", "verified_on", "tickets", "flags", "tests", "sources"],
+    "api": ["type", "product", "status", "verified_on", "tickets", "features", "sources"],
     "ticket": ["type", "product", "features", "status", "qa_verdict", "verified_on", "jira", "sources"],
 }
 ALLOWED = {
     ("feature", "status"): {"draft", "verified", "stale"},
     ("product-overview", "status"): {"draft", "verified", "stale"},
+    ("api", "status"): {"draft", "verified", "stale"},
     ("ticket", "status"): {"done", "in-qa", "blocked", "partial", "n/a"},
     ("ticket", "qa_verdict"): {"PASS", "PASS-with-issues", "FAIL", "-"},
 }
@@ -98,7 +100,7 @@ def main():
                 expect = f"{parts[2].upper()}/{stem}"
                 if fm.get("id") != expect:
                     errors.append(f"{rel}: id {fm.get('id')!r}, ожидается {expect!r}")
-            if ptype in ("feature", "product-overview"):
+            if ptype in ("feature", "product-overview", "api"):
                 for t in as_list(fm.get("tickets")):
                     if t not in ticket_ids:
                         errors.append(f"{rel}: tickets ссылается на {t!r}, карточки kb/tickets/{t}.md нет")

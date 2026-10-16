@@ -79,6 +79,15 @@ sources:
 ### VITE_MANAGED_MODPACK_URL
 Ссылка на managed-модпак в панели ([DEV-459](../tickets/DEV-459.md)). Исправлено в !532.
 
+### Env бэкапов и установки модпака
+Подробно: [API - backups](../products/up/api/backups.md#как-работает-лимит-частоты), [DEV-452](../tickets/DEV-452.md), [DEV-484](../tickets/DEV-484.md).
+
+| Переменная | Значение | Что делает |
+|---|---|---|
+| `BACKUP_THROTTLE_LIMIT` / `BACKUP_THROTTLE_PERIOD` | прод `1` / `3600`, дефолт `config/backups.php` `2` / `600` | лимит частоты бэкапов, читают оба счётчика (`backups` и `backup_instances`) |
+| `GODLIKE_PREINSTALL_BACKUP_EXEMPT_FROM_THROTTLE` | по умолчанию `true`, значение на проде ❓ | включает проверку исключения пре-инсталл бэкапа из лимита частоты. Строка `is_system_initiated=true` ставится всегда |
+| `WORKFLOW_MODPACK_INSTALL_ENABLED` | по умолчанию `false`, на проде workflow-путь включён | выбирает workflow-путь установки модпака; от него зависят три причины стадии установки |
+
 ## Флаги автотестов (наш репо)
 
 | Переменная | Что включает |

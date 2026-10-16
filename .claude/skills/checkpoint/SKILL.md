@@ -20,6 +20,17 @@ description: >-
 - `KNOWLEDGE_BASE.md` → добавь новые находки по живому DOM (с датой «подтверждено DOM <дата>»).
 - `CLAUDE.md` / `AGENT_HANDOFF.md` → поправь счётчики/статусы, если менялись.
 
+## 1b. KB после QA фичи
+
+Если за сессию закрыт QA фичи или тикета, обнови `kb/` (правила - `kb/README.md`, ID и ссылки - `kb/_meta/id-scheme.md`, шаблоны - `kb/_meta/templates.md`):
+
+- **Страница фичи** `kb/products/<prod>/<slug>.md`: поведение, правила, гочи, покрытие, строка в «История», `verified_on`.
+- **Карточка тикета** `kb/tickets/<KEY>.md`: что изменилось, итог QA, находки `<KEY>/F<n>`, связи, хвосты. Индекс: `python -I kb/_tools/tickets_index.py kb/tickets`.
+- **API-страницы** `kb/products/up/api/<ресурс>.md` (см. `kb/products/up/api/README.md`): каждый эндпоинт, который трогал QA - метод, путь, параметры, тело, коды и `error_code`, флаги и env, строка в «История изменений», как проверено. Чего нет в источниках - `❓`, подмену ответа в браузере не выдавать за проверку бэкенда. Токены не писать.
+- **Реестры и карта:** новые флаги, env, серверы - в `kb/registry/`; новые страницы - в `kb/map.md`.
+- Проверки: `python -I kb/_tools/linkcheck.py .` (0 битых), `python -I kb/_tools/frontmatter_check.py .`.
+- Параллельно `agents.docs/game-panel/KNOWLEDGE_BASE.md` (находки по живому DOM, паттерны, гочи) - как в разделе 1.
+
 ## 2. Проверки
 
 - `npx tsc --noEmit` — должно быть **0 ошибок** (хук qa-gate это же блокирует на пуше).

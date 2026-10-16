@@ -4,14 +4,14 @@ title: Backups - бэкапы сервера, базы и папки
 type: feature
 product: UP
 status: draft
-updated: 2026-10-15
-verified_on: 2026-06-09        # последний recon бэкапов
-tickets: [DEV-418]
+updated: 2026-10-16
+verified_on: 2026-10-16        # DEV-484: лимиты и счётчики; остальное recon 2026-06-09
+tickets: [DEV-418, DEV-452, DEV-484]
 flags: []
 tests: [tests/game/panel/backups.spec.ts, tests/game/panel/role.enforcement.spec.ts, tests/game/panel/security.spec.ts]
 sources:
   - agents.docs/game-panel/KNOWLEDGE_BASE.md §5h, §5i, §5j, §8d (recon 05..09-Jun-2026)
-  - kb/tickets/DEV-418.md
+  - kb/tickets/DEV-418.md, DEV-452.md, DEV-484.md, kb/products/up/api/backups.md
 ---
 
 # Backups - бэкапы сервера, базы и папки
@@ -38,6 +38,16 @@ sources:
 - **Schedule Backup создаёт повторяющееся расписание (cron),** а не разовый бэкап: оно само плодит бэкапы и ест слоты. KB §8d.
 - **Restore** перезаписывает сервер содержимым бэкапа - деструктив.
 - Хранение - адаптер `wings` (общая шара ноды); на нём же World Backup ([DEV-418](../../tickets/DEV-418.md)).
+
+## Лимиты частоты и два хранилища (DEV-452, DEV-484)
+
+- Бэкапы лежат в двух таблицах: `backups` (пре-инсталл модпака, ядро) и `backup_instances` (ручные из вкладки Server). Список в UI
+  склеен, у всех `type = "instance"`. Счётчики лимита раздельные, настройки общие (прод: 1 бэкап в 3600 с).
+- Пре-инсталл бэкап вне лимита частоты ([DEV-484](../../tickets/DEV-484.md), `is_system_initiated`), но занимает слот.
+- Ручной бэкап: 202, второй подряд в окне - 429 «Only N backup instances may be generated…». Слово `instances` отличает счётчик ручных бэкапов от счётчика ядра.
+- ⚠️ Квота «N/3 slots used» считается фронтом по общему списку, включая неудачные, поэтому может показать «4/3» ([DEV-484/F1](../../tickets/DEV-484.md#находки)).
+- Общий счётчик для пре-инсталл, ручных и расписаний не сделан (часть 2 DEV-484).
+- Детали, коды, примеры: [UP API - backups](api/backups.md). Отказы установки модпака из-за бэкапа: [UP/modpack-catalog](modpack-catalog.md#отказы-при-установке-с-бэкапом-dev-452).
 
 ## Статусы и переходы
 
@@ -97,3 +107,5 @@ Locked-бэкап нельзя удалить, пока не разлочен.
 | 05-Jun-2026 | - | Recon бэкапов, KB §5h |
 | 09-Jun-2026 | - | Форма богаче (Ignored Files, расписание), BKP-003, SEC-002 |
 | 10..14-Aug-2026 | [DEV-418](../../tickets/DEV-418.md) | Отдельный тип World Backup, хранение на `wings` |
+| 16-Sep-2026 | [DEV-484](../../tickets/DEV-484.md) | Пре-инсталл бэкап вне лимита частоты (QA 16-Oct-2026) |
+| 16-Oct-2026 | [DEV-452](../../tickets/DEV-452.md) | Описаны два хранилища и раздельные счётчики (по QA DEV-452/DEV-484) |

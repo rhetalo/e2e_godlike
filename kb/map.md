@@ -3,7 +3,7 @@ id: KB-MAP
 title: Майндкарта проекта godlike
 type: index
 status: draft
-updated: 2026-10-15
+updated: 2026-10-16
 verified_on: null              # карта собрана из KB, сама по себе с продуктом не сверяется
 sources:
   - kb/_meta/inventory-2026-10-15.md §2
@@ -45,6 +45,7 @@ mindmap
       Custom Modpack add-on DEV-458
     UP игровая панель
       Вход и дашборд
+      API v2 modpacks server backups
       Сервер
         Overview DEV-562
         Power и Console
@@ -61,7 +62,7 @@ mindmap
         Sharing и роли
         Audit Log
       Данные
-        Backups
+        Backups DEV-452 DEV-484
         World Backup DEV-418
         Databases
       Монетизация
@@ -119,6 +120,7 @@ mindmap
 ### [UP - игровая панель ultra.panel + API v2](products/up/README.md)
 
 - ⚪ [Как устроено: Vue SPA, API v2, Pterodactyl, Pennant-флаги](products/up/README.md#как-устроено)
+- 📄 [UP API v2](products/up/api/README.md) - swagger-подобная дока: [modpacks](products/up/api/modpacks.md), [server](products/up/api/server.md), [backups](products/up/api/backups.md)
 - 📄 [UP/login-dashboard](products/up/login-dashboard.md) - вход, дашборд My Servers, меню аккаунта
 - Сервер
   - 📄 [UP/server-overview](products/up/server-overview.md) - Server Information, Edit Server: [DEV-562](tickets/DEV-562.md) (Steam Port)
@@ -144,6 +146,7 @@ mindmap
   - 📄 [UP/modpack-catalog](products/up/modpack-catalog.md) - модпаки: видимость и установка
     - 🎫 [DEV-532](tickets/DEV-532.md) - `is_listed`, [flag:is-listed](registry/flags.md#is-listed)
     - 🎫 [DEV-459](tickets/DEV-459.md) - вход в Custom Modpack Setup
+    - 🎫 [DEV-452](tickets/DEV-452.md) - причины отказа пре-инсталл бэкапа
   - 📄 [UP/missing-mod-deps](products/up/missing-mod-deps.md) - [TASK-missing-mod-deps](tickets/TASK-missing-mod-deps.md)
 - 📄 [UP/java-detection](products/up/java-detection.md) - требование к Java, попап, гейт старта
   - 🎫 [DEV-472](tickets/DEV-472.md) - автодетект и попап
@@ -153,6 +156,7 @@ mindmap
   - 📄 [UP/sharing-roles](products/up/sharing-roles.md) - инвайты, роли, Audit Log: [TASK-v2-subuser-permissions](tickets/TASK-v2-subuser-permissions.md)
 - Данные
   - 📄 [UP/backups](products/up/backups.md) - бэкапы сервера, базы, папки
+    - 🎫 [DEV-484](tickets/DEV-484.md) - пре-инсталл бэкап вне лимита
   - 📄 [UP/tasks](products/up/tasks.md) - задачи и расписание
   - 📄 [UP/databases](products/up/databases.md) - базы MySQL (stale, создание падало в июне)
   - 📄 [UP/ports-domains](products/up/ports-domains.md) - поддомен и порты

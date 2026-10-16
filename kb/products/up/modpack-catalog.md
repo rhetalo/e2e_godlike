@@ -4,16 +4,17 @@ title: Модпаки - каталог, видимость и установка
 type: feature
 product: UP
 status: draft
-updated: 2026-10-15
-verified_on: 2026-10-08        # последняя живая сверка - DEV-532
-tickets: [DEV-532, DEV-405, DEV-472, DEV-492, DEV-459]
+updated: 2026-10-16
+verified_on: 2026-10-16        # последняя живая сверка - DEV-452
+tickets: [DEV-532, DEV-405, DEV-472, DEV-492, DEV-459, DEV-452, DEV-484]
 flags: [is-listed, modpack-catalog-v2, extension-compatibility, VITE_MANAGED_MODPACK_URL]
 tests: [tests/game/panel/extensions.spec.ts, tests/game/panel/extension.sources.spec.ts]
 sources:
   - kb/tickets/DEV-532.md, DEV-405.md, DEV-472.md, DEV-492.md, DEV-459.md, DEV-515.md
   - kb/products/up/README.md (гоча 7, пробел 9)
   - test-docs/ultra.panel/dev532-modpack-catalog-visibility-REPORT.md
-  - memory: dev532-modpack-catalog-visibility, panel-modals-handle-myself
+  - kb/tickets/DEV-452.md, DEV-484.md, kb/products/up/api/modpacks.md
+  - memory: dev532-modpack-catalog-visibility, panel-modals-handle-myself, dev452-modpack-backup-fail-reasons
 ---
 
 # Модпаки - каталог, видимость и установка
@@ -44,6 +45,7 @@ sources:
 - **Установка:** `POST minecraft/modpacks` с обязательными `install_mode` (валидно `overwrite`) и `world_folder`
   ([DEV-515](../../tickets/DEV-515.md)). Под [flag:extension-compatibility](../../registry/flags.md#extension-compatibility)
   на ядре без модов → 409 `modpacks_not_supported`.
+- **API установки и отказов:** подробные коды, поля и порядок проверок - в [UP API - modpacks](api/modpacks.md), асинхронные ошибки - в [UP API - server](api/server.md).
 - **Видимость:** колонка `modpacks_v2.is_listed` ([flag:is-listed](../../registry/flags.md#is-listed)), меняется в админке
   `PATCH .../listing` и действует со следующего запроса (API `Cache-Control: no-cache`, Cloudflare `DYNAMIC`).
   Скрытая запись пропадает из клиентского каталога и калькулятора modded-страницы, `meta.total` уменьшается.
@@ -57,6 +59,23 @@ sources:
   - неизвестные jar получают вердикт за 0-7 с, клиентские отключаются на старте ([UP/client-only-mods](client-only-mods.md)).
 - **Каталог v2** - под [flag:modpack-catalog-v2](../../registry/flags.md#modpack-catalog-v2) (только staff). Что именно
   он меняет для клиента ❓ ([обзор UP, пробел 5](README.md#пробелы)).
+
+## Отказы при установке с бэкапом (DEV-452)
+
+Только режим «Create Backup and Install». Бэкенд проверяет заранее, экран прогресса при отказе не открывается:
+
+| Ситуация | Ответ | Что видит пользователь |
+|---|---|---|
+| Нет свободных слотов бэкапов | 409 `no_free_backup_slots` | диалог «No Free Backup Slots» + Go To Backups |
+| Лимит частоты бэкапов | 409 `backup_throttled` (`retry_after`, `retry_at`, `throttle_limit`, `throttle_period`) | диалог «Backup Limit Reached», только крестик |
+| Отказ позже по ходу установки | поле `modpack_install_error` (8 кодов) | тост со своим текстом на каждый код |
+
+- Порядок проверок: сначала лимит частоты, потом слоты ([API - modpacks](api/modpacks.md#post-serversuuidminecraftmodpacks)).
+- После [DEV-484](../../tickets/DEV-484.md) пре-инсталл бэкап вне лимита частоты, поэтому `backup_throttled` из новой панели получить нельзя.
+  Диалог «Backup Limit Reached» проверен только подменой ответа.
+- Слот пре-инсталл бэкап занимает: на тарифе с одним слотом вторая установка с бэкапом невозможна, пока бэкап не удалён.
+- Старая React-панель отказы не объясняет ([DEV-452/Q1](../../tickets/DEV-452.md#хвосты)).
+- Открытые находки: [DEV-452/F1, F2, F3](../../tickets/DEV-452.md#находки), [DEV-484/F1](../../tickets/DEV-484.md#находки).
 
 ## Правила и граничные случаи
 
@@ -90,6 +109,7 @@ sources:
 | `is_listed`: скрытие, detail, корзина, калькулятор | ручной QA [DEV-532](../../tickets/DEV-532.md) + регресс `slider.modded`, `modpack.config.modded` | ⚠️ авто только витрина |
 | Установка модпака, режимы, цепочка окон | ручной QA попутно ([DEV-472](../../tickets/DEV-472.md), [DEV-492](../../tickets/DEV-492.md), [DEV-418](../../tickets/DEV-418.md)) | ❌ авто нет |
 | Upload custom modpack | ручной QA [DEV-492](../../tickets/DEV-492.md) | ❌ авто нет |
+| Отказы пре-инсталл бэкапа: слоты живьём, диалог и тосты подменой ответа | ручной QA [DEV-452](../../tickets/DEV-452.md), [DEV-484](../../tickets/DEV-484.md) | ⚠️ авто нет |
 | Бейдж Optimized | нечем проверить (единственный `modpack_variants` неактивен) | ❌ |
 
 ## История
@@ -102,3 +122,5 @@ sources:
 | 02..08-Oct-2026 | [DEV-472](../../tickets/DEV-472.md) | После установки обновляются версия, loader, Java |
 | 08-Oct-2026 | [DEV-532](../../tickets/DEV-532.md) | Видимость `is_listed`, скрытие дублей |
 | 09-Oct-2026 | [DEV-492](../../tickets/DEV-492.md) | Скан модов сразу после установки, манифест не рвёт установку |
+| 09-Sep-2026 | [DEV-452](../../tickets/DEV-452.md) | Префлайт лимита и слотов, 8 причин отказа, диалог и тосты (QA 16-Oct-2026) |
+| 16-Sep-2026 | [DEV-484](../../tickets/DEV-484.md) | Пре-инсталл бэкап вне лимита частоты |
