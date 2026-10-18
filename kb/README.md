@@ -66,17 +66,20 @@ kb/
     tickets_index.py        # пересборка tickets/README.md: python -I kb/_tools/tickets_index.py kb/tickets
     frontmatter_check.py    # обязательные поля шапки, id, связи фич с тикетами: python -I kb/_tools/frontmatter_check.py .
     build_map.py            # интерактивная майндкарта kb/map.html (markmap): python -I kb/_tools/build_map.py .
+    coverage.py             # матрица покрытия kb/coverage.md + сверка tests:/«Покрытие» с кодом: python -I kb/_tools/coverage.py . --write
 ```
 
 ## С чего начать
 
 - **Карта всего проекта:** [map.md](map.md) - продукты → области → фичи → тикеты, всё ссылками.
+- **Что покрыто автотестами:** [coverage.md](coverage.md) - фича → спеки → число тестов → ✅ / руками / ❌ (генерируется).
 - **Продукт целиком:** [products/up/README.md](products/up/README.md) - игровая панель (28 страниц фич), [products/vps/README.md](products/vps/README.md) - VPS-панель VirtFusion, [products/wpgl/README.md](products/wpgl/README.md) - витрина, [products/bil/README.md](products/bil/README.md) - биллинг, [products/pfh/README.md](products/pfh/README.md) - PlayFreeHost, [products/oldp/README.md](products/oldp/README.md) - старая панель, [products/adm/README.md](products/adm/README.md) - админка.
 - **Задачи:** [tickets/README.md](tickets/README.md) - 30 карточек: что меняли, итог QA, находки.
 - **Перед тестом:** [окружения](registry/environments.md), [серверы](registry/test-servers.md),
   [аккаунты](registry/test-accounts.md), [флаги](registry/flags.md), [интеграции](registry/integrations.md),
   [MCP-серверы](registry/mcp-tools.md) (SQL к базам, инструменты WP), [Confluence DevOps и поддержки](registry/external-docs.md), [глоссарий](glossary.md).
-- **Перед коммитом в `kb/`:** `linkcheck.py` (0 битых ссылок), `frontmatter_check.py` (0 ошибок), пересобрать индекс тикетов; поменял `map.md` - пересобрать `map.html` (`build_map.py`).
+- **Перед коммитом в `kb/`:** `linkcheck.py` (0 битых ссылок), `frontmatter_check.py` (0 ошибок), пересобрать индекс тикетов; поменял `map.md` - пересобрать `map.html` (`build_map.py`);
+  поменял `tests:` / «Покрытие» или спеки - `coverage.py . --write` (0 ошибок; строки с ❓ и проза не проверяются).
 
 ## Этапы
 

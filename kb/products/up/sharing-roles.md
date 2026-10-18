@@ -4,7 +4,7 @@ title: Sharing, роли участников и Audit Log
 type: feature
 product: UP
 status: draft
-updated: 2026-10-15
+updated: 2026-10-18
 verified_on: 2026-09-22        # API-права docker_access; UI-матрица - recon 06-Jun
 tickets: [TASK-v2-subuser-permissions, TASK-split-server]
 flags: []
@@ -12,7 +12,7 @@ tests:
   - tests/game/panel/sharing.spec.ts
   - tests/game/panel/sharing.audit.spec.ts
   - tests/game/panel/role.enforcement.spec.ts
-  - tests/game/panel/permission.enforcement.api.spec.ts
+  # permission.enforcement.api.spec.ts (PERM-API-001) - лежит локально, не закоммичен (чужой WIP), см. «Покрытие»
 sources:
   - agents.docs/game-panel/KNOWLEDGE_BASE.md §4, §5e, §5i, §9b (recon 05-Jun..27-Jul-2026)
   - kb/tickets/TASK-v2-subuser-permissions.md, TASK-split-server.md

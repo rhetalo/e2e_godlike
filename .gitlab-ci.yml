@@ -44,6 +44,7 @@ kb_checks:
   script:
     - python3 -I kb/_tools/linkcheck.py .
     - python3 -I kb/_tools/frontmatter_check.py .
+    - python3 -I kb/_tools/coverage.py . --check   # матрица покрытия актуальна, ссылки KB на тесты живы
 
 # ── ОСНОВНЕ: доставка коду на VPS при push у main ────────────────────────────
 deploy_to_vps:

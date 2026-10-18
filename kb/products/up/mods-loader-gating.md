@@ -4,11 +4,11 @@ title: Loader gating - каталог и установка по ядру сер
 type: feature
 product: UP
 status: draft
-updated: 2026-10-15
+updated: 2026-10-18
 verified_on: 2026-10-08        # последняя живая сверка - DEV-529 (Mohist)
 tickets: [DEV-515, DEV-529, DEV-534]
 flags: [extension-compatibility]
-tests: []                      # автотестов нет, только ручной QA
+tests: [tests/game/panel/mods.spec.ts]   # только контракт API (TC-GP-MOD-005); поведение - ручной QA
 sources:
   - kb/tickets/DEV-515.md, DEV-529.md, DEV-534.md, DEV-532.md
   - test-docs/ultra.panel/dev515-mods-loader-gating-REPORT.md
@@ -94,7 +94,9 @@ sources:
 
 ## Покрытие
 
-- **Автотестов нет.** Ручной QA: [dev515-mods-loader-gating-REPORT.md](../../../test-docs/ultra.panel/dev515-mods-loader-gating-REPORT.md),
+- **Контракт - автотест** `mods.spec.ts` (TC-GP-MOD-005): zod-схема `GET minecraft/version`, в т.ч. `extension_capabilities`
+  (объект или null; на проде 16-Oct везде null - флаг выключен, внутренности не контрактованы). Поведение гейтинга - только руками.
+- Ручной QA: [dev515-mods-loader-gating-REPORT.md](../../../test-docs/ultra.panel/dev515-mods-loader-gating-REPORT.md),
   [dev529-arclight-start-REPORT.md](../../../test-docs/ultra.panel/dev529-arclight-start-REPORT.md).
 - Не покрыто: Velocity ([DEV-515/S1](../../tickets/DEV-515.md#находки)), тексты заглушек на UA/RU после раскатки флага.
 

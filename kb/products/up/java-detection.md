@@ -4,11 +4,11 @@ title: Java detection и гейт старта
 type: feature
 product: UP
 status: draft
-updated: 2026-10-15
+updated: 2026-10-18
 verified_on: 2026-10-09        # последняя живая сверка - добивка DEV-485
 tickets: [DEV-472, DEV-485, DEV-512]
 flags: [java-start-gate, java-mismatch-fixer, restart-confirmation]
-tests: []                      # автотестов нет, только ручной QA
+tests: [tests/game/panel/mods.spec.ts]   # только контракт API (TC-GP-MOD-005); поведение - ручной QA
 sources:
   - kb/tickets/DEV-472.md, DEV-485.md
   - test-docs/ultra.panel/java-detection-matrix-REPORT.md
@@ -99,7 +99,9 @@ Java до старта и отказывает на всех путях:
 
 ## Покрытие
 
-- **Автотестов нет.** Ручные матрицы: [java-detection-matrix-REPORT.md](../../../test-docs/ultra.panel/java-detection-matrix-REPORT.md)
+- **Контракт - автотест** `mods.spec.ts` (TC-GP-MOD-005): zod-схема `GET minecraft/server-jar/status` (`status`, `error`,
+  `java_preflight` - объект или null; на проде 16-Oct null) и `required_java` в `minecraft/version`. Сам детект и гейт - только руками.
+- Ручные матрицы: [java-detection-matrix-REPORT.md](../../../test-docs/ultra.panel/java-detection-matrix-REPORT.md)
   (C3-C10, модпаки M1/M2, ретесты 06-09 Oct) и [java-start-gate-REPORT.md](../../../test-docs/ultra.panel/java-start-gate-REPORT.md) (G0-G9).
 - Не покрыто: лаунчер (решение владельца 02-Oct), не-Minecraft (Hytale), письмо при блоке фонового старта
   ([DEV-485/F2](../../tickets/DEV-485.md#находки)).
