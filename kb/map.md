@@ -119,11 +119,11 @@ mindmap
 ### [BIL - биллинг WHMCS](products/bil/README.md)
 
 - 📄 [Как устроено: WHMCS, эндпоинты, связь с панелью](products/bil/README.md#как-устроено)
-- 📄 [Язык чекаута](products/bil/README.md#язык-чекаута) · [Оплата](products/bil/README.md#оплата)
-- 📄 [Статусы услуги: отмена, пауза, free-план, trial](products/bil/README.md#статусы-и-переходы) - [DEV-401](tickets/DEV-401.md)
-- 📄 [Free-продукты 282 / 1127](products/bil/README.md#free-продукты) - [DEV-455](tickets/DEV-455.md)
-- 🎫 Custom Modpack Setup add-on - [DEV-458](tickets/DEV-458.md)
-- 🎫 Тарифы для Upgrade - [TASK-tariff-list-400](tickets/TASK-tariff-list-400.md)
+- 📄 [Чекаут и язык чекаута](products/bil/checkout.md) · [оплата: шлюзы, кредит, валюта](products/bil/payments.md) · [аккаунты: регистрация и вход](products/bil/accounts.md)
+- 📄 [Услуги в кабинете, отмена и возврат](products/bil/services-cancellation.md) - 🎫 [DEV-401](tickets/DEV-401.md)
+- 📄 [Free-продукты 282 / 1127 и письма eSputnik](products/bil/free-products.md) - 🎫 [DEV-455](tickets/DEV-455.md)
+- 📄 [Add-on Custom Modpack Setup и trial конструктора](products/bil/addons-trials.md) - 🎫 [DEV-458](tickets/DEV-458.md)
+- 📄 [Тарифы и апгрейд: tariffs-new](products/bil/tariffs.md) - 🎫 [TASK-tariff-list-400](tickets/TASK-tariff-list-400.md)
 
 ### [UP - игровая панель ultra.panel + API v2](products/up/README.md)
 

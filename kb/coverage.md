@@ -103,11 +103,18 @@ sources:
 
 ## BIL
 
-Страниц: 1, с автотестами: 1, тестов в их спеках: 17.
+Страниц: 8, с автотестами: 5, тестов в их спеках: 20.
 
 | Фича | Статус | Спеки | Тестов | Покрытие ✅ / руками / ❌ |
 |---|---|---|---|---|
 | [BIL - биллинг WHMCS (godlike.host/clientarea)](products/bil/README.md) | draft | все спеки продукта (8) | 17 | 0 / 0 / 0 |
+| [Аккаунты клиентов - регистрация, вход, соцсети](products/bil/accounts.md) | draft | `login.validation.spec.ts`, `registration-flow.spec.ts` | 3 | 2 / 1 / 2 |
+| [Add-on Custom Modpack Setup и trial конструктора модпаков](products/bil/addons-trials.md) | draft | `funnel.modpack-constructor.spec.ts` | 2 | 1 / 1 / 2 |
+| [Чекаут WHMCS - Review & Checkout и язык чекаута](products/bil/checkout.md) | draft | `funnel.seed.spec.ts`, `funnel.spec.ts`, `funnel.modded.spec.ts`, `vps.funnel.happy-path.spec.ts` | 6 | 4 / 0 / 1 |
+| [Оплата - Stripe, PayPal, Crypto, кредитный баланс, валюта](products/bil/payments.md) | draft | `funnel.cart.paypal.spec.ts`, `funnel.with.credit.check.spec.ts` | 5 | 5 / 1 / 1 |
+| [Free-продукты и письма - бесплатные серверы, cart-free, цепочка eSputnik](products/bil/free-products.md) | draft | - | - | 0 / 3 / 3 |
+| [Услуги в кабинете - Product Details, статусы, отмена и возврат подписки](products/bil/services-cancellation.md) | draft | - | - | 0 / 1 / 2 |
+| [Тарифы и апгрейд со стороны биллинга - tariffs-new API](products/bil/tariffs.md) | draft | - | - | 1 / 0 / 2 |
 
 ## OLDP
 

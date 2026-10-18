@@ -3,7 +3,7 @@ id: KB-REG-MCP
 title: MCP-серверы godlike (доступ AI-агента к сайту и базам)
 type: registry
 status: draft
-updated: 2026-10-15
+updated: 2026-10-18
 sources:
   - jira: DEV-450 (ТЗ «MCP-доступ до сайту godlike.host для маркетингу», Notion arcaneweb)
   - сообщение Sergey Serpichenko о подключении panel-sql и billing-sql
@@ -25,7 +25,7 @@ sources:
 | Сервер | Что | Адрес | У нас подключён |
 |---|---|---|---|
 | `godlike-panel-sql` | Read-only SQL по базе панели (UP/OLDP/ADM) | `panel.godlike.host/mcp/godlike-panel-sql` | ✅ |
-| `godlike-billing-sql` | Read-only SQL по базе WHMCS (услуги, инвойсы, промокоды, клиенты) | ❓ | ❌ **нет** (на 15-Oct) |
+| `godlike-billing-sql` | Read-only SQL по базе WHMCS (услуги, инвойсы, промокоды, клиенты), инструмент `query_billing_database` | `godlike.host/clientarea/modules/addons/godlike_product_features/mcp.php` | ✅ с 18-Oct-2026 |
 | `godlike-wp-sql` | Read-only SQL по базе WordPress | `godlike.host/wp-json/godlike-mcp/v1/rpc` | ✅ |
 | `godlike-wp` | Инструменты WP по ТЗ DEV-450 (чтение + запись с журналом) | тот же `godlike-mcp/v1/rpc`, другой ключ | ✅ |
 
@@ -76,5 +76,5 @@ sources:
 
 ## Открыто
 
-- ❌ `godlike-billing-sql` не подключён: нужен блок из `.mcp.json` разработки (адрес + токен).
+- ✅ `godlike-billing-sql` подключён 18-Oct-2026: блок из `.mcp.json` репо billing ([billing!524](https://git.godlike.ovh/billing/billing-godlike-host/-/merge_requests/524)), ключ значением - env-переменные до агента из IDE не доезжают. Проверено: без ключа 401, GET 405, `SELECT 1` ок.
 - Есть ли stage для WP-MCP (§3 п.7 ТЗ) - ❓.

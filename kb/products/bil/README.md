@@ -4,8 +4,8 @@ title: BIL - биллинг WHMCS (godlike.host/clientarea)
 type: product-overview
 product: BIL
 status: draft
-updated: 2026-10-15
-verified_on: null              # собрано из памяти и карточек; БД биллинга через MCP пока недоступна
+updated: 2026-10-18
+verified_on: null              # собрано из памяти и карточек; SQL к БД появился 18-Oct, сверкой ещё не пользовались
 tickets: [DEV-401, DEV-455, DEV-458, DEV-459, TASK-tariff-list-400]
 flags: []
 tests: [tests/funnels/*.spec.ts, tests/general/registration-flow.spec.ts, tests/general/login.validation.spec.ts]
@@ -22,7 +22,7 @@ sources:
 > **В двух словах.** Биллинг - это WHMCS под адресом `godlike.host/clientarea/`: корзина и чекаут, оплата,
 > личный кабинет с услугами и инвойсами, отмена и возврат подписки, бесплатные тарифы, письма. Витрина
 > ([WPGL](../wpgl/README.md)) ведёт сюда покупку, а игровая ([UP](../up/README.md)) и VPS-панель ([VPS](../vps/README.md))
-> берут отсюда тарифы и ссылаются на кабинет. Как продукт биллинг описан хуже всего: многое ниже - обрывки из задач.
+> берут отсюда тарифы и ссылаются на кабинет. Как продукт биллинг описан хуже всего: многое ниже - обрывки из задач. Страницы фич - в карте разделов.
 
 ## Как устроено
 
@@ -34,7 +34,7 @@ sources:
 | Кастомные эндпоинты | `api-cart.php`, `api-cart-free.php`; `product_features.php?action=trial \| modpack_setup_order \| free_gift_status \| free_gift_event`; `free_start.php?product=282&config=529` | карточки, memory |
 | Аддоны | `modules/addons/godlike_ptero_server` (связь с панелью), аддон eSputnik | memory dev455 |
 | Код | репо `billing` ([id-scheme](../../_meta/id-scheme.md#репозитории-кода-gitlab-gitgodlikeovh)), доступа у владельца пока нет | id-scheme |
-| БД | через MCP недоступна, `godlike-billing-sql` ждёт подключения ([реестр MCP](../../registry/mcp-tools.md)) | memory project-docs |
+| БД | read-only SQL через MCP `godlike-billing-sql` (подключён 18-Oct-2026, ключ в `.mcp.json`; [реестр MCP](../../registry/mcp-tools.md)) | billing!524 |
 
 **Связь с панелью.** Суффикс имени сервера `_NNNNNN` = ID услуги WHMCS; Upgrade в UP тянет тарифы
 `GET /api/v2/tariffs-new/{service_id}/list` ([UP/upgrade](../up/upgrade.md)); «Request Cancellation» из кабинета открывает
@@ -42,19 +42,19 @@ sources:
 
 ## Карта разделов
 
-| Раздел | Что это | Тикеты | Автотесты | Знания |
+| Раздел | Что это | Тикеты | Автотесты | Знания и страница |
 |---|---|---|---|---|
-| Корзина и чекаут | Vue-cart с 20-Aug-2026, блок авторизации `.auth-page` (email, Google, Discord, Twitch, Apple) | [DEV-402](../../tickets/DEV-402.md) | `funnel`, `login.validation`, `registration-flow` | ✅ |
-| Язык чекаута | отдельно от витрины: по гео или настройке аккаунта | - | косвенно | ✅ |
-| Оплата | Stripe (iframe), PayPal, Crypto (CoinPayments), кредитный баланс | - | `funnel.cart.paypal`, `funnel.with.credit.check` | ⚠️ |
-| Кабинет: Product Details | страница услуги, Request Cancellation, «Cancel the cancellation» | [DEV-401](../../tickets/DEV-401.md) | нет | ⚠️ |
-| Отмена и возврат подписки | Request Cancellation → модуль в UP; Resume subscription | [DEV-401](../../tickets/DEV-401.md) | нет | ⚠️ |
-| Статусы услуги | Active, Paused, Suspended, terminated | [DEV-401](../../tickets/DEV-401.md), [DEV-563](../../tickets/DEV-563.md) | нет | ❌ |
-| Free-продукты | 282 (EU), 1127 (USA), парные free для удержания | [DEV-455](../../tickets/DEV-455.md), [DEV-563](../../tickets/DEV-563.md) | нет | ⚠️ |
-| Письма eSputnik | цепочка Free Gift Day 0..28 по событию `FreeServerGift` | [DEV-455](../../tickets/DEV-455.md) | нет | ⚠️ |
-| Add-on Custom Modpack Setup | Lite = 1217, Pro = 1218, one-time | [DEV-458](../../tickets/DEV-458.md) | нет | ✅ |
-| Trial конструктора модпаков | 3 ч → suspend → terminate через 72 ч | - | `funnel.modpack-constructor` (до сабмита) | ⚠️ |
-| Тарифы и апгрейд | API `tariffs-new` для панели (сломан 09-Oct) | [TASK-tariff-list-400](../../tickets/TASK-tariff-list-400.md) | нет | ❌ |
+| Корзина и чекаут | Vue-cart с 20-Aug-2026, блок авторизации `.auth-page` (email, Google, Discord, Twitch, Apple) | [DEV-402](../../tickets/DEV-402.md) | `funnel`, `login.validation`, `registration-flow` | ✅ [BIL/checkout](checkout.md) |
+| Язык чекаута | отдельно от витрины: по гео или настройке аккаунта | - | косвенно | ✅ [BIL/checkout](checkout.md) |
+| Оплата | Stripe (iframe), PayPal, Crypto (CoinPayments), кредитный баланс | - | `funnel.cart.paypal`, `funnel.with.credit.check` | ⚠️ [BIL/payments](payments.md) |
+| Кабинет: Product Details | страница услуги, Request Cancellation, «Cancel the cancellation» | [DEV-401](../../tickets/DEV-401.md) | нет | ⚠️ [BIL/services-cancellation](services-cancellation.md) |
+| Отмена и возврат подписки | Request Cancellation → модуль в UP; Resume subscription | [DEV-401](../../tickets/DEV-401.md) | нет | ⚠️ [BIL/services-cancellation](services-cancellation.md) |
+| Статусы услуги | Active, Paused, Suspended, terminated | [DEV-401](../../tickets/DEV-401.md), [DEV-563](../../tickets/DEV-563.md) | нет | ❌ [BIL/services-cancellation](services-cancellation.md) |
+| Free-продукты | 282 (EU), 1127 (USA), парные free для удержания | [DEV-455](../../tickets/DEV-455.md), [DEV-563](../../tickets/DEV-563.md) | нет | ⚠️ [BIL/free-products](free-products.md) |
+| Письма eSputnik | цепочка Free Gift Day 0..28 по событию `FreeServerGift` | [DEV-455](../../tickets/DEV-455.md) | нет | ⚠️ [BIL/free-products](free-products.md) |
+| Add-on Custom Modpack Setup | Lite = 1217, Pro = 1218, one-time | [DEV-458](../../tickets/DEV-458.md) | нет | ✅ [BIL/addons-trials](addons-trials.md) |
+| Trial конструктора модпаков | 3 ч → suspend → terminate через 72 ч | - | `funnel.modpack-constructor` (до сабмита) | ⚠️ [BIL/addons-trials](addons-trials.md) |
+| Тарифы и апгрейд | API `tariffs-new` для панели (сломан 09-Oct) | [TASK-tariff-list-400](../../tickets/TASK-tariff-list-400.md) | нет | ❌ [BIL/tariffs](tariffs.md) |
 
 ## Язык чекаута
 
