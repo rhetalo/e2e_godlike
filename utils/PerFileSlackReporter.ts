@@ -1,7 +1,17 @@
 import { Reporter, TestCase, TestResult, FullConfig, Suite } from '@playwright/test/reporter';
 import * as https from 'https';
 import * as path from 'path';
+import { execSync } from 'child_process';
 import { describeFailure, failureHeadline } from './reporterFailure';
+import {
+  analyze,
+  appendRun,
+  historyEnabled,
+  historyFile,
+  type HistoryReport,
+  type HistoryRow,
+  type HistoryStatus,
+} from './runHistory';
 
 /**
  * Slack-репортер зі ЗВЕДЕННЯМ ПО ФУНКЦІОНАЛЬНИХ БЛОКАХ.
@@ -18,7 +28,19 @@ import { describeFailure, failureHeadline } from './reporterFailure';
  *
  * (Історична назва файлу — PerFileSlackReporter; залишена, щоб не чіпати
  *  playwright.config.ts. Логіка тепер блокова, не пофайлова.)
+ *
+ * Історія (18-Oct-2026, RESEARCH F3): звітний прогін (є webhook, немає CI = cron на VPS) дописує
+ * рядок на тест у test-logs/history/history.jsonl (утиліта utils/runHistory.ts) і додає у звіт
+ * «нове падіння / падав X з N» біля кожного падіння + секції нестабільних і червоних поспіль.
+ * SLACK_DRY_RUN=1 — друкує payload у консоль замість відправки (перевірка без Slack).
  */
+
+/** Вікно метрик і скільки прогонів зберігати. */
+const HISTORY_WINDOW = 14;
+const HISTORY_KEEP = 30;
+/** Мінімальна серія червоних прогонів, яку показуємо окремою секцією. */
+const RED_STREAK_MIN = 3;
+const TOP_UNSTABLE = 5;
 
 // ── Мапа функціональних блоків (укр. назви). Порядок = порядок у звіті. ──
 const BLOCKS: { name: string; match: (f: string) => boolean }[] = [
@@ -52,6 +74,7 @@ function passingAttempt(test: TestCase): string {
 }
 
 interface Failure {
+  testId: string;
   title: string;
   file: string;
   error: string;
@@ -78,6 +101,8 @@ type SlackBlock = Record<string, unknown>;
 
 class PerFileSlackReporter implements Reporter {
   private rootSuite: Suite | undefined;
+  private rootDir = process.cwd();
+  private runId = new Date().toISOString();
   private totalDurationMs = 0;
   private webhookUrl: string;
   private meta: { key: string; value: string }[];
@@ -87,8 +112,59 @@ class PerFileSlackReporter implements Reporter {
     this.meta = options.meta || [];
   }
 
-  onBegin(_config: FullConfig, suite: Suite) {
+  onBegin(config: FullConfig, suite: Suite) {
     this.rootSuite = suite;
+    this.rootDir = config.rootDir;
+    this.runId = new Date().toISOString();
+  }
+
+  /** Стабільний між прогонами id: файл відносно кореня + describe… + назва (без проєкту). */
+  private testId(test: TestCase): string {
+    const rel = path.relative(this.rootDir, test.location.file).split(path.sep).join('/');
+    return [rel, ...test.titlePath().slice(3)].join(' › ');
+  }
+
+  /** Записати поточний прогін в історію і порахувати метрики. Best-effort: збій історії не валить звіт. */
+  private recordHistory(): HistoryReport | null {
+    if (!historyEnabled(this.webhookUrl)) return null;
+    try {
+      let commit = process.env.CI_COMMIT_SHA?.slice(0, 8) || '';
+      if (!commit) {
+        try {
+          commit = execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+        } catch {
+          commit = 'unknown';
+        }
+      }
+      const statusOf: Record<string, HistoryStatus> = {
+        expected: 'passed',
+        unexpected: 'failed',
+        flaky: 'flaky',
+        skipped: 'skipped',
+      };
+      const rows: HistoryRow[] = (this.rootSuite?.allTests() ?? []).map((test) => {
+        const status = statusOf[test.outcome()] ?? 'failed';
+        const last = test.results[test.results.length - 1];
+        const row: HistoryRow = {
+          runId: this.runId,
+          commit,
+          testId: this.testId(test),
+          file: path.basename(test.location.file),
+          title: test.title,
+          status,
+          durationMs: test.results.reduce((sum, r) => sum + r.duration, 0),
+        };
+        if (status === 'failed' || status === 'flaky') {
+          row.error = (last?.errors?.[0]?.message ?? '').split('\n')[0].slice(0, 200);
+        }
+        return row;
+      });
+      const all = appendRun(historyFile(), rows, HISTORY_KEEP);
+      return analyze(all, HISTORY_WINDOW);
+    } catch (e) {
+      console.error(`[SlackReporter] історія не записана: ${e instanceof Error ? e.message : String(e)}`);
+      return null;
+    }
   }
 
   // Считаем/классифицируем НЕ здесь: onTestEnd зовётся на КАЖДУЮ попытку (ретрай = отдельный
@@ -139,14 +215,16 @@ class PerFileSlackReporter implements Reporter {
         } catch {
           /* обогащение best-effort — падение репортёра недопустимо */
         }
-        r.failures.push({ title: test.title, file, error: reason, headline });
+        r.failures.push({ testId: this.testId(test), title: test.title, file, error: reason, headline });
       }
     }
     return blocks;
   }
 
   async onEnd() {
-    if (!this.webhookUrl) return;
+    const history = this.recordHistory(); // пишемо навіть без webhook, якщо TEST_HISTORY=1
+    const dryRun = process.env.SLACK_DRY_RUN === '1';
+    if (!this.webhookUrl && !dryRun) return;
     const blocks = this.collectBlocks();
     if (blocks.size === 0) return;
 
@@ -212,7 +290,8 @@ class PerFileSlackReporter implements Reporter {
         const cleanError = f.error ? f.error.split('\n').slice(0, 12).join('\n') : 'Unknown error';
         const link = jobUrl ? ` <${jobUrl}/artifacts/file/playwright-report/index.html|лог>` : '';
         const head = f.headline ? `\n${f.headline}` : '';
-        return `*❌ ${f.file} › ${f.title}*${link}${head}\n\`\`\`${cleanError}\`\`\``;
+        const trend = history ? `\n${this.trendNote(history, f.testId)}` : '';
+        return `*❌ ${f.file} › ${f.title}*${link}${head}${trend}\n\`\`\`${cleanError}\`\`\``;
       });
       allBlocks.push({ type: 'divider' });
       this.chunkTextToBlocks(`*🐞 ${name} — баги:*`, failLines, '\n\n').forEach((b) => allBlocks.push(b));
@@ -232,7 +311,49 @@ class PerFileSlackReporter implements Reporter {
       this.chunkTextToBlocks('*⚠️ Флоки (пройшли на ретраї):*', flakyLines).forEach((b) => allBlocks.push(b));
     }
 
+    if (history) this.historyBlocks(history).forEach((b) => allBlocks.push(b));
+
+    if (dryRun) {
+      console.log(`[SlackReporter] DRY RUN, payload:\n${JSON.stringify({ blocks: allBlocks }, null, 2)}`);
+      return;
+    }
     await this.sendBlocksInChunks(allBlocks);
+  }
+
+  /** Позначка біля падіння: нове чи повторне (за вікном історії, включно з поточним прогоном). */
+  private trendNote(h: HistoryReport, testId: string): string {
+    const fails = h.failsInWindow.get(testId) ?? 1;
+    const streak = h.redStreaks.find((s) => s.testId === testId)?.streak ?? 1;
+    if (fails <= 1) return `🆕 нове падіння (вперше за ${h.windowRuns} прогонів)`;
+    const streakNote = streak >= 2 ? `, червоний ${streak} прогони поспіль` : '';
+    return `📊 падав ${fails} з ${h.windowRuns} останніх прогонів${streakNote}`;
+  }
+
+  /** Секції тренду: нестабільні (і зелені, і червоні у вікні) + червоні N прогонів поспіль. */
+  private historyBlocks(h: HistoryReport): SlackBlock[] {
+    const out: SlackBlock[] = [];
+    if (h.windowRuns < 2) return out; // одного прогону для тренду замало
+    // Хто вже в секції «стабільно червоні», у «нестабільних» не дублюємо.
+    const inStreak = new Set(h.redStreaks.filter((s) => s.streak >= RED_STREAK_MIN).map((s) => s.testId));
+    const unstable = h.unstable
+      .filter((u) => !inStreak.has(u.testId))
+      .slice(0, TOP_UNSTABLE)
+      .map(
+        (u) =>
+          `• *${u.file} › ${u.title}* — падав ${u.fails} з ${u.runs} (${Math.round(u.failRate * 100)}%), змін статусу: ${u.flips}`,
+      );
+    const streaks = h.redStreaks
+      .filter((s) => s.streak >= RED_STREAK_MIN)
+      .map((s) => `• *${s.file} › ${s.title}* — червоний ${s.streak} прогонів поспіль`);
+    if (unstable.length) {
+      out.push({ type: 'divider' });
+      out.push(...this.chunkTextToBlocks(`*📉 Нестабільні за ${h.windowRuns} прогонів (топ-${TOP_UNSTABLE}):*`, unstable));
+    }
+    if (streaks.length) {
+      out.push({ type: 'divider' });
+      out.push(...this.chunkTextToBlocks(`*🔴 Стабільно червоні (≥${RED_STREAK_MIN} прогонів поспіль):*`, streaks));
+    }
+    return out;
   }
 
   /** Розбиває масив рядків на Slack-секції з урахуванням ліміту 3000 символів. */
