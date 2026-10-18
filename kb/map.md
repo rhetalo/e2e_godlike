@@ -3,7 +3,7 @@ id: KB-MAP
 title: Майндкарта проекта godlike
 type: index
 status: draft
-updated: 2026-10-16
+updated: 2026-10-18
 verified_on: null              # карта собрана из KB, сама по себе с продуктом не сверяется
 sources:
   - kb/_meta/inventory-2026-10-15.md §2
@@ -79,8 +79,11 @@ mindmap
       Лимиты нод DEV-477
       is_listed модпаков
     VPS VirtFusion
+      Вход и список серверов
+      Страница сервера
       Power и Rebuild
       Media Network Storage Options
+      Воронка покупки
     PFH PlayFreeHost
     Реестры
       Окружения
@@ -102,7 +105,7 @@ mindmap
   - 🎫 [DEV-400](tickets/DEV-400.md) - страницы модпаков → `cart-modded-new`
   - 🎫 [DEV-402](tickets/DEV-402.md) - страницы игр → Vue-cart
   - 🎫 [DEV-459](tickets/DEV-459.md) - Custom Modpack Setup, точки входа
-  - 📄 [VPS-воронка](products/vps/README.md#как-устроено)
+  - 📄 [VPS-воронка](products/vps/purchase-funnel.md)
 - 📄 [Промо: MONTHLY75, MODPACK50, flash-sale, Free Server Gift](products/wpgl/README.md#промо---как-работает) - [DEV-455](tickets/DEV-455.md)
 - 🎫 Калькулятор modded - [DEV-532](tickets/DEV-532.md)
 - 📄 [Гочи витрины](products/wpgl/README.md#гочи-для-тестирования)
@@ -189,9 +192,12 @@ mindmap
 ### [VPS - vf-panel (VirtFusion)](products/vps/README.md)
 
 - 📄 [Как устроено, связь с биллингом](products/vps/README.md#как-устроено)
-- 📄 [Карта разделов: вход, серверы, Media, Network, Storage, Options](products/vps/README.md#карта-разделов)
-- 📄 [Power: статусы и переходы](products/vps/README.md#статусы-и-переходы)
-- 📄 [Rebuild: переустановка ОС](products/vps/README.md#rebuild-переустановка-ос)
+- 📄 [Карта разделов](products/vps/README.md#карта-разделов)
+- 📄 [Вход, Dashboard и список серверов](products/vps/login-dashboard.md) · [страница сервера и вкладки](products/vps/server-page.md)
+- 📄 [Power: Boot, Shutdown, Power Off, Restart](products/vps/power.md)
+- 📄 [Rebuild: переустановка ОС](products/vps/rebuild.md)
+- 📄 [Media: Boot Order](products/vps/media.md) · [Network](products/vps/network.md) · [Storage](products/vps/storage.md) · [Options: VNC, Rescue, пароль, Boot Type](products/vps/options.md)
+- 📄 [Воронка покупки: лендинг → cart-vps → WHMCS](products/vps/purchase-funnel.md)
 - 📄 [Гочи: DOM «врёт»](products/vps/README.md#гочи-для-тестирования)
 - Сервер: [srv:9c49ed96](registry/test-servers.md#9c49ed96)
 

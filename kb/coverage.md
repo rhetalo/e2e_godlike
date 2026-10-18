@@ -57,11 +57,20 @@ sources:
 
 ## VPS - панель VirtFusion
 
-Страниц: 1, с автотестами: 1, тестов в их спеках: 46.
+Страниц: 10, с автотестами: 10, тестов в их спеках: 46.
 
 | Фича | Статус | Спеки | Тестов | Покрытие ✅ / руками / ❌ |
 |---|---|---|---|---|
 | [VPS - панель VirtFusion (vf-panel.godlike.host)](products/vps/README.md) | draft | все спеки продукта (13) | 46 | 0 / 0 / 0 |
+| [Вход в VPS-панель, Dashboard и список серверов](products/vps/login-dashboard.md) | draft | `vps.panel.login.spec.ts`, `vps.panel.server.spec.ts` | 14 | 6 / 0 / 1 |
+| [Media VPS - порядок загрузки (Boot Order)](products/vps/media.md) | draft | `vps.panel.media.spec.ts` | 3 | 3 / 0 / 1 |
+| [Network VPS - IP, статистика трафика, Reverse DNS](products/vps/network.md) | draft | `vps.panel.network.spec.ts` | 3 | 3 / 0 / 1 |
+| [Options VPS - VNC, Rescue, сброс пароля, Boot Type](products/vps/options.md) | draft | `vps.panel.options.spec.ts` | 4 | 4 / 0 / 2 |
+| [Power VPS - Boot, Shutdown, Power Off, Restart](products/vps/power.md) | draft | `vps.panel.power.actions.spec.ts`, `vps.panel.server.spec.ts` | 13 | 7 / 0 / 0 |
+| [Воронка покупки VPS - лендинг, cart-vps, checkout WHMCS](products/vps/purchase-funnel.md) | draft | `vps.funnel.billing.spec.ts`, `vps.funnel.configure.spec.ts`, `vps.funnel.happy-path.spec.ts` | 9 | 4 / 0 / 1 |
+| [Rebuild VPS - переустановка ОС](products/vps/rebuild.md) | draft | `vps.panel.rebuild.os-selection.spec.ts`, `vps.panel.rebuild.real.spec.ts`, `vps.panel.rebuild.selection.spec.ts` | 6 | 6 / 0 / 1 |
+| [Страница сервера VPS - статус, кнопки питания и вкладки](products/vps/server-page.md) | draft | `vps.panel.server.spec.ts` | 7 | 3 / 0 / 1 |
+| [Storage VPS - диск сервера](products/vps/storage.md) | draft | `vps.panel.storage.spec.ts` | 1 | 1 / 0 / 1 |
 
 ## WPGL - витрина
 

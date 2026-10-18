@@ -4,7 +4,7 @@ title: VPS - панель VirtFusion (vf-panel.godlike.host)
 type: product-overview
 product: VPS
 status: draft
-updated: 2026-10-15
+updated: 2026-10-18
 verified_on: 2026-06-19        # последний recon / handoff VPS-панели
 tickets: []
 flags: []
@@ -44,18 +44,18 @@ sources:
 
 Маршруты: `/login`, `/dashboard`, `/servers`, `/server/{uuid}`. Страница сервера - вкладки.
 
-| Раздел | Что это | Автотесты | Знания |
+| Раздел | Что это | Автотесты | Знания и страница |
 |---|---|---|---|
-| Вход | Форма email + пароль, редирект на `/dashboard`; без сессии - на `/login` | `vps.panel.login` (LOGIN-001..006 + редиректы) | ✅ |
-| Dashboard и Servers | `/dashboard`, список `/servers` (All / Bookmarked, закладки), кнопка Manage | `vps.panel.server` (SRV-001, 002, 005, 006) | ✅ |
-| Страница сервера | Имя, статус, power-кнопки, вкладки | `vps.panel.server` (SRV-003, 004 + вкладки) | ✅ |
-| Power | Boot, Shutdown, Power Off, Restart + activity table | `vps.panel.power.actions` (PWR-001..006) | ✅ |
-| Rebuild | Переустановка ОС: выбор шаблона → Install | `vps.panel.rebuild.*` (RBD-001..005, BUILD-001) | ✅ |
-| Media | Boot Order: HDD / CD/DVD → Apply | `vps.panel.media` (MED-001..003) | ✅ |
-| Network | Primary Network (IPv4), Statistics (Plotly-график), Reverse DNS, DNS resolver | `vps.panel.network` (NET-001..003) | ✅ |
-| Storage | Карточка диска «Drive: A», Primary, размер в GB - только просмотр | `vps.panel.storage` (STG-001) | ✅ |
-| Options | Под-табы VNC / Rescue / Password / Settings (Boot Type BIOS / UEFI) | `vps.panel.options` (OPT-001..004) | ⚠️ Rescue не покрыт |
-| Воронка покупки | `/vps-hosting/` → `cart-vps` → WHMCS | `vps.funnel.*` (happy-path, configure, billing) | ⚠️ описано только в памяти |
+| Вход | Форма email + пароль, редирект на `/dashboard`; без сессии - на `/login` | `vps.panel.login` (LOGIN-001..006 + редиректы) | ✅ [VPS/login-dashboard](login-dashboard.md) |
+| Dashboard и Servers | `/dashboard`, список `/servers` (All / Bookmarked, закладки), кнопка Manage | `vps.panel.server` (SRV-001, 002, 005, 006) | ✅ [VPS/login-dashboard](login-dashboard.md) |
+| Страница сервера | Имя, статус, power-кнопки, вкладки | `vps.panel.server` (SRV-003, 004 + вкладки) | ✅ [VPS/server-page](server-page.md) |
+| Power | Boot, Shutdown, Power Off, Restart + activity table | `vps.panel.power.actions` (PWR-001..006) | ✅ [VPS/power](power.md) |
+| Rebuild | Переустановка ОС: выбор шаблона → Install | `vps.panel.rebuild.*` (RBD-001..005, BUILD-001) | ✅ [VPS/rebuild](rebuild.md) |
+| Media | Boot Order: HDD / CD/DVD → Apply | `vps.panel.media` (MED-001..003) | ✅ [VPS/media](media.md) |
+| Network | Primary Network (IPv4), Statistics (Plotly-график), Reverse DNS, DNS resolver | `vps.panel.network` (NET-001..003) | ✅ [VPS/network](network.md) |
+| Storage | Карточка диска «Drive: A», Primary, размер в GB - только просмотр | `vps.panel.storage` (STG-001) | ✅ [VPS/storage](storage.md) |
+| Options | Под-табы VNC / Rescue / Password / Settings (Boot Type BIOS / UEFI) | `vps.panel.options` (OPT-001..004) | ⚠️ Rescue не покрыт [VPS/options](options.md) |
+| Воронка покупки | `/vps-hosting/` → `cart-vps` → WHMCS | `vps.funnel.*` (happy-path, configure, billing) | ✅ [VPS/purchase-funnel](purchase-funnel.md) |
 
 ## Статусы и переходы
 
