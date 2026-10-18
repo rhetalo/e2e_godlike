@@ -32,6 +32,10 @@ export class GamePanelDashboardPage extends GamePanelBasePage {
   async goto(): Promise<void> {
     await this.open("/?page=1");
     await this.heading.waitFor({ state: "visible", timeout: 20_000 });
+    // Заголовок рендерится раньше списка: ждём первую карточку (16-Oct-2026, F2 — раньше это
+    // прикрывала пауза networkidle). Без catch-гейта на пустой аккаунт: у тестовых аккаунтов
+    // серверы есть, а если нет — пусть упадёт ассерт спека с понятным сообщением.
+    await this.servers.first().waitFor({ state: "visible", timeout: 20_000 }).catch(() => {});
   }
 
   async serverCount(): Promise<number> {
@@ -52,7 +56,12 @@ export class GamePanelDashboardPage extends GamePanelBasePage {
 
   /** Виден ли сервер с данным именем в списке «My Servers». */
   async hasServer(name: string): Promise<boolean> {
-    return this.serverByName(name).isVisible({ timeout: 5_000 }).catch(() => false);
+    // waitFor, а не isVisible({timeout}): у isVisible таймаут игнорируется — ответ мгновенный,
+    // и до загрузки списка возвращался ложный false (SHR-003 после F2, 16-Oct-2026).
+    return this.serverByName(name)
+      .waitFor({ state: "visible", timeout: 10_000 })
+      .then(() => true)
+      .catch(() => false);
   }
 
   /** Ссылка глобального сайдбара по названию (Billing, Support Tickets, ...). */

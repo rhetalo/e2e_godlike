@@ -5,7 +5,7 @@
  * с Vuetify-инпутом и текстом-именем свойства (motd, difficulty, max-players, ...).
  *
  * ⚠️ Save-кнопки нет — форма АВТОСЕЙВИТ при изменении поля (PATCH на blur). Поэтому
- * setValue() делает fill → blur → ждёт networkidle; персист проверяется в спеке через
+ * setValue() делает fill → blur → ждёт ответ PATCH автосейва; персист проверяется в спеке через
  * reload + getValue(). id инпутов динамические — якоримся по имени свойства в тексте строки.
  *
  * Методы — действия и читатели состояния; assert'ы в спеке.
@@ -53,12 +53,19 @@ export class GamePanelConfigPage extends GamePanelBasePage {
    */
   async setValue(prop: string, value: string): Promise<void> {
     const field = this.input(prop);
+    // Ждём ответ автосейва (PATCH к api/v2 сервера), а не networkidle — тот на странице сервера не
+    // наступает (websocket-консоль). Слушатель ДО действия. Значение не изменилось → PATCH нет →
+    // ограниченный таймаут без падения; персист в любом случае проверяет спек перезагрузкой.
+    const saved = this.page
+      .waitForResponse(
+        (r) => r.request().method() === "PATCH" && /\/api\/v2\/servers\//.test(r.url()),
+        { timeout: 8_000 },
+      )
+      .catch(() => null);
     await field.click();
     await field.fill(value);
     await field.blur(); // триггерит PATCH (автосейв)
-    // ВАЖНО: networkidle на странице сервера не наступает (websocket-консоль) — ждём
-    // ограниченно и гасим .catch, иначе вечное ожидание. Этого хватает на автосейв-PATCH.
-    await this.page.waitForLoadState("networkidle", { timeout: 8_000 }).catch(() => {});
+    await saved;
   }
 }
 

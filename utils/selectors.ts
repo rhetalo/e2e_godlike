@@ -582,6 +582,13 @@ export const GAME_PANEL_HEADER = {
   logoutLink: 'a[href="/logout"]',        // пункт меню Log Out (.user__navigation-item)
 } as const;
 
+// Оболочка SPA ultra.panel — сигнал готовности для GamePanelBasePage.open() вместо networkidle.
+// `.v-application__wrap` (Vuetify смонтирован) есть на ВСЕХ маршрутах, включая /login; `.v-main`
+// (контент) — только под авторизацией, ~1.8 с после domcontentloaded. Live-recon 16-Oct-2026.
+export const GAME_PANEL_SHELL = {
+  app: ".v-application__wrap",
+} as const;
+
 export const GAME_PANEL_TOUR = {
   overlay: '.shepherd-modal-is-visible, .shepherd-modal-overlay-container, .shepherd-enabled',
   close: 'button:has-text("Skip"), button:has-text("Close"), button:has-text("Got it"), button[aria-label="Close"]',

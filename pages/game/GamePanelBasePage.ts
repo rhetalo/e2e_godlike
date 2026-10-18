@@ -13,6 +13,7 @@ import type { Page, Response } from "@playwright/test";
 import { ShepherdTour } from "../../components/game/ShepherdTour";
 import { GiveawayModal } from "../../components/game/GiveawayModal";
 import { GAME_PANEL_URL } from "../../utils/gameAuth";
+import { GAME_PANEL_SHELL } from "../../utils/selectors";
 
 export abstract class GamePanelBasePage {
   readonly page: Page;
@@ -29,8 +30,10 @@ export abstract class GamePanelBasePage {
   protected async open(pathOrUrl: string): Promise<Response | null> {
     const url = pathOrUrl.startsWith("http") ? pathOrUrl : `${GAME_PANEL_URL}${pathOrUrl}`;
     const resp = await this.page.goto(url, { waitUntil: "domcontentloaded", timeout: 60_000 });
-    // networkidle на панели не всегда наступает (websocket-консоль) — отсюда .catch
-    await this.page.waitForLoadState("networkidle", { timeout: 8_000 }).catch(() => {});
+    // Сигнал готовности — смонтированная оболочка Vuetify, а НЕ networkidle: websocket-консоль не даёт
+    // ему наступить, и ожидание съедало 5-8 с на КАЖДОЕ открытие (замер 16-Oct-2026, RESEARCH F2).
+    // Якорь конкретной страницы ждёт подкласс; оверлеи, всплывшие позже, гасит neutralizeOverlays().
+    await this.page.locator(GAME_PANEL_SHELL.app).first().waitFor({ state: "visible", timeout: 20_000 });
     await this.tour.dismissIfPresent();
     await this.giveaway.dismissIfPresent(); // промо-модалка (её scrim перехватывает клики)
     await this.neutralizeOverlays();
@@ -57,10 +60,14 @@ export abstract class GamePanelBasePage {
       .addStyleTag({
         content:
           ".server__header-help, .server__help-wrapper, .shepherd-modal-overlay-container, .shepherd-modal-is-visible, .shepherd-element," +
+          // ⚠️ 16-Oct-2026: потомки тоже. У shepherd свой pointer-events на <path> внутри svg-оверлея —
+          // правило на сам <svg> его не перебивает, и клик перехватывал именно path (CON-003/FILE-001
+          // после F2). Раньше это маскировала пауза networkidle: dismissIfPresent успевал закрыть тур.
+          " .shepherd-modal-overlay-container *, .shepherd-element *," +
           // giveaway-модалка может всплыть по таймеру уже после open() → её overlay
           // (scrim + content) делаем click-through. Таргет `:has(.giveaway-modal)` не
           // задевает реальные диалоги (EULA/confirm их не содержат).
-          " .v-overlay:has(.giveaway-modal)," +
+          " .v-overlay:has(.giveaway-modal), .v-overlay:has(.giveaway-modal) *," +
           // CookieYes consent-бокс (и его возможный full-screen scrim) — click-through.
           " .cky-consent-container, .cky-overlay { pointer-events: none !important; }",
       })
