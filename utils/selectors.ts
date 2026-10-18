@@ -699,7 +699,15 @@ export const GAME_PANEL_FILES = {
   sftpForm: ".server__file-manager__sftp-form",
   // CurseForge upload-модпак диалог (структурный; ⚠️ не загружать)
   curseForgeButton: 'button:has-text("Upload custom modpack")',
-  curseForgeDialog: ".curseforge-dialog__content, [class*='curseforge-dialog']",
+  curseForgeDialog: ".v-overlay--active .curseforge-dialog",
+  curseForgeCancel: ".curseforge-dialog button:has-text('Cancel')", // Escape диалог НЕ закрывает
+  // 18-Oct-2026: «Upload custom modpack» сначала открывает апселл Custom Modpack Setup (Lite/Pro,
+  // entry=files). Показ = PC Minecraft + владелец + загружен GET .../modpack-setup/quote; клик до ответа
+  // quote → сразу CurseForge-диалог. ⚠️ «Order now» (.modpack-setup-dialog__order) = заказ, НЕ жать.
+  modpackSetupDialog: ".v-overlay--active .modpack-setup-dialog",
+  modpackSetupCard: ".modpack-setup-card",
+  modpackSetupOrder: ".modpack-setup-dialog__order",
+  modpackSetupDismiss: '[data-testid="modpack-setup-dismiss"]', // «I’ll upload it myself» → CurseForge-диалог
   // per-row "..." меню действий (Open/Pin/Copy×3/Rename/Move/Archive/Duplicate/Download/Delete)
   rowActionsBtn: ".server__file-manager__file-list-item__actions-btn",
   rowActionsItem: ".v-overlay--active .v-list-item",                        // пункт открытого меню

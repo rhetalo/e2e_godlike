@@ -3,10 +3,12 @@
  *
  * FILE-003: per-row "..." меню (полный набор действий).
  * SFTP-001: SFTP Connect диалог (поля подключения + кнопки).
- * CF-001:   CurseForge upload-модпак диалог (file-input + Browse/Proceed).
+ * CF-001:   «Upload custom modpack» → апселл Custom Modpack Setup (с 16-Oct-2026) → «I’ll upload it myself»
+ *           → CurseForge upload-диалог (file-input + Browse/Proceed).
  *
  * ⚠️ Ничего не сабмитим: Rename/Move/Archive/Delete из меню НЕ жмём; Generate/Save (SFTP) и
- * Proceed (CurseForge) НЕ жмём — открыли, проверили структуру, закрыли. Подтверждено MCP-recon 06-Jun.
+ * Proceed (CurseForge) и Order now (апселл) НЕ жмём — открыли, проверили структуру, закрыли. Подтверждено
+ * MCP-recon 06-Jun; апселл - recon 18-Oct. Клики по апселлу шлют только аналитику (POST .../modpack-setup/events).
  */
 import { test, expect, type BrowserContext } from "@playwright/test";
 import { GamePanelFilesPage } from "../../../pages/game/GamePanelFilesPage";
@@ -63,16 +65,27 @@ test.describe("@regression [game-panel] File manager — диалоги/меню
     await files.closeOverlay();
   });
 
-  test("TC-GP-CF-001 | CurseForge upload диалог: Browse/Proceed (без загрузки)", async () => {
-    await files.openCurseForgeDialog();
+  test("TC-GP-CF-001 | Upload custom modpack: апселл Modpack setup → «I’ll upload it myself» → CurseForge диалог (без заказа/загрузки)", async () => {
+    await files.openUploadCustomModpack();
 
-    await test.step("диалог загрузки модпака виден", async () => {
-      await expect(files.activeDialog).toBeVisible();
-      await expect(files.activeDialog).toContainText(/Browse file/i);
-      await expect(files.activeDialog).toContainText(/Proceed/i);
+    await test.step("сначала апселл Custom Modpack Setup: тарифы Lite/Pro, Order now, свой путь", async () => {
+      await expect(files.modpackSetupDialog).toBeVisible();
+      await expect(files.modpackSetupDialog).toContainText(/Modpack setup/i);
+      expect(await files.modpackSetupCards.count()).toBeGreaterThanOrEqual(2);
+      await expect(files.modpackSetupOrderButton).toBeVisible(); // ⚠️ не жмём - заказ
+      await expect(files.modpackSetupDismissButton).toHaveText(/upload it myself/i);
     });
 
-    await files.closeOverlay();
+    await files.chooseSelfUpload();
+
+    await test.step("«I’ll upload it myself» закрывает апселл и открывает CurseForge-диалог Browse/Proceed", async () => {
+      await expect(files.modpackSetupDialog).toBeHidden();
+      await expect(files.curseForgeDialog).toBeVisible();
+      await expect(files.curseForgeDialog).toContainText(/Browse file/i);
+      await expect(files.curseForgeDialog).toContainText(/Proceed/i);
+    });
+
+    await files.closeCurseForgeDialog();
   });
 
   test("TC-GP-FILE-005 | CodeMirror-редактор открывает текстовый файл (read-only)", async () => {

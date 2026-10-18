@@ -121,10 +121,49 @@ export class GamePanelFilesPage extends GamePanelBasePage {
       .catch(() => {});
   }
 
-  /** Открыть CurseForge upload-модпак диалог. ⚠️ Proceed НЕ жмём. */
-  async openCurseForgeDialog(): Promise<void> {
+  get modpackSetupDialog(): Locator {
+    return this.page.locator(GAME_PANEL_FILES.modpackSetupDialog).first();
+  }
+  get modpackSetupCards(): Locator {
+    return this.modpackSetupDialog.locator(GAME_PANEL_FILES.modpackSetupCard);
+  }
+  /** ⚠️ «Order now» = реальный заказ услуги. Только для проверки видимости, НЕ кликать. */
+  get modpackSetupOrderButton(): Locator {
+    return this.modpackSetupDialog.locator(GAME_PANEL_FILES.modpackSetupOrder).first();
+  }
+  get modpackSetupDismissButton(): Locator {
+    return this.modpackSetupDialog.locator(GAME_PANEL_FILES.modpackSetupDismiss).first();
+  }
+  get curseForgeDialog(): Locator {
+    return this.page.locator(GAME_PANEL_FILES.curseForgeDialog).first();
+  }
+
+  /**
+   * Перезайти в Files и нажать «Upload custom modpack». С 16-Oct-2026 кнопка сначала показывает апселл
+   * Custom Modpack Setup, но только когда уже пришёл GET .../modpack-setup/quote (иначе - сразу
+   * CurseForge-диалог, гонка). Поэтому слушатель quote ставим ДО навигации и кликаем после ответа -
+   * апселл появляется детерминированно (recon 18-Oct, 3/3). ⚠️ «Order now» НЕ жмём.
+   */
+  async openUploadCustomModpack(): Promise<void> {
+    const quote = this.page.waitForResponse((r) => /\/minecraft\/modpack-setup\/quote/.test(r.url()), {
+      timeout: 30_000,
+    });
+    await this.goto();
+    await quote;
     await this.curseForgeButton.click();
-    await this.activeDialog.waitFor({ state: "visible", timeout: 10_000 }).catch(() => {});
+    await this.modpackSetupDialog.or(this.curseForgeDialog).first().waitFor({ state: "visible", timeout: 10_000 });
+  }
+
+  /** Апселл → «I’ll upload it myself» → CurseForge upload-диалог. ⚠️ Proceed НЕ жмём. */
+  async chooseSelfUpload(): Promise<void> {
+    await this.modpackSetupDismissButton.click();
+    await this.curseForgeDialog.waitFor({ state: "visible", timeout: 10_000 });
+  }
+
+  /** Закрыть CurseForge-диалог кнопкой Cancel (Escape его не закрывает). */
+  async closeCurseForgeDialog(): Promise<void> {
+    await this.page.locator(GAME_PANEL_FILES.curseForgeCancel).first().click();
+    await this.curseForgeDialog.waitFor({ state: "hidden", timeout: 8_000 });
   }
 
   /** Открыть per-row "..." меню действий для записи по имени. */

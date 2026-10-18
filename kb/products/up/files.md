@@ -4,8 +4,8 @@ title: Files - файловый менеджер, Recycle Bin, SFTP
 type: feature
 product: UP
 status: draft
-updated: 2026-10-15
-verified_on: 2026-06-09        # последний recon файлового менеджера
+updated: 2026-10-18
+verified_on: 2026-10-18        # recon Upload custom modpack (апселл); остальное - 09-Jun
 tickets: [DEV-418, DEV-459, DEV-492]
 flags: [world-backup]
 tests:
@@ -34,8 +34,12 @@ sources:
 - **Редактор** CodeMirror (`.cm-editor`) по Open текстового файла, кнопки Cancel / Save.
 - **Recycle Bin** - строка-кнопка вверху списка → `?dir=/.trash-<shortid>`; отдельные кнопки **Restore** и **Clear Recycle Bin**.
 - **SFTP Connect:** окно «Connect with SFTP» (Host, Port, Username, Password), кнопки Open SFTP, Generate, Save; рядом Download SFTP Client.
-- **Upload custom modpack** (окно `curseforge-dialog__*`, загрузка zip / `manifest.json`) и блок заказа Custom Modpack Setup в `/mods`
+- **Upload custom modpack** (окно `curseforge-dialog`, загрузка zip / `manifest.json`) и блок заказа Custom Modpack Setup в `/mods`
   ([DEV-459](../../tickets/DEV-459.md), [UP/modpack-catalog](modpack-catalog.md)).
+- **С 16-Oct-2026 кнопка сначала открывает апселл «Modpack setup»** (`.modpack-setup-dialog`): «Let our team build your
+  custom modpack», карточки Lite (до 30 модов, €9.99) / Pro (до 60, €17.99) one-time, Total, кнопки «Order now» и
+  «I’ll upload it myself» (`data-testid="modpack-setup-dismiss"`). Отказ закрывает апселл и открывает прежнее окно
+  CurseForge manifest.json (Browse file / Cancel / Proceed). По коду фронта тот же компонент стоит во вкладке Modpacks (подпись «No thanks, I’ll do it myself»), в UI там не проверялось.
 - **World Backups** - кнопка рядом с Recycle Bin ([UP/world-backup](world-backup.md)).
 
 ## Как работает (под капотом)
@@ -46,6 +50,12 @@ sources:
 - Загруженный через Upload custom modpack пак запускает скан модов ([DEV-492/F1](../../tickets/DEV-492.md#находки), исправлено),
   вручную залитый jar сканер подхватывает примерно за 18 минут ([UP/client-only-mods](client-only-mods.md)).
 - Отключённые сканером моды лежат в `mods/` как `*.jar.disabled`.
+- **Когда показывается апселл** (фронт `ModpackSetupDialogContainer`, recon бандла 18-Oct): `canOffer` = сервер PC Minecraft
+  (`is_pc_minecraft`) + текущий пользователь владелец + есть `external_id` + `GET /api/v2/servers/{uuid}/minecraft/modpack-setup/quote`
+  вернул хотя бы один тариф с `available: true` и `amount > 0`. Иначе (сабюзер, не MC, quote ещё не пришёл) - сразу окно CurseForge.
+- Апселл шлёт аналитику `POST .../modpack-setup/events` (202): `modpack_setup_entry_click`, `_popup_shown`, `_tier_selected`,
+  `_popup_closed` (reason `dismiss`), `_self_upload`; поле `entry` = `files` или `modpacks`. «Order now» = `POST .../modpack-setup/orders`
+  (реальный заказ; ошибки `price_changed` / `unavailable` / 404 «not available» / 422).
 
 ## Правила и граничные случаи
 
@@ -60,7 +70,10 @@ sources:
 - **Редактор монтируется асинхронно** - ждать `.cm-content`.
 - **Restore - отдельная кнопка `v-btn--slim`**, не внутри `action-btn-group` (там Delete = удалить навсегда). KB §9c.
 - Тест-папки копятся дублями в корзине между прогонами - очищаются сами через 24 часа.
-- SFTP и Upload custom modpack - только структурно, без Generate / Save / Proceed.
+- SFTP и Upload custom modpack - только структурно, без Generate / Save / Proceed / Order now.
+- **Гонка апселла:** quote приходит через 5-8 с после открытия Files; клик раньше - апселла нет, сразу CurseForge.
+  В тесте слушатель `waitForResponse(/modpack-setup\/quote/)` ставится ДО навигации (`openUploadCustomModpack()`).
+- **Окно CurseForge не закрывается по Escape** - только Cancel (`closeCurseForgeDialog()`).
 
 ## Покрытие
 
@@ -68,7 +81,7 @@ sources:
 |---|---|---|
 | Создание, удаление, переименование папки | `files.spec.ts` (FILE-001, 002, 004) | ✅ |
 | Корзина и восстановление | `files.recycle.spec.ts` (FILE-006) | ✅ |
-| Меню «...», SFTP, Upload custom modpack, редактор | `files.structure.spec.ts` (FILE-003, SFTP-001, CF-001, FILE-005) | ✅ структурно |
+| Меню «...», SFTP, Upload custom modpack (апселл → свой путь → CurseForge), редактор | `files.structure.spec.ts` (FILE-003, SFTP-001, CF-001, FILE-005) | ✅ структурно |
 | XSS в имени папки | `security.spec.ts` (SEC-003) | ✅ |
 | Правка файла → Save → откат, Move, Zip / Unzip | не покрыто | ❌ |
 | Окно World Backup при удалении `world` | только ручной QA [DEV-418](../../tickets/DEV-418.md) | ❌ авто нет |
@@ -81,3 +94,4 @@ sources:
 | 14-Aug-2026 | [DEV-418](../../tickets/DEV-418.md) | Кнопка World Backups и окно при удалении мира |
 | 28-Sep-2026 | [DEV-459](../../tickets/DEV-459.md) | Блок Custom Modpack Setup в `/mods` |
 | 09-Oct-2026 | [DEV-492](../../tickets/DEV-492.md) | Upload custom modpack запускает скан модов |
+| 16-Oct-2026 | - (follow-up [DEV-459](../../tickets/DEV-459.md), тикет не найден) | Апселл Modpack setup перед окном CurseForge; CF-001 обновлён 18-Oct |

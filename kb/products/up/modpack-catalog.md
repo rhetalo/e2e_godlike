@@ -35,6 +35,8 @@ sources:
 - **Свой модпак:** Files → `/mods` → «Upload custom modpack / Upload manifest» (CF `manifest.json`).
 - **Платная сборка «под ключ»:** блок «Don't want to build or configure your modpack yourself?» в Modpacks и в `/mods`
   ведёт на заказ Custom Modpack Setup ([DEV-459](../../tickets/DEV-459.md)).
+  С 16-Oct-2026 Upload custom modpack (и, по коду фронта, Modpacks) сначала показывает апселл «Modpack setup» (Lite/Pro, «Order now» /
+  «No thanks, I’ll do it myself»), подробности и условия показа - [UP/files](files.md#как-работает-под-капотом).
 - **Админка** `/admin/modpacks-v2/view/{id}`: чекбокс «Client catalog» (колонка Listed / Hidden) - это ADM, только с ок владельца.
 
 ## Как работает (под капотом)
