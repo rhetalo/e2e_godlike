@@ -74,11 +74,24 @@ sources:
 
 ## WPGL - витрина
 
-Страниц: 1, с автотестами: 1, тестов в их спеках: 95.
+Страниц: 14, с автотестами: 12, тестов в их спеках: 95.
 
 | Фича | Статус | Спеки | Тестов | Покрытие ✅ / руками / ❌ |
 |---|---|---|---|---|
 | [WPGL - витрина godlike.host (WordPress)](products/wpgl/README.md) | draft | все спеки продукта (26) | 95 | 0 / 0 / 0 |
+| [Кастомайзер тарифа на страницах игр (Customize server)](products/wpgl/game-customizer.md) | draft | `game-slider.spec.ts` | 19 | 5 / 0 / 1 |
+| [Воронка игрового сервера - корзина, вход, Configure, чекаут WHMCS](products/wpgl/game-funnel.md) | draft | `funnel.cart.paypal.spec.ts`, `funnel.spec.ts`, `funnel.with.credit.check.spec.ts`, `login.validation.spec.ts`, `registration-flow.spec.ts` | 10 | 8 / 1 / 1 |
+| [Каталог игр - сетка с фильтрами и список лендингов](products/wpgl/games-catalog.md) | draft | `games.catalog.spec.ts` | 6 | 6 / 0 / 1 |
+| [Шапка, футер, навигация и SEO витрины](products/wpgl/header-navigation.md) | draft | `smoke.pages.spec.ts`, `storefront.breadth.spec.ts`, `valid.links.spec.ts` | 8 | 5 / 0 / 1 |
+| [Языки и валюты витрины](products/wpgl/locale-currency.md) | draft | `locale.spec.ts` | 3 | 3 / 1 / 1 |
+| [Мобильная корзина /mobile-cart](products/wpgl/mobile-cart.md) | draft | `funnel.mobile.spec.ts` | 4 | 4 / 0 / 1 |
+| [Калькулятор modded-хостинга - модпак и тариф](products/wpgl/modded-calculator.md) | draft | `smoke.pages.spec.ts`, `modpack.config.modded.spec.ts`, `slider.modded.spec.ts` | 12 | 7 / 1 / 1 |
+| [Воронка modded - cart-modded-new и страницы модпаков](products/wpgl/modded-funnel.md) | draft | `cart.modded-new.spec.ts`, `funnel.modded.spec.ts` | 6 | 4 / 1 / 1 |
+| [Конструктор модпаков и 3-часовой trial](products/wpgl/modpack-constructor.md) | draft | `funnel.modpack-constructor.spec.ts`, `modpack.constructor.spec.ts` | 5 | 5 / 0 / 1 |
+| [Промо витрины - MONTHLY75, дефолтные коды, MODPACK50, flash-sale, Free Server Gift](products/wpgl/promo.md) | draft | `funnel.mobile.spec.ts`, `games.invalid.promo.spec.ts`, `games.valid.promo.spec.ts` | 6 | 3 / 1 / 2 |
+| [Сиды Minecraft - Seed finder, калькулятор сида, cart-seed](products/wpgl/seeds.md) | draft | `funnel.seed.spec.ts`, `smoke.pages.spec.ts`, `seed-list.finder.spec.ts`, `slider.seed.spec.ts` | 19 | 6 / 0 / 1 |
+| [Custom Modpack Setup - «соберём модпак за тебя»](products/wpgl/custom-modpack-setup.md) | draft | - | - | 1 / 2 / 2 |
+| [Лендинги без автотестов - Launcher, SMP One-Click, KB сайта, каталог серверов игроков](products/wpgl/landings.md) | draft | - | - | 0 / 3 / 4 |
 
 ## ADM
 

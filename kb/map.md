@@ -100,14 +100,19 @@ mindmap
 
 - 📄 [Как устроено: WordPress, Polylang, кеш, аналитика, маршруты](products/wpgl/README.md#как-устроено)
 - 📄 [Карта разделов: навигация, языки, игры, KB сайта, калькуляторы, лендинги](products/wpgl/README.md#карта-разделов)
-- 📄 [Шапка, меню, 21 валюта (live 15-Oct)](products/wpgl/README.md#шапка-и-меню-live-15-oct) · [сетка каталога и 46 лендингов](products/wpgl/README.md#игры-live-15-oct-исправлено-16-oct) · [23 корзины](products/wpgl/README.md#корзины-funnel-страницы)
+- 📄 [Шапка, меню, 21 валюта (live 15-Oct)](products/wpgl/README.md#шапка-и-меню-live-15-oct) · [23 корзины](products/wpgl/README.md#корзины-funnel-страницы)
+- 📄 [Шапка, футер, навигация, SEO](products/wpgl/header-navigation.md) · [языки и валюты](products/wpgl/locale-currency.md)
+- 📄 [Каталог игр: сетка и «List of games»](products/wpgl/games-catalog.md) · [кастомайзер тарифа](products/wpgl/game-customizer.md)
 - Воронки
-  - 🎫 [DEV-400](tickets/DEV-400.md) - страницы модпаков → `cart-modded-new`
-  - 🎫 [DEV-402](tickets/DEV-402.md) - страницы игр → Vue-cart
-  - 🎫 [DEV-459](tickets/DEV-459.md) - Custom Modpack Setup, точки входа
+  - 📄 [Воронка игрового сервера → WHMCS](products/wpgl/game-funnel.md) - 🎫 [DEV-402](tickets/DEV-402.md)
+  - 📄 [Мобильная корзина](products/wpgl/mobile-cart.md)
+  - 📄 [Modded-калькулятор](products/wpgl/modded-calculator.md) - 🎫 [DEV-532](tickets/DEV-532.md) · [modded-воронка](products/wpgl/modded-funnel.md) - 🎫 [DEV-400](tickets/DEV-400.md)
+  - 📄 [Сиды: Seed finder, калькулятор, cart-seed](products/wpgl/seeds.md)
+  - 📄 [Конструктор модпаков и trial](products/wpgl/modpack-constructor.md)
+  - 📄 [Custom Modpack Setup](products/wpgl/custom-modpack-setup.md) - 🎫 [DEV-458](tickets/DEV-458.md), [DEV-459](tickets/DEV-459.md)
   - 📄 [VPS-воронка](products/vps/purchase-funnel.md)
-- 📄 [Промо: MONTHLY75, MODPACK50, flash-sale, Free Server Gift](products/wpgl/README.md#промо---как-работает) - [DEV-455](tickets/DEV-455.md)
-- 🎫 Калькулятор modded - [DEV-532](tickets/DEV-532.md)
+- 📄 [Промо: MONTHLY75, MODPACK50, flash-sale, Free Server Gift](products/wpgl/promo.md) - 🎫 [DEV-455](tickets/DEV-455.md)
+- 📄 [Лендинги без автотестов: Launcher, SMP, KB сайта, /servers/](products/wpgl/landings.md)
 - 📄 [Гочи витрины](products/wpgl/README.md#гочи-для-тестирования)
 - Инструменты WP: [MCP godlike-wp](registry/mcp-tools.md#серверы)
 

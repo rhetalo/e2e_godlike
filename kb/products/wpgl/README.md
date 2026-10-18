@@ -4,7 +4,7 @@ title: WPGL - витрина godlike.host (WordPress)
 type: product-overview
 product: WPGL
 status: draft
-updated: 2026-10-15
+updated: 2026-10-18
 verified_on: 2026-10-15        # меню, каталог игр, языки, валюты, корзины, sitemap - live recon; остальное из памяти и доков
 tickets: [DEV-400, DEV-402, DEV-455, DEV-458, DEV-459, DEV-532]
 flags: [flash-sale]
@@ -47,28 +47,29 @@ sources:
 
 ## Карта разделов
 
-| Раздел | Что это | Тикеты | Автотесты | Знания |
+| Раздел | Что это | Тикеты | Автотесты | Знания и страница |
 |---|---|---|---|---|
-| Шапка, футер, навигация | см. [Шапка и меню](#шапка-и-меню-live-15-oct) | - | `storefront.breadth`, `valid.links`, `smoke.pages` | ✅ |
-| Языки и валюты | 8 языков URL-префиксом `/{code}/`; **21 валюта** в cookie, по умолчанию по IP (live 15-Oct) | - | `locale` (LOC-001..003, все 21 валюта) | ✅ |
+| Шапка, футер, навигация | см. [Шапка и меню](#шапка-и-меню-live-15-oct) | - | `storefront.breadth`, `valid.links`, `smoke.pages` | ✅ [WPGL/header-navigation](header-navigation.md) |
+| Языки и валюты | 8 языков URL-префиксом `/{code}/`; **21 валюта** в cookie, по умолчанию по IP (live 15-Oct) | - | `locale` (LOC-001..003, все 21 валюта) | ✅ [WPGL/locale-currency](locale-currency.md) |
 | CookieYes | Баннер `.cky-consent-container`, гасится `CookieBanner.dismissAll` | - | косвенно | ⚠️ поведение не описано |
-| Страницы игр и каталог | сетка каталога ~46 карточек с фильтрами (ведут в корзину) + SEO-список «List of games» на 20 ссылок; 46 лендингов (см. [Игры](#игры-live-15-oct-исправлено-16-oct)); тарифы в Vue-cart с 20-Aug | [DEV-402](../../tickets/DEV-402.md) | `games.valid.promo`, `games.invalid.promo`, `game-slider` | ✅ |
-| Витрина серверов игроков | `/servers/` - 34 сервера игроков, фильтры по тегам, версиям, лоадерам, режимам (тип записи `server`) | - | нет | ⏸ отложено владельцем 15-Oct |
+| Страницы игр и каталог | сетка каталога ~46 карточек с фильтрами (ведут в корзину) + SEO-список «List of games» на 20 ссылок; 46 лендингов (см. [Игры](#игры-live-15-oct-исправлено-16-oct)); тарифы в Vue-cart с 20-Aug | [DEV-402](../../tickets/DEV-402.md) | `games.valid.promo`, `games.invalid.promo`, `game-slider` | ✅ [WPGL/games-catalog](games-catalog.md) |
+| Кастомайзер тарифа игры | Customize server: слайдеры Slots, RAM, Days, синхронизация Slots ↔ RAM | - | `game-slider` | ✅ [WPGL/game-customizer](game-customizer.md) |
+| Витрина серверов игроков | `/servers/` - 34 сервера игроков, фильтры по тегам, версиям, лоадерам, режимам (тип записи `server`) | - | нет | ⏸ отложено владельцем 15-Oct [WPGL/landings](landings.md) |
 | Инструменты Minecraft | Seed Map `/minecraft-seed-map/`, Circle Generator, Skin Editor `/minecraft-skin-editor/` | - | нет | ❌ |
-| KB сайта (`ht_kb`) | `/knowledgebase-en/`, редизайн проверен на stage 31-Aug | - | нет | ⚠️ |
+| KB сайта (`ht_kb`) | `/knowledgebase-en/`, редизайн проверен на stage 31-Aug | - | нет | ⚠️ [WPGL/landings](landings.md) |
 | Блог | статьи в корне `/...-blog/`, не под `/blog/*` | [DEV-455](../../tickets/DEV-455.md) | нет | ❌ |
-| Калькулятор modded | `<plan-calculator-widget>` в Shadow DOM (с 05-Aug), данные из panel API `/api/v2/minecraft/modpacks` | [DEV-532](../../tickets/DEV-532.md) | `slider.modded`, `modpack.config.modded` | ✅ |
-| Калькулятор сида и Seed finder | одиночный сид в Shadow DOM (с 06-Aug); `/minecraft-seeds/` = Seed finder без корзины (с 02-Oct) | - | `slider.seed`, `seed-list.finder` | ✅ |
-| Воронка игры | step 2 (биллинг) → Configure (локация, тип) → WHMCS | [DEV-402](../../tickets/DEV-402.md) | `funnel`, `registration-flow`, `login.validation` | ✅ |
-| Воронка modded | `/cart-modded-new/` с `modpackId=<src>:<proj>:<file>`, 43 страницы модпаков | [DEV-400](../../tickets/DEV-400.md) | `cart.modded-new`, `funnel.modded` | ✅ |
-| Воронка сида | `/cart-seed`, классическая Vue-cart | - | `funnel.seed` (1 тест) | ✅ |
-| Мобильная корзина | `/mobile-cart`, 390×844, до выбора игры цена $0.00 | - | `funnel.mobile` | ✅ |
+| Калькулятор modded | `<plan-calculator-widget>` в Shadow DOM (с 05-Aug), данные из panel API `/api/v2/minecraft/modpacks` | [DEV-532](../../tickets/DEV-532.md) | `slider.modded`, `modpack.config.modded` | ✅ [WPGL/modded-calculator](modded-calculator.md) |
+| Калькулятор сида и Seed finder | одиночный сид в Shadow DOM (с 06-Aug); `/minecraft-seeds/` = Seed finder без корзины (с 02-Oct) | - | `slider.seed`, `seed-list.finder` | ✅ [WPGL/seeds](seeds.md) |
+| Воронка игры | step 2 (биллинг) → Configure (локация, тип) → WHMCS | [DEV-402](../../tickets/DEV-402.md) | `funnel`, `registration-flow`, `login.validation` | ✅ [WPGL/game-funnel](game-funnel.md) |
+| Воронка modded | `/cart-modded-new/` с `modpackId=<src>:<proj>:<file>`, 43 страницы модпаков | [DEV-400](../../tickets/DEV-400.md) | `cart.modded-new`, `funnel.modded` | ✅ [WPGL/modded-funnel](modded-funnel.md) |
+| Воронка сида | `/cart-seed`, классическая Vue-cart | - | `funnel.seed` (1 тест) | ✅ [WPGL/seeds](seeds.md) |
+| Мобильная корзина | `/mobile-cart`, 390×844, до выбора игры цена $0.00 | - | `funnel.mobile` | ✅ [WPGL/mobile-cart](mobile-cart.md) |
 | VPS-воронка | `/vps-hosting/` (тогглы Performance × Service) → `/cart-vps/` → WHMCS | - | `vps.funnel.*` | ✅ ([VPS](../vps/README.md)) |
-| Конструктор модпаков и trial | Dry-Run → демо-сервер на 3 часа → `/cart-modpack-constructor/` → trial | - | `funnel.modpack-constructor`, `modpack.constructor` | ⚠️ |
-| Custom Modpack Setup | `/custom-modpack-setup/`, Lite / Pro, 4 входа | [DEV-458](../../tickets/DEV-458.md), [DEV-459](../../tickets/DEV-459.md) | нет | ✅ |
-| Лендинги | Launcher `/launcher/` (черновик), SMP One-Click `/minecraft-smp/` (6 сборок), Modpack Program ❓ | - | нет | ⚠️ |
+| Конструктор модпаков и trial | Dry-Run → демо-сервер на 3 часа → `/cart-modpack-constructor/` → trial | - | `funnel.modpack-constructor`, `modpack.constructor` | ⚠️ [WPGL/modpack-constructor](modpack-constructor.md) |
+| Custom Modpack Setup | `/custom-modpack-setup/`, Lite / Pro, 4 входа | [DEV-458](../../tickets/DEV-458.md), [DEV-459](../../tickets/DEV-459.md) | нет | ✅ [WPGL/custom-modpack-setup](custom-modpack-setup.md) |
+| Лендинги | Launcher `/launcher/` (черновик), SMP One-Click `/minecraft-smp/` (6 сборок), Modpack Program ❓ | - | нет | ⚠️ [WPGL/landings](landings.md) |
 | PlayFreeHost | отдельный WP-сайт playfreehost.com - свой обзор [PFH](../pfh/README.md) | [DEV-563](../../tickets/DEV-563.md) | нет | ✅ |
-| Промо | MONTHLY75/50, MODPACK50, VANILLA20 / COMMUNITY40, flash-sale, попап Free Server Gift | [DEV-400](../../tickets/DEV-400.md), [DEV-455](../../tickets/DEV-455.md) | `games.*.promo`, воронки | ✅ |
+| Промо | MONTHLY75/50, MODPACK50, VANILLA20 / COMMUNITY40, flash-sale, попап Free Server Gift | [DEV-400](../../tickets/DEV-400.md), [DEV-455](../../tickets/DEV-455.md) | `games.*.promo`, воронки | ✅ [WPGL/promo](promo.md) |
 
 ## Шапка и меню (live 15-Oct)
 
