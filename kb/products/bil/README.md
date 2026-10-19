@@ -4,8 +4,8 @@ title: BIL - биллинг WHMCS (godlike.host/clientarea)
 type: product-overview
 product: BIL
 status: draft
-updated: 2026-10-18
-verified_on: null              # собрано из памяти и карточек; SQL к БД появился 18-Oct, сверкой ещё не пользовались
+updated: 2026-10-19
+verified_on: 2026-10-19        # частично: статусы, free-продукты, add-on/trial, валюты, услуга 461901 сверены billing-sql; остальное - память и карточки
 tickets: [DEV-401, DEV-455, DEV-458, DEV-459, TASK-tariff-list-400]
 flags: []
 tests: [tests/funnels/*.spec.ts, tests/general/registration-flow.spec.ts, tests/general/login.validation.spec.ts]
@@ -49,7 +49,7 @@ sources:
 | Оплата | Stripe (iframe), PayPal, Crypto (CoinPayments), кредитный баланс | - | `funnel.cart.paypal`, `funnel.with.credit.check` | ⚠️ [BIL/payments](payments.md) |
 | Кабинет: Product Details | страница услуги, Request Cancellation, «Cancel the cancellation» | [DEV-401](../../tickets/DEV-401.md) | нет | ⚠️ [BIL/services-cancellation](services-cancellation.md) |
 | Отмена и возврат подписки | Request Cancellation → модуль в UP; Resume subscription | [DEV-401](../../tickets/DEV-401.md) | нет | ⚠️ [BIL/services-cancellation](services-cancellation.md) |
-| Статусы услуги | Active, Paused, Suspended, terminated | [DEV-401](../../tickets/DEV-401.md), [DEV-563](../../tickets/DEV-563.md) | нет | ❌ [BIL/services-cancellation](services-cancellation.md) |
+| Статусы услуги | Pending, Active, Paused, Suspended, Cancelled, Terminated, Fraud | [DEV-401](../../tickets/DEV-401.md), [DEV-563](../../tickets/DEV-563.md) | нет | ❌ [BIL/services-cancellation](services-cancellation.md) |
 | Free-продукты | 282 (EU), 1127 (USA), парные free для удержания | [DEV-455](../../tickets/DEV-455.md), [DEV-563](../../tickets/DEV-563.md) | нет | ⚠️ [BIL/free-products](free-products.md) |
 | Письма eSputnik | цепочка Free Gift Day 0..28 по событию `FreeServerGift` | [DEV-455](../../tickets/DEV-455.md) | нет | ⚠️ [BIL/free-products](free-products.md) |
 | Add-on Custom Modpack Setup | Lite = 1217, Pro = 1218, one-time | [DEV-458](../../tickets/DEV-458.md) | нет | ✅ [BIL/addons-trials](addons-trials.md) |
@@ -121,9 +121,9 @@ sources:
 
 ## Пробелы
 
-1. Жизненный цикл услуги, инвойсы, продление, кредит, Paused и Suspended вне trial - не описаны.
+1. Жизненный цикл услуги (переходы в Cancelled, Suspended, Fraud вне trial), инвойсы, продление, кредит - не описаны.
 2. Stripe iframe: поведение и селекторы.
 3. Тарифы и апгрейд со стороны WHMCS; судьба бага `tariffs-new` ([TASK-tariff-list-400](../../tickets/TASK-tariff-list-400.md)).
 4. Нет спеков на кабинет (productdetails, отмена, resume), письма, add-ons, free-продукты.
 5. Хвосты: письмо Custom Modpack Setup после оплаты ([DEV-458/F-EMAIL](../../tickets/DEV-458.md#находки)), имена событий resume-баннера,
-   Day 7 цепочки Free Gift (~21-Oct), висит ли отмена [srv:43ae756d](../../registry/test-servers.md#43ae756d) в WHMCS.
+   Day 7 цепочки Free Gift (~21-Oct), почему отмена [srv:43ae756d](../../registry/test-servers.md#43ae756d) терминировала услугу сразу.

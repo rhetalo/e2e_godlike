@@ -4,14 +4,15 @@ title: Add-on Custom Modpack Setup и trial конструктора модпа�
 type: feature
 product: BIL
 status: draft
-updated: 2026-10-18
-verified_on: 2026-09-28        # QA DEV-458; trial - memory modpack-constructor-trial-funnel
+updated: 2026-10-19
+verified_on: 2026-10-19        # billing-sql: tblproducts 1217/1218/343, tblcustomfields 1887; письмо - QA DEV-458 28-Sep
 tickets: [DEV-458]
 flags: []
 tests: [tests/funnels/funnel.modpack-constructor.spec.ts]
 sources:
   - kb/products/bil/README.md (Карта разделов, Статусы и переходы)
   - kb/tickets/DEV-458.md; memory: custom-modpack-setup-qa, modpack-constructor-trial-funnel
+  - billing-sql 19-Oct-2026: tblproducts, tblproductgroups, tblcustomfields
 ---
 
 # Add-on Custom Modpack Setup и trial конструктора модпаков
@@ -24,9 +25,16 @@ sources:
 
 | Продукт | ID в WHMCS | Как создаётся |
 |---|---|---|
-| Custom Modpack Setup Lite | 1217 | one-time add-on, `product_features.php?action=modpack_setup_order` |
-| Custom Modpack Setup Pro | 1218 | то же |
-| Trial конструктора | pid 343 (customfield 1887 = `mod_test_session_id`) | `POST api-cart.php` → `POST product_features.php?action=trial` |
+| Custom Modpack Setup - Lite | 1217 | `product_features.php?action=modpack_setup_order` |
+| Custom Modpack Setup - Pro | 1218 | то же |
+| Trial конструктора | pid 343 (customfield 1887 «Mod Test Session ID») | `POST api-cart.php` → `POST product_features.php?action=trial` |
+
+По базе (billing-sql 19-Oct-2026):
+
+- **«Add-on» - это не WHMCS Addon, а обычный продукт:** 1217 и 1218 лежат в `tblproducts`, группа `custom-modpack-setup-service`
+  (gid 193), `paytype = onetime`, модуль `autorelease`.
+- **pid 343 - обычный платный тариф** «Quadra» из группы Minecraft Budget (gid 57, `paytype = recurring`), а не отдельный
+  trial-продукт; trial отличает customfield 1887 (текстовое поле продукта 343).
 
 - Trial: успех → редирект на `clientarea.php?action=productdetails&id=<id>`; при активном trial - **409** «An active trial already exists for this client.»
 

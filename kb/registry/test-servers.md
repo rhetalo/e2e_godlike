@@ -3,7 +3,7 @@ id: KB-REG-SERVERS
 title: Тест-серверы (UP, VPS)
 type: registry
 status: draft
-updated: 2026-10-15
+updated: 2026-10-19
 verified_on: -        # с живой панелью ещё не сверяли
 sources:
   - utils/gameAuth.ts (env + фолбэки)
@@ -112,7 +112,8 @@ DEV-418. 🟡
 DEV-418. 🟡
 
 ### 43ae756d
-DEV-418. После DEV-401 мог остаться в PENDING-отмене в WHMCS ❓. В панели 15-Oct: платный, активный. 🔴
+DEV-418. В WHMCS услуга 461901 **Terminated 14-Aug-2026** (после теста ловушки DEV-401), запросов отмены нет; в панели строка
+осталась, `free=0`, `external_id = NULL` - сервер отвязан от биллинга (billing-sql + panel-sql, 19-Oct-2026). 🔴
 
 ### 799c975d
 DEV-418. 🟡

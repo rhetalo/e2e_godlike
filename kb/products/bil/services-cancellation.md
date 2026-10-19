@@ -4,8 +4,8 @@ title: Услуги в кабинете - Product Details, статусы, от�
 type: feature
 product: BIL
 status: draft
-updated: 2026-10-18
-verified_on: 2026-08-17        # QA DEV-401 14-17 Aug на проде
+updated: 2026-10-19
+verified_on: 2026-10-19        # billing-sql: tblhosting.domainstatus, услуга 461901; экраны отмены - QA DEV-401 14-17 Aug
 tickets: [DEV-401, DEV-563]
 flags: [cancellation-retention-steps]
 tests: []                      # спеков кабинета нет; модуль отмены - только ручной QA
@@ -13,6 +13,7 @@ sources:
   - kb/products/bil/README.md (Статусы и переходы, Правила 2-3, гоча 3)
   - kb/tickets/DEV-401.md; kb/products/up/cancel-module.md
   - memory: cancel-retention-dev401, cancel-retention-run-notes
+  - billing-sql 19-Oct-2026: tblhosting, tblcancelrequests; panel-sql 19-Oct-2026: servers
 ---
 
 # Услуги в кабинете - Product Details, статусы, отмена и возврат подписки
@@ -42,7 +43,8 @@ sources:
 | Active | пауза из модуля отмены (freeze) | Paused |
 | Active | «Continue With Free Plan» | парный free-продукт ([BIL/free-products](free-products.md)) |
 
-Статусы услуги в WHMCS: Active, Paused, Suspended, terminated. Жизненный цикл вне отмены и trial не описан ❓.
+Статусы услуги в WHMCS (`tblhosting.domainstatus`, все 7 значений по базе, billing-sql 19-Oct-2026): **Pending, Active, Paused, Suspended, Cancelled, Terminated, Fraud**.
+Какое событие переводит услугу в Cancelled, Suspended или Fraud вне отмены и trial - не описано ❓.
 
 ## Правила и граничные случаи
 
@@ -61,7 +63,9 @@ sources:
 
 - **Закрытие модалки отмены после экрана reason = реальная отмена.** Откат - «Cancel the cancellation» или баннер Resume.
 - Пауза - реальный Paused в WHMCS; снимать «Unpause Server» → «Undo pause».
-- Висит ли отмена [srv:43ae756d](../../registry/test-servers.md#43ae756d) в WHMCS - ❓ (проверить SQL-ом через `godlike-billing-sql`).
+- **Отмена [srv:43ae756d](../../registry/test-servers.md#43ae756d) не висит:** услуга 461901 в WHMCS **Terminated 14-Aug-2026** (день теста ловушки),
+  хотя оплачена до 11-Sep; запросов в `tblcancelrequests` нет. В панели строка сервера осталась, `external_id = NULL`
+  (billing-sql 19-Oct-2026, panel-sql). Почему отмена из модуля сработала сразу, а не в конце периода - ❓.
 
 ## Покрытие
 

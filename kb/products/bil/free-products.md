@@ -4,8 +4,8 @@ title: Free-продукты и письма - бесплатные сервер
 type: feature
 product: BIL
 status: draft
-updated: 2026-10-18
-verified_on: 2026-10-15        # QA DEV-455 закрыт 15-Oct; free-продукты 282/1127 - DEV-563
+updated: 2026-10-19
+verified_on: 2026-10-19        # billing-sql: tblproducts 282/1127/285/286/299/316; Free Gift - QA DEV-455 15-Oct
 tickets: [DEV-455, DEV-563, DEV-401]
 flags: []
 tests: []                      # спеков на free-продукты и письма нет
@@ -13,6 +13,7 @@ sources:
   - kb/products/bil/README.md (Free-продукты, Правило 1)
   - kb/tickets/DEV-455.md, DEV-563.md, DEV-401.md
   - memory: dev455-free-server-gift, dev563-free-egg-lock, playfreehost-landing-qa
+  - billing-sql 19-Oct-2026: tblproducts, tblproductgroups
 ---
 
 # Free-продукты и письма - бесплатные серверы, cart-free, цепочка eSputnik
@@ -29,11 +30,13 @@ sources:
 
 ## Как работает (под капотом)
 
-| Продукт | Что |
-|---|---|
-| 282 | Free Minecraft EU; попап Free Gift и PlayFreeHost |
-| 1127 | Free Minecraft USA |
-| 285, 286, 299, 316 | парные free для удержания: Unturned, Terraria, Core Keeper, Enshrouded ([BIL/services-cancellation](services-cancellation.md)) |
+Все шесть - в группе WHMCS **Free Tariffs** (gid 49), `paytype = free`, модуль `pterodactyl`, не скрыты и не retired (billing-sql 19-Oct-2026).
+
+| Продукт | Имя в WHMCS | Что |
+|---|---|---|
+| 282 | Minecraft | Free Minecraft EU; попап Free Gift и PlayFreeHost |
+| 1127 | Minecraft (USA) | Free Minecraft USA |
+| 285, 286, 299, 316 | Unturned, Terraria, Core Keeper, Enshrouded | парные free для удержания ([BIL/services-cancellation](services-cancellation.md)) |
 
 - Создание: `POST api-cart-free.php`. Статус и события попапа: `product_features.php?action=free_gift_status` / `free_gift_event`.
 - **Письма:** аддон eSputnik, цепочка по событию `FreeServerGift` - Day 0 / 7 / 14 / 21 / 28 ([DEV-455](../../tickets/DEV-455.md)).
