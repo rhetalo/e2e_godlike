@@ -26,11 +26,11 @@ description: >-
 | Что | Правило |
 |---|---|
 | Папка и имя | `tests/<domain>/<feature>.spec.ts`, ≤ ~300 строк |
-| Импорт | витрина (`godlike.host`): `import { test, expect } from "../../fixtures/base";` - гасит CookieYes / flash-sale и пиннит A/B Amplitude. Панели: можно `@playwright/test`, но навигация через PO |
+| Импорт | витрина (`godlike.host`): `import { test, expect } from "../../fixtures/base";` - гасит CookieYes / flash-sale и пиннит A/B Amplitude. Панели: можно `@playwright/test`, но навигация через PO; в новых и правленых спеках панели - `import { test, expect } from "../../../fixtures/diagnostics"` (N1: console/pageerror/HTTP-ошибки во вложении при падении, report-only, D-024) |
 | UI | только через Page Object / Component. **Сырых локаторов в спеке нет** (ESLint предупреждает). Нужен локатор - в PO, селектор - в `utils/selectors.ts` с датированным комментарием |
 | Селекторы | приоритет: стабильный id → BEM → семантические атрибуты → роли. Не `:nth-child`, не `data-v-*`, по возможности не `:has-text()` |
 | Ассерты | только в спеке, внутри `test.step("...")`. PO и компоненты возвращают состояние, `expect` не вызывают |
-| Теги | `@smoke` / `@critical` / `@regression` (на тесте или на `describe`, если весь файл одного класса); `@flaky` - карантин с комментарием «почему» |
+| Теги | `@smoke` / `@critical` / `@regression` (на тесте или на `describe`, если весь файл одного класса); `@flaky` - карантин с комментарием «почему». Новые и правленые тесты - через детали: `{ tag: "@critical", annotation: { type: "issue", description: "DEV-123" } }` (C3, старые не мигрируем) |
 | Язык | названия тестов и шагов - по-русски; UI-лейблы, ID кейсов (`TC-GP-*`), теги - как есть |
 | Данные | URL, UUID, учётки, списки - из `fixtures/test-data.ts` / `utils/*` (`process.env.X ?? fallback`). В теле спека не хардкодим |
 | Каждый тест | минимум один `expect`; проверяет результат действия, а не «кнопка видна» |
@@ -39,6 +39,13 @@ description: >-
 ## 2. Ожидания и стабильность
 
 - Только web-first: `expect(locator).toBeVisible/...`, `locator.waitFor({ state })`, `expect.poll(...)`.
+- **`expect(await po.getX())` не писать** для значения, которое меняется (после клика, навигации, статус): читает один раз,
+  без ретрая → `await expect.poll(() => po.getX()).toBe(...)`; есть локатор - web-first (`toHaveText(/\S/)` вместо
+  `innerText().length > 0`). Допустимо для уже устоявшегося значения и ответа API (C1, `TEST_GUIDELINES.md` §5.8).
+- Много независимых полей в одном шаге (каталог, контракт, summary) - `expect.soft`, чтобы увидеть все расхождения;
+  составное условие из нескольких чтений - `expect(async () => {...}).toPass({ timeout })` (C4).
+- Известный **стабильный** баг прода - `test.fail(true, "DEV-123: ...")`: тест описывает правильное поведение и сам
+  покраснеет, когда баг починят (C2). Нестабильность - это `@flaky`, а не `test.fail`.
   **`waitForTimeout` нельзя** (исключения: краулер `valid.links`, второй проход баннеров в `fixtures/base.ts`).
 - **`networkidle` не ждать** на страницах панели (живой WebSocket) - ждать конкретный ответ:
   `page.waitForResponse(...)`, слушатель ставить **до** действия.
@@ -80,6 +87,7 @@ short vs full UUID для части API; Pennant-флаги считаются 
 - [ ] нет захардкоженных URL и данных
 - [ ] ассерты в `test.step`, есть тег, у каждого теста есть `expect`
 - [ ] нет `waitForTimeout`, `networkidle`, строгого сравнения URL, «ровно N»
+- [ ] нет `expect(await ...)` на меняющемся значении - `expect.poll` или web-first
 - [ ] ничего из раздела 3 не нажимается
 - [ ] проверяется **видимое пользователю** (не `toBeAttached` на спрятанном элементе)
 - [ ] ожидаемые значения не подогнаны под текущее поведение прода (если тест «починили» правкой ожидания - это кандидат в баг, а не фикс)

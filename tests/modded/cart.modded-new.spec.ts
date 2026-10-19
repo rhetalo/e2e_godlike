@@ -75,7 +75,7 @@ test.describe("Воронка /cart-modded-new — конфигурация че
     await test.step("≥5 планов в списке и цена отрендерена", async () => {
       const planOpts = await cart.optionTexts(cart.planSelect());
       expect(planOpts.length).toBeGreaterThanOrEqual(5);
-      expect(await cart.priceText()).toMatch(StorefrontPriceRe);
+      await expect.poll(() => cart.priceText()).toMatch(StorefrontPriceRe);
     });
   });
 
@@ -86,9 +86,9 @@ test.describe("Воронка /cart-modded-new — конфигурация че
     await cart.selectOption(cart.planSelect(), /Godlike/); // заметно более крупный тариф
 
     await test.step("выбран Godlike, цена пересчиталась", async () => {
-      await expect.poll(() => cart.toggleText(cart.planSelect()), { timeout: 10_000 }).not.toBe(planBefore);
+      expect(planBefore).not.toMatch(/Godlike/i);
+      await expect.poll(() => cart.toggleText(cart.planSelect()), { timeout: 10_000 }).toMatch(/Godlike/i);
       await expect.poll(() => cart.priceText(), { timeout: 10_000 }).not.toBe(priceBefore);
-      expect(await cart.toggleText(cart.planSelect())).toMatch(/Godlike/i);
     });
   });
 
@@ -99,9 +99,9 @@ test.describe("Воронка /cart-modded-new — конфигурация че
     await cart.selectOption(cart.billingSelect(), /12 Months/);
 
     await test.step("выбран 12 Months, цена пересчиталась", async () => {
-      await expect.poll(() => cart.toggleText(cart.billingSelect()), { timeout: 10_000 }).not.toBe(billingBefore);
+      expect(billingBefore).not.toMatch(/12 Months/i);
+      await expect.poll(() => cart.toggleText(cart.billingSelect()), { timeout: 10_000 }).toMatch(/12 Months/i);
       await expect.poll(() => cart.priceText(), { timeout: 10_000 }).not.toBe(priceBefore);
-      expect(await cart.toggleText(cart.billingSelect())).toMatch(/12 Months/i);
     });
   });
 

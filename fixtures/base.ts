@@ -27,7 +27,9 @@
  *   Решение: ждём networkidle (все JS-запросы завершены) → первый dismiss,
  *   затем ещё короткая пауза → второй dismiss для баннеров с setTimeout.
  */
-import { test as base, expect, type Page, type Browser, type BrowserContext } from '@playwright/test';
+import { expect, type Page, type Browser, type BrowserContext } from '@playwright/test';
+// База - фикстура диагностики N1 (console / pageerror / failed requests → вложение при падении, report-only).
+import { test as base } from './diagnostics';
 import { CookieBanner } from '../components/CookieBanner';
 import { pinAmplitudeExperiments } from '../utils/amplitude';
 

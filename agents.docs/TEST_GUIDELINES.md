@@ -33,7 +33,7 @@ test("Пользователь выключает работающий серв�
     expect(serverPage.page.url()).toContain(TEST_SERVER_UUID);
   });
   await test.step("Проверяем начальное состояние: сервер Running", async () => {
-    expect(await serverPage.getStatusText()).toContain("Running");
+    await expect.poll(() => serverPage.getStatusText()).toContain("Running");
     await expect(serverPage.shutdownButton).toBeEnabled();
   });
   const rowsBefore = await serverPage.getActivityRowCount();
@@ -47,7 +47,7 @@ test("Пользователь выключает работающий серв�
   });
   await test.step("Ждём регистрации задачи в activity table", async () => {
     await serverPage.waitForNewActivityRow(rowsBefore, 15_000);
-    expect(await serverPage.getLatestTaskName()).toBe("Shutdown");
+    await expect.poll(() => serverPage.getLatestTaskName()).toBe("Shutdown");
   });
   await test.step("Ждём завершения Shutdown (до 90 сек)", async () => {
     await serverPage.waitForLatestTaskComplete(90_000);
@@ -55,8 +55,8 @@ test("Пользователь выключает работающий серв�
     expect(progress).toBe("100");
   });
   await test.step("Финальная проверка: статус = Stopped", async () => {
-    await serverPage.waitForStatus("Stopped", 30_000);
-    expect(await serverPage.getStatusText()).toContain("Stopped");
+    // C1: опрос вместо «прочитал один раз» - значение из PO-метода ретраится, как web-first ассерт
+    await expect.poll(() => serverPage.getStatusText(), { timeout: 30_000 }).toContain("Stopped");
   });
   await test.step("Проверяем кнопки при Stopped: Boot активен, остальные — нет", async () => {
     await expect(serverPage.bootButton).toBeEnabled({ timeout: 5_000 });
@@ -68,11 +68,11 @@ test("Пользователь выключает работающий серв�
 5.1 Каждое утверждение — в test.step()
 // ❌ Плохо
 await serverPage.goto();
-expect(await serverPage.getStatusText()).toContain("Running");
+await expect.poll(() => serverPage.getStatusText()).toContain("Running");
 // ✓ Хорошо
 await test.step("Страница загружена, сервер Running", async () => {
   await serverPage.goto();
-  expect(await serverPage.getStatusText()).toContain("Running");
+  await expect.poll(() => serverPage.getStatusText()).toContain("Running");
 });
 
 Шаги видны в HTML-отчёте при падении — сразу понятно на каком именно шаге тест упал.
@@ -105,7 +105,7 @@ test("Пользователь меняет Hostname и сохраняет", asy
   
   await test.step("Проверяем что сохранилось", async () => {
     await page.reload();
-    expect(await optionsPage.getHostnameValue()).toBe("test-hostname-123");
+    await expect.poll(() => optionsPage.getHostnameValue()).toBe("test-hostname-123");
   });
   
   await test.step("Восстанавливаем оригинальный hostname", async () => {
@@ -173,6 +173,47 @@ npm run test:stable       # всё, КРОМЕ @flaky — кандидат на 
 
 Цель — пустой карантин: либо чиним и снимаем тег, либо подтверждаем реальный баг и
 заводим bug-report. `@flaky` — это TODO с дедлайном, а не постоянное место жительства теста.
+
+5.8 Ожидания и известные баги: expect.poll, expect.soft, toPass, test.fail — узаконено 19-Oct-2026 (D-024)
+Источник: ресерч `RESEARCH_2026-10-16.md` §2 (C1-C4). Новое пишем так; старое правим, когда трогаем файл (без массовой миграции).
+
+C1. `expect.poll` вместо `expect(await ...)`. `expect(await po.getX())` читает значение ОДИН раз и не ретраит -
+после клика или навигации это гонка. Если значение берётся из метода PO (текст статуса, имя активной плитки, count):
+```typescript
+// ❌ один снимок, гонка с Vue/WebSocket
+expect(await config.getActiveOsTypeName()).toBe("Ubuntu");
+// ✓ ретраится до таймаута expect
+await expect.poll(() => config.getActiveOsTypeName()).toBe("Ubuntu");
+// ✓ если есть локатор - web-first ассерт ещё лучше
+await expect(config.orderServerType).toHaveText(/\S/);   // вместо innerText().trim().length > 0
+```
+`expect(await ...)` допустим только для значения, которое уже не меняется (прочитали ПОСЛЕ ожидания, чистая функция, ответ API).
+Детали и интервалы - §9.6.
+
+C2. `test.fail()` для известного бага прода. Тест описывает ПРАВИЛЬНОЕ поведение и помечен как ожидаемо падающий -
+когда баг починят, тест «неожиданно пройдёт», покраснеет и напомнит снять пометку. Это не `@flaky` (там нестабильность)
+и не `.skip()` (там проверка молчит).
+```typescript
+test("TC-GP-XXX | ...", { annotation: { type: "issue", description: "DEV-123" } }, async () => {
+  test.fail(true, "DEV-123: прод отдаёт 400 на /upgrade - снять, когда починят");
+  // ... ассерты на правильное поведение
+});
+```
+Только для стабильного (детерминированного) бага: нестабильный - это `@flaky` (§5.7). Запись - в «Известные проблемы прода» TEST_PLAN.
+
+C3. Теги и Jira в деталях теста - для новых и правленых тестов (старые не мигрируем, `--grep` ловит оба способа):
+```typescript
+test("смена тарифа пересчитывает цену", {
+  tag: "@critical",
+  annotation: { type: "issue", description: "DEV-400" },   // ID тикета/задачи, видно в HTML-отчёте
+}, async () => { ... });
+```
+
+C4. `expect.soft` - когда в одном шаге проверяется МНОГО независимых полей (карточки каталога, поля контракта,
+строки summary): падение одного не прячет остальные, отчёт показывает все расхождения сразу. Тест всё равно красный.
+Не для предусловий: если без значения дальше идти бессмысленно - обычный `expect`.
+`expect(async () => { ... }).toPass({ timeout })` - когда ждать надо СОСТАВНОЕ условие из нескольких чтений
+(статус + бейдж + кнопка) или повторить действие+проверку. Внутри - обычные `expect`; таймаут задавать явно.
 
 6. Иерархия файлов
 @smoke       — самый быстрый критический путь (3–5 тестов)

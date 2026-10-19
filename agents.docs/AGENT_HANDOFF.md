@@ -29,16 +29,24 @@
 - `qa-gate` = CI (`--max-warnings 0`); скиллы `bug-report` (3 повтора) и `spec-to-testplan` (вердикты по артефакту,
   чек-лист пропусков) - приёмы из akovalion/paranoid-qa; D-022 (хук «нет зелёного прогона - нет коммита» не ставим).
 
+**Сделано 19-Oct (вторая сессия, D-024):**
+- **C1-C4** узаконены: `TEST_GUIDELINES.md` §5.8 (шаблон §4 больше не учит `expect(await ...)`), скиллы `godlike-e2e-conventions`
+  (§1 C3, §2 C1/C2/C4, чек-лист) и `flaky-triage` (§3 `test.fail()` для стабильного бага). C1 применён в
+  `vps.funnel.configure`, `cart.modded-new`, `game/panel/versions` (остальные ~95 мест - при касании файла).
+- **N1** `fixtures/diagnostics.ts`: auto-фикстура (console error/warning, pageerror, requestfailed, HTTP >= 400 со всех контекстов,
+  включая общий из `beforeAll`) → вложение `browser-diagnostics` только у упавшего теста, report-only. Витрина - через `fixtures/base.ts`,
+  панель - пилот `game/panel/versions.spec.ts`; остальные панели переводить импортом при касании.
+
 **Следующее (по пользе):**
 1. **Проверить F3 в TestPulse** после 2-3 ночей: появились ли «нове / падав X з N» и секция «Нестабільні»; если пусто -
    проверить, что cron пишет `test-logs/history/history.jsonl` на VPS.
-2. **Конвенции из ресерча (§2 C1-C4):** `expect.poll` вместо `expect(await ...)` (109 мест, начать с шаблона в
-   `TEST_GUIDELINES.md` §4), `test.fail()` для известных багов прода, `{ tag }` + Jira-аннотация для новых тестов, `expect.soft`.
+2. ~~Конвенции C1-C4~~ ✅ 19-Oct (D-024). Остаток C1 - по файлу при касании; первым кандидатом - `game-slider.spec.ts` (20 мест).
 3. **Чистка легаси под храповиком:** по одному файлу из `eslint-suppressions.json` (51 запись) → `npm run lint:prune`.
    `funnel.with.credit.check` (реальный заказ с кредита) - только по решению владельца.
 4. **Слабые тесты, остаток:** PREM-001, EXT-002 (нужен recon), VPS OPT-004, VPS SRV-005; ~10 `isVisible({timeout})` в PO панели
    (таймаут игнорируется - кандидаты на `waitFor`, но часть - намеренные мгновенные проверки).
-5. **Новое из ресерча (§3):** N1 auto-фикстура диагностики (console + pageerror + failed requests, report-only), N2 PO как фикстуры.
+5. **Новое из ресерча (§3):** ~~N1~~ ✅ 19-Oct; через 2-3 ночи посмотреть вложения `browser-diagnostics` у упавших в TestPulse/HTML -
+   если шум мешает, добавить фильтр сторонних хостов. Дальше N2 (PO как фикстуры), N3 (моки error-состояний).
 6. **KB:** страницы фич для PFH / OLDP / ADM (сейчас только обзоры); этап 4 (архитектура) - доступ к репо панели и биллинга есть.
 7. **Не горит:** параллельный прогон витрины (2 воркера, риск Cloudflare); ESLint 9 → 10 (v9 EOL);
    zod `extension_capabilities` / `java_preflight` - когда проба покажет заполненный объект.

@@ -7,7 +7,8 @@
  *
  * Подтверждено MCP-recon 06-Jun-2026 (BEM .server__versions / .server__version).
  */
-import { test, expect, type BrowserContext } from "@playwright/test";
+import { type BrowserContext } from "@playwright/test";
+import { test, expect } from "../../../fixtures/diagnostics";
 import { GamePanelVersionsPage } from "../../../pages/game/GamePanelVersionsPage";
 import {
   loginAndSaveGameSession,
@@ -40,7 +41,7 @@ test.describe("@regression [game-panel] Versions (server software)", () => {
 
     await test.step("сетка семейств содержит несколько server-software", async () => {
       await expect(versions.grid).toBeVisible();
-      expect(await versions.familyCards().count()).toBeGreaterThan(3);
+      await expect.poll(() => versions.familyCards().count()).toBeGreaterThan(3);
     });
 
     await test.step("известные семейства присутствуют (Vanilla/Paper/NeoForge)", async () => {
@@ -64,13 +65,13 @@ test.describe("@regression [game-panel] Versions (server software)", () => {
       await expect(versions.versionCards().first()).toBeVisible();
       releaseCount = await versions.versionCards().count();
       expect(releaseCount).toBeGreaterThan(0);
-      expect(await versions.versionTypes()).toEqual(["RELEASE"]);
+      await expect.poll(() => versions.versionTypes()).toEqual(["RELEASE"]);
     });
 
     await test.step("Show Snapshot Versions: версий больше, появились SNAPSHOT", async () => {
       await versions.toggleSnapshots();
       await expect.poll(() => versions.versionCards().count()).toBeGreaterThan(releaseCount);
-      expect(await versions.versionTypes()).toEqual(expect.arrayContaining(["RELEASE", "SNAPSHOT"]));
+      await expect.poll(() => versions.versionTypes()).toEqual(expect.arrayContaining(["RELEASE", "SNAPSHOT"]));
     });
 
     await test.step("Go Back возвращает к сетке семейств", async () => {
