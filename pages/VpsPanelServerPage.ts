@@ -89,13 +89,22 @@ export class VpsPanelServerPage {
 
   /**
    * Status badge.
-   * Confirmed HTML: <div class="p-3">&nbsp;&nbsp;Running</div>
-   * Filter by text because div.p-3 may appear for other layout blocks too.
+   * Confirmed HTML (19-Oct-2026): <div class="badge-running ... status-block-container"><div class="p-3">Running</div>
+   * Скоуп строго в .status-block-container: голый div.p-3 + фильтр по тексту ловил вкладку
+   * Options («The server must be running to perform this action») → статус всегда «Running».
    */
   get statusBadge(): Locator {
+    return this.page.locator(".status-block-container div.p-3").first();
+  }
+
+  /**
+   * Карточка Memory на Overview. Пока гость грузится (нет QEMU guest agent) там
+   * «Memory Information Unavailable» / «0 Bytes of 0 Bytes»; реальные MB/GB = ОС поднялась.
+   */
+  get guestMemoryReady(): Locator {
     return this.page
       .locator("div.p-3")
-      .filter({ hasText: /Running|Stopped|Paused|Building/i })
+      .filter({ hasText: /Memory[\s\S]*\d\s*(MB|GB) of/ })
       .first();
   }
 
@@ -410,12 +419,16 @@ export class VpsPanelServerPage {
     expected: "Running" | "Stopped",
     timeoutMs = 90_000,
   ): Promise<void> {
-    await expect(
-      this.page
-        .locator("div.p-3")
-        .filter({ hasText: new RegExp(expected, "i") })
-        .first(),
-    ).toBeVisible({ timeout: timeoutMs });
+    await expect(this.statusBadge).toContainText(new RegExp(expected, "i"), { timeout: timeoutMs });
+  }
+
+  /**
+   * Дождаться, что гостевая ОС реально поднялась (guest agent отдаёт память).
+   * Нужен после Boot: Shutdown (ACPI), отправленный пока ОС грузится, гость игнорирует,
+   * а VirtFusion всё равно пишет Complete — сервер остаётся Running (19-Oct-2026).
+   */
+  async waitForGuestReady(timeoutMs = 120_000): Promise<void> {
+    await expect(this.guestMemoryReady).toBeVisible({ timeout: timeoutMs });
   }
 
   /**
@@ -424,14 +437,16 @@ export class VpsPanelServerPage {
    */
   async ensureRunning(timeoutMs = 60_000): Promise<void> {
     const status = await this.getStatusText();
-    if (status.includes("Running")) return;
-
-    console.log(`[SETUP] Server is "${status}" — booting before test...`);
-    await expect(this.bootButton).toBeVisible({ timeout: 10_000 });
-    await expect(this.bootButton).toBeEnabled({ timeout: 10_000 });
-    await this.bootButton.click();
-    await this.waitForStatus("Running", timeoutMs);
-    console.log("[SETUP] Server is Running ✓");
+    if (!status.includes("Running")) {
+      console.log(`[SETUP] Server is "${status}" — booting before test...`);
+      await expect(this.bootButton).toBeVisible({ timeout: 10_000 });
+      await expect(this.bootButton).toBeEnabled({ timeout: 10_000 });
+      await this.bootButton.click();
+      await this.waitForStatus("Running", timeoutMs);
+    }
+    // И при свежем Boot, и при «Running» сразу после чужого Boot — ждём живую ОС.
+    await this.waitForGuestReady();
+    console.log("[SETUP] Server is Running, guest OS up ✓");
   }
 
   /**

@@ -11,8 +11,11 @@
  *   Running →[Shutdown]→ Stopped →[Boot]→ Running →[Power Off]→ Stopped →[Boot]→
  *   Running →[Restart]→ Running.
  *
- * Таймауты из реальной activity history (May 2026): Boot/Poweroff 3–5с,
- * Shutdown 6–43с, Restart ~10с. Статус VirtFusion обновляет через ~2с поллинг.
+ * Таймауты из реальной activity history: May 2026 Boot/Poweroff 3–5с; 19-Oct-2026
+ * Boot/Shutdown ~22с, Poweroff 33–34с (бюджет 30с ронял PWR-003 стабильно) →
+ * бюджеты Complete: Boot 60с, Poweroff/Shutdown/Restart 90с.
+ * Статус div.p-3 ОТСТАЁТ от задачи: пока Poweroff идёт, бейдж ещё «Running».
+ * Поэтому до/после сьюта settleServer(): дождаться Complete последней задачи + reload.
  * Слитые тесты длиннее микро-шагов → test.setTimeout(180s) (см. teardown-флоки панелей).
  *
  * ── СЕЛЕКТОРЫ: все через VpsPanelServerPage (data-action на кнопках НЕТ). ──
@@ -56,20 +59,38 @@ async function awaitTaskComplete(
   return sp.getLatestTaskName();
 }
 
+/**
+ * Дождаться завершения последней задачи в activity table и перечитать страницу,
+ * чтобы статус-бейдж был свежим. Без этого после упавшей попытки (Poweroff ещё
+ * идёт) статус = устаревший «Running» → ensureRunning ничего не делает и сервер
+ * остаётся Stopped (так было 19-Oct-2026: teardown не поднял VPS).
+ */
+async function settleServer(sp: VpsPanelServerPage): Promise<void> {
+  await sp.waitForLatestTaskComplete(90_000).catch((e) => {
+    console.log(`[SETTLE] Последняя задача не дошла до Complete за 90с: ${e}`);
+  });
+  await sp.goto();
+}
+
 test.beforeAll(async ({ browser }: { browser: Browser }) => {
+  test.setTimeout(180_000);
   await loginAndSaveSession(browser);
   sharedContext = await browser.newContext({ storageState: STORAGE_STATE_PATH });
   const page = await sharedContext.newPage();
   serverPage = new VpsPanelServerPage(page, TEST_SERVER_UUID);
   await serverPage.goto();
+  // На serial-ретрае задача прошлой попытки может ещё выполняться.
+  await settleServer(serverPage);
 });
 
 test.afterAll(async () => {
+  // Хук наследует timeout 120с из конфига — даём запас над settle(90с) + boot(60с) + guest(120с).
+  test.setTimeout(300_000);
   // Возвращаем сервер в рабочее состояние Running после всех операций.
   try {
-    if (!(await serverPage.getStatusText()).includes("Running")) {
-      await serverPage.ensureRunning(60_000);
-    }
+    await settleServer(serverPage);
+    await serverPage.ensureRunning(60_000);
+    console.log(`[TEARDOWN] Статус после teardown: ${await serverPage.getStatusText()}`);
   } catch (e) {
     console.log(`[TEARDOWN] Не удалось восстановить сервер в Running: ${e}`);
   } finally {
@@ -120,7 +141,7 @@ test.describe("@critical VPS-питание — переходы состоян�
       const rowsBefore = await serverPage.getActivityRowCount();
       await expect(serverPage.bootButton).toBeEnabled({ timeout: 5_000 });
       await serverPage.bootButton.click();
-      expect(await awaitTaskComplete(serverPage, rowsBefore, 30_000)).toBe("Boot");
+      expect(await awaitTaskComplete(serverPage, rowsBefore, 60_000)).toBe("Boot");
       await serverPage.waitForStatus("Running", 30_000);
       expect(await serverPage.getStatusText()).toContain("Running");
     });
@@ -138,7 +159,7 @@ test.describe("@critical VPS-питание — переходы состоян�
       const rowsBefore = await serverPage.getActivityRowCount();
       await serverPage.powerOffButton.click();
       await confirmAction(serverPage, serverPage.powerOffConfirmButton);
-      expect(await awaitTaskComplete(serverPage, rowsBefore, 30_000)).toBe("Poweroff");
+      expect(await awaitTaskComplete(serverPage, rowsBefore, 90_000)).toBe("Poweroff");
       await serverPage.waitForStatus("Stopped", 30_000);
       expect(await serverPage.getStatusText()).toContain("Stopped");
     });
