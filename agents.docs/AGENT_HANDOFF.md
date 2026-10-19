@@ -14,26 +14,34 @@
 
 ---
 
-## ▶ Продолжаем здесь (16-Oct-2026 · Playwright 1.64.1, CI-гейт, zod, пилот Test Agents)
+## ▶ Продолжаем здесь (19-Oct-2026 · фундамент F1-F4, KB по всем продуктам, приёмы paranoid-qa)
 
-**Состояние:** 657 тестов (+ проект `agents`, не в обычных прогонах). Прогон 654 на 1.64.1: 631 passed, 8 failed →
-все 8 зелёные изолированно (артефакты среды). Всё в `main` (4634da9..c85c70a), запушено origin/replit/gitlab.
+**Состояние:** всё в `main` (90d5801..b49d997), запушено origin / replit / gitlab, GitLab-гейт зелёный.
+Ночной cron 18-Oct: 663 теста, 652 passed, 1 failed (CF-001, починен 3df605e), 1 flaky (VPS PWR-003, починен 4ac3da1).
 
-**Что изменилось:**
-- Playwright **1.64.1**; CI: образ `v1.64.1-noble`, стадия `quality` перед deploy (`quality_gate`: tsc + eslint; `kb_checks`).
-- Проект `agents` (`default: false`): `tests/seed.spec.ts`, черновики Playwright Test Agents - в `tests/agents-pilot/` (сейчас пусто, всё перенесено в финал).
-- zod-контракты `utils/schemas/` (MOD/PLG-001/002); цены витрины по гео `StorefrontPriceRe`; новый спек `tests/general/games.catalog.spec.ts`.
-- Журнал решений `agents.docs/DECISIONS.md`; скилл `godlike-e2e-conventions`; отчёт пилота `agents.docs/PLAYWRIGHT_AGENTS_PILOT.md`.
+**Сделано 16..19-Oct:**
+- Сетка каталога TC-GAMES-005/006; zod `minecraft/version` + `server-jar/status` (TC-GP-MOD-005); VER-002, SRV-003 усилены.
+- Ресерч `agents.docs/RESEARCH_2026-10-16.md`, фундамент: **F1+F4** линт-храповик (D-021: `eslint-suppressions.json`,
+  `--max-warnings 0`, плагин 2.12.1); **F2** `GamePanelBasePage.open()` без networkidle - game-panel 28.4 → 19.2 мин;
+  **F3** история прогонов в TestPulse (`utils/runHistory.ts`, `test-logs/history/history.jsonl`).
+- KB: матрица покрытия `kb/coverage.md` (`kb/_tools/coverage.py --check` в kb_checks); страницы фич VPS 9, WPGL 13, BIL 7
+  (+ UP 28); BIL сверен с WHMCS через `godlike-billing-sql` (подключён 18-Oct, ключ значением в `.mcp.json`).
+- `qa-gate` = CI (`--max-warnings 0`); скиллы `bug-report` (3 повтора) и `spec-to-testplan` (вердикты по артефакту,
+  чек-лист пропусков) - приёмы из akovalion/paranoid-qa; D-022 (хук «нет зелёного прогона - нет коммита» не ставим).
 
-**Сделано 16-Oct (вечер):**
-- B2/B3 перенесены в `games.catalog.spec.ts` (TC-GAMES-005 фильтры, TC-GAMES-006 поиск), черновики из `agents-pilot` удалены.
-- zod `utils/schemas/minecraftServer.ts`: `minecraft/version` + `server-jar/status`, тест TC-GP-MOD-005 в `mods.spec.ts`.
-  ⚠️ На пробе `extension_capabilities` / `java_preflight` / `details` = null на всех 5 серверах - их внутренности не контрактованы.
-
-**Следующее:**
-1. Проверить первый прогон `quality_gate` в GitLab.
-2. Уточнить схему `extension_capabilities` / `java_preflight`, когда проба покажет заполненный объект (флаг гейтинга / Start с префлайтом).
-3. Дальше по `agents.docs/IMPROVEMENTS_2026-10.md`.
+**Следующее (по пользе):**
+1. **Проверить F3 в TestPulse** после 2-3 ночей: появились ли «нове / падав X з N» и секция «Нестабільні»; если пусто -
+   проверить, что cron пишет `test-logs/history/history.jsonl` на VPS.
+2. **Конвенции из ресерча (§2 C1-C4):** `expect.poll` вместо `expect(await ...)` (109 мест, начать с шаблона в
+   `TEST_GUIDELINES.md` §4), `test.fail()` для известных багов прода, `{ tag }` + Jira-аннотация для новых тестов, `expect.soft`.
+3. **Чистка легаси под храповиком:** по одному файлу из `eslint-suppressions.json` (51 запись) → `npm run lint:prune`.
+   `funnel.with.credit.check` (реальный заказ с кредита) - только по решению владельца.
+4. **Слабые тесты, остаток:** PREM-001, EXT-002 (нужен recon), VPS OPT-004, VPS SRV-005; ~10 `isVisible({timeout})` в PO панели
+   (таймаут игнорируется - кандидаты на `waitFor`, но часть - намеренные мгновенные проверки).
+5. **Новое из ресерча (§3):** N1 auto-фикстура диагностики (console + pageerror + failed requests, report-only), N2 PO как фикстуры.
+6. **KB:** страницы фич для PFH / OLDP / ADM (сейчас только обзоры); этап 4 (архитектура) - доступ к репо панели и биллинга есть.
+7. **Не горит:** параллельный прогон витрины (2 воркера, риск Cloudflare); ESLint 9 → 10 (v9 EOL);
+   zod `extension_capabilities` / `java_preflight` - когда проба покажет заполненный объект.
 
 ---
 
