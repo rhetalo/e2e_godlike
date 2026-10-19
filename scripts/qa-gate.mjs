@@ -5,7 +5,8 @@
  * Делает ТОЛЬКО быстрые статические проверки (никаких live-прогонов спеков — они
  * бьют по проду и идут минутами):
  *   - npx tsc --noEmit  → БЛОКИРУЕТ коммит/пуш при ошибках типов (exit 2);
- *   - npx eslint .      → БЛОКИРУЕТ при ESLint-ОШИБКАХ (hard-rules); warnings пропускает;
+ *   - npx eslint . --max-warnings 0 → БЛОКИРУЕТ при ошибках И предупреждениях, как CI quality_gate
+ *     (храповик D-021: легаси заморожено в eslint-suppressions.json, новое не проходит);
  *   - grep антипаттерна waitForTimeout в pages/components/tests → ПРЕДУПРЕЖДАЕТ (не блокирует).
  *
  * Хук получает JSON на stdin: { tool_name, tool_input: { command } }. Гейт реагирует
@@ -68,7 +69,11 @@ function findWaitForTimeout() {
         continue;
       }
       text.split("\n").forEach((line, i) => {
-        if (line.includes("waitForTimeout")) hits.push(`${file.replace(/\\/g, "/")}:${i + 1}`);
+        // Только вызовы: строки-комментарии («без waitForTimeout», JSDoc) не считаем - иначе шум
+        // приучает игнорировать предупреждение (19-Oct-2026: 5 из 6 срабатываний были комментариями).
+        const code = line.replace(/\/\/.*$/, "");
+        if (/^\s*\*/.test(line) || !/\.waitForTimeout\s*\(/.test(code)) return;
+        hits.push(`${file.replace(/\\/g, "/")}:${i + 1}`);
       });
     }
   }
@@ -93,12 +98,13 @@ function main() {
     process.exit(2);
   }
 
-  // 2) eslint — жёсткий блок на ERROR (hard-rules репо: no-wait-for-timeout,
-  // expect-expect, no-focused-test, no-standalone-expect и т.д.). Warnings не блокируют
-  // (eslint exit=1 только при errors), поэтому «мягкий слой» (any/unused/web-first) не мешает.
-  const lint = spawnSync("npx", ["eslint", "."], { shell: true, encoding: "utf8" });
+  // 2) eslint — тот же режим, что в CI quality_gate (D-021): --max-warnings 0. Раньше warnings
+  // пропускались, и коммит проходил локально, а пайплайн падал (найдено 19-Oct-2026).
+  // Устаревшее подавление (почистил легаси) тоже валит - тогда `npm run lint:prune`.
+  const lint = spawnSync("npx", ["eslint", ".", "--max-warnings", "0"], { shell: true, encoding: "utf8" });
   if (lint.status !== 0) {
-    console.error("[qa-gate] ❌ eslint нашёл ОШИБКИ — коммит/пуш заблокирован. Почини правила:\n");
+    console.error("[qa-gate] ❌ eslint: ошибки или предупреждения (CI их тоже валит) — коммит/пуш заблокирован.");
+    console.error("[qa-gate]    Почини; если почистил легаси — `npm run lint:prune` и закоммить eslint-suppressions.json.\n");
     console.error((lint.stdout || "") + (lint.stderr || ""));
     process.exit(2);
   }
