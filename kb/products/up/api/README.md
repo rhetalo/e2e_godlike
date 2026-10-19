@@ -41,9 +41,10 @@ sources:
 | [modpacks](modpacks.md) | установка модпака и список установленных | `POST .../minecraft/modpacks`, `GET .../minecraft/modpacks/installed` | [DEV-452](../../../tickets/DEV-452.md), [DEV-484](../../../tickets/DEV-484.md) |
 | [server](server.md) | состояние сервера и канал ошибок установки | `GET /servers/{uuid}`, `DELETE .../install-error` | [DEV-452](../../../tickets/DEV-452.md) |
 | [backups](backups.md) | бэкапы, лимиты, таблицы хранения | `GET .../backups`, `POST .../backups/instances` | [DEV-452](../../../tickets/DEV-452.md), [DEV-484](../../../tickets/DEV-484.md) |
+| [minecraft-version](minecraft-version.md) | ядро сервера и `extension_capabilities` | `GET .../minecraft/version` | [DEV-515](../../../tickets/DEV-515.md), [DEV-549](../../../tickets/DEV-549.md) |
 
 Уже описанные в других местах куски API (пока не вынесены сюда):
-`GET .../minecraft/version` и `extension_capabilities` - [DEV-515](../../../tickets/DEV-515.md); `GET /features` - [флаги](../../../registry/flags.md);
+`GET /features` - [флаги](../../../registry/flags.md);
 файлы, базы - KNOWLEDGE_BASE §7i.
 
 ## Легенда

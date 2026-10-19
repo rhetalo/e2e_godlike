@@ -4,9 +4,9 @@ title: Files - файловый менеджер, Recycle Bin, SFTP
 type: feature
 product: UP
 status: draft
-updated: 2026-10-18
+updated: 2026-10-19
 verified_on: 2026-10-18        # recon Upload custom modpack (апселл); остальное - 09-Jun
-tickets: [DEV-418, DEV-459, DEV-492]
+tickets: [DEV-418, DEV-459, DEV-492, DEV-549]
 flags: [world-backup]
 tests:
   - tests/game/panel/files.spec.ts
@@ -63,6 +63,12 @@ sources:
 2. **Restore и Clear Recycle Bin неактивны,** пока не выбрана строка.
 3. **Generate / Save в SFTP меняют пароль SFTP** - реальная мутация.
 4. Ошибки манифеста при Upload custom modpack в UI не показываются ([DEV-492/F7](../../tickets/DEV-492.md#находки)).
+5. **На ядрах без модпаков** (Paper-подобные, Vanilla; только у владельца с флагом `extension-compatibility`) кнопка
+   Upload custom modpack контурная, disabled, с тултипом «Custom modpacks cannot be uploaded on this core…»; клик ничего
+   не открывает, апселла тоже нет ([DEV-549](../../tickets/DEV-549.md)).
+6. **Тур первого захода в Files** не стартует, пока идёт туториал модов, и тогда не помечается показанным
+   (`localStorage godlike-file-tour-shown`). Если уйти из Files с открытым туром FM, он остаётся на другой странице
+   ([DEV-549/O1](../../tickets/DEV-549.md#находки)).
 
 ## Гочи для тестирования
 
@@ -74,6 +80,8 @@ sources:
 - **Гонка апселла:** quote приходит через 5-8 с после открытия Files; клик раньше - апселла нет, сразу CurseForge.
   В тесте слушатель `waitForResponse(/modpack-setup\/quote/)` ставится ДО навигации (`openUploadCustomModpack()`).
 - **Окно CurseForge не закрывается по Escape** - только Cancel (`closeCurseForgeDialog()`).
+- **CF-001 завязан на флаг владельца:** сервер `ec78834c` - Paper, владелец 388101 без флага, поэтому кнопка активна.
+  Если флаг этому владельцу включат, кнопка станет disabled - переводить CF-001 на модовый сервер ([DEV-549](../../tickets/DEV-549.md)).
 
 ## Покрытие
 
@@ -95,3 +103,4 @@ sources:
 | 28-Sep-2026 | [DEV-459](../../tickets/DEV-459.md) | Блок Custom Modpack Setup в `/mods` |
 | 09-Oct-2026 | [DEV-492](../../tickets/DEV-492.md) | Upload custom modpack запускает скан модов |
 | 16-Oct-2026 | - (follow-up [DEV-459](../../tickets/DEV-459.md), тикет не найден) | Апселл Modpack setup перед окном CurseForge; CF-001 обновлён 18-Oct |
+| 19-Oct-2026 | [DEV-549](../../tickets/DEV-549.md) | Upload custom modpack disabled на ядрах без модпаков; тур FM не стартует поверх туториала модов |

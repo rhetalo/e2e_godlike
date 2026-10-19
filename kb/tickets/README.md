@@ -37,6 +37,7 @@ updated: 2026-10-15
 | [DEV-529](DEV-529.md) | Versions - Arclight на Forge/NeoForge после запуска сервера превращается в Forge/NeoForge | UP | done | PASS | 2026-10-08 |
 | [DEV-532](DEV-532.md) | Убрать дубли модпаков CurseForge / Modrinth из выбора на modded-странице | UP, ADM, WPGL | done | PASS | 2026-10-08 |
 | [DEV-534](DEV-534.md) | Фильтры «All» и «All versions» в каталоге модов и плагинов не расширяют список | UP | done | PASS-with-issues | 2026-10-09 |
+| [DEV-549](DEV-549.md) | Фикси після DEV-515: туторіал на заглушках, кнопка кастомних модпаків та API | UP | qa | PASS | 2026-10-19 |
 | [DEV-562](DEV-562.md) | Steam Port для подключения к серверу Project Zomboid в Overview | UP | done | PASS | 2026-10-15 |
 | [DEV-563](DEV-563.md) | Запретить Free-серверам изменять тип сервера (Ultra Panel и PlayFreeHost) | UP, PFH | partial | PASS-with-issues | 2026-10-15 |
 | [TASK-missing-mod-deps](TASK-missing-mod-deps.md) | Окно Missing mod dependencies (автодозагрузка зависимостей) | UP | done | PASS-with-issues | 2026-09-29 |

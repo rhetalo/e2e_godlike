@@ -4,9 +4,9 @@ title: Loader gating - каталог и установка по ядру сер
 type: feature
 product: UP
 status: draft
-updated: 2026-10-18
-verified_on: 2026-10-08        # последняя живая сверка - DEV-529 (Mohist)
-tickets: [DEV-515, DEV-529, DEV-534]
+updated: 2026-10-19
+verified_on: 2026-10-19        # последняя живая сверка - DEV-549 (туториал, кнопка, API по всем ядрам)
+tickets: [DEV-515, DEV-529, DEV-534, DEV-549]
 flags: [extension-compatibility]
 tests: [tests/game/panel/mods.spec.ts]   # только контракт API (TC-GP-MOD-005); поведение - ручной QA
 sources:
@@ -39,8 +39,21 @@ sources:
 - **Попап версий мода** показывает только совместимые версии, даже если клиент вручную сменил фильтр. Если
   совместимых нет - «No compatible versions were found for your server.», Install disabled.
 - Версия в попапе предвыбрана, даже если фильтр не совпадает с ядром ([DEV-515/F6](../../tickets/DEV-515.md#находки)).
+- **Tutorial** на вкладках строит шаги по ядру и вкладке запуска ([DEV-549](../../tickets/DEV-549.md)):
 
-Источник: [DEV-515](../../tickets/DEV-515.md), [DEV-534](../../tickets/DEV-534.md).
+| Ядро | С какой вкладки | Шаги |
+|---|---|---|
+| Моды есть (Forge, Fabric, NeoForge, Quilt, гибриды) или флага нет | Mods / Modpacks | прежние 7: intro → modpacks → mods types / search / install → FM custom modpack → FM upload |
+| Чистый мод-лоадер | Plugins | 8: первым «плагины недоступны, моды поддерживаются», затем прежние 7 |
+| Paper-подобные | Mods / Modpacks | 6: «как ставить плагины» → шаг на заглушке → Plugins types / search / install (вкладка сама) → FM upload |
+| Paper-подобные | Plugins | 5: тот же тур без шага на заглушке |
+| Vanilla | любая | 1: шаг с текстом вкладки, «1 of 1», End Tutorial |
+
+- **«Upload custom modpack» в File Manager** при `supports_modpacks:false` (Paper-подобные, Vanilla): контурная `#ff784d`,
+  disabled, тултип «Custom modpacks cannot be uploaded on this core…» по hover и фокусу (Tab). На 390 px подпись «Upload manifest».
+  Платная Custom Modpack Setup (DEV-527) на вкладке Modpacks доступна при любом ядре - так согласовано.
+
+Источник: [DEV-515](../../tickets/DEV-515.md), [DEV-534](../../tickets/DEV-534.md), [DEV-549](../../tickets/DEV-549.md).
 
 ## Как работает (под капотом)
 
@@ -73,11 +86,15 @@ sources:
 
 1. **Leaves / Waterfall / Pufferfish** раньше не распознавались (`enforced:false`, Fabric API ставился на Leaves) -
    исправлено 06-Oct ([DEV-515/F1](../../tickets/DEV-515.md#находки)).
-2. **`plugin_loader=spigot` остаётся при `supports_plugins=false`** - наблюдение, не баг.
+2. **`supports_plugins=false` → `plugin_loader: null`, `plugin_providers: []`** с [DEV-549](../../tickets/DEV-549.md) (раньше `spigot`).
+   Гибриды и Paper-подобные без изменений. Сервер с ненайденным ядром (`minecraft_type: null`) тоже отдаёт `null` / `[]`
+   при `supports_plugins: true` - так было и до DEV-549 ([DEV-549/L3](../../tickets/DEV-549.md#находки)).
 3. **Без флага окно установки мода выбирает первый файл без учёта ядра** ([DEV-529/F2](../../tickets/DEV-529.md#находки), открыт).
 4. **Velocity не ставится из UI** (версии без названий, 400) - [DEV-515/S1](../../tickets/DEV-515.md#находки), вне задачи.
 5. **BungeeCord:** Simple Voice Chat помечен Installed, а на диске bukkit-jar - [DEV-515/S2](../../tickets/DEV-515.md#находки).
-6. **Tutorial шаг 5** ищет карточку, которой нет на заглушке ([DEV-515/O1](../../tickets/DEV-515.md#находки)).
+6. **Tutorial на заглушках** больше не ищет карточку, которой нет ([DEV-515/O1](../../tickets/DEV-515.md#находки) исправлен в
+   [DEV-549](../../tickets/DEV-549.md)). Если каталог ещё грузится, шаг Installation показывается по центру без подсветки
+   ([DEV-549/L1](../../tickets/DEV-549.md#находки)). Тур FM не стартует поверх туториала и не помечается показанным.
 7. **Mohist:** после Start установленный билд раньше становился `build:null` - исправлено 08-Oct
    ([DEV-529/F1](../../tickets/DEV-529.md#находки)). Youer и Magma в каталоге панели нет.
 8. **Риск раскатки флага:** стоковая Modrinth BMC4 не стартует из-за `ambiguous_loader`
@@ -108,5 +125,6 @@ sources:
 | 06-Oct-2026 | [DEV-529](../../tickets/DEV-529.md) | Arclight остаётся Arclight после старта, flavor в capabilities ([DEV-515/F2](../../tickets/DEV-515.md#находки) закрыт здесь) |
 | 08-Oct-2026 | [DEV-529](../../tickets/DEV-529.md) | Mohist сохраняет билд после старта |
 | 09-Oct-2026 | [DEV-534](../../tickets/DEV-534.md) | «All» = `any` расширяет список поверх автофильтра |
+| 19-Oct-2026 | [DEV-549](../../tickets/DEV-549.md) | Tutorial по ядру, кнопка Upload custom modpack disabled на ядрах без модпаков, `plugin_loader: null` без плагинов |
 
 Открыто: снятие / раскатка флага `extension-compatibility` - за разработкой.
