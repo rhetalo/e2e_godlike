@@ -4,9 +4,9 @@ title: World Backup - копия мира перед опасными дейст
 type: feature
 product: UP
 status: draft
-updated: 2026-10-15
+updated: 2026-10-20
 verified_on: 2026-08-14        # клиентская часть, итоговый прогон DEV-418
-tickets: [DEV-418, DEV-401, DEV-506]
+tickets: [DEV-418, DEV-401, DEV-506, DEV-571]
 flags: [world-backup]
 tests: []                      # world-backup.spec.ts не написан
 sources:
@@ -43,7 +43,7 @@ sources:
 ## Как работает (под капотом)
 
 - **API:** `panel.godlike.host/api/v2/servers/{FULL_UUID}/world-backups`. Короткий uuid → 400. `POST` = 202,
-  `DELETE /world-backups/{uuid}`, restore = `DELETE /world-backups/restore`. Без флага - 404 «World Backups are not
+  `DELETE /world-backups/{uuid}`, restore = `POST /world-backups/{uuid}/restore` (stage 20-Oct), отмена незавершённых = `POST /world-backups/abandon` ([DEV-571](../../tickets/DEV-571.md)). Без флага - 404 «World Backups are not
   available for this account».
 - **Что входит в копию:**
 
@@ -63,6 +63,8 @@ sources:
   `php artisan pennant:purge world-backup` (CLI, DevOps). Лимит 0/N живёт в бэкенд-админке Pterodactyl (Build).
 
 ## Правила и граничные случаи
+
+0. **Continue without backup** ([DEV-571](../../tickets/DEV-571.md)): сначала abandon (PENDING/FAILED → DELETING), действие только после 200; отменённая копия держит слот ~30 мин; abandon разрешён при `files.write` / `server.reinstall` / `server.change_version` / `addons.modpacks` / `backups.manage`; каждая фактическая отмена в Audit log.
 
 1. **Legacy-строки `disk=s3` в PENDING** через API не удалить, они держат слот ([DEV-418/F6](../../tickets/DEV-418.md#находки),
    ждёт зачистки в БД от DevOps).
@@ -98,3 +100,4 @@ sources:
 | 14-Aug-2026 | [DEV-418](../../tickets/DEV-418.md) | Итоговый прогон на 4 свежих серверах, F2-F5 исправлены. Клиентская часть PASS |
 | 14..17-Aug-2026 | [DEV-401](../../tickets/DEV-401.md) | Окно при смене игры в cancel-модуле |
 | 05-Oct-2026 | [DEV-506](../../tickets/DEV-506.md) | Окно на Versions → Install + Wipe; «Continue without backup» шлёт `delete_files:true` |
+| 19..20-Oct-2026 | [DEV-571](../../tickets/DEV-571.md) | «Готово» только после ноды, Continue → abandon, права и Audit. Stage PASS |

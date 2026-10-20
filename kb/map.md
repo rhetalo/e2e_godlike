@@ -63,7 +63,7 @@ mindmap
         Audit Log
       Данные
         Backups DEV-452 DEV-484
-        World Backup DEV-418
+        World Backup DEV-418 DEV-571
         Databases
       Монетизация
         Upgrade
@@ -168,7 +168,7 @@ mindmap
   - 📄 [UP/tasks](products/up/tasks.md) - задачи и расписание
   - 📄 [UP/databases](products/up/databases.md) - базы MySQL (stale, создание падало в июне)
   - 📄 [UP/ports-domains](products/up/ports-domains.md) - поддомен и порты
-  - 📄 [UP/world-backup](products/up/world-backup.md) - [DEV-418](tickets/DEV-418.md), [flag:world-backup](registry/flags.md#world-backup)
+  - 📄 [UP/world-backup](products/up/world-backup.md) - [DEV-418](tickets/DEV-418.md), [DEV-571](tickets/DEV-571.md), [flag:world-backup](registry/flags.md#world-backup)
 - Монетизация
   - 📄 [UP/upgrade](products/up/upgrade.md) - Boost, тарифы, Free Premium: [TASK-tariff-list-400](tickets/TASK-tariff-list-400.md)
   - 📄 [UP/referral](products/up/referral.md) - реф-ссылка и вывод
