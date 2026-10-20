@@ -28,6 +28,7 @@ export default tseslint.config(
       "test-results/**",
       ".history/**", // снимки VS Code Local History — не наш код
       ".playwright-mcp/**", // служебный вывод Playwright MCP (логи, снапшоты, разовые пробы) — не наш код
+      "test-docs/**", // QA-отчёты и разовые скрипты к ним (не коммитятся) - не код автотестов
       "storageState*.json",
       "eslint.config.mjs",
     ],
