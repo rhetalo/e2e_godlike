@@ -6,7 +6,7 @@ product: UP
 status: draft
 updated: 2026-10-15
 verified_on: 2026-10-12        # последняя живая сверка - финал DEV-500
-tickets: [DEV-500, DEV-492]
+tickets: [DEV-500, DEV-492, DEV-558]
 flags: [MOD_SCAN_BACKFILL]
 tests: []                      # автотестов нет, только ручной QA
 sources:
@@ -68,8 +68,11 @@ sources:
 1. **Сторона мода известна только у Fabric** (`fabric.mod.json`). Forge/NeoForge jar всегда `safe`
    («side detection deferred») - клиентские Forge-моды на сервере **не отключаются**
    ([DEV-492/F9](../../tickets/DEV-492.md#находки), вынесено в DEV-321 v1, ❓ ключ). Legacy Forge 1.12.2 и ниже (`mcmod.info`) - тоже всегда safe.
-2. **Старая запись override по хешу блокирует повторное отключение** (Uninstall → Install, вайп) -
-   [DEV-492/F5](../../tickets/DEV-492.md#находки), High, вынесено (правило DEV-275).
+2. **Сброс override (DEV-558, prod 21-Oct-2026).** Uninstall стирает запись по хешу файла; Reinstall, смена версии с
+   Wipe, модпак `delete`/`backup`, удаление модпака стирают все записи сервера. Файл, исчезнувший и вернувшийся через
+   файловый менеджер/SFTP, записи не сбрасывает (неотличим от ручного включения). Исправляет
+   [DEV-492/F5](../../tickets/DEV-492.md#находки). Открыто: Reinstall без «Delete files» тоже стирает записи, файлы
+   остаются → ручные включения теряются ([DEV-558/F1](../../tickets/DEV-558.md#находки)).
 3. **jar больше 100 МБ без вердикта** (Cobblemon 131 МБ) - [DEV-492/F2](../../tickets/DEV-492.md#находки).
 4. **«Some mods were disabled» → Got It не пишет `acknowledged_at`**, окно повторяется - [DEV-492/F3](../../tickets/DEV-492.md#находки).
 5. **Утечки Modrinth:** индекс матчит проект по среде, если хоть одна версия `client_and_server` / `unknown`
@@ -84,7 +87,10 @@ sources:
 - **Сервер 26.x:** пустой loader = loader сервера, а под 26.3 модов почти нет. Для выборок ставить фильтр руками
   (Forge 1.20.1, Fabric 1.21.1).
 - **Эталон для CF** - сайт-API `curseforge.com`, официальный CF API без ключа недоступен.
-- **Отключение проверять на Fabric-сервере** (Forge всегда safe). F5 после [panel!1665](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1665) не перепроверен - нужен Fabric.
+- **Отключение проверять на Fabric-сервере** (Forge всегда safe). Клиентский тест-мод: CF Controlling (250398), файлы
+  19.0.3 Fabric 1.21.1 = 5759860, 18.0.4 Fabric 1.21 = 5603224; в каталоге скрыт, ставить `POST /minecraft/mods
+  {provider, mod_id, version_id}`. Отключение срабатывает на Start, Restart (после «Yes, Restart») и принятии EULA;
+  если старт блокирует префлайт `server-jar/status` (`ambiguous_loader`), сканер не запускается.
 - Стенды: каталог - [srv:8c2a6bd7](../../registry/test-servers.md#8c2a6bd7) (на нём модпак BMC4, 266 jar - не трогать),
   скан - [srv:ca326e28](../../registry/test-servers.md#ca326e28), Paper - [srv:f8e7df56](../../registry/test-servers.md#f8e7df56),
   trial - [srv:33b383ef](../../registry/test-servers.md#33b383ef).
