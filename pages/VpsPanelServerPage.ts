@@ -78,6 +78,30 @@ export class VpsPanelServerPage {
     // Проактивное закрытие — на случай если баннер уже был на странице
     // до того, как addLocatorHandler успел зарегистрироваться.
     await new CookieBanner(this.page).dismissAll();
+
+    // Сервер с build_fail VirtFusion рендерит на этом URL экран «Installation Failed»
+    // вместо Overview → без явной проверки тесты падают «имя/вкладка не найдены» (21-Oct-2026).
+    await this.statusBadge.or(this.installFailedHeading).first()
+      .waitFor({ state: "visible", timeout: 15_000 })
+      .catch(() => null);
+    if (await this.isInstallFailed()) {
+      throw new Error(
+        `VPS ${this.url} в состоянии «Installation Failed» (VirtFusion build_fail) - ` +
+          "Overview недоступен. Нужно восстановление вручную: Try Again / Restart the Setup Process.",
+      );
+    }
+  }
+
+  // ── Install state ─────────────────────────────────────────────────────────
+
+  /** Заголовок экрана неудачной установки ОС (state=failed, build_fail=1). */
+  get installFailedHeading(): Locator {
+    return this.page.getByRole("heading", { name: "Installation Failed" });
+  }
+
+  /** true, если вместо Overview показан экран «Installation Failed». */
+  async isInstallFailed(): Promise<boolean> {
+    return this.installFailedHeading.isVisible();
   }
 
   // ── Server Identity ───────────────────────────────────────────────────────

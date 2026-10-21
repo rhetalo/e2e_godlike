@@ -49,14 +49,30 @@ test.describe("@critical VPS-панель — Rebuild: РЕАЛЬНЫЙ install 
           waitUntil: "domcontentloaded",
           timeout: 30_000,
         });
+        // Экран «Installation Failed» отдаём в poll как значение → в отчёте видна причина, а не таймаут.
         await expect
-          .poll(() => serverPage.getLatestTaskName(), {
-            timeout: 90_000,
-            intervals: [2_000, 3_000, 5_000],
-          })
+          .poll(
+            async () =>
+              (await serverPage.isInstallFailed())
+                ? "INSTALLATION FAILED"
+                : serverPage.getLatestTaskName(),
+            { timeout: 90_000, intervals: [2_000, 3_000, 5_000] },
+          )
           .toMatch(/Build|Install/i);
         await serverPage.waitForLatestTaskComplete(180_000);
         await serverPage.waitForStatus("Running", 120_000);
+      });
+
+      // 21-Oct-2026: попытка «прошла», а сервер остался с build_fail (экран Installation Failed
+      // после reload) → следующие VPS-спеки падали. Проверяем ИТОГ после свежей загрузки.
+      await test.step("после reload: нет «Installation Failed», статус Running, ОС поднялась", async () => {
+        await page.reload({ waitUntil: "domcontentloaded" });
+        await expect(serverPage.statusBadge.or(serverPage.installFailedHeading).first()).toBeVisible({
+          timeout: 30_000,
+        });
+        await expect(serverPage.installFailedHeading, "сервер остался в Installation Failed").toBeHidden();
+        await serverPage.waitForStatus("Running", 60_000);
+        await serverPage.waitForGuestReady();
       });
     } finally {
       await context.close();
