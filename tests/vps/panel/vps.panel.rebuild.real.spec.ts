@@ -50,15 +50,16 @@ test.describe("@critical VPS-панель — Rebuild: РЕАЛЬНЫЙ install 
           timeout: 30_000,
         });
         // Экран «Installation Failed» отдаём в poll как значение → в отчёте видна причина, а не таймаут.
+        // Регэксп заякорен: без ^ значение-маркер провала само матчилось на /Install/ (21-Oct-2026).
         await expect
           .poll(
             async () =>
               (await serverPage.isInstallFailed())
-                ? "INSTALLATION FAILED"
+                ? "ЭКРАН Installation Failed (build_fail)"
                 : serverPage.getLatestTaskName(),
             { timeout: 90_000, intervals: [2_000, 3_000, 5_000] },
           )
-          .toMatch(/Build|Install/i);
+          .toMatch(/^(Build|Install)\b/i);
         await serverPage.waitForLatestTaskComplete(180_000);
         await serverPage.waitForStatus("Running", 120_000);
       });
