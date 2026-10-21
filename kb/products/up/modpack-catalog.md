@@ -4,8 +4,8 @@ title: Модпаки - каталог, видимость и установка
 type: feature
 product: UP
 status: draft
-updated: 2026-10-16
-verified_on: 2026-10-16        # последняя живая сверка - DEV-452
+updated: 2026-10-21
+verified_on: 2026-10-21        # последняя живая сверка - DEV-452 ретест
 tickets: [DEV-532, DEV-405, DEV-472, DEV-492, DEV-459, DEV-452, DEV-484]
 flags: [is-listed, modpack-catalog-v2, extension-compatibility, VITE_MANAGED_MODPACK_URL]
 tests: [tests/game/panel/extensions.spec.ts, tests/game/panel/extension.sources.spec.ts]
@@ -71,13 +71,20 @@ sources:
 | Нет свободных слотов бэкапов | 409 `no_free_backup_slots` | диалог «No Free Backup Slots» + Go To Backups |
 | Лимит частоты бэкапов | 409 `backup_throttled` (`retry_after`, `retry_at`, `throttle_limit`, `throttle_period`) | диалог «Backup Limit Reached», только крестик |
 | Отказ позже по ходу установки | поле `modpack_install_error` (8 кодов) | тост со своим текстом на каждый код |
+| Прочая ошибка POST (например 500) | тело с `error` | тост «Error installing <модпак>. …», окно установки и RAM-предупреждение остаются, можно повторить |
+
+- На любой из двух 409 фронт закрывает и окно установки, и RAM-предупреждение «needs more RAM»; на экране остаётся только диалог отказа,
+  после его закрытия - ничего ([new-panel!562](https://git.godlike.ovh/panel/godlike-new-panel/-/merge_requests/562), с 21-Oct-2026).
+  До фикса RAM-предупреждение оставалось под диалогом, и его Install Anyway повторно слал отклонённый запрос ([DEV-452/F3](../../tickets/DEV-452.md#находки)).
+- Слоты для установки считаются по общей квоте сервера ([DEV-484](../../tickets/DEV-484.md), panel!1691): ручные бэкапы, папки и базы
+  новой панели тоже занимают слоты. Квота видна в `meta.quota` ответа `GET /servers/{uuid}/backups`.
 
 - Порядок проверок: сначала лимит частоты, потом слоты ([API - modpacks](api/modpacks.md#post-serversuuidminecraftmodpacks)).
 - После [DEV-484](../../tickets/DEV-484.md) пре-инсталл бэкап вне лимита частоты, поэтому `backup_throttled` из новой панели получить нельзя.
   Диалог «Backup Limit Reached» проверен только подменой ответа.
 - Слот пре-инсталл бэкап занимает: на тарифе с одним слотом вторая установка с бэкапом невозможна, пока бэкап не удалён.
 - Старая React-панель отказы не объясняет ([DEV-452/Q1](../../tickets/DEV-452.md#хвосты)).
-- Открытые находки: [DEV-452/F1, F2, F3](../../tickets/DEV-452.md#находки), [DEV-484/F1](../../tickets/DEV-484.md#находки).
+- Открытая находка: [DEV-452/F1](../../tickets/DEV-452.md#находки) (только описание MR). F2 и F3 закрыты 21-Oct-2026.
 
 ## Правила и граничные случаи
 
