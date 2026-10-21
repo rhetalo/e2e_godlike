@@ -3,7 +3,7 @@ id: KB-COVERAGE
 title: Матрица покрытия - фичи KB и автотесты
 type: index
 status: draft
-updated: 2026-10-19
+updated: 2026-10-21
 verified_on: null              # генерируется из KB и tests/, с продуктом не сверяется
 sources:
   - kb/products/**/*.md (шапка tests:, раздел «Покрытие»)
@@ -74,7 +74,7 @@ sources:
 
 ## WPGL - витрина
 
-Страниц: 14, с автотестами: 12, тестов в их спеках: 95.
+Страниц: 15, с автотестами: 12, тестов в их спеках: 95.
 
 | Фича | Статус | Спеки | Тестов | Покрытие ✅ / руками / ❌ |
 |---|---|---|---|---|
@@ -92,6 +92,7 @@ sources:
 | [Сиды Minecraft - Seed finder, калькулятор сида, cart-seed](products/wpgl/seeds.md) | draft | `funnel.seed.spec.ts`, `smoke.pages.spec.ts`, `seed-list.finder.spec.ts`, `slider.seed.spec.ts` | 19 | 6 / 0 / 1 |
 | [Custom Modpack Setup - «соберём модпак за тебя»](products/wpgl/custom-modpack-setup.md) | draft | - | - | 1 / 2 / 2 |
 | [Лендинги без автотестов - Launcher, SMP One-Click, KB сайта, каталог серверов игроков](products/wpgl/landings.md) | draft | - | - | 0 / 3 / 4 |
+| [Каталог Minecraft-схематик /minecraft-schematics/](products/wpgl/schematics.md) | draft | - | - | 0 / 2 / 2 |
 
 ## ADM
 

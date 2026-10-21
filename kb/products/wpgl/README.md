@@ -55,6 +55,7 @@ sources:
 | Страницы игр и каталог | сетка каталога ~46 карточек с фильтрами (ведут в корзину) + SEO-список «List of games» на 20 ссылок; 46 лендингов (см. [Игры](#игры-live-15-oct-исправлено-16-oct)); тарифы в Vue-cart с 20-Aug | [DEV-402](../../tickets/DEV-402.md) | `games.valid.promo`, `games.invalid.promo`, `game-slider` | ✅ [WPGL/games-catalog](games-catalog.md) |
 | Кастомайзер тарифа игры | Customize server: слайдеры Slots, RAM, Days, синхронизация Slots ↔ RAM | - | `game-slider` | ✅ [WPGL/game-customizer](game-customizer.md) |
 | Витрина серверов игроков | `/servers/` - 34 сервера игроков, фильтры по тегам, версиям, лоадерам, режимам (тип записи `server`) | - | нет | ⏸ отложено владельцем 15-Oct [WPGL/landings](landings.md) |
+| Каталог схематик | `/minecraft-schematics/`: подборки, фильтры версия / формат / свои группы, модалка, скачивание; пока только stage | [DEV-566](../../tickets/DEV-566.md) | нет | ⚠️ [WPGL/schematics](schematics.md) |
 | Инструменты Minecraft | Seed Map `/minecraft-seed-map/`, Circle Generator, Skin Editor `/minecraft-skin-editor/` | - | нет | ❌ |
 | KB сайта (`ht_kb`) | `/knowledgebase-en/`, редизайн проверен на stage 31-Aug | - | нет | ⚠️ [WPGL/landings](landings.md) |
 | Блог | статьи в корне `/...-blog/`, не под `/blog/*` | [DEV-455](../../tickets/DEV-455.md) | нет | ❌ |

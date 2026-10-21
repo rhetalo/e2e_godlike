@@ -18,7 +18,7 @@ updated: 2026-10-15
 | [DEV-402](DEV-402.md) | Страницы игр подключены к новой воронке (Vue-cart) | WPGL, BIL | done | - | 2026-08-20 |
 | [DEV-405](DEV-405.md) | Источник модов, плагинов и сборок в новой панели - прямые API CurseForge и Modrinth | UP | done | PASS | 2026-10-05 |
 | [DEV-418](DEV-418.md) | World Backup - отдельная копия мира Minecraft перед опасными действиями | UP | partial | PASS-with-issues | 2026-08-14 |
-| [DEV-452](DEV-452.md) | Понятные причины отказа при создании пре-инсталл бэкапа модпака (троттлинг vs остальные) | UP | done | PASS-with-issues | 2026-10-16 |
+| [DEV-452](DEV-452.md) | Понятные причины отказа при создании пре-инсталл бэкапа модпака (троттлинг vs остальные) | UP | done | PASS | 2026-10-21 |
 | [DEV-455](DEV-455.md) | Попап Free Server Gift и цепочка писем (GROWTH-95) | WPGL, BIL | done | PASS-with-issues | 2026-10-15 |
 | [DEV-458](DEV-458.md) | Custom Modpack Setup как one-time add-on в биллинге | BIL, WPGL | blocked | FAIL | 2026-09-28 |
 | [DEV-459](DEV-459.md) | Custom Modpack Setup - точки входа в воронке и в игровой панели | WPGL, UP | done | PASS | 2026-09-28 |
@@ -37,9 +37,12 @@ updated: 2026-10-15
 | [DEV-529](DEV-529.md) | Versions - Arclight на Forge/NeoForge после запуска сервера превращается в Forge/NeoForge | UP | done | PASS | 2026-10-08 |
 | [DEV-532](DEV-532.md) | Убрать дубли модпаков CurseForge / Modrinth из выбора на modded-странице | UP, ADM, WPGL | done | PASS | 2026-10-08 |
 | [DEV-534](DEV-534.md) | Фильтры «All» и «All versions» в каталоге модов и плагинов не расширяют список | UP | done | PASS-with-issues | 2026-10-09 |
-| [DEV-549](DEV-549.md) | Фикси після DEV-515: туторіал на заглушках, кнопка кастомних модпаків та API | UP | qa | PASS | 2026-10-19 |
+| [DEV-549](DEV-549.md) | Фікси після DEV-515 - сценарії туторіалу на заглушках, блокування кнопки кастомних модпаків та API | UP | done | PASS | 2026-10-19 |
+| [DEV-558](DEV-558.md) | Переустановленный клиентский мод не отключается (правило DEV-275) | UP | done | PASS | 2026-10-21 |
 | [DEV-562](DEV-562.md) | Steam Port для подключения к серверу Project Zomboid в Overview | UP | done | PASS | 2026-10-15 |
 | [DEV-563](DEV-563.md) | Запретить Free-серверам изменять тип сервера (Ultra Panel и PlayFreeHost) | UP, PFH | partial | PASS-with-issues | 2026-10-15 |
+| [DEV-566](DEV-566.md) | Каталог Minecraft-схематик /minecraft-schematics/ | WPGL | done | PASS | 2026-10-21 |
+| [DEV-571](DEV-571.md) | World Backup - «готово» только после ноды, Continue without backup отменяет незавершённые копии | UP | done | PASS | 2026-10-20 |
 | [TASK-missing-mod-deps](TASK-missing-mod-deps.md) | Окно Missing mod dependencies (автодозагрузка зависимостей) | UP | done | PASS-with-issues | 2026-09-29 |
 | [TASK-palworld-settings](TASK-palworld-settings.md) | Palworld Settings: UI-редактор PalWorldSettings.ini | UP | partial | PASS-with-issues | 2026-08-20 |
 | [TASK-split-server](TASK-split-server.md) | Split Server: управление ресурсами split-серверов в новой панели | UP | done | PASS | 2026-09-10 |
