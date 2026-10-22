@@ -12,7 +12,7 @@ tests: [tests/game/panel/extensions.spec.ts, tests/game/panel/extension.sources.
 sources:
   - kb/tickets/DEV-532.md, DEV-405.md, DEV-472.md, DEV-492.md, DEV-459.md, DEV-515.md
   - kb/products/up/README.md (гоча 7, пробел 9)
-  - test-docs/ultra.panel/dev532-modpack-catalog-visibility-REPORT.md
+  - test-docs/ultra.panel/DEV-532/dev532-modpack-catalog-visibility-REPORT.md
   - kb/tickets/DEV-452.md, DEV-484.md, kb/products/up/api/modpacks.md
   - memory: dev532-modpack-catalog-visibility, panel-modals-handle-myself, dev452-modpack-backup-fail-reasons
 ---

@@ -11,7 +11,7 @@ flags: []
 tests: []                      # автотестов нет
 sources:
   - kb/tickets/DEV-563.md, DEV-401.md, DEV-455.md
-  - test-docs/ultra.panel/DEV-563_free_egg_lock_checklist.xlsx
+  - test-docs/ultra.panel/DEV-563/DEV-563_free_egg_lock_checklist.xlsx
   - memory: dev563-free-egg-lock
 ---
 
@@ -61,7 +61,7 @@ sources:
 
 ## Покрытие
 
-- **Автотестов нет.** Ручной чек-лист FE-01..FE-26: [DEV-563_free_egg_lock_checklist.xlsx](../../../test-docs/ultra.panel/DEV-563_free_egg_lock_checklist.xlsx).
+- **Автотестов нет.** Ручной чек-лист FE-01..FE-26: [DEV-563_free_egg_lock_checklist.xlsx](../../../test-docs/ultra.panel/DEV-563/DEV-563_free_egg_lock_checklist.xlsx).
 - Хвост: перепроверить FE-07 / FE-10 после деплоя фронта PlayFreeHost.
 
 ## История

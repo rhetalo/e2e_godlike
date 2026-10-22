@@ -11,8 +11,8 @@ flags: [MOD_SCAN_BACKFILL]
 tests: []                      # автотестов нет, только ручной QA
 sources:
   - kb/tickets/DEV-500.md, DEV-492.md
-  - test-docs/ultra.panel/client-only-mods-hide-REPORT.md (+ RECHECK, RECHECK2, RECHECK3)
-  - test-docs/ultra.panel/dev492-post-install-mod-scan-REPORT.md
+  - test-docs/ultra.panel/DEV-500/client-only-mods-hide-REPORT.md (+ RECHECK, RECHECK2, RECHECK3)
+  - test-docs/ultra.panel/DEV-492/dev492-post-install-mod-scan-REPORT.md
   - memory: dev500-client-only-mods-hide, dev492-post-install-mod-scan
 ---
 
@@ -98,8 +98,8 @@ sources:
 
 ## Покрытие
 
-- **Автотестов нет.** Ручной QA: отчёты [DEV-500](../../../test-docs/ultra.panel/client-only-mods-hide-RECHECK3-REPORT.md)
-  (финал) и [DEV-492](../../../test-docs/ultra.panel/dev492-post-install-mod-scan-REPORT.md).
+- **Автотестов нет.** Ручной QA: отчёты [DEV-500](../../../test-docs/ultra.panel/DEV-500/client-only-mods-hide-RECHECK3-REPORT.md)
+  (финал) и [DEV-492](../../../test-docs/ultra.panel/DEV-492/dev492-post-install-mod-scan-REPORT.md).
 - Не покрыто: Forge-моды (by design safe), legacy Forge, перепроверка F5 после [panel!1665](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1665).
 
 ## История

@@ -16,7 +16,7 @@ tests:
 sources:
   - kb/tickets/DEV-405.md, DEV-498.md, DEV-534.md, DEV-515.md, DEV-500.md, DEV-532.md
   - agents.docs/game-panel/KNOWLEDGE_BASE.md §7b, §7b-bis (recon 06-Jun и 20-Jul-2026)
-  - test-docs/ultra.panel/dev405-cf-modrinth-REPORT.md, mods-loader-filter-REPORT.md
+  - test-docs/ultra.panel/DEV-405/dev405-cf-modrinth-REPORT.md, mods-loader-filter-REPORT.md
   - memory: cf-modrinth-source-swap, mods-loader-filter-qa
 ---
 

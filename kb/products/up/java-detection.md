@@ -11,8 +11,8 @@ flags: [java-start-gate, java-mismatch-fixer, restart-confirmation]
 tests: [tests/game/panel/mods.spec.ts]   # только контракт API (TC-GP-MOD-005); поведение - ручной QA
 sources:
   - kb/tickets/DEV-472.md, DEV-485.md
-  - test-docs/ultra.panel/java-detection-matrix-REPORT.md
-  - test-docs/ultra.panel/java-start-gate-REPORT.md
+  - test-docs/ultra.panel/DEV-472/java-detection-matrix-REPORT.md
+  - test-docs/ultra.panel/DEV-485/java-start-gate-REPORT.md
   - memory: dev472-485-java-recheck-handoff, dev485-java-start-gate
 ---
 
@@ -101,8 +101,8 @@ Java до старта и отказывает на всех путях:
 
 - **Контракт - автотест** `mods.spec.ts` (TC-GP-MOD-005): zod-схема `GET minecraft/server-jar/status` (`status`, `error`,
   `java_preflight` - объект или null; на проде 16-Oct null) и `required_java` в `minecraft/version`. Сам детект и гейт - только руками.
-- Ручные матрицы: [java-detection-matrix-REPORT.md](../../../test-docs/ultra.panel/java-detection-matrix-REPORT.md)
-  (C3-C10, модпаки M1/M2, ретесты 06-09 Oct) и [java-start-gate-REPORT.md](../../../test-docs/ultra.panel/java-start-gate-REPORT.md) (G0-G9).
+- Ручные матрицы: [java-detection-matrix-REPORT.md](../../../test-docs/ultra.panel/DEV-472/java-detection-matrix-REPORT.md)
+  (C3-C10, модпаки M1/M2, ретесты 06-09 Oct) и [java-start-gate-REPORT.md](../../../test-docs/ultra.panel/DEV-485/java-start-gate-REPORT.md) (G0-G9).
 - Не покрыто: лаунчер (решение владельца 02-Oct), не-Minecraft (Hytale), письмо при блоке фонового старта
   ([DEV-485/F2](../../tickets/DEV-485.md#находки)).
 

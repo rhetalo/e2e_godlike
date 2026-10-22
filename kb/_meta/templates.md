@@ -27,7 +27,7 @@ verified_on: 2026-10-15        # когда последний раз сверя
 env: [prod]
 jira: https://<jira>/browse/DEV-562
 sources:
-  - test-docs/ultra.panel/DEV-562-jira-comment.md
+  - test-docs/ultra.panel/DEV-562/DEV-562-jira-comment.md
   - memory: dev562-pz-steam-port
 ---
 

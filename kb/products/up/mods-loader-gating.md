@@ -11,8 +11,8 @@ flags: [extension-compatibility]
 tests: [tests/game/panel/mods.spec.ts]   # только контракт API (TC-GP-MOD-005); поведение - ручной QA
 sources:
   - kb/tickets/DEV-515.md, DEV-529.md, DEV-534.md, DEV-532.md
-  - test-docs/ultra.panel/dev515-mods-loader-gating-REPORT.md
-  - test-docs/ultra.panel/dev529-arclight-start-REPORT.md
+  - test-docs/ultra.panel/DEV-515/dev515-mods-loader-gating-REPORT.md
+  - test-docs/ultra.panel/DEV-529/dev529-arclight-start-REPORT.md
   - memory: dev515-mods-loader-gating, dev529-arclight-start-fix
 ---
 
@@ -113,8 +113,8 @@ sources:
 
 - **Контракт - автотест** `mods.spec.ts` (TC-GP-MOD-005): zod-схема `GET minecraft/version`, в т.ч. `extension_capabilities`
   (объект или null; на проде 16-Oct везде null - флаг выключен, внутренности не контрактованы). Поведение гейтинга - только руками.
-- Ручной QA: [dev515-mods-loader-gating-REPORT.md](../../../test-docs/ultra.panel/dev515-mods-loader-gating-REPORT.md),
-  [dev529-arclight-start-REPORT.md](../../../test-docs/ultra.panel/dev529-arclight-start-REPORT.md).
+- Ручной QA: [dev515-mods-loader-gating-REPORT.md](../../../test-docs/ultra.panel/DEV-515/dev515-mods-loader-gating-REPORT.md),
+  [dev529-arclight-start-REPORT.md](../../../test-docs/ultra.panel/DEV-529/dev529-arclight-start-REPORT.md).
 - Не покрыто: Velocity ([DEV-515/S1](../../tickets/DEV-515.md#находки)), тексты заглушек на UA/RU после раскатки флага.
 
 ## История

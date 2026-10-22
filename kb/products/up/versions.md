@@ -12,8 +12,8 @@ tests: [tests/game/panel/versions.spec.ts]
 sources:
   - kb/tickets/DEV-506.md, DEV-529.md, DEV-512.md, DEV-472.md, DEV-418.md
   - agents.docs/game-panel/KNOWLEDGE_BASE.md §7a, §9e (recon 06-Jun-2026)
-  - test-docs/ultra.panel/dev506-arclight-version-REPORT.md
-  - test-docs/ultra.panel/dev529-arclight-start-REPORT.md
+  - test-docs/ultra.panel/DEV-506/dev506-arclight-version-REPORT.md
+  - test-docs/ultra.panel/DEV-529/dev529-arclight-start-REPORT.md
   - memory: dev506-arclight-version-rollback, dev529-arclight-start-fix
 ---
 
