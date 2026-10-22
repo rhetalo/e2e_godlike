@@ -41,7 +41,7 @@ updated: 2026-10-15
 | [DEV-558](DEV-558.md) | Переустановленный клиентский мод не отключается (правило DEV-275) | UP | done | PASS | 2026-10-21 |
 | [DEV-562](DEV-562.md) | Steam Port для подключения к серверу Project Zomboid в Overview | UP | done | PASS | 2026-10-15 |
 | [DEV-563](DEV-563.md) | Запретить Free-серверам изменять тип сервера (Ultra Panel и PlayFreeHost) | UP, PFH | partial | PASS-with-issues | 2026-10-15 |
-| [DEV-566](DEV-566.md) | Каталог Minecraft-схематик /minecraft-schematics/ | WPGL | done | PASS | 2026-10-21 |
+| [DEV-566](DEV-566.md) | Каталог Minecraft-схематик /minecraft-schematics/ | WPGL | done | PASS | 2026-10-22 |
 | [DEV-571](DEV-571.md) | World Backup - «готово» только после ноды, Continue without backup отменяет незавершённые копии | UP | done | PASS | 2026-10-20 |
 | [TASK-missing-mod-deps](TASK-missing-mod-deps.md) | Окно Missing mod dependencies (автодозагрузка зависимостей) | UP | done | PASS-with-issues | 2026-09-29 |
 | [TASK-palworld-settings](TASK-palworld-settings.md) | Palworld Settings: UI-редактор PalWorldSettings.ini | UP | partial | PASS-with-issues | 2026-08-20 |

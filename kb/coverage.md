@@ -3,7 +3,7 @@ id: KB-COVERAGE
 title: Матрица покрытия - фичи KB и автотесты
 type: index
 status: draft
-updated: 2026-10-21
+updated: 2026-10-22
 verified_on: null              # генерируется из KB и tests/, с продуктом не сверяется
 sources:
   - kb/products/**/*.md (шапка tests:, раздел «Покрытие»)
