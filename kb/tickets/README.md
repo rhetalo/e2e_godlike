@@ -47,7 +47,7 @@ updated: 2026-10-23
 | [DEV-563](DEV-563.md) | Запретить Free-серверам изменять тип сервера (Ultra Panel и PlayFreeHost) | UP, PFH | partial | PASS-with-issues | candidate | 2026-10-15 |
 | [DEV-564](DEV-564.md) | Bedrock NetherNet - UDP-порты под каждый слот вместо transport nethernet | UP | partial | PASS-with-issues | candidate | 2026-10-21 |
 | [DEV-566](DEV-566.md) | Каталог Minecraft-схематик /minecraft-schematics/ | WPGL | done | PASS | blocked | 2026-10-22 |
-| [DEV-571](DEV-571.md) | World Backup - «готово» только после ноды, Continue without backup отменяет незавершённые копии | UP | done | PASS | blocked | 2026-10-23 |
+| [DEV-571](DEV-571.md) | World Backup - «готово» только после ноды, Continue without backup отменяет незавершённые копии | UP | done | PASS | covered | 2026-10-23 |
 | [DEV-579](DEV-579.md) | Project Zomboid - лимит -Xmx в ProjectZomboid64.json следует за тарифом | UP | done | PASS | candidate | 2026-10-21 |
 | [TASK-missing-mod-deps](TASK-missing-mod-deps.md) | Окно Missing mod dependencies (автодозагрузка зависимостей) | UP | done | PASS-with-issues | - | 2026-09-29 |
 | [TASK-palworld-settings](TASK-palworld-settings.md) | Palworld Settings: UI-редактор PalWorldSettings.ini | UP | partial | PASS-with-issues | - | 2026-08-20 |
@@ -81,6 +81,5 @@ updated: 2026-10-23
 - **blocked**: [DEV-546](DEV-546.md) - Блок «Boost your server» на чекауте v2 (только UI и QA-превью под флагом)
 - **blocked**: [DEV-549](DEV-549.md) - Фікси після DEV-515 - сценарії туторіалу на заглушках, блокування кнопки кастомних модпаків та API
 - **blocked**: [DEV-566](DEV-566.md) - Каталог Minecraft-схематик /minecraft-schematics/
-- **blocked**: [DEV-571](DEV-571.md) - World Backup - «готово» только после ноды, Continue without backup отменяет незавершённые копии
 
 Только упоминаются, карточек нет: DEV-145 (ARK settings), DEV-275, DEV-315 (конструктор модпаков), DEV-321, DEV-441, DEV-523, PROD-126, GROWTH-95.

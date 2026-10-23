@@ -8,7 +8,7 @@ updated: 2026-10-23
 verified_on: 2026-08-14        # клиентская часть, итоговый прогон DEV-418
 tickets: [DEV-418, DEV-401, DEV-506, DEV-571]
 flags: [world-backup]
-tests: []                      # world-backup.spec.ts не написан
+tests: [tests/game/panel/world-backup.spec.ts]
 sources:
   - kb/tickets/DEV-418.md, DEV-401.md, DEV-506.md
   - agents.docs/game-panel/PROD-134-world-backup-REPORT.md
@@ -61,7 +61,7 @@ sources:
 - **Хранение:** адаптер `wings` (общая шара ноды), как у остальных бэкапов.
 - **Флаг** [flag:world-backup](../../registry/flags.md#world-backup) - Pennant. С 23-Oct-2026 (сверка) раскатан на всех, класс оставлен
   как рычаг отката (сузить тело или `deactivate` для аккаунта). Раньше включался тумблером + `php artisan pennant:purge world-backup`.
-  ⚠️ `POST /world-backups/abandon` ([DEV-571](../../tickets/DEV-571.md)) на 23-Oct только на stage, на проде маршрута нет. Лимит 0/N живёт в бэкенд-админке Pterodactyl (Build).
+  `POST /world-backups/abandon` ([DEV-571](../../tickets/DEV-571.md)) на проде с 23-Oct-2026. Лимит 0/N живёт в бэкенд-админке Pterodactyl (Build).
 
 ## Правила и граничные случаи
 
@@ -85,8 +85,9 @@ sources:
 
 ## Покрытие
 
-- **Автотестов нет.** План `tests/game/panel/world-backup.spec.ts` (в памяти): матрица окна + Cancel, create, ротация,
-  DELETE на PENDING, `/features`.
+- **Автотест** `tests/game/panel/world-backup.spec.ts` (23-Oct-2026, [DEV-571](../../tickets/DEV-571.md)): TC-GP-WB-001 окно при удалении
+  `world` + порядок abandon → trash, TC-GP-WB-002 отказ abandon → без удаления, тост, повтор. Мир не удаляется (route-guard).
+- Не покрыто автотестом: create / ротация / restore, DELETE на PENDING, окно на Versions / Reinstall / модпаках, роли.
 - Ручной QA: [PROD-134-world-backup-REPORT.md](../../../agents.docs/game-panel/PROD-134-world-backup-REPORT.md), ран-бук
   [PROD-134-world-backup-testplan.md](../../../agents.docs/game-panel/PROD-134-world-backup-testplan.md).
 - Открыто у DevOps (§6 ран-бука): ротация при ошибке, fallback `world_backup_<дата>` при сбое заливки, реальная очистка
@@ -102,3 +103,4 @@ sources:
 | 14..17-Aug-2026 | [DEV-401](../../tickets/DEV-401.md) | Окно при смене игры в cancel-модуле |
 | 05-Oct-2026 | [DEV-506](../../tickets/DEV-506.md) | Окно на Versions → Install + Wipe; «Continue without backup» шлёт `delete_files:true` |
 | 19..20-Oct-2026 | [DEV-571](../../tickets/DEV-571.md) | «Готово» только после ноды, Continue → abandon, права и Audit. Stage PASS |
+| 23-Oct-2026 | [DEV-571](../../tickets/DEV-571.md) | Флаг раскатан на всех, DEV-571 выкачен на прод (panel!1710 + фронт), автотест `world-backup.spec.ts` (WB-001/002) |
