@@ -21,11 +21,11 @@ sources:
 
 ## UP - игровая панель
 
-Страниц: 29, с автотестами: 20, тестов в их спеках: 85.
+Страниц: 29, с автотестами: 21, тестов в их спеках: 87.
 
 | Фича | Статус | Спеки | Тестов | Покрытие ✅ / руками / ❌ |
 |---|---|---|---|---|
-| [UP - игровая панель ultra.panel + API v2](products/up/README.md) | draft | все спеки продукта (31) | 85 | 0 / 0 / 0 |
+| [UP - игровая панель ultra.panel + API v2](products/up/README.md) | draft | все спеки продукта (32) | 87 | 0 / 0 / 0 |
 | [Backups - бэкапы сервера, базы и папки](products/up/backups.md) | draft | `backups.spec.ts`, `role.enforcement.spec.ts`, `security.spec.ts` | 11 | 6 / 1 / 1 |
 | [Config - server.properties и блок Docker/Java](products/up/config.md) | draft | `config.spec.ts`, `security.spec.ts` | 6 | 3 / 1 / 1 |
 | [Console - лог сервера и ввод команд](products/up/console.md) | draft | `console.palette.spec.ts`, `console.spec.ts`, `players.spec.ts`, `security.console.spec.ts` | 6 | 5 / 0 / 1 |
@@ -45,6 +45,7 @@ sources:
 | [Throttling - окно «Lag Detected» при нехватке CPU](products/up/throttling.md) | draft | `throttling.notification.spec.ts` | 1 | 0 / 0 / 0 |
 | [Upgrade / Boost - смена тарифа из панели](products/up/upgrade.md) | draft | `promo.spec.ts` | 2 | 2 / 0 / 1 |
 | [Versions - смена ядра и версии Minecraft](products/up/versions.md) | draft | `versions.spec.ts` | 2 | 2 / 1 / 2 |
+| [World Backup - копия мира перед опасными действиями](products/up/world-backup.md) | draft | `world-backup.spec.ts` | 2 | 0 / 0 / 0 |
 | [Cancel module - отмена сервера, пауза и удержание](products/up/cancel-module.md) | draft | - | - | 0 / 0 / 0 |
 | [Client-only моды - скрытие в каталоге и отключение на сервере](products/up/client-only-mods.md) | draft | - | - | 0 / 0 / 0 |
 | [Databases - базы данных MySQL для сервера](products/up/databases.md) | stale | - | - | 0 / 0 / 0 |
@@ -53,7 +54,6 @@ sources:
 | [Missing mod dependencies - автодозагрузка зависимостей модов](products/up/missing-mod-deps.md) | draft | - | - | 0 / 0 / 0 |
 | [Модалки и оверлеи панели](products/up/modals.md) | draft | - | - | 0 / 0 / 0 |
 | [Split Server - деление сервера на основной и саб-серверы](products/up/split-server.md) | draft | - | - | 0 / 0 / 0 |
-| [World Backup - копия мира перед опасными действиями](products/up/world-backup.md) | draft | - | - | 0 / 0 / 0 |
 
 ## VPS - панель VirtFusion
 
@@ -96,11 +96,13 @@ sources:
 
 ## ADM
 
-Страниц: 1, с автотестами: 0, тестов в их спеках: 0.
+Страниц: 3, с автотестами: 0, тестов в их спеках: 0.
 
 | Фича | Статус | Спеки | Тестов | Покрытие ✅ / руками / ❌ |
 |---|---|---|---|---|
 | [ADM - админка панели (panel.godlike.host/admin)](products/adm/README.md) | draft | - | - | 0 / 0 / 0 |
+| [Каталог модпаков v2 в админке - скрытие из клиентского каталога (is_listed)](products/adm/modpack-catalog.md) | draft | - | - | 0 / 0 / 0 |
+| [Сервер в админке - Startup (образ Docker, смена egg) и Build](products/adm/server-startup.md) | draft | - | - | 0 / 0 / 0 |
 
 ## BIL
 
@@ -119,19 +121,23 @@ sources:
 
 ## OLDP
 
-Страниц: 1, с автотестами: 0, тестов в их спеках: 0.
+Страниц: 3, с автотестами: 0, тестов в их спеках: 0.
 
 | Фича | Статус | Спеки | Тестов | Покрытие ✅ / руками / ❌ |
 |---|---|---|---|---|
 | [OLDP - старая клиентская панель (panel.godlike.host)](products/oldp/README.md) | draft | - | - | 0 / 0 / 0 |
+| [Параметры запуска в старой панели - выбор образа Docker (Java)](products/oldp/startup-params.md) | draft | - | - | 0 / 0 / 0 |
+| [Смена версии Minecraft в старой панели (Version Changer) и выбор Java](products/oldp/version-changer.md) | draft | - | - | 0 / 0 / 0 |
 
 ## PFH
 
-Страниц: 1, с автотестами: 0, тестов в их спеках: 0.
+Страниц: 3, с автотестами: 0, тестов в их спеках: 0.
 
 | Фича | Статус | Спеки | Тестов | Покрытие ✅ / руками / ❌ |
 |---|---|---|---|---|
 | [PFH - PlayFreeHost (бесплатный Minecraft-хостинг)](products/pfh/README.md) | draft | - | - | 0 / 0 / 0 |
+| [Лендинг PlayFreeHost - вход, регистрация и создание бесплатного сервера](products/pfh/landing.md) | draft | - | - | 0 / 0 / 0 |
+| [Панель PlayFreeHost (playfreehost.com/panel) - копия ultra.panel для free](products/pfh/panel.md) | draft | - | - | 0 / 0 / 0 |
 
 ## Покрытие, о котором KB не знает
 

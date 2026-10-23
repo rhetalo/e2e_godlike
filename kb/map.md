@@ -3,7 +3,7 @@ id: KB-MAP
 title: Майндкарта проекта godlike
 type: index
 status: draft
-updated: 2026-10-18
+updated: 2026-10-23
 verified_on: null              # карта собрана из KB, сама по себе с продуктом не сверяется
 sources:
   - kb/_meta/inventory-2026-10-15.md §2
@@ -73,11 +73,12 @@ mindmap
       Free-серверы DEV-563
       Game settings Palworld
     OLDP старая панель
-      Version changer DEV-486
-      Startup Docker image DEV-513
+      Version changer DEV-486 DEV-512
+      Параметры запуска DEV-513
     ADM админка
+      Startup и Build сервера
+      Каталог модпаков is_listed DEV-532
       Лимиты нод DEV-477
-      is_listed модпаков
     VPS VirtFusion
       Вход и список серверов
       Страница сервера
@@ -85,6 +86,8 @@ mindmap
       Media Network Storage Options
       Воронка покупки
     PFH PlayFreeHost
+      Лендинг и вход
+      Панель PFH DEV-563
     Реестры
       Окружения
       Аккаунты
@@ -182,13 +185,17 @@ mindmap
 
 ### [OLDP - старая клиентская панель](products/oldp/README.md)
 
-- 📄 [Version Changer, Параметры запуска, образы libxrender](products/oldp/README.md#что-известно)
+- 📄 [Что известно о старой панели](products/oldp/README.md#что-известно)
+- 📄 [Version Changer: смена версии и выбор Java, libxrender](products/oldp/version-changer.md)
+- 📄 [Параметры запуска: образ Docker, «установлен администратором»](products/oldp/startup-params.md)
 - 🎫 Version changer - [DEV-486](tickets/DEV-486.md), [DEV-512](tickets/DEV-512.md)
 - 🎫 Startup / Docker image - [DEV-513](tickets/DEV-513.md)
 
 ### [ADM - админка panel.godlike.host/admin](products/adm/README.md)
 
-- 📄 [Startup сервера, каталог модпаков, ноды, флаги](products/adm/README.md#что-известно)
+- 📄 [Что известно об админке: разделы, ноды, флаги](products/adm/README.md#что-известно)
+- 📄 [Сервер: Startup (образ, egg) и Build (Memory, лимит World Backup)](products/adm/server-startup.md)
+- 📄 [Каталог модпаков v2: скрытие из клиентского каталога](products/adm/modpack-catalog.md)
 - 📄 [Правило: ничего без ок владельца](products/adm/README.md#правила)
 - 🎫 Лимиты ресурсов нод - [DEV-477](tickets/DEV-477.md)
 - 🎫 Видимость модпаков `is_listed` - [DEV-532](tickets/DEV-532.md)
@@ -208,8 +215,9 @@ mindmap
 
 ### [PFH - PlayFreeHost](products/pfh/README.md)
 
-- 📄 [Лендинг, вход, создание бесплатного сервера](products/pfh/README.md#из-чего-состоит)
-- 📄 [Открытые находки (live 15-Oct)](products/pfh/README.md#открытые-находки-recon-15-oct-2026)
+- 📄 [Из чего состоит](products/pfh/README.md#из-чего-состоит)
+- 📄 [Лендинг: вход, регистрация, создание бесплатного сервера](products/pfh/landing.md) · [открытые находки (live 15-Oct)](products/pfh/landing.md#открытые-находки-recon-15-oct-2026)
+- 📄 [Панель PFH: копия ultra.panel, отставание фронта](products/pfh/panel.md)
 - 🎫 Панель PFH и запрет смены игры - [DEV-563](tickets/DEV-563.md)
 
 ### Реестры (общие для всех продуктов)
@@ -226,5 +234,5 @@ mindmap
 
 ## Что дальше по карте
 
-- Все 7 продуктов имеют обзор. Самые тонкие: [OLDP](products/oldp/README.md), [ADM](products/adm/README.md), [BIL](products/bil/README.md) - дополнять по мере задач.
+- Все 7 продуктов имеют обзор и страницы фич. Самые тонкие: [OLDP](products/oldp/README.md) (2 страницы), [ADM](products/adm/README.md) (2 страницы), [PFH](products/pfh/README.md) (2 страницы) - дополнять по мере задач.
 - Отложено владельцем 15-Oct: витрина серверов `/servers/`, разбор 23 корзин витрины.

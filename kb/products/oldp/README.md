@@ -4,7 +4,7 @@ title: OLDP - старая клиентская панель (panel.godlike.host
 type: product-overview
 product: OLDP
 status: draft
-updated: 2026-10-15
+updated: 2026-10-23
 verified_on: 2026-10-12        # DEV-513
 tickets: [DEV-486, DEV-512, DEV-513]
 flags: []
@@ -23,26 +23,26 @@ sources:
 
 ## Что известно
 
-| Раздел | Что | Источник |
+| Раздел | Что | Страница |
 |---|---|---|
-| Страница сервера | `panel.godlike.host/server/<short>` | [DEV-486](../../tickets/DEV-486.md) |
-| «Ядро & Версия» (Version Changer) | смена версии Minecraft: `POST /api/client/extensions/versionchanger/servers/{uuid}/install {build, delete_files}` → тост «Версия успешно изменена.» Это расширение Blueprint (versionchanger) | [DEV-486](../../tickets/DEV-486.md) |
-| «Параметры запуска» | «Образ Docker» (Java); `GET /api/client/servers/:uuid/startup` отдаёт `meta.docker_image`. Режим «Образ Docker этого сервера был установлен администратором» (`isCustomImage`) | [DEV-513](../../tickets/DEV-513.md) |
-| Язык интерфейса | в отчётах QA тексты русские («Изменение версии Minecraft», «Параметры запуска»); какие языки есть ещё - ❓ | [DEV-486](../../tickets/DEV-486.md), [DEV-513](../../tickets/DEV-513.md) |
+| Страница сервера | `panel.godlike.host/server/<short>` | - |
+| «Ядро & Версия» (Version Changer) | смена версии Minecraft, расширение Blueprint versionchanger; Java подбирается автоматически, libxrender сохраняется | [OLDP/version-changer](version-changer.md) |
+| «Параметры запуска» | «Образ Docker» (Java): выбор из списка egg или надпись «установлен администратором»; `meta.docker_image` в `/startup` | [OLDP/startup-params](startup-params.md) |
+| Язык интерфейса | в отчётах QA тексты русские («Изменение версии Minecraft», «Параметры запуска»); какие языки есть ещё - ❓ | - |
 
 ## Как работает (под капотом)
 
-- **Образы Java libxrender** (`yolks-javaNN-libxrender`) есть только в eggs 2 (PC-Forge), 121 (PC-Fabric), 1863 (PC-NeoForge);
-  в egg 3 (PC-Paper) их нет. Около 330 серверов на таких образах. Источник: [DEV-486](../../tickets/DEV-486.md).
-- **Выбор Java при смене версии** - общий с UP `JavaImageMatcher::pick()`: сохраняет libxrender, если сервер на нём был
-  ([DEV-512](../../tickets/DEV-512.md), [UP/versions](../up/versions.md)).
+- Бэкенд общий с [UP](../up/README.md) (репо `panel`), выбор Java при смене версии - общий `JavaImageMatcher::pick()`
+  ([OLDP/version-changer](version-changer.md#как-работает-под-капотом)).
+- Образы libxrender есть не во всех eggs - таблица в [OLDP/version-changer](version-changer.md#образы-libxrender-по-egg).
 - **Фиксы делают в core-коде панели,** а не в расширении versionchanger: патчи расширения теряются при `blueprint -upgrade` ([DEV-513](../../tickets/DEV-513.md)).
 
 ## Гочи для тестирования
 
-- **Скоуп:** проверять OLDP только если задача про неё (memory panel-scope-new-panel).
-- Нестандартный образ ставится через админку ([ADM](../adm/README.md)) - только с ок владельца.
-- «Параметры запуска» раньше показывали старый образ до F5 - проверять переходом по меню, а не перезагрузкой ([DEV-513](../../tickets/DEV-513.md)).
+- **Скоуп:** проверять OLDP только если задача про неё (memory panel-scope-new-panel). Если задача не про старую панель -
+  не упоминать её в отчётах даже как «не проверялось».
+- Нестандартный образ и смена egg - через админку ([ADM/server-startup](../adm/server-startup.md)), только с ок владельца.
+- Образ в «Параметрах запуска» проверять переходом по меню, а не перезагрузкой ([OLDP/startup-params](startup-params.md#гочи-для-тестирования)).
 
 ## Пробелы
 
