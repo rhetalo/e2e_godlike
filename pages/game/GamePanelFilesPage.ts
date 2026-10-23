@@ -205,6 +205,36 @@ export class GamePanelFilesPage extends GamePanelBasePage {
     await this.curseForgeDialog.waitFor({ state: "visible", timeout: 10_000 });
   }
 
+  get curseForgeStatusSuccess(): Locator {
+    return this.curseForgeDialog.locator(GAME_PANEL_FILES.curseForgeStatusSuccess);
+  }
+  get curseForgeStatusError(): Locator {
+    return this.curseForgeDialog.locator(GAME_PANEL_FILES.curseForgeStatusError);
+  }
+  get curseForgeSkippedEntries(): Locator {
+    return this.curseForgeDialog.locator(GAME_PANEL_FILES.curseForgeSkippedEntries);
+  }
+  /** ⚠️ Proceed = установка модов на сервер. Только для проверки состояния, НЕ кликать. */
+  get curseForgeProceed(): Locator {
+    return this.page.locator(GAME_PANEL_FILES.curseForgeProceed).first();
+  }
+
+  /**
+   * Выбрать manifest.json в CurseForge-диалоге и дождаться ответа валидации (DEV-556).
+   * Валидация read-only: на сервер ничего не ставится, пока не нажат Proceed.
+   */
+  async selectManifest(name: string, content: string): Promise<void> {
+    const validated = this.page.waitForResponse((r) => /\/minecraft\/manifest\/validate/.test(r.url()), {
+      timeout: 30_000,
+    });
+    await this.page.locator(GAME_PANEL_FILES.curseForgeFileInput).setInputFiles({
+      name,
+      mimeType: "application/json",
+      buffer: Buffer.from(content),
+    });
+    await validated;
+  }
+
   /** Закрыть CurseForge-диалог кнопкой Cancel (Escape его не закрывает). */
   async closeCurseForgeDialog(): Promise<void> {
     await this.page.locator(GAME_PANEL_FILES.curseForgeCancel).first().click();

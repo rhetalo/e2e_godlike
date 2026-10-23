@@ -154,3 +154,23 @@ export const QuickPickModpacks = [
 ] as const;
 
 export type QuickPickModpack = (typeof QuickPickModpacks)[number];
+
+/**
+ * Тестовые CurseForge manifest.json для окна «Upload custom modpack» (DEV-556, 23-Oct-2026).
+ * Используются только для валидации (POST .../manifest/validate, read-only) - Proceed с ними не жмём.
+ * partial: валидная запись (Fabric API 0.116.17 для 1.21.1) + запись без fileID → isValid, 1 пропуск.
+ * broken: не JSON → «Invalid JSON: Syntax error».
+ */
+export const CurseForgeManifests = {
+  partial: JSON.stringify({
+    minecraft: { version: "1.21.1", modLoaders: [{ id: "fabric-0.16.10", primary: true }] },
+    manifestType: "minecraftModpack",
+    manifestVersion: 1,
+    name: "e2e partial manifest",
+    files: [
+      { projectID: 306612, fileID: 8786256, required: true },
+      { projectID: 238222, required: true },
+    ],
+  }),
+  broken: "{not json",
+} as const;

@@ -709,6 +709,13 @@ export const GAME_PANEL_FILES = {
   curseForgeButton: 'button:has-text("Upload custom modpack")',
   curseForgeDialog: ".v-overlay--active .curseforge-dialog",
   curseForgeCancel: ".curseforge-dialog button:has-text('Cancel')", // Escape диалог НЕ закрывает
+  // 23-Oct-2026 (DEV-556, new-panel!563): выбор manifest.json → POST .../manifest/validate (read-only) и статус в окне.
+  // ⚠️ Proceed = реальная установка модов, в тестах НЕ жать.
+  curseForgeFileInput: ".curseforge-dialog__file-input",
+  curseForgeStatusSuccess: ".curseforge-dialog__status--success", // «Manifest is valid»
+  curseForgeStatusError: ".curseforge-dialog__status--error",     // текст отказа валидации
+  curseForgeSkippedEntries: ".manifest-skipped-entries",          // битые записи, которые установка пропустит
+  curseForgeProceed: ".curseforge-dialog .server__file-manager__modal-button--curseforge",
   // 18-Oct-2026: «Upload custom modpack» сначала открывает апселл Custom Modpack Setup (Lite/Pro,
   // entry=files). Показ = PC Minecraft + владелец + загружен GET .../modpack-setup/quote; клик до ответа
   // quote → сразу CurseForge-диалог. ⚠️ «Order now» (.modpack-setup-dialog__order) = заказ, НЕ жать.

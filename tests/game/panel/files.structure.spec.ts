@@ -5,12 +5,16 @@
  * SFTP-001: SFTP Connect диалог (поля подключения + кнопки).
  * CF-001:   «Upload custom modpack» → апселл Custom Modpack Setup (с 16-Oct-2026) → «I’ll upload it myself»
  *           → CurseForge upload-диалог (file-input + Browse/Proceed).
+ * CF-002:   тот же диалог, выбор manifest.json → только валидация (POST .../manifest/validate, read-only):
+ *           запись без fileID пропускается с предупреждением, не-JSON отклоняется (DEV-556, 23-Oct-2026).
  *
  * ⚠️ Ничего не сабмитим: Rename/Move/Archive/Delete из меню НЕ жмём; Generate/Save (SFTP) и
  * Proceed (CurseForge) и Order now (апселл) НЕ жмём — открыли, проверили структуру, закрыли. Подтверждено
  * MCP-recon 06-Jun; апселл - recon 18-Oct. Клики по апселлу шлют только аналитику (POST .../modpack-setup/events).
  */
-import { test, expect, type BrowserContext } from "@playwright/test";
+import type { BrowserContext } from "@playwright/test";
+import { test, expect } from "../../../fixtures/diagnostics";
+import { CurseForgeManifests } from "../../../fixtures/test-data";
 import { GamePanelFilesPage } from "../../../pages/game/GamePanelFilesPage";
 import {
   loginAndSaveGameSession,
@@ -87,6 +91,33 @@ test.describe("@regression [game-panel] File manager — диалоги/меню
 
     await files.closeCurseForgeDialog();
   });
+
+  test(
+    "TC-GP-CF-002 | manifest.json: битая запись пропускается с предупреждением, битый файл отклоняется (без установки)",
+    { tag: "@regression", annotation: { type: "issue", description: "DEV-556" } },
+    async () => {
+      await files.openUploadCustomModpack();
+      await files.chooseSelfUpload();
+      await files.selectManifest("manifest.json", CurseForgeManifests.partial);
+
+      await test.step("запись без fileID не блокирует манифест: «Manifest is valid» + список пропусков", async () => {
+        await expect(files.curseForgeStatusSuccess).toContainText(/Manifest is valid/i);
+        await expect(files.curseForgeSkippedEntries).toContainText(/will be skipped/i);
+        await expect(files.curseForgeSkippedEntries).toContainText(/index 1 .*fileID/i);
+        await expect(files.curseForgeProceed).toBeEnabled(); // ⚠️ не жмём - установка
+      });
+
+      await files.selectManifest("manifest.json", CurseForgeManifests.broken);
+
+      await test.step("битый файл: понятный текст ошибки, предупреждение сброшено, Proceed выключен", async () => {
+        await expect(files.curseForgeStatusError).toContainText(/Invalid JSON/i);
+        await expect(files.curseForgeSkippedEntries).toBeHidden();
+        await expect(files.curseForgeProceed).toBeDisabled();
+      });
+
+      await files.closeCurseForgeDialog();
+    },
+  );
 
   test("TC-GP-FILE-005 | CodeMirror-редактор открывает текстовый файл (read-only)", async () => {
     await files.goto(); // к чистому списку файлов (предыдущий тест мог оставить overlay)
