@@ -2,7 +2,7 @@
  * ModpackConstructorPage — конструктор модпаков (/custom-minecraft-modpacks-constructor/).
  *
  * ⚠️ Web-component на Shadow DOM (build:embed). ДВЕ гочи, из-за которых наивный тест мёртв:
- *   1. ЛЕНИВАЯ гидрация — приложение монтируется в #modpack-constructor.shadowRoot только
+ *   1. ЛЕНИВАЯ гидрация — приложение монтируется в shadowRoot хоста (SEL.host) только
  *      после пользовательского взаимодействия (mouse move/wheel). См. waitReady().
  *   2. Поиск модов фильтрует по нажатию ENTER, а не по вводу. См. searchMod().
  * Playwright сам пробивает open shadow DOM для css/text/role-локаторов, поэтому внутрь
@@ -98,8 +98,8 @@ export class ModpackConstructorPage extends BasePage {
     const before = await this.installedCount();
     // Дождаться, пока отфильтрованные результаты поиска отрендерят карточку мода.
     await this.page.waitForFunction(
-      (modName) => {
-        const host = document.querySelector("#modpack-constructor") as
+      ({ modName, hostSel }) => {
+        const host = document.querySelector(hostSel) as
           | (HTMLElement & { shadowRoot: ShadowRoot })
           | null;
         const root = host?.shadowRoot;
@@ -108,7 +108,7 @@ export class ModpackConstructorPage extends BasePage {
           (e) => e.children.length === 0 && (e.textContent ?? "").trim() === modName,
         );
       },
-      name,
+      { modName: name, hostSel: SEL.host },
       { timeout: 15_000 },
     );
     const clicked = await this.host().evaluate((hostEl, modName) => {
@@ -131,8 +131,8 @@ export class ModpackConstructorPage extends BasePage {
     }, name);
     if (!clicked) throw new Error(`installMod: карточка мода "${name}" с кнопкой Install не найдена`);
     await this.page.waitForFunction(
-      (prev) => {
-        const host = document.querySelector("#modpack-constructor") as
+      ({ prev, hostSel }) => {
+        const host = document.querySelector(hostSel) as
           | (HTMLElement & { shadowRoot: ShadowRoot })
           | null;
         const root = host?.shadowRoot;
@@ -140,7 +140,7 @@ export class ModpackConstructorPage extends BasePage {
         const m = (root.textContent ?? "").match(/Installed\s*\((\d+)\)/i);
         return !!m && Number(m[1]) > prev;
       },
-      before,
+      { prev: before, hostSel: SEL.host },
       { timeout: 15_000 },
     );
   }

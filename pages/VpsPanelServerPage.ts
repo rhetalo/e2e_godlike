@@ -137,6 +137,12 @@ export class VpsPanelServerPage {
    * VirtFusion may return "RUNNING" or "Running" depending on version — we normalize.
    */
   async getStatusText(): Promise<string> {
+    // Пока статус грузится, бейдж показывает заглушку «·······» (23-Oct-2026: RBD-005 читал её).
+    // Ждём реальный статус до 10с; не дождались — читаем как есть (вызывающий тест увидит значение).
+    await this.statusBadge
+      .filter({ hasText: /running|stopped|paused|building|starting/i })
+      .waitFor({ state: "visible", timeout: 10_000 })
+      .catch(() => null);
     const raw = await this.statusBadge.innerText({ timeout: 10_000 }).catch(() => "");
     const trimmed = raw.trim();
     if (/running/i.test(trimmed)) return "Running";

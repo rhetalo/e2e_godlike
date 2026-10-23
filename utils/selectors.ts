@@ -291,13 +291,15 @@ export const CART_MODDED_NEW = {
 
 /* ===== Modpack Constructor (/custom-minecraft-modpacks-constructor/) ===== */
 // ⚠️ Web-component на Shadow DOM (build:embed) + ЛЕНИВАЯ гидрация: приложение
-// монтируется в #modpack-constructor.shadowRoot только после пользовательского
+// монтируется в shadowRoot хоста только после пользовательского
 // mouse-нуджа (см. ModpackConstructorPage.waitReady). Playwright сам пробивает
 // open shadow DOM для css/text/role-локаторов. Внутри — Tailwind (нестабильные
-// классы), поэтому опираемся на host-id + текст/роль. Confirmed live recon 10-Jul-2026.
+// классы), поэтому опираемся на хост + текст/роль. Confirmed live recon 10-Jul-2026.
+// 23-Oct-2026: хост сменился с <div id="modpack-constructor"> на
+// <div data-vue-app="modpack-constructor" data-isolation="shadow"> (общий Vue-embed).
 export const MODPACK_CONSTRUCTOR = {
-  host: "#modpack-constructor",
-  searchInput: "#modpack-constructor input[type='text']", // поиск срабатывает по Enter
+  host: "[data-vue-app='modpack-constructor']",
+  searchInput: "[data-vue-app='modpack-constructor'] input[type='text']", // поиск срабатывает по Enter
   // Кнопки идентифицируем по тексту через getByRole в Page Object:
   //   Install / Uninstall / Clear All / Change Configuration / Save & Continue /
   //   Compilation (Dry-Run) / Proceed with test run / Start 3-hour Demo / Download Client Mods
