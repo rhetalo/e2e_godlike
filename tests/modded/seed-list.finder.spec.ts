@@ -90,7 +90,7 @@ test.describe("Seed finder (/minecraft-seeds/)", () => {
         const count = await finder.readCount();
         expect(count).toBeLessThanOrEqual(all);
         // инвариант: empty-state показан ⇔ счётчик 0 ⇔ карточек нет
-        expect(await finder.emptyState().isVisible(), "empty-state ⇔ 0").toBe(count === 0);
+        await expect(finder.emptyState(), "empty-state ⇔ 0").toBeVisible({ visible: count === 0 });
         expect((await finder.cards().count()) > 0, "карточки ⇔ count > 0").toBe(count > 0);
       });
     }

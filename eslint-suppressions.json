@@ -15,14 +15,6 @@
       "count": 4
     }
   },
-  "tests/game/panel/dashboard.spec.ts": {
-    "playwright/no-conditional-expect": {
-      "count": 1
-    },
-    "playwright/no-conditional-in-test": {
-      "count": 1
-    }
-  },
   "tests/game/panel/files.recycle.spec.ts": {
     "playwright/no-conditional-in-test": {
       "count": 1
@@ -40,11 +32,6 @@
   },
   "tests/game/panel/plugins.spec.ts": {
     "playwright/no-conditional-in-test": {
-      "count": 1
-    }
-  },
-  "tests/general/login.validation.spec.ts": {
-    "no-restricted-syntax": {
       "count": 1
     }
   },
@@ -76,11 +63,6 @@
       "count": 3
     },
     "playwright/no-conditional-in-test": {
-      "count": 1
-    }
-  },
-  "tests/modded/seed-list.finder.spec.ts": {
-    "playwright/prefer-web-first-assertions": {
       "count": 1
     }
   },

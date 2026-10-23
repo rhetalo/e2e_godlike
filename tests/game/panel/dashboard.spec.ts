@@ -34,10 +34,9 @@ test.describe("@smoke [game-panel] Дашборд", () => {
     const headingCount = await dash.headingCount();
 
     expect(rowCount, "rendered server rows").toBeGreaterThan(0);
-    if (headingCount !== null) {
-      // заголовок отражает общее число серверов аккаунта; на странице их не меньше 0 и не больше счётчика
-      expect(headingCount).toBeGreaterThanOrEqual(rowCount);
-    }
+    // заголовок отражает общее число серверов аккаунта: строк на странице не больше счётчика
+    // (нет числа в заголовке → сравнивать не с чем, проверка вырождается в rowCount >= rowCount)
+    expect(headingCount ?? rowCount).toBeGreaterThanOrEqual(rowCount);
   });
 
   test("TC-GP-DASH-002 | глобальный сайдбар содержит ключевые разделы", async () => {

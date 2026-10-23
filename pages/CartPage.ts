@@ -35,12 +35,13 @@ export class CartPage extends BasePage {
     return this.page.locator(AUTH.anyTab, { hasText: name }).first();
   }
 
+  /** Auth-block корзины (step 1: вкладки Register / Login). */
+  get authBlock(): Locator {
+    return this.page.locator(AUTH.anyBlock).first();
+  }
+
   isAuthBlockVisible(): Promise<boolean> {
-    return this.page
-      .locator(AUTH.anyBlock)
-      .first()
-      .isVisible()
-      .catch(() => false);
+    return this.authBlock.isVisible().catch(() => false);
   }
 
   /** Switch to the Login tab if it isn't active yet. */
