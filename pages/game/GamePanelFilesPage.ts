@@ -11,14 +11,59 @@ import { type Locator, type Page, expect } from "@playwright/test";
 import { GamePanelBasePage } from "./GamePanelBasePage";
 import { GAME_PANEL_FILES } from "../../utils/selectors";
 
+/** Кадр стрима поиска файлов (поля сняты live 23-Oct-2026; контракт - kb/products/up/api/files.md). */
+export type SearchFrame =
+  | { type: "match"; file: { path: string; name: string; is_file: boolean } }
+  | { type: "progress"; listings: number; elapsed_ms: number }
+  | {
+      type: "end";
+      status: string;
+      reason: string | null;
+      listings: number;
+      matches: number;
+      elapsed_ms: number;
+      failed_directories: number;
+    };
+
 export class GamePanelFilesPage extends GamePanelBasePage {
   constructor(page: Page, private readonly uuid: string) {
     super(page);
   }
 
-  async goto(): Promise<void> {
-    await this.open(`/server/${this.uuid}/files`);
+  /** Открыть файловый менеджер; `dir` - сразу в папку (`/plugins`), иначе корень. */
+  async goto(dir?: string): Promise<void> {
+    const query = dir ? `?dir=${encodeURIComponent(dir)}` : "";
+    await this.open(`/server/${this.uuid}/files${query}`);
     await this.newFolderButton.waitFor({ state: "visible", timeout: 20_000 }).catch(() => {});
+  }
+
+  // ── поиск файлов (DEV-476) ──────────────────────────────────────────────────
+  get searchInput(): Locator {
+    return this.page.locator(GAME_PANEL_FILES.searchInput).first();
+  }
+
+  /**
+   * Поиск от текущей папки: ввести строку + Enter (без Enter запрос не уходит) и дочитать стрим до конца.
+   * Возвращает кадры text/event-stream (`data: {type: match|progress|end, ...}`) как объекты.
+   */
+  async searchCapturingStream(term: string): Promise<{ status: number; contentType: string; frames: SearchFrame[] }> {
+    await this.searchInput.fill(term);
+    const [resp] = await Promise.all([
+      this.page.waitForResponse((r) => GAME_PANEL_FILES.searchApi.test(r.url()), { timeout: 20_000 }),
+      this.searchInput.press("Enter"),
+    ]);
+    const body = await resp.text();
+    const frames = body
+      .split("\n\n")
+      .map((chunk) => chunk.replace(/^data:\s*/, "").trim())
+      .filter(Boolean)
+      .map((json) => JSON.parse(json) as SearchFrame);
+    return { status: resp.status(), contentType: resp.headers()["content-type"] ?? "", frames };
+  }
+
+  /** Папки совпадений в таблице результатов поиска. */
+  searchResultPaths(): Locator {
+    return this.page.locator(GAME_PANEL_FILES.filePath);
   }
 
   get newFolderButton(): Locator {

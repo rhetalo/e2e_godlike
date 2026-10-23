@@ -30,6 +30,18 @@ export class GamePanelBackupsPage extends GamePanelBasePage {
     await this.nameInput.waitFor({ state: "visible", timeout: 20_000 }).catch(() => {});
   }
 
+  /** Открыть страницу и вернуть ответ GET списка бэкапов, который она грузит сама (meta.quota - DEV-484). */
+  async gotoCapturingList(): Promise<{ status: number; json: unknown }> {
+    const [resp] = await Promise.all([
+      this.page.waitForResponse(
+        (r) => r.request().method() === "GET" && GAME_PANEL_BACKUPS.listApi.test(r.url()),
+        { timeout: 30_000 },
+      ),
+      this.goto(),
+    ]);
+    return { status: resp.status(), json: await resp.json().catch(() => null) };
+  }
+
   // ── create form ─────────────────────────────────────────────────────────────
   get nameInput(): Locator {
     return this.page.locator(GAME_PANEL_BACKUPS.nameInput).first();

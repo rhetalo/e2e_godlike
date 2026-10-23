@@ -11,8 +11,10 @@
  *
  * Подтверждено recon 05-Jun-2026 (.backups / .backups-list / .backups-list__action-menu).
  */
-import { test, expect, type BrowserContext } from "@playwright/test";
+import { type BrowserContext } from "@playwright/test";
+import { test, expect } from "../../../fixtures/diagnostics";
 import { GamePanelBackupsPage } from "../../../pages/game/GamePanelBackupsPage";
+import { schemaIssues, BackupsListResponse } from "../../../utils/schemas";
 import {
   loginAndSaveGameSession,
   GAME_STORAGE_STATE_PATH,
@@ -87,6 +89,33 @@ test.describe("[game-panel] Backups", () => {
       await expect(backups.scheduledSection).toBeVisible();
     });
   });
+
+  test(
+    "TC-GP-BKP-004 | общая квота слотов: контракт meta.quota и счётчик на странице",
+    { tag: "@regression", annotation: { type: "issue", description: "DEV-484" } },
+    async () => {
+      // Read-only: ответ, который страница грузит сама. Бэкапы не создаём (окно частоты и слоты не тратим).
+      const list = await backups.gotoCapturingList();
+
+      await test.step("GET списка бэкапов: 200 и ответ соответствует контракту (zod)", async () => {
+        expect(list.status).toBe(200);
+        expect(schemaIssues(BackupsListResponse, list.json)).toEqual([]);
+      });
+
+      const { quota } = BackupsListResponse.parse(list.json).meta;
+
+      await test.step("квота согласована: free = limit - used (не меньше 0), refusal только при can_create=false", async () => {
+        expect.soft(quota.free).toBe(Math.max(0, quota.limit - quota.used));
+        expect.soft(quota.refusal === null).toBe(quota.can_create);
+        expect.soft(quota.free === 0 && quota.can_create, "нет свободных слотов, а can_create=true").toBe(false);
+        expect.soft(quota.retry_after === null).toBe(quota.refusal !== "throttled");
+      });
+
+      await test.step("счётчик на странице берёт числа с бэкенда: «used/limit slots used»", async () => {
+        await expect(backups.quota).toHaveText(new RegExp(`^\\s*${quota.used}\\s*/\\s*${quota.limit}\\s+slots used`, "i"));
+      });
+    },
+  );
 
   test("TC-GP-BKP-003 @regression | scheduled-backup форма: Schedule Backup + Set interval + секция Scheduled", async () => {
     // ⚠️ СТРУКТУРНО, БЕЗ САБМИТА: создание расписания = рекуррентный cron на shared-проде

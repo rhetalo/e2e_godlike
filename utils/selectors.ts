@@ -690,6 +690,12 @@ export const GAME_PANEL_FILES = {
   dialogSaveButton: "button.server__file-manager__modal-button--primary", // "Save"
   fileName: ".server__file-manager__file-list__file-name",
   row: "tr.v-data-table__tr",
+  // Поиск файлов (DEV-476, live-recon 23-Oct-2026): поле в шапке таблицы, запрос уходит ТОЛЬКО по Enter
+  // (fill / посимвольный ввод поиск не запускают). Ищет от текущей папки (?dir=). В результатах у строки
+  // под именем - папка совпадения (`/plugins/spark` для /plugins/spark/config.json).
+  searchInput: ".input-search input",
+  filePath: ".server__file-manager__file-list__file-path",
+  searchApi: /\/api\/v2\/servers\/[0-9a-f-]{36}\/files\/search\?/,
   rowCheckbox: 'input[type="checkbox"]',
   footerActionGroup: ".server__file-manager__action-btn-group",           // Download/Move/Duplicate/Delete
   // confirm-диалог удаления («Delete File»): подтверждение — danger-кнопка (НЕ dialog__button-primary)
@@ -852,6 +858,9 @@ export const GAME_PANEL_BACKUPS = {
   scheduleCheckbox: ".backups__checkbox",                  // v-checkbox (фильтр по label: Schedule Backup / Set interval)
   scheduleLabel: 'label.v-label--clickable:has-text("Schedule Backup")',
   setIntervalLabel: 'label.v-label--clickable:has-text("Set interval")',
+  // GET списка бэкапов, который страница грузит сама: data + meta.quota (DEV-484, live-проба 23-Oct-2026).
+  // ⚠️ Эндпоинт принимает только ПОЛНЫЙ UUID (короткий → 400 «No query results for model»).
+  listApi: /\/api\/v2\/servers\/[0-9a-f-]{36}\/backups(\?|$)/,
 } as const;
 
 // Versions (/server/{uuid}/minecraft/versions). Confirmed via live DOM 06-Jun-2026 (MCP recon).

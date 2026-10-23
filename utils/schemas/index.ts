@@ -11,6 +11,7 @@
  */
 import type { z } from "zod";
 
+export * from "./backups";
 export * from "./extensions";
 export * from "./minecraftServer";
 
