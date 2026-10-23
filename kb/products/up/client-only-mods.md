@@ -5,8 +5,8 @@ type: feature
 product: UP
 status: draft
 updated: 2026-10-23
-verified_on: 2026-10-12        # последняя живая сверка - финал DEV-500
-tickets: [DEV-500, DEV-492, DEV-558, DEV-557]
+verified_on: 2026-10-23        # окно Some mods were disabled - DEV-556
+tickets: [DEV-500, DEV-492, DEV-558, DEV-557, DEV-556]
 flags: [MOD_SCAN_BACKFILL]
 tests: []                      # автотестов нет, только ручной QA
 sources:
@@ -29,7 +29,9 @@ sources:
 - **Каталог Mods** ([UP/extensions-catalog](extensions-catalog.md)): клиентских модов в выдаче нет. Пустая страница -
   «Nothing found / Nothing matches the current filters», без Total и без «Try the next page» на последней или
   единственной странице ([new-panel!547](https://git.godlike.ovh/panel/godlike-new-panel/-/merge_requests/547)).
-- **Окно «Some mods were disabled» → Got It** - после установки модпака или на старте, когда сканер отключил моды.
+- **Окно «Some mods were disabled»** - после установки модпака или на старте, когда сканер отключил моды. С 23-Oct-2026 в окне
+  список «Disabled client-side mods» (и «Other disabled files» для старых записей без имени). «Got It» закрывает окно до
+  нового отключения (localStorage), «Don't Show Again» гасит насовсем ([DEV-556](../../tickets/DEV-556.md), [API](api/minecraft-mods.md#get-serversuuidminecraftclient-only-notice)).
 - **Files** - отключённые моды лежат в `mods/` как `*.jar.disabled`.
 - **Конструктор модпаков** клиентские моды показывает специально (их ставит игрок себе).
 
@@ -75,7 +77,10 @@ sources:
    с «Delete files» (`reallocate`), модпак `delete`/`backup` - в джобе после `deleteFiles` (упавший бэкап память не
    трогает), плюс смена игры. Ретест 21-Oct PASS.
 3. **jar больше 100 МБ без вердикта** (Cobblemon 131 МБ) - [DEV-492/F2](../../tickets/DEV-492.md#находки).
-4. **«Some mods were disabled» → Got It не пишет `acknowledged_at`**, окно повторяется - [DEV-492/F3](../../tickets/DEV-492.md#находки).
+4. **Окно «Some mods were disabled»** ([DEV-556](../../tickets/DEV-556.md), закрывает [DEV-492/F3](../../tickets/DEV-492.md#находки)):
+   «Got It» пишет в `localStorage` ключ `client-only-notice-dismissed:<uuid>` = `revision` и на бэкенд ничего не шлёт.
+   Окно вернётся, только когда `revision` вырастет (новое отключение). Ручное включение мода убирает его из списка, `revision`
+   не меняет. В другом браузере или профиле окно появится снова - by design. `acknowledged_at` пишет только «Don't Show Again».
 5. **Утечки Modrinth:** индекс матчит проект по среде, если хоть одна версия `client_and_server` / `unknown`
    (JEBr, FISM) - [DEV-500/F3](../../tickets/DEV-500.md#находки), остаток 3 мода.
 6. **CF без меток** (JER, TexTrue) остаются скрыты, Living Horizon виден в Forge 1.20.1 -
@@ -98,7 +103,7 @@ sources:
 
 ## Покрытие
 
-- **Автотестов нет.** Ручной QA: отчёты [DEV-500](../../../test-docs/ultra.panel/DEV-500/client-only-mods-hide-RECHECK3-REPORT.md)
+- **Автотестов нет** (окно отключённых модов - кандидат на мутирующий спек на [srv:75d1175e](../../registry/test-servers.md#75d1175e)). Ручной QA: отчёты [DEV-500](../../../test-docs/ultra.panel/DEV-500/client-only-mods-hide-RECHECK3-REPORT.md)
   (финал) и [DEV-492](../../../test-docs/ultra.panel/DEV-492/dev492-post-install-mod-scan-REPORT.md).
 - Не покрыто: Forge-моды (by design safe), legacy Forge, перепроверка F5 после [panel!1665](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1665).
 
@@ -111,6 +116,7 @@ sources:
 | 07-Oct-2026 | [DEV-500](../../tickets/DEV-500.md) | [panel!1652](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1652), [panel!1660](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1660), [new-panel!546](https://git.godlike.ovh/panel/godlike-new-panel/-/merge_requests/546): CF клиентских 131 → 56 → 15 |
 | 09-Oct-2026 | [DEV-492](../../tickets/DEV-492.md) | [panel!1665](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1665): манифест с битым fileID не рвёт установку, легаси-эндпоинт проверяет ядро. PASS |
 | 12-Oct-2026 | [DEV-500](../../tickets/DEV-500.md) | [panel!1672](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1672) + [new-panel!547](https://git.godlike.ovh/panel/godlike-new-panel/-/merge_requests/547): CF по файлу под loader+version, 14 из 131. PASS |
+| 23-Oct-2026 | [DEV-556](../../tickets/DEV-556.md) | [panel!1701](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1701) + [new-panel!571](https://git.godlike.ovh/panel/godlike-new-panel/-/merge_requests/571): в окне список модов, Got It до роста `revision`. PASS |
 | 22..23-Oct-2026 | [DEV-557](../../tickets/DEV-557.md) | Jar больше 100 МБ (Cobblemon) без вердикта: mod-scan-service!7 на проде не действует, FAIL; сервис переписан (!8-!11), перепроверяет DevOps |
 
 Связано: пост-инсталл скан как отдельная фича (`UP/post-install-mod-scan`) пока описан здесь; окно

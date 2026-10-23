@@ -4,9 +4,9 @@ title: Loader gating - каталог и установка по ядру сер
 type: feature
 product: UP
 status: draft
-updated: 2026-10-19
-verified_on: 2026-10-19        # последняя живая сверка - DEV-549 (туториал, кнопка, API по всем ядрам)
-tickets: [DEV-515, DEV-529, DEV-534, DEV-549]
+updated: 2026-10-23
+verified_on: 2026-10-23        # тексты отказов в старом дизайне и модалке манифеста - DEV-556
+tickets: [DEV-515, DEV-529, DEV-534, DEV-549, DEV-556]
 flags: [extension-compatibility]
 tests: [tests/game/panel/mods.spec.ts]   # только контракт API (TC-GP-MOD-005); поведение - ручной QA
 sources:
@@ -126,5 +126,6 @@ sources:
 | 08-Oct-2026 | [DEV-529](../../tickets/DEV-529.md) | Mohist сохраняет билд после старта |
 | 09-Oct-2026 | [DEV-534](../../tickets/DEV-534.md) | «All» = `any` расширяет список поверх автофильтра |
 | 19-Oct-2026 | [DEV-549](../../tickets/DEV-549.md) | Tutorial по ядру, кнопка Upload custom modpack disabled на ядрах без модпаков, `plugin_loader: null` без плагинов |
+| 23-Oct-2026 | [DEV-556](../../tickets/DEV-556.md) | Отказы по ядру/лоадеру видны: старый дизайн - тост с текстом (было «Ключ ... не был установлен»), манифест - 409 в модалке. Вне раскатки legacy по-прежнему ставит моды на Paper ([DEV-556/F1](../../tickets/DEV-556.md#находки)) |
 
 Открыто: снятие / раскатка флага `extension-compatibility` - за разработкой.

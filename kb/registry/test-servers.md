@@ -80,6 +80,8 @@ Suspended-сервер, для проверок баннера suspended. 🔴
 `test_e2e_mut_fabric` (было `GxVxq7bw_480890`), 23-Oct переведён Paper → Fabric 1.21.1 (loader 0.20.1, Wipe Server Files).
 Клиентские моды ([DEV-558](../tickets/DEV-558.md)). Раньше - платный регресс [DEV-563](../tickets/DEV-563.md) (задача закрыта).
 - Env: `GAME_PANEL_SERVER_MUT_FABRIC_UUID`. Трогать: 🟢.
+- ⚠️ Владелец 388101 вне раскатки `extension-compatibility`: отказов по ядру/лоадеру тут нет. 23-Oct ([DEV-556](../tickets/DEV-556.md)): окно
+  «Some mods were disabled» подтверждено ack, /mods вернул к 2 файлам (godlikemetrics + fabric-api 0.116.13), offline.
 
 ### b62bffd0
 `test_e2e_mut_bedrock` (было `PPmTky5j_481131`, id 778464), 23-Oct сменена игра Paper → BEDROCK-Vanilla (egg 125, Delete files),
@@ -124,6 +126,12 @@ SMP Private, переименован в `DEV-562-MC` под [DEV-562](../ticket
 ### f8e7df56
 SkyBlock, на нём воспроизводился баг tariff-list 400. 20-Oct-2026 переименован в `DEV-484-backup-throttle` (было `JBl1Dqfw_474692`):
 квота ядра, сервер сверх лимита, окно частоты [DEV-484](../tickets/DEV-484.md); тестовые бэкапы оставлены. 🟡
+- 23-Oct-2026: ядро **NeoForge 1.21.1** (не Paper), владелец 307989 в раскатке `extension-compatibility` - стенд отказа по лоадеру
+  ([DEV-556](../tickets/DEV-556.md)); 477 модов, Essential от теста убран в корзину.
+
+### 7c5aa3cf
+`test`, сплит от [srv:1d7d34aa](#1d7d34aa), Paper 26.2, владелец 307989 в раскатке `extension-compatibility`. Стенд «ядро без модов»:
+legacy 400 и v2 409 `mods_not_supported`, кнопка Upload custom modpack disabled ([DEV-556](../tickets/DEV-556.md), [DEV-549](../tickets/DEV-549.md)). Только отказы, ничего не ставилось. 🟡
 
 ### 9c891502
 `DEV-484-db` (было `Gs5I5zqx_482442`), владелец - тестовый пользователь 388101, не основной аккаунт. Бэкапы баз [DEV-484](../tickets/DEV-484.md):

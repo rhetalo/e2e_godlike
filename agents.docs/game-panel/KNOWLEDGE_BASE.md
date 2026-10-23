@@ -583,6 +583,14 @@ preflight и нет канала причин (known gap, вне scope).
   ⚠️ Generate/Save меняют SFTP-пароль → тест только структурный.
 - **CurseForge** (кнопка `Upload custom modpack`): диалог `curseforge-dialog__*` — `input[type=file]`,
   кнопки **Browse file / Cancel / Proceed**. Загрузка кастомного модпака из zip. ⚠️ Не загружать → структурный.
+  **23-Oct-2026 (DEV-556, new-panel!563):** выбор файла в `.curseforge-dialog__file-input` сразу шлёт read-only
+  `POST .../manifest/validate`; статусы `.curseforge-dialog__status--success|--error|--validating`, жёлтый блок
+  пропусков `.manifest-skipped-entries`, отказ установки `.manifest-install-failure`. Proceed =
+  `.server__file-manager__modal-button--curseforge` (после отказа `disabled`, при retryable - «Retry»). Валидацию можно
+  гонять в автотесте (TC-GP-CF-002), Proceed - нет.
+- **Окно «Some mods were disabled»** (DEV-556, new-panel!571): «Got It» пишет `localStorage`
+  `client-only-notice-dismissed:<full uuid>` = `revision` и на бэкенд ничего не шлёт; «Don't Show Again» =
+  `POST .../client-only-notice/ack`. Для повторного показа в тесте - удалить ключ или новый контекст.
 - Прочее на странице: **Recycle Bin** (строка-кнопка), **Search** (`textbox`), **Download SFTP Client**,
   bulk-бар (Download/Move/Duplicate/Delete/Zip/Unzip). Файловый редактор (CodeMirror `.cm-content`) —
   открывается по Open текстового файла (§5b).

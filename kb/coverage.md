@@ -21,16 +21,16 @@ sources:
 
 ## UP - игровая панель
 
-Страниц: 29, с автотестами: 20, тестов в их спеках: 82.
+Страниц: 29, с автотестами: 20, тестов в их спеках: 85.
 
 | Фича | Статус | Спеки | Тестов | Покрытие ✅ / руками / ❌ |
 |---|---|---|---|---|
-| [UP - игровая панель ultra.panel + API v2](products/up/README.md) | draft | все спеки продукта (30) | 82 | 0 / 0 / 0 |
+| [UP - игровая панель ultra.panel + API v2](products/up/README.md) | draft | все спеки продукта (31) | 85 | 0 / 0 / 0 |
 | [Backups - бэкапы сервера, базы и папки](products/up/backups.md) | draft | `backups.spec.ts`, `role.enforcement.spec.ts`, `security.spec.ts` | 11 | 6 / 1 / 1 |
 | [Config - server.properties и блок Docker/Java](products/up/config.md) | draft | `config.spec.ts`, `security.spec.ts` | 6 | 3 / 1 / 1 |
 | [Console - лог сервера и ввод команд](products/up/console.md) | draft | `console.palette.spec.ts`, `console.spec.ts`, `players.spec.ts`, `security.console.spec.ts` | 6 | 5 / 0 / 1 |
 | [Каталог расширений - моды, плагины, модпаки](products/up/extensions-catalog.md) | draft | `extension.sources.spec.ts`, `extensions.spec.ts`, `mods.spec.ts`, `plugins.spec.ts` | 17 | 4 / 2 / 4 |
-| [Files - файловый менеджер, Recycle Bin, SFTP](products/up/files.md) | draft | `files.recycle.spec.ts`, `files.spec.ts`, `files.structure.spec.ts`, `security.spec.ts` | 12 | 5 / 2 / 3 |
+| [Files - файловый менеджер, Recycle Bin, SFTP](products/up/files.md) | draft | `files.recycle.spec.ts`, `files.search.spec.ts`, `files.spec.ts`, `files.structure.spec.ts`, `security.spec.ts` | 15 | 6 / 3 / 4 |
 | [Java detection и гейт старта](products/up/java-detection.md) | draft | `mods.spec.ts` | 5 | 0 / 0 / 0 |
 | [Вход в панель и дашборд My Servers](products/up/login-dashboard.md) | draft | `auth.logout.spec.ts`, `dashboard.spec.ts`, `login.spec.ts`, `security.spec.ts` | 15 | 4 / 0 / 1 |
 | [Модпаки - каталог, видимость и установка](products/up/modpack-catalog.md) | draft | `extension.sources.spec.ts`, `extensions.spec.ts` | 6 | 2 / 4 / 3 |

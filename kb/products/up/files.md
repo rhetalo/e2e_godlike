@@ -5,8 +5,8 @@ type: feature
 product: UP
 status: draft
 updated: 2026-10-23
-verified_on: 2026-10-18        # recon Upload custom modpack (апселл); остальное - 09-Jun
-tickets: [DEV-418, DEV-459, DEV-492, DEV-549, DEV-476]
+verified_on: 2026-10-23        # окно манифеста DEV-556; апселл - 18-Oct; остальное - 09-Jun
+tickets: [DEV-418, DEV-459, DEV-492, DEV-549, DEV-476, DEV-556]
 flags: [world-backup]
 tests:
   - tests/game/panel/files.spec.ts
@@ -63,7 +63,11 @@ sources:
 1. **Имена принимают `<` и HTML как есть,** но рендерят как текст: stored XSS в имени папки нет (SEC-003). KB §5j.
 2. **Restore и Clear Recycle Bin неактивны,** пока не выбрана строка.
 3. **Generate / Save в SFTP меняют пароль SFTP** - реальная мутация.
-4. Ошибки манифеста при Upload custom modpack в UI не показываются ([DEV-492/F7](../../tickets/DEV-492.md#находки)).
+4. **Ошибки манифеста видны в окне** ([DEV-556](../../tickets/DEV-556.md), закрывает [DEV-492/F7](../../tickets/DEV-492.md#находки)):
+   битые записи - жёлтый блок «These entries are broken and will be skipped» до установки; отказ 409/400 или частичная
+   установка - окно остаётся открытым, «Some mods failed to install. The other mods are installed. These were not:» + список,
+   Proceed выключен (Retry, если сбой провайдера), Cancel → Close, во время установки окно не закрыть. Тексты и коды -
+   [API minecraft-mods](api/minecraft-mods.md).
 5. **На ядрах без модпаков** (Paper-подобные, Vanilla; только у владельца с флагом `extension-compatibility`) кнопка
    Upload custom modpack контурная, disabled, с тултипом «Custom modpacks cannot be uploaded on this core…»; клик ничего
    не открывает, апселла тоже нет ([DEV-549](../../tickets/DEV-549.md)).
@@ -91,6 +95,8 @@ sources:
 | Создание, удаление, переименование папки | `files.spec.ts` (FILE-001, 002, 004) | ✅ |
 | Корзина и восстановление | `files.recycle.spec.ts` (FILE-006) | ✅ |
 | Меню «...», SFTP, Upload custom modpack (апселл → свой путь → CurseForge), редактор | `files.structure.spec.ts` (FILE-003, SFTP-001, CF-001, FILE-005) | ✅ структурно |
+| Валидация manifest.json: пропуск битой записи, отказ не-JSON (без Proceed) | `files.structure.spec.ts` (TC-GP-CF-002), [DEV-556](../../tickets/DEV-556.md) | ✅ |
+| Установка манифеста: частичный провал, 409, Retry | только ручной QA [DEV-556](../../tickets/DEV-556.md) (мутация) | ❌ авто нет |
 | XSS в имени папки | `security.spec.ts` (SEC-003) | ✅ |
 | Правка файла → Save → откат, Move, Zip / Unzip | не покрыто | ❌ |
 | Окно World Backup при удалении `world` | только ручной QA [DEV-418](../../tickets/DEV-418.md) | ❌ авто нет |
@@ -107,4 +113,5 @@ sources:
 | 09-Oct-2026 | [DEV-492](../../tickets/DEV-492.md) | Upload custom modpack запускает скан модов |
 | 16-Oct-2026 | - (follow-up [DEV-459](../../tickets/DEV-459.md), тикет не найден) | Апселл Modpack setup перед окном CurseForge; CF-001 обновлён 18-Oct |
 | 19-Oct-2026 | [DEV-549](../../tickets/DEV-549.md) | Upload custom modpack disabled на ядрах без модпаков; тур FM не стартует поверх туториала модов |
+| 23-Oct-2026 | [DEV-556](../../tickets/DEV-556.md) | [new-panel!563](https://git.godlike.ovh/panel/godlike-new-panel/-/merge_requests/563) + [panel!1690](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1690): ошибки манифеста и пропущенные записи в окне. PASS, TC-GP-CF-002 |
 | 20-Oct-2026 | [DEV-476](../../tickets/DEV-476.md) | Поиск файлов потоковый (panel!1597 + new-panel!519): BMC4 за 5,8 с вместо 125 с, лимиты 2 символа / 500 совпадений / 2 поиска, [API files](api/files.md). PASS |

@@ -40,6 +40,7 @@ updated: 2026-10-23
 | [DEV-534](DEV-534.md) | Фильтры «All» и «All versions» в каталоге модов и плагинов не расширяют список | UP | done | PASS-with-issues | - | 2026-10-09 |
 | [DEV-546](DEV-546.md) | Блок «Boost your server» на чекауте v2 (только UI и QA-превью под флагом) | BIL | done | PASS | blocked | 2026-10-19 |
 | [DEV-549](DEV-549.md) | Фікси після DEV-515 - сценарії туторіалу на заглушках, блокування кнопки кастомних модпаків та API | UP | done | PASS | blocked | 2026-10-19 |
+| [DEV-556](DEV-556.md) | Ошибки установки модов понятно в интерфейсе | UP | done | PASS | covered | 2026-10-23 |
 | [DEV-557](DEV-557.md) | Jar больше 100 МБ никогда не получает вердикт сканера клиентских модов | UP, INFRA | done | FAIL | no | 2026-10-23 |
 | [DEV-558](DEV-558.md) | Переустановленный клиентский мод не отключается (правило DEV-275) | UP | done | PASS | candidate | 2026-10-21 |
 | [DEV-562](DEV-562.md) | Steam Port для подключения к серверу Project Zomboid в Overview | UP | done | PASS | no | 2026-10-15 |
