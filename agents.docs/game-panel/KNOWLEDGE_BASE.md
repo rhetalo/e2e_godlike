@@ -251,6 +251,44 @@ Moderator/Member + счётчики), **Members**, **Audit Log**.
 - Page object: `GamePanelBackupsPage` (`createBackup`, `backupRow`, `completedStatusOf`, `deleteBackup`,
   `deleteIfPresent`, `quota`, `scheduledSection`). Создаём/удаляем ТОЛЬКО свой бэкап; чужой «111» не трогаем.
 
+### 5h-bis. Общая квота бэкапов после DEV-484 (prod 20-Oct-2026, QA PASS)
+
+MR: panel!1691 (бэк, влит 20-Oct-2026) + new-panel!564 (фронт). Полная дока: `kb/products/up/api/backups.md`,
+`kb/products/up/backups.md`, `kb/tickets/DEV-484.md`. Отчёт: https://claude.ai/artifact/537r7XRR8NiYidKCqNWy5C
+
+- **Один лимит слотов** (`backup_limit`) на 4 таблицы: `backups` (ядро: пре-инсталл, старая панель), `backup_instances`
+  (ручные + расписания), `backup_folders`, `backup_databases`. Старая и новая панель больше не дают 3 + 3.
+- **Окно частоты** (прод `BACKUP_THROTTLE_LIMIT=1`, `PERIOD=3600`) - серверные и папочные бэкапы. **Вне окна, но в слоте:**
+  пре-инсталл модпака (`is_system_initiated`) и бэкапы баз (3 подряд проходят). Окно своё у каждого сервера.
+- **`GET /api/v2/servers/{uuid}/backups` → `meta.quota`** `{limit, used, free, can_create, refusal, retry_after}`;
+  `refusal` = `no_free_slots` / `throttled` / `null`. Пример: `free=1, can_create=false, refusal=throttled, retry_after=3516`.
+  Сверх лимита: `used=4, limit=3, free=0`.
+- **UI:** `.backups-list__subtitle` «N/M slots used» и футер «Showing N backups. M backup remaining.» по `meta.quota`; при `free=0`
+  форма закрыта заглушкой **«Slots Limit Reached»** (кнопка Upgrade), удаление работает. Старая находка «4/3 slots used» закрыта.
+- **Коды и тексты:**
+  - нет слотов: **400** «Cannot create a new backup, this server has reached its limit of N backups.» (ручной и база);
+    установка модпака - **409** `no_free_backup_slots` + диалог «No Free Backup Slots»;
+  - окно занято: **429** «Only N backups may be generated within T second span of time.» (единый текст, слова `instances`
+    больше нет), заголовка `Retry-After` в v2 нет - брать `meta.quota.retry_after`;
+  - бэкап чужой / несуществующей базы (`POST .../backups/databases`, `databaseId`) - **404**, строки нет;
+  - `PUT .../backups/databases/{backupUUID}` с `database_id` - 200, меняется только имя;
+  - пустая база - 400 «Seems like this database is empty.» (до DEV-484 так же).
+- **Расписания** (`gl:handle-scheduled-backups`, раз в минуту):
+  - шаблон расписания без архива не тратит ни слот, ни окно;
+  - `auto_replace` держит одного ребёнка: при полных слотах новый создан, старый удалён;
+  - интервальное при полных слотах пропускает запуск и переносится ровно на интервал; одноразовое пропускает и остаётся в списке;
+  - `retain_count=N`: после N-го запуска расписание удаляется, бэкапы становятся обычными и сразу попадают в окно;
+  - удалил расписание - бэкапы остаются обычными;
+  - только «Set interval» без «Schedule Backup» = сразу обычный бэкап (слот + окно) + отдельное расписание.
+- ⚠️ **Гочи прогона:** время приложения UTC, планировщик срабатывает только в точную минуту `schedule_date + schedule_time`
+  (UI переводит локальное время в UTC). UI-интервал только дни / недели / месяцы, API принимает минуты и часы - короткие
+  расписания для проверки только через API тем же телом, что шлёт форма. API-токен = `localStorage.access_token`.
+- **Low-замечания (открыты):** OBS-1 два тоста на 429 и нет времени ожидания; («Last -1» снят: только API с `retain_count = NULL`, из UI не воспроизводится);
+  OBS-2 пропущенное одноразовое висит в Scheduled.
+- **Не проверено:** `FAILED` не занимает слот, логи «Scheduled backup skipped...».
+- **Автотестов на квоту нет.** Тестовые серверы (prod): f8e7df56, 546bc52e, ca326e28, 9c891502 (тестовый пользователь, 2 базы);
+  бэкапы и базы оставлены до ок владельца.
+
 ## 5i. Role enforcement (подтверждено DOM 06-Jun-2026)
 
 Роли участника: **Owner / Co-owner / Moderator / Member**. Owner раздаёт роли; смена роли участника — §5e
@@ -427,6 +465,9 @@ preflight и нет канала причин (known gap, вне scope).
 - ⚠️ **Живой 409 `backup_throttled` на проде не воспроизвести:** ручные бэкапы новой панели пишутся в
   `backup_instances`, а preflight считает только core `backups`; шаг MR «создать N бэкапов вручную через
   Backups» для новой панели неверен. Верификация - моком ответа.
+  Обновление 20-Oct-2026 (DEV-484 часть 2): слоты теперь общие (409 `no_free_backup_slots` после ручного бэкапа воспроизводится),
+  но пре-инсталл бэкап вне окна, поэтому установка сразу после ручного - 200, и живой `backup_throttled` по-прежнему недостижим
+  (только при env `GODLIKE_PREINSTALL_BACKUP_EXEMPT_FROM_THROTTLE=false`, нужен DevOps). См. §5h-bis.
 - **Тосты ultra.panel** = `@kyvg/vue3-notification`: селектор **`.vue-notification-wrapper`** (НЕ `v-snackbar`
   / `role=alert`).
 - **Паттерн мока (page.route):** `page.route` с `try/catch` вокруг `fulfill` + между итерациями
@@ -573,6 +614,8 @@ Locked, Schedule):
   квоту (3 слота, 1 занят «111»). Контрол удаления расписания НЕ разведать без создания живого cron
   (секция Scheduled пуста) → на shared-проде это необратимый-до-проверки риск. Делать только с явным
   подтверждением владельца + известным способом удаления расписания.
+- Обновление 20-Oct-2026 (DEV-484): расписания создавались и удалялись на проде (с ок владельца), удаление работает, бэкапы
+  удалённого расписания остаются обычными и занимают слоты. Поведение расписаний и гочи (UTC, точная минута, единицы интервала) - §5h-bis.
 
 ## 9. Round-3 sub-flows (MCP, 06-Jun-2026)
 

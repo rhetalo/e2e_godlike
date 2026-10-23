@@ -40,7 +40,7 @@ sources:
 |---|---|---|---|
 | [modpacks](modpacks.md) | установка модпака и список установленных | `POST .../minecraft/modpacks`, `GET .../minecraft/modpacks/installed` | [DEV-452](../../../tickets/DEV-452.md), [DEV-484](../../../tickets/DEV-484.md) |
 | [server](server.md) | состояние сервера и канал ошибок установки | `GET /servers/{uuid}`, `DELETE .../install-error` | [DEV-452](../../../tickets/DEV-452.md) |
-| [backups](backups.md) | бэкапы, лимиты, таблицы хранения | `GET .../backups`, `POST .../backups/instances` | [DEV-452](../../../tickets/DEV-452.md), [DEV-484](../../../tickets/DEV-484.md) |
+| [backups](backups.md) | бэкапы, общая квота `meta.quota`, лимит частоты, бэкапы баз, расписания | `GET .../backups`, `POST .../backups/instances`, `POST`/`PUT .../backups/databases` | [DEV-452](../../../tickets/DEV-452.md), [DEV-484](../../../tickets/DEV-484.md) |
 | [minecraft-version](minecraft-version.md) | ядро сервера и `extension_capabilities` | `GET .../minecraft/version` | [DEV-515](../../../tickets/DEV-515.md), [DEV-549](../../../tickets/DEV-549.md) |
 
 Уже описанные в других местах куски API (пока не вынесены сюда):
@@ -82,6 +82,7 @@ sources:
 
 ## Известные пробелы
 
-- Нет полной схемы тел ответов (`GET /servers/{uuid}`, `GET .../backups`): описаны только поля, которые трогали тикеты.
+- Нет полной схемы тел ответов (`GET /servers/{uuid}`, `GET .../backups`): описаны только поля, которые трогали тикеты (у `GET .../backups` - `meta.quota`).
+- Пути эндпоинтов бэкапа папки и расписаний бэкапов не записаны ❓ ([backups](backups.md#эндпоинты)).
 - Не описаны эндпоинты консоли, файлов, баз, задач, версий (кроме упоминаний выше).
 - Коды успешных ответов (200 / 202) для части POST не зафиксированы ❓.

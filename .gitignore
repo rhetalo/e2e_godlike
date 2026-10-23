@@ -54,6 +54,7 @@ storageState.*.json
 # Credentials (не хранить в git)
 credentials.csv
 credentials.json
+.mcp.json
 
 # Артефакты запусков
 debug-output.txt

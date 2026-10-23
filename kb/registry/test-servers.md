@@ -73,6 +73,9 @@ Suspended-сервер, для проверок баннера suspended. 🔴
 Java-сервер (id 771938).
 - Задачи: [DEV-472](../tickets/DEV-472.md), [DEV-485](../tickets/DEV-485.md), [DEV-486](../tickets/DEV-486.md), [DEV-513](../tickets/DEV-513.md), missing deps, SMP.
 - На нём включён [flag:java-start-gate](flags.md#java-start-gate).
+- 20-Oct-2026 переименован в `DEV-484-retain` (было `Ft2FVM1G_474664`): расписание с `retain_count=3` для [DEV-484](../tickets/DEV-484.md), 3 бэкапа оставлены.
+- 21-Oct-2026 переименован в `DEV-558-Fabric` под [DEV-558](../tickets/DEV-558.md): Fabric 1.21 + пак Sodium Plus, статус `reinstall_failed` после теста Reinstall. Бэкапы DEV-484 не тронуты.
+- 22-Oct-2026 переименован в `DEV-557-scan` (было `DEV-558-Fabric`) под [DEV-557](../tickets/DEV-557.md): сейчас egg PC-Paper, offline; создана `/mods` с `Cobblemon-fabric-1.8.1+1.21.1.jar` (131 МиБ, через files/pull с Modrinth CDN) и `dev557-control-95mib.jar` (синтетика) - ждут суточного обхода mod-scan-service. В тот же день переведён на Fabric 1.21.1 (без вайпа) и через Plugins/Mods поставлен Cobblemon 1.8.2 (133 МиБ). Обход 22-Oct: контроль разобран, оба Cobblemon без вердикта (FAIL). 23-Oct задача закрыта (сервис переписан Сергеем, проверяет сам); 3 тестовых jar в `/mods` оставлены по решению владельца - стенд для проверки Сергея (хеши в артефакте DEV-557).
 - Трогать: 🟡.
 
 ### 8c2a6bd7
@@ -84,6 +87,7 @@ Java-сервер (id 771938).
 SMP.
 - Владелец с [flag:extension-compatibility](flags.md#extension-compatibility).
 - Задачи: [DEV-515](../tickets/DEV-515.md), [DEV-529](../tickets/DEV-529.md).
+- 20-Oct-2026 переименован в `DEV-484-schedules` (было `aDFt94f8_474690`): расписания [DEV-484](../tickets/DEV-484.md), бэкапы оставлены.
 - Трогать: 🟡.
 
 ### 0cf8346f
@@ -98,7 +102,12 @@ SMP.
 SMP Private, переименован в `DEV-562-MC` под [DEV-562](../tickets/DEV-562.md). 🟡
 
 ### f8e7df56
-SkyBlock, на нём воспроизводился баг tariff-list 400. 🟡
+SkyBlock, на нём воспроизводился баг tariff-list 400. 20-Oct-2026 переименован в `DEV-484-backup-throttle` (было `JBl1Dqfw_474692`):
+квота ядра, сервер сверх лимита, окно частоты [DEV-484](../tickets/DEV-484.md); тестовые бэкапы оставлены. 🟡
+
+### 9c891502
+`DEV-484-db` (было `Gs5I5zqx_482442`), владелец - тестовый пользователь 388101, не основной аккаунт. Бэкапы баз [DEV-484](../tickets/DEV-484.md):
+базы `s779874_cjyV9C2A` (id 26530, таблица `dev484_probe`) и `s779874_Ebhns6Vr` (26531), бэкапы баз оставлены до ок владельца. 🟡
 
 ### 7166c707
 **Одноразовый, деструктив разрешён** (restore, version change и т.п.). 🟢

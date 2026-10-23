@@ -26,7 +26,7 @@ sources:
 | Фича | Статус | Спеки | Тестов | Покрытие ✅ / руками / ❌ |
 |---|---|---|---|---|
 | [UP - игровая панель ultra.panel + API v2](products/up/README.md) | draft | все спеки продукта (30) | 81 | 0 / 0 / 0 |
-| [Backups - бэкапы сервера, базы и папки](products/up/backups.md) | draft | `backups.spec.ts`, `role.enforcement.spec.ts`, `security.spec.ts` | 10 | 5 / 0 / 1 |
+| [Backups - бэкапы сервера, базы и папки](products/up/backups.md) | draft | `backups.spec.ts`, `role.enforcement.spec.ts`, `security.spec.ts` | 10 | 5 / 1 / 1 |
 | [Config - server.properties и блок Docker/Java](products/up/config.md) | draft | `config.spec.ts`, `security.spec.ts` | 6 | 3 / 1 / 1 |
 | [Console - лог сервера и ввод команд](products/up/console.md) | draft | `console.palette.spec.ts`, `console.spec.ts`, `players.spec.ts`, `security.console.spec.ts` | 6 | 5 / 0 / 1 |
 | [Каталог расширений - моды, плагины, модпаки](products/up/extensions-catalog.md) | draft | `extension.sources.spec.ts`, `extensions.spec.ts`, `mods.spec.ts`, `plugins.spec.ts` | 17 | 4 / 2 / 4 |

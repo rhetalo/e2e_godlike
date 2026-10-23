@@ -80,7 +80,7 @@ sources:
 Ссылка на managed-модпак в панели ([DEV-459](../tickets/DEV-459.md)). Исправлено в !532.
 
 ### Env бэкапов и установки модпака
-Подробно: [API - backups](../products/up/api/backups.md#как-работает-лимит-частоты), [DEV-452](../tickets/DEV-452.md), [DEV-484](../tickets/DEV-484.md).
+Подробно: [API - backups](../products/up/api/backups.md#модель-квоты-после-dev-484), [DEV-452](../tickets/DEV-452.md), [DEV-484](../tickets/DEV-484.md).
 
 | Переменная | Значение | Что делает |
 |---|---|---|
