@@ -188,7 +188,7 @@ function registerGameTests(game: GameConfig): void {
       const blocks = await helper.getSliderBlocks();
       const lastSlotOption = blocks[0].options[blocks[0].options.length - 1];
       await helper.clickOption(0, lastSlotOption);
-      expect(await helper.getCurrentValue(0)).toBe(lastSlotOption);
+      await expect.poll(() => helper.getCurrentValue(0)).toBe(lastSlotOption);
     });
 
     test("@regression клик по средней опции Slots обновляет отображаемое значение Slots", async () => {
@@ -197,7 +197,7 @@ function registerGameTests(game: GameConfig): void {
       const midIdx = Math.floor(blocks[0].options.length / 2);
       const midOption = blocks[0].options[midIdx];
       await helper.clickOption(0, midOption);
-      expect(await helper.getCurrentValue(0)).toBe(midOption);
+      await expect.poll(() => helper.getCurrentValue(0)).toBe(midOption);
     });
 
     // ── Slots ↔ RAM synchronisation ──────────────────────────────────────────
@@ -216,8 +216,8 @@ function registerGameTests(game: GameConfig): void {
 
       await helper.clickOption(0, lastSlotOption);
 
-      expect(await helper.getCurrentValue(0)).toBe(lastSlotOption);
-      expect(await helper.getCurrentValue(1)).toBe(expectedRam);
+      await expect.poll(() => helper.getCurrentValue(0)).toBe(lastSlotOption);
+      await expect.poll(() => helper.getCurrentValue(1)).toBe(expectedRam);
     });
 
     test("@regression выбор средней опции Slots двигает RAM на парную среднюю опцию", async () => {
@@ -229,8 +229,8 @@ function registerGameTests(game: GameConfig): void {
       );
       const midIdx = Math.floor(blocks[0].options.length / 2);
       await helper.clickOption(0, blocks[0].options[midIdx]);
-      expect(await helper.getCurrentValue(0)).toBe(blocks[0].options[midIdx]);
-      expect(await helper.getCurrentValue(1)).toBe(blocks[1].options[midIdx]);
+      await expect.poll(() => helper.getCurrentValue(0)).toBe(blocks[0].options[midIdx]);
+      await expect.poll(() => helper.getCurrentValue(1)).toBe(blocks[1].options[midIdx]);
     });
 
     test("@regression выбор первой опции Slots оставляет RAM на первой опции (синхронизация)", async () => {
@@ -240,8 +240,8 @@ function registerGameTests(game: GameConfig): void {
       const lastSlotOption = blocks[0].options[blocks[0].options.length - 1];
       await helper.clickOption(0, lastSlotOption);
       await helper.clickOption(0, blocks[0].options[0]);
-      expect(await helper.getCurrentValue(0)).toBe(blocks[0].options[0]);
-      expect(await helper.getCurrentValue(1)).toBe(blocks[1].options[0]);
+      await expect.poll(() => helper.getCurrentValue(0)).toBe(blocks[0].options[0]);
+      await expect.poll(() => helper.getCurrentValue(1)).toBe(blocks[1].options[0]);
     });
 
     // ── RAM slider direct interactions ───────────────────────────────────────
@@ -252,7 +252,7 @@ function registerGameTests(game: GameConfig): void {
       const blocks = await helper.getSliderBlocks();
       const lastRamOption = blocks[1].options[blocks[1].options.length - 1];
       await helper.clickOption(1, lastRamOption);
-      expect(await helper.getCurrentValue(1)).toBe(lastRamOption);
+      await expect.poll(() => helper.getCurrentValue(1)).toBe(lastRamOption);
     });
 
     test("@regression клик по первой опции RAM после последней возвращает RAM к первому значению", async () => {
@@ -261,7 +261,7 @@ function registerGameTests(game: GameConfig): void {
       const lastRam = blocks[1].options[blocks[1].options.length - 1];
       await helper.clickOption(1, lastRam);
       await helper.clickOption(1, firstRam);
-      expect(await helper.getCurrentValue(1)).toBe(firstRam);
+      await expect.poll(() => helper.getCurrentValue(1)).toBe(firstRam);
     });
 
     test("@critical смена RAM напрямую с первой на последнюю опцию меняет цену тарифа", async () => {
@@ -279,23 +279,23 @@ function registerGameTests(game: GameConfig): void {
 
     test('@regression клик по Days=90 обновляет отображаемое значение Days до "90"', async () => {
       await helper.clickOption(2, "90");
-      expect(await helper.getCurrentValue(2)).toBe("90");
+      await expect.poll(() => helper.getCurrentValue(2)).toBe("90");
     });
 
     test('@regression клик по Days=180 обновляет отображаемое значение Days до "180"', async () => {
       await helper.clickOption(2, "180");
-      expect(await helper.getCurrentValue(2)).toBe("180");
+      await expect.poll(() => helper.getCurrentValue(2)).toBe("180");
     });
 
     test('@regression клик по Days=360 обновляет отображаемое значение Days до "360"', async () => {
       await helper.clickOption(2, "360");
-      expect(await helper.getCurrentValue(2)).toBe("360");
+      await expect.poll(() => helper.getCurrentValue(2)).toBe("360");
     });
 
     test('@regression слайдер Days возвращается к "30" при повторном выборе первой опции', async () => {
       await helper.clickOption(2, "360");
       await helper.clickOption(2, "30");
-      expect(await helper.getCurrentValue(2)).toBe("30");
+      await expect.poll(() => helper.getCurrentValue(2)).toBe("30");
     });
 
     // ── Price / billing changes ───────────────────────────────────────────────
@@ -352,9 +352,9 @@ function registerGameTests(game: GameConfig): void {
       }
       await helper.clickOption(2, "360");
 
-      expect(await helper.getCurrentValue(0)).toBe(expectedSlot);
-      expect(await helper.getCurrentValue(1)).toBe(expectedRam);
-      expect(await helper.getCurrentValue(2)).toBe("360");
+      await expect.poll(() => helper.getCurrentValue(0)).toBe(expectedSlot);
+      await expect.poll(() => helper.getCurrentValue(1)).toBe(expectedRam);
+      await expect.poll(() => helper.getCurrentValue(2)).toBe("360");
     });
   });
 }

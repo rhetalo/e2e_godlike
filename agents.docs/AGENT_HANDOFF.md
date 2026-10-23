@@ -1,6 +1,6 @@
 # AGENT HANDOFF — godlike.host Playwright E2E Suite
 
-> **Последнее обновление:** 16-Oct-2026
+> **Последнее обновление:** 23-Oct-2026
 > **Стек:** TypeScript · Playwright · Chromium
 > **Репо:** https://github.com/rhetalo/e2e_godlike
 
@@ -14,7 +14,29 @@
 
 ---
 
-## ▶ Продолжаем здесь (19-Oct-2026 · фундамент F1-F4, KB по всем продуктам, приёмы paranoid-qa)
+## ▶ Продолжаем здесь (23-Oct-2026 · автономная сессия: слабые тесты, isVisible, линт, KB PFH/OLDP/ADM)
+
+**Сделано 23-Oct (без участия владельца, всё read-only):**
+- Слабые тесты усилены от поведения: EXT-002 (карточки Modpacks = ответ `/minecraft/modpacks`), PREM-001 (окно Free Premium
+  сравнивает текущий план и Premium), VPS OPT-004 (Boot Type: ровно один отмеченный режим), VPS SRV-005 (имя в списке ведёт
+  на страницу сервера). Burn-in 3/3.
+- `GamePanelBasePage.isShownWithin()` вместо `isVisible({ timeout })` (таймаут игнорируется) там, где ожидание задумано:
+  EULA после Start, confirm-диалоги, has*-читатели, `hasPowerControls` (SEC-001). Оверлеи и CookieBanner не тронуты.
+- Храповик D-021: сняты dashboard, seed-list.finder, login.validation; C1 в `game-slider.spec.ts` (17 мест → `expect.poll`).
+- KB: страницы фич PFH (landing, panel), OLDP (version-changer, startup-params), ADM (server-startup, modpack-catalog);
+  DEV-563/BUG-1 закрыт в карточке.
+
+**Заблокировано, нужен владелец:**
+- Мутирующие регресс-спеки DEV-558 (75d1175e), DEV-484 «Slots Limit Reached» (fd965a60), DEV-579 (PZ): auto mode classifier
+  запрещает прямые мутации прод-API - нужен явный ок или allow-правило.
+- DEV-563 read-only (Edit Server у free без Game/Server Type): нет кредов free-аккаунта (DEV563@testmail.com, сервер 0010cf61) в `.env`.
+  Селекторы уже сняты: `.app-field-caption` «Game/Platform» / «Server Type» в `.edit__server-block__dialog`.
+- F3/N1: история прогонов и вложения `browser-diagnostics` живут на VPS cron / TestPulse - локально не проверить.
+- Храповик, остаток: storefront.breadth (нужен компонент SEO-мета - новая абстракция), vps.panel.media (stateful), воронки с оплатой, valid.links (краулер).
+
+---
+
+## Прошлая сессия (19-Oct-2026 · фундамент F1-F4, KB по всем продуктам, приёмы paranoid-qa)
 
 **Состояние:** всё в `main` (90d5801..b49d997), запушено origin / replit / gitlab, GitLab-гейт зелёный.
 Ночной cron 18-Oct: 663 теста, 652 passed, 1 failed (CF-001, починен 3df605e), 1 flaky (VPS PWR-003, починен 4ac3da1).
