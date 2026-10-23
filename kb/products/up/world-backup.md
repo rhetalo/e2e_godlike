@@ -4,7 +4,7 @@ title: World Backup - копия мира перед опасными дейст
 type: feature
 product: UP
 status: draft
-updated: 2026-10-20
+updated: 2026-10-23
 verified_on: 2026-08-14        # клиентская часть, итоговый прогон DEV-418
 tickets: [DEV-418, DEV-401, DEV-506, DEV-571]
 flags: [world-backup]
@@ -21,7 +21,7 @@ sources:
 > **В двух словах.** Перед действием, которое может стереть мир (переустановка, смена версии с очисткой,
 > установка модпака с удалением файлов, удаление папки мира), панель предлагает сначала сохранить копию
 > только мира. Копия не занимает обычные слоты бэкапов, живёт 7 дней, её можно восстановить. Работает для
-> Minecraft Java и Bedrock, включается флагом на аккаунт. Клиентская часть приняла QA 14-Aug-2026, открыты
+> Minecraft Java и Bedrock, с 23-Oct-2026 (сверка) раскатан на всех клиентов. Клиентская часть приняла QA 14-Aug-2026, открыты
 > проверки DevOps ([DEV-418](../../tickets/DEV-418.md), бывш. PROD-134).
 
 ## Где в интерфейсе
@@ -59,8 +59,9 @@ sources:
   (Bedrock) не трогает.
 - **PENDING («Creating…»):** Restore и Delete недоступны, `DELETE` → 409.
 - **Хранение:** адаптер `wings` (общая шара ноды), как у остальных бэкапов.
-- **Флаг** [flag:world-backup](../../registry/flags.md#world-backup) - Pennant, per-account. Включение = тумблер +
-  `php artisan pennant:purge world-backup` (CLI, DevOps). Лимит 0/N живёт в бэкенд-админке Pterodactyl (Build).
+- **Флаг** [flag:world-backup](../../registry/flags.md#world-backup) - Pennant. С 23-Oct-2026 (сверка) раскатан на всех, класс оставлен
+  как рычаг отката (сузить тело или `deactivate` для аккаунта). Раньше включался тумблером + `php artisan pennant:purge world-backup`.
+  ⚠️ `POST /world-backups/abandon` ([DEV-571](../../tickets/DEV-571.md)) на 23-Oct только на stage, на проде маршрута нет. Лимит 0/N живёт в бэкенд-админке Pterodactyl (Build).
 
 ## Правила и граничные случаи
 

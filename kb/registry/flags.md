@@ -35,7 +35,9 @@ sources:
 
 ### world-backup
 - **Что:** World Backup ([DEV-418](../tickets/DEV-418.md)).
-- **Состояние:** включается на аккаунт (после включения нужен `pennant:purge`). Включён на [acc:admin](test-accounts.md#admin) с 11-Aug.
+- **Состояние:** **раскатан на всех клиентов** (код `WorldBackupFeature`: «ROLLED OUT TO EVERY CLIENT», сверка 23-Oct-2026,
+  у тест-аккаунта есть в `/features`). Класс оставлен как рычаг отката. Раньше - только [acc:admin](test-accounts.md#admin) с 11-Aug.
+  Не путать с [DEV-571](../tickets/DEV-571.md) (abandon): тот на 23-Oct только на stage.
 
 ### cancellation-retention-steps
 - **Что:** экраны удержания в cancel-модуле ([DEV-401](../tickets/DEV-401.md)).
