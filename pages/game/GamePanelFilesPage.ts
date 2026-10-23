@@ -81,9 +81,12 @@ export class GamePanelFilesPage extends GamePanelBasePage {
       .first();
   }
 
-  /** Строка таблицы, содержащая имя. */
+  /**
+   * Строка таблицы с записью `name` (имя совпадает точно). Подстрокой нельзя: `world` ловил служебную
+   * строку «World Backups» (23-Oct-2026).
+   */
   fileRow(name: string): Locator {
-    return this.page.locator(GAME_PANEL_FILES.row, { hasText: name }).first();
+    return this.page.locator(GAME_PANEL_FILES.row).filter({ has: this.fileEntry(name) }).first();
   }
 
   async hasEntry(name: string): Promise<boolean> {
@@ -120,6 +123,15 @@ export class GamePanelFilesPage extends GamePanelBasePage {
 
   /** Удалить запись: чекбокс строки → нижний Delete → подтверждение. */
   async deleteEntry(name: string): Promise<void> {
+    await this.confirmDeleteOf(name);
+    await this.fileEntry(name).waitFor({ state: "hidden", timeout: 10_000 }).catch(() => {});
+  }
+
+  /**
+   * Чекбокс строки → нижний Delete → «Delete File» → подтвердить. Для `world` дальше открывается окно
+   * World Backup (удаление ждёт выбора в нём), для остальных записей удаление уходит сразу.
+   */
+  async confirmDeleteOf(name: string): Promise<void> {
     await this.selectRow(name);
     await this.page
       .locator(`${GAME_PANEL_FILES.footerActionGroup} button`)
@@ -134,7 +146,75 @@ export class GamePanelFilesPage extends GamePanelBasePage {
     await confirm.waitFor({ state: "visible", timeout: 8_000 });
     await confirm.locator(GAME_PANEL_FILES.deleteConfirmButton).first().click();
     await confirm.waitFor({ state: "hidden", timeout: 8_000 }).catch(() => {});
-    await this.fileEntry(name).waitFor({ state: "hidden", timeout: 10_000 }).catch(() => {});
+  }
+
+  // ── World Backup при удалении мира (DEV-418, DEV-571) ───────────────────────
+
+  /** Окно «Save Your World First?». */
+  get worldBackupPrompt(): Locator {
+    return this.page
+      .locator(".v-overlay--active")
+      .filter({ has: this.page.locator(GAME_PANEL_FILES.worldBackupPromptMarker) })
+      .last();
+  }
+  get worldBackupContinueButton(): Locator {
+    return this.worldBackupPrompt.locator(GAME_PANEL_FILES.worldBackupContinue).first();
+  }
+  /** ⚠️ «Create World Backup» создаёт реальную копию мира. Только для проверки видимости. */
+  get worldBackupCreateButton(): Locator {
+    return this.worldBackupPrompt.locator(GAME_PANEL_FILES.worldBackupCreate).first();
+  }
+  get errorToast(): Locator {
+    return this.page.locator(GAME_PANEL_FILES.errorToast).last();
+  }
+
+  /**
+   * Предохранитель: запросы удаления файлов обрываются в браузере, до сервера не доходят. Ставить ДО любого
+   * сценария с удалением мира, если нужен только порядок запросов (мир не трогаем).
+   */
+  async blockFileDeletion(): Promise<void> {
+    await this.page.route(GAME_PANEL_FILES.fileDeletionApi, (route) => route.abort());
+  }
+
+  /** Подмена ответа abandon на 500 в браузере (бэкенд не трогается) - для проверки отказа. */
+  async failWorldBackupAbandon(): Promise<void> {
+    await this.page.route(GAME_PANEL_FILES.worldBackupAbandonApi, (route) =>
+      route.fulfill({ status: 500, contentType: "application/json", body: '{"message":"Server Error"}' }),
+    );
+  }
+
+  /** Снять подмены из blockFileDeletion / failWorldBackupAbandon. */
+  async clearDeletionRoutes(): Promise<void> {
+    await this.page.unroute(GAME_PANEL_FILES.fileDeletionApi);
+    await this.page.unroute(GAME_PANEL_FILES.worldBackupAbandonApi);
+  }
+
+  /**
+   * Нажать «Continue Without Backup» и вернуть по порядку изменяющие запросы abandon / удаления
+   * (`POST world-backups/abandon`, `POST files/trash`). Ждёт удаления либо тоста ошибки - что раньше.
+   */
+  async continueWithoutWorldBackup(): Promise<string[]> {
+    const sent: string[] = [];
+    const track = (r: { url(): string; method(): string }): void => {
+      const url = r.url();
+      if (GAME_PANEL_FILES.worldBackupAbandonApi.test(url)) sent.push(`${r.method()} abandon`);
+      if (GAME_PANEL_FILES.fileDeletionApi.test(url)) sent.push(`${r.method()} ${url.match(/files\/(trash|delete)/)![0]}`);
+    };
+    this.page.on("request", track);
+    const deletion = this.page.waitForRequest(GAME_PANEL_FILES.fileDeletionApi, { timeout: 20_000 });
+    const failed = this.errorToast.waitFor({ state: "visible", timeout: 20_000 });
+    await this.worldBackupContinueButton.click();
+    await Promise.race([deletion, failed]).catch(() => {});
+    this.page.off("request", track);
+    deletion.catch(() => {});
+    failed.catch(() => {});
+    return sent;
+  }
+
+  /** Закрыть окно World Backup (Escape закрывает его вместе с «Delete File», DEV-571/UX-2). */
+  async closeWorldBackupPrompt(): Promise<void> {
+    await this.page.keyboard.press("Escape");
+    await this.worldBackupPrompt.waitFor({ state: "hidden", timeout: 8_000 });
   }
 
   /** Best-effort уборка (для precondition/teardown). */

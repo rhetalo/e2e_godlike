@@ -702,6 +702,15 @@ export const GAME_PANEL_FILES = {
   dialogTitleSel: ".server__file-manager__dialog-title",
   deleteConfirmButton: "button.server__file-manager__modal-button--danger",
   dialogCloseButton: "button.server__file-manager__dialog__btn-close",     // Cancel
+  // 23-Oct-2026 (DEV-571 на проде, live-recon): удаление `world` после «Delete File» открывает «Save Your World First?».
+  // Continue Without Backup = сначала POST .../world-backups/abandon, удаление (POST .../files/trash) только после 200;
+  // при ошибке abandon - тост .panel-notification.error, окно остаётся. Create World Backup - реальная копия, НЕ жать.
+  worldBackupPromptMarker: ".world-backup-prompt__warning",
+  worldBackupContinue: ".dialog__button:not(.dialog__button-primary)", // «Continue Without Backup»
+  worldBackupCreate: ".dialog__button.dialog__button-primary",          // «Create World Backup» - не жать
+  errorToast: ".panel-notification.error",
+  worldBackupAbandonApi: /\/api\/v2\/servers\/[0-9a-f-]{36}\/world-backups\/abandon/,
+  fileDeletionApi: /\/api\/v2\/servers\/[0-9a-f-]{36}\/files\/(trash|delete)/,
   // SFTP Connect диалог (структурный; ⚠️ Generate/Save НЕ жать — меняют SFTP-пароль)
   sftpButton: 'button:has-text("SFTP Connect")',
   sftpForm: ".server__file-manager__sftp-form",
