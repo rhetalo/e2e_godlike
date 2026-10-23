@@ -22,6 +22,7 @@ product: [UP]                  # префиксы из id-scheme
 features: [UP/server-overview] # фичи, которые тикет меняет
 status: done                   # QA-статус: in-qa / done / blocked / partial
 qa_verdict: PASS               # PASS / PASS-with-issues / FAIL / -
+regression: candidate          # candidate / covered / blocked / no - решение при закрытии (skill qa-close, D-025)
 updated: 2026-10-15
 verified_on: 2026-10-15        # когда последний раз сверяли с живым продуктом
 env: [prod]
@@ -54,6 +55,10 @@ sources:
 - Серверы: [srv:d70813d3](../registry/test-servers.md#d70813d3)
 - Флаги: [flag:...](../registry/flags.md#...)
 - Связанные тикеты: [DEV-xxx](DEV-xxx.md)
+
+## Регресс
+**candidate**, read-only: что покрыть, на каком сервере, на какой PO / спек опереться. Для `covered` - путь и ID теста,
+для `blocked` / `no` - причина. Обязателен у закрытых карточек с 23-Oct-2026 (проверяет `frontmatter_check.py`).
 
 ## Хвосты
 Что осталось открытым, у кого.

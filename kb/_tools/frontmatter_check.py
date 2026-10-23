@@ -8,6 +8,8 @@ Exit 1, если есть ошибки (предупреждения не вал
 - feature / product-overview: type, product, status (draft|verified|stale), verified_on, tickets, flags, tests, sources;
 - ticket: type, product, features, status (done|in-qa|blocked|partial|n/a), qa_verdict, verified_on, jira, sources;
   id = имя файла;
+- ticket: regression (candidate|covered|blocked|no) + раздел «## Регресс» с причиной. Обязательно для карточек
+  со status done/partial и updated >= REGRESSION_SINCE (храповик: старые карточки не валят, D-025);
 - feature в products/<prod>/<slug>.md: id = <PROD>/<slug>;
 - tickets: [...] фичи и обзора ссылаются на существующие kb/tickets/<KEY>.md (TASK-*/DEV-* и т.п.);
 - предупреждение: em-dash «—» в тексте (в KB пишем только дефис).
@@ -29,7 +31,9 @@ ALLOWED = {
     ("api", "status"): {"draft", "verified", "stale"},
     ("ticket", "status"): {"done", "in-qa", "blocked", "partial", "n/a"},
     ("ticket", "qa_verdict"): {"PASS", "PASS-with-issues", "FAIL", "-"},
+    ("ticket", "regression"): {"candidate", "covered", "blocked", "no"},
 }
+REGRESSION_SINCE = "2026-10-23"  # с этой даты закрытая карточка обязана нести решение по регрессу (D-025)
 
 
 def parse(text):
@@ -95,6 +99,12 @@ def main():
             stem = f[:-3]
             if ptype == "ticket" and fm.get("id") != stem:
                 errors.append(f"{rel}: id {fm.get('id')!r} не совпадает с именем файла {stem!r}")
+            if ptype == "ticket":
+                closed = fm.get("status") in ("done", "partial")
+                if "regression" in fm and not re.search(r"^## Регресс\s*$", text, re.M):
+                    errors.append(f"{rel}: regression={fm['regression']!r}, но нет раздела «## Регресс» с причиной")
+                elif closed and "regression" not in fm and fm.get("updated", "") >= REGRESSION_SINCE:
+                    errors.append(f"{rel}: закрытая карточка без `regression:` (candidate|covered|blocked|no), см. skill qa-close")
             parts = rel.split("/")
             if ptype == "feature" and len(parts) == 4 and parts[1] == "products":
                 expect = f"{parts[2].upper()}/{stem}"

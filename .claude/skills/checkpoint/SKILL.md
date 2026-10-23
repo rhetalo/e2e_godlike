@@ -22,14 +22,11 @@ description: >-
 
 ## 1b. KB после QA фичи
 
-Если за сессию закрыт QA фичи или тикета, обнови `kb/` (правила - `kb/README.md`, ID и ссылки - `kb/_meta/id-scheme.md`, шаблоны - `kb/_meta/templates.md`):
+KB обновляется **при закрытии задачи**, а не в конце сессии - это skill `qa-close` (D-025). Здесь только страховка:
 
-- **Страница фичи** `kb/products/<prod>/<slug>.md`: поведение, правила, гочи, покрытие, строка в «История», `verified_on`.
-- **Карточка тикета** `kb/tickets/<KEY>.md`: что изменилось, итог QA, находки `<KEY>/F<n>`, связи, хвосты. Индекс: `python -I kb/_tools/tickets_index.py kb/tickets`.
-- **API-страницы** `kb/products/up/api/<ресурс>.md` (см. `kb/products/up/api/README.md`): каждый эндпоинт, который трогал QA - метод, путь, параметры, тело, коды и `error_code`, флаги и env, строка в «История изменений», как проверено. Чего нет в источниках - `❓`, подмену ответа в браузере не выдавать за проверку бэкенда. Токены не писать.
-- **Реестры и карта:** новые флаги, env, серверы - в `kb/registry/`; новые страницы - в `kb/map.md`.
-- Проверки: `python -I kb/_tools/linkcheck.py .` (0 битых), `python -I kb/_tools/frontmatter_check.py .`.
-- Параллельно `agents.docs/game-panel/KNOWLEDGE_BASE.md` (находки по живому DOM, паттерны, гочи) - как в разделе 1.
+- За сессию закрыта задача, а `qa-close` по ней не проходили - пройди сейчас (KB + решение `regression:`).
+- Проверки: `python -I kb/_tools/linkcheck.py .` (0 битых), `python -I kb/_tools/frontmatter_check.py .` (0 ошибок).
+- Новые страницы - в `kb/map.md`.
 
 ## 2. Проверки
 
