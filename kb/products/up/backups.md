@@ -8,7 +8,7 @@ updated: 2026-10-23
 verified_on: 2026-10-20        # DEV-484 r2: общая квота, расписания, бэкапы баз; остальное recon 2026-06-09
 tickets: [DEV-418, DEV-452, DEV-484]
 flags: []
-tests: [tests/game/panel/backups.spec.ts, tests/game/panel/backups.throttle.spec.ts, tests/game/panel/role.enforcement.spec.ts, tests/game/panel/security.spec.ts]
+tests: [tests/game/panel/backups.spec.ts, tests/game/panel/backups.throttle.spec.ts, tests/game/panel/backups.slots-full.spec.ts, tests/game/panel/role.enforcement.spec.ts, tests/game/panel/security.spec.ts]
 sources:
   - agents.docs/game-panel/KNOWLEDGE_BASE.md §5h, §5i, §5j, §8d (recon 05..09-Jun-2026)
   - kb/tickets/DEV-418.md, DEV-452.md, DEV-484.md, kb/products/up/api/backups.md
@@ -129,7 +129,7 @@ OBS-2 пропущенное одноразовое расписание вис�
 | Restore, Rename, Lock, Database / Folder, Ignored Files, создание расписания | не покрыто | ❌ |
 | Общая квота `meta.quota`: контракт и счётчик used/limit | `backups.spec.ts` (TC-GP-BKP-004), [DEV-484](../../tickets/DEV-484.md) | ✅ read-only |
 | Окно частоты: `throttled` + `retry_after`, 429 с единым текстом, тост, строки нет | `backups.throttle.spec.ts` (TC-GP-BKP-005), mut-сервер fd965a60 | ✅ мутация |
-| Заглушка «Slots Limit Reached» (free = 0) | не покрыто: нужна непустая база для бэкапов вне окна | ❌ |
+| Заглушка «Slots Limit Reached» (free = 0): Create неактивна, Upgrade, счётчик/футер, удаление доступно | `backups.slots-full.spec.ts` (TC-GP-BKP-006), read-only на 9c891502 (3/3) | ✅ read-only |
 
 ## История
 

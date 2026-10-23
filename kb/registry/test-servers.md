@@ -73,7 +73,8 @@ Suspended-сервер, для проверок баннера suspended. 🔴
 Мутировать можно всё, только serial и с teardown. Ядро - часть контракта: тест, сменивший его, возвращает обратно.
 
 ### fd965a60
-`test_e2e_mut_java` (было `3kvfVx6l_481368`), Paper 26.2. Общие мутации: бэкапы и слоты ([DEV-484](../tickets/DEV-484.md)).
+`test_e2e_mut_java` (было `3kvfVx6l_481368`), Paper 26.2. Общие мутации: бэкапы и слоты ([DEV-484](../tickets/DEV-484.md)). Тариф Double:
+0 баз (`POST /databases` → 400), поэтому слоты бэкапами баз здесь не заполнить.
 - 23-Oct-2026: `backups.throttle.spec.ts` (TC-GP-BKP-005) создаёт 1 бэкап `qa-484-window-a` и удаляет его в teardown.
 - 23-Oct-2026: EULA принята, первый старт создал `world` - он нужен `world-backup.spec.ts` ([DEV-571](../tickets/DEV-571.md)), не удалять
   (иначе тесты WB уйдут в skip; вернуть - один Start). Вне раскатки `extension-compatibility`: legacy ставит моды на Paper ([DEV-556](../tickets/DEV-556.md)).
@@ -141,6 +142,8 @@ legacy 400 и v2 409 `mods_not_supported`, кнопка Upload custom modpack di
 ### 9c891502
 `DEV-484-db` (было `Gs5I5zqx_482442`), владелец - тестовый пользователь 388101, не основной аккаунт. Бэкапы баз [DEV-484](../tickets/DEV-484.md):
 базы `s779874_cjyV9C2A` (id 26530, таблица `dev484_probe`) и `s779874_Ebhns6Vr` (26531), бэкапы баз оставлены до ок владельца. 🟡
+- 23-Oct-2026: слоты 3/3 - на этом держится read-only `backups.slots-full.spec.ts` (TC-GP-BKP-006, заглушка «Slots Limit Reached»).
+  Освободишь слот - тест уйдёт в skip с причиной. Env: `GAME_PANEL_SERVER_FULL_SLOTS_UUID`.
 
 ### 7166c707
 **Одноразовый, деструктив разрешён** (restore, version change и т.п.). 🟢

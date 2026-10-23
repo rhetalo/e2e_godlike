@@ -21,12 +21,13 @@ sources:
 
 ## UP - игровая панель
 
-Страниц: 29, с автотестами: 21, тестов в их спеках: 87.
+Страниц: 29, с автотестами: 22, тестов в их спеках: 90.
 
 | Фича | Статус | Спеки | Тестов | Покрытие ✅ / руками / ❌ |
 |---|---|---|---|---|
-| [UP - игровая панель ultra.panel + API v2](products/up/README.md) | draft | все спеки продукта (32) | 87 | 0 / 0 / 0 |
-| [Backups - бэкапы сервера, базы и папки](products/up/backups.md) | draft | `backups.spec.ts`, `role.enforcement.spec.ts`, `security.spec.ts` | 11 | 7 / 1 / 2 |
+| [UP - игровая панель ultra.panel + API v2](products/up/README.md) | draft | все спеки продукта (34) | 90 | 0 / 0 / 0 |
+| [Backups - бэкапы сервера, базы и папки](products/up/backups.md) | draft | `backups.spec.ts`, `backups.throttle.spec.ts`, `role.enforcement.spec.ts`, `security.spec.ts` | 12 | 8 / 1 / 1 |
+| [Client-only моды - скрытие в каталоге и отключение на сервере](products/up/client-only-mods.md) | draft | `client-only-mods.spec.ts` | 2 | 0 / 0 / 0 |
 | [Config - server.properties и блок Docker/Java](products/up/config.md) | draft | `config.spec.ts`, `security.spec.ts` | 6 | 3 / 1 / 1 |
 | [Console - лог сервера и ввод команд](products/up/console.md) | draft | `console.palette.spec.ts`, `console.spec.ts`, `players.spec.ts`, `security.console.spec.ts` | 6 | 5 / 0 / 1 |
 | [Каталог расширений - моды, плагины, модпаки](products/up/extensions-catalog.md) | draft | `extension.sources.spec.ts`, `extensions.spec.ts`, `mods.spec.ts`, `plugins.spec.ts` | 17 | 4 / 2 / 4 |
@@ -47,7 +48,6 @@ sources:
 | [Versions - смена ядра и версии Minecraft](products/up/versions.md) | draft | `versions.spec.ts` | 2 | 2 / 1 / 2 |
 | [World Backup - копия мира перед опасными действиями](products/up/world-backup.md) | draft | `world-backup.spec.ts` | 2 | 0 / 0 / 0 |
 | [Cancel module - отмена сервера, пауза и удержание](products/up/cancel-module.md) | draft | - | - | 0 / 0 / 0 |
-| [Client-only моды - скрытие в каталоге и отключение на сервере](products/up/client-only-mods.md) | draft | - | - | 0 / 0 / 0 |
 | [Databases - базы данных MySQL для сервера](products/up/databases.md) | stale | - | - | 0 / 0 / 0 |
 | [Free-серверы в панели - ограничения бесплатного тарифа](products/up/free-servers.md) | draft | - | - | 0 / 0 / 0 |
 | [Game settings - настройки не-Minecraft игр (Palworld, ARK)](products/up/game-settings.md) | draft | - | - | 0 / 0 / 0 |
