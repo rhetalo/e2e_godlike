@@ -83,7 +83,7 @@ Suspended-сервер, для проверок баннера suspended. 🔴
 
 ### b62bffd0
 `test_e2e_mut_bedrock` (было `PPmTky5j_481131`, id 778464), 23-Oct сменена игра Paper → BEDROCK-Vanilla (egg 125, Delete files),
-BDS 1.26.52.3. UDP NetherNet ([DEV-564](../tickets/DEV-564.md)). ⚠️ Блок UDP после смены игры не выдан - [DEV-564/F5](../tickets/DEV-564.md#находки).
+BDS 1.26.52.3. ⚠️ UDP-блока нет и не будет: блок выдаётся только при покупке Bedrock, не при смене игры (by design, [DEV-564/F5](../tickets/DEV-564.md#находки)). Под спек UDP-блока DEV-564 нужен **купленный** Bedrock на тест-аккаунте.
 - Env: `GAME_PANEL_SERVER_MUT_BEDROCK_UUID`. Трогать: 🟢. Остановлен.
 
 ## Java, версии, моды
