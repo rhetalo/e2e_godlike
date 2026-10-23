@@ -4,9 +4,9 @@ title: Files - файловый менеджер, Recycle Bin, SFTP
 type: feature
 product: UP
 status: draft
-updated: 2026-10-19
+updated: 2026-10-23
 verified_on: 2026-10-18        # recon Upload custom modpack (апселл); остальное - 09-Jun
-tickets: [DEV-418, DEV-459, DEV-492, DEV-549]
+tickets: [DEV-418, DEV-459, DEV-492, DEV-549, DEV-476]
 flags: [world-backup]
 tests:
   - tests/game/panel/files.spec.ts
@@ -93,6 +93,7 @@ sources:
 | XSS в имени папки | `security.spec.ts` (SEC-003) | ✅ |
 | Правка файла → Save → откат, Move, Zip / Unzip | не покрыто | ❌ |
 | Окно World Backup при удалении `world` | только ручной QA [DEV-418](../../tickets/DEV-418.md) | ❌ авто нет |
+| Поиск файлов: стрим, 422, 429, обрезка 500 | только ручной QA [DEV-476](../../tickets/DEV-476.md), регресс-кандидат | ❌ авто нет |
 
 ## История
 
@@ -104,3 +105,4 @@ sources:
 | 09-Oct-2026 | [DEV-492](../../tickets/DEV-492.md) | Upload custom modpack запускает скан модов |
 | 16-Oct-2026 | - (follow-up [DEV-459](../../tickets/DEV-459.md), тикет не найден) | Апселл Modpack setup перед окном CurseForge; CF-001 обновлён 18-Oct |
 | 19-Oct-2026 | [DEV-549](../../tickets/DEV-549.md) | Upload custom modpack disabled на ядрах без модпаков; тур FM не стартует поверх туториала модов |
+| 20-Oct-2026 | [DEV-476](../../tickets/DEV-476.md) | Поиск файлов потоковый (panel!1597 + new-panel!519): BMC4 за 5,8 с вместо 125 с, лимиты 2 символа / 500 совпадений / 2 поиска, [API files](api/files.md). PASS |

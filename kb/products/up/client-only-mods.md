@@ -4,9 +4,9 @@ title: Client-only моды - скрытие в каталоге и отключ
 type: feature
 product: UP
 status: draft
-updated: 2026-10-15
+updated: 2026-10-23
 verified_on: 2026-10-12        # последняя живая сверка - финал DEV-500
-tickets: [DEV-500, DEV-492, DEV-558]
+tickets: [DEV-500, DEV-492, DEV-558, DEV-557]
 flags: [MOD_SCAN_BACKFILL]
 tests: []                      # автотестов нет, только ручной QA
 sources:
@@ -111,6 +111,7 @@ sources:
 | 07-Oct-2026 | [DEV-500](../../tickets/DEV-500.md) | [panel!1652](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1652), [panel!1660](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1660), [new-panel!546](https://git.godlike.ovh/panel/godlike-new-panel/-/merge_requests/546): CF клиентских 131 → 56 → 15 |
 | 09-Oct-2026 | [DEV-492](../../tickets/DEV-492.md) | [panel!1665](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1665): манифест с битым fileID не рвёт установку, легаси-эндпоинт проверяет ядро. PASS |
 | 12-Oct-2026 | [DEV-500](../../tickets/DEV-500.md) | [panel!1672](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1672) + [new-panel!547](https://git.godlike.ovh/panel/godlike-new-panel/-/merge_requests/547): CF по файлу под loader+version, 14 из 131. PASS |
+| 22..23-Oct-2026 | [DEV-557](../../tickets/DEV-557.md) | Jar больше 100 МБ (Cobblemon) без вердикта: mod-scan-service!7 на проде не действует, FAIL; сервис переписан (!8-!11), перепроверяет DevOps |
 
 Связано: пост-инсталл скан как отдельная фича (`UP/post-install-mod-scan`) пока описан здесь; окно
 «Missing mod dependencies» - [TASK-missing-mod-deps](../../tickets/TASK-missing-mod-deps.md).

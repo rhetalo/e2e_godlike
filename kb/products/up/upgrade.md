@@ -4,9 +4,9 @@ title: Upgrade / Boost - смена тарифа из панели
 type: feature
 product: UP
 status: draft
-updated: 2026-10-15
+updated: 2026-10-23
 verified_on: 2026-10-09        # страница сломана, TASK-tariff-list-400
-tickets: [TASK-tariff-list-400, DEV-534]
+tickets: [TASK-tariff-list-400, DEV-534, DEV-579]
 flags: []
 tests: [tests/game/panel/promo.spec.ts]
 sources:
@@ -67,3 +67,4 @@ sources:
 |---|---|---|
 | 06-Jun-2026 | - | Recon Upgrade и Free Premium, KB §7c, §9d |
 | 09-Oct-2026 | [TASK-tariff-list-400](../../tickets/TASK-tariff-list-400.md) | Список тарифов падает с 400, Upgrade не работает |
+| 21-Oct-2026 | [DEV-579](../../tickets/DEV-579.md) | Project Zomboid: -Xmx в ProjectZomboid64.json пересчитывается от памяти тарифа при каждом старте (panel!1695). PASS |

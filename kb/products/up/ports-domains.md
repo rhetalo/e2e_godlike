@@ -4,9 +4,9 @@ title: Port & Domains - поддомен и порты сервера
 type: feature
 product: UP
 status: draft
-updated: 2026-10-15
+updated: 2026-10-23
 verified_on: 2026-06-19        # connection-info recon; раздел - 05..06-Jun
-tickets: [DEV-562]
+tickets: [DEV-562, DEV-564]
 flags: []
 tests: [tests/game/panel/network.spec.ts, tests/game/panel/network.connection-info.spec.ts]
 sources:
@@ -53,6 +53,7 @@ sources:
 | Блок Subdomain, карточки портов, окно Add Port, кнопки Copy | `network.spec.ts` (NET-001..004) | ✅ структурно |
 | Адрес = реальный IP аллокации | `network.connection-info.spec.ts` (NET-010) | ✅ |
 | Смена поддомена, добавление порта | не покрыто (мутация) | ❌ |
+| Bedrock: блок UDP-портов, замок, защита от удаления | только ручной QA [DEV-564](../../tickets/DEV-564.md), регресс-кандидат (нужен Bedrock-стенд) | ❌ авто нет |
 
 ## История
 
@@ -61,3 +62,4 @@ sources:
 | 05..06-Jun-2026 | - | Recon раздела и окна Add Additional Port |
 | ~25-Jun-2026 | - | Адрес на Overview = `allocation.ip`, а не FQDN ноды |
 | 15-Oct-2026 | [DEV-562](../../tickets/DEV-562.md) | Steam Port PZ проверяет, что порт - allocation этого сервера |
+| 21-Oct-2026 | [DEV-564](../../tickets/DEV-564.md) | Bedrock: блок UDP-портов `NETHERNET_UDP` под слоты, замок, защита от удаления (400). PASS с замечаниями (F1 High) |

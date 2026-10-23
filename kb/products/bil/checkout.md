@@ -4,9 +4,9 @@ title: Чекаут WHMCS - Review & Checkout и язык чекаута
 type: feature
 product: BIL
 status: draft
-updated: 2026-10-18
+updated: 2026-10-23
 verified_on: 2026-07-08        # язык чекаута доказан recon + node-пробником
-tickets: []
+tickets: [DEV-546]
 flags: []
 tests:
   - tests/funnels/funnel.spec.ts
@@ -64,6 +64,7 @@ sources:
 | Modded-воронка доходит до чекаута, шлюзы видны | `funnel.modded.spec.ts` | ✅ |
 | VPS-воронка доходит до чекаута | `vps.funnel.happy-path.spec.ts` | ✅ |
 | Чекаут на другом языке аккаунта | не покрыто (ассерты по английскому H1) | ❌ |
+| Блок Boost your server (QA-превью под флагом) | только ручной QA [DEV-546](../../tickets/DEV-546.md), покрыть после интеграции Boost | ❌ авто нет |
 
 ## История
 
@@ -71,3 +72,4 @@ sources:
 |---|---|---|
 | 08-Jul-2026 | - | Все воронки упали из-за языка биллинга, механика языка доказана recon |
 | 20-Jul-2026 | - | `advanceToPayment` ждёт `/clientarea/` вместо счёта кликов |
+| 16..19-Oct-2026 | [DEV-546](../../tickets/DEV-546.md) | Блок «Boost your server» на чекауте v2, только UI и QA-превью под флагом (опции в заказ не идут). PASS после billing!736 |

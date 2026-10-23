@@ -80,8 +80,9 @@ Java-сервер (id 771938).
 
 ### 8c2a6bd7
 Моды: [DEV-405](../tickets/DEV-405.md), [DEV-500](../tickets/DEV-500.md), [DEV-532](../tickets/DEV-532.md).
-- Сейчас на нём BMC4.
-- Трогать: 🔴, не менять.
+- Сейчас на нём BMC4 (425 папок, 5003 файла).
+- 20-Oct-2026 переименован в `DEV-476-search` (было `FYkKLp1D_474959`): эталон поиска файлов [DEV-476](../tickets/DEV-476.md), база для DEV-480.
+- Трогать: 🔴, не менять. Read-only поиск разрешён.
 
 ### 546bc52e
 SMP.
@@ -131,7 +132,7 @@ DEV-418. 🟡
 DEV-418, Bedrock. 🟡
 
 ### 7d7041c8
-DEV-418. 🟡
+DEV-418. 21-Oct-2026 под [DEV-564](../tickets/DEV-564.md): Paper → Bedrock → обратно на Paper, имя `18k6mMw5_462880`. 🟡
 
 ### b4089560
 DEV-418. 🟡
@@ -167,7 +168,14 @@ Cancel Amplitude (события отмены). 🟡
 ## Не-MC и free
 
 ### d70813d3
-Project Zomboid, имя `DEV-562-PZ`, [DEV-562](../tickets/DEV-562.md). 🟡
+Project Zomboid, [DEV-562](../tickets/DEV-562.md), [DEV-579](../tickets/DEV-579.md).
+- 21-Oct-2026 переименован в `DEV-579-PZ` (было `DEV-562-PZ`). Panel memory 4096, в биллинге тариф 6 ГБ (бейдж «6 Ram»), остановлен.
+- Трогать: 🟡.
+
+### 976c89c3
+Bedrock, `DEV-564-BR-C` (было `tJf6lPCi_482724`, WHMCS 482724), куплен владельцем 21-Oct-2026 под [DEV-564](../tickets/DEV-564.md).
+- Оставлен под ретест DEV-564; удаление (LIFE-09) - после ретеста.
+- Трогать: 🟡.
 
 ### 1db4a8bb
 Arma, [DEV-562](../tickets/DEV-562.md). 🟡

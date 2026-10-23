@@ -3,7 +3,7 @@ id: KB-COVERAGE
 title: Матрица покрытия - фичи KB и автотесты
 type: index
 status: draft
-updated: 2026-10-22
+updated: 2026-10-23
 verified_on: null              # генерируется из KB и tests/, с продуктом не сверяется
 sources:
   - kb/products/**/*.md (шапка tests:, раздел «Покрытие»)
@@ -30,13 +30,13 @@ sources:
 | [Config - server.properties и блок Docker/Java](products/up/config.md) | draft | `config.spec.ts`, `security.spec.ts` | 6 | 3 / 1 / 1 |
 | [Console - лог сервера и ввод команд](products/up/console.md) | draft | `console.palette.spec.ts`, `console.spec.ts`, `players.spec.ts`, `security.console.spec.ts` | 6 | 5 / 0 / 1 |
 | [Каталог расширений - моды, плагины, модпаки](products/up/extensions-catalog.md) | draft | `extension.sources.spec.ts`, `extensions.spec.ts`, `mods.spec.ts`, `plugins.spec.ts` | 17 | 4 / 2 / 4 |
-| [Files - файловый менеджер, Recycle Bin, SFTP](products/up/files.md) | draft | `files.recycle.spec.ts`, `files.spec.ts`, `files.structure.spec.ts`, `security.spec.ts` | 12 | 4 / 1 / 2 |
+| [Files - файловый менеджер, Recycle Bin, SFTP](products/up/files.md) | draft | `files.recycle.spec.ts`, `files.spec.ts`, `files.structure.spec.ts`, `security.spec.ts` | 12 | 4 / 2 / 3 |
 | [Java detection и гейт старта](products/up/java-detection.md) | draft | `mods.spec.ts` | 5 | 0 / 0 / 0 |
 | [Вход в панель и дашборд My Servers](products/up/login-dashboard.md) | draft | `auth.logout.spec.ts`, `dashboard.spec.ts`, `login.spec.ts`, `security.spec.ts` | 15 | 4 / 0 / 1 |
 | [Модпаки - каталог, видимость и установка](products/up/modpack-catalog.md) | draft | `extension.sources.spec.ts`, `extensions.spec.ts` | 6 | 2 / 4 / 3 |
 | [Loader gating - каталог и установка по ядру сервера](products/up/mods-loader-gating.md) | draft | `mods.spec.ts` | 5 | 0 / 0 / 0 |
 | [Players - администраторы, игроки, whitelist, баны](products/up/players.md) | draft | `players.spec.ts` | 2 | 2 / 0 / 1 |
-| [Port & Domains - поддомен и порты сервера](products/up/ports-domains.md) | draft | `network.connection-info.spec.ts`, `network.spec.ts` | 5 | 2 / 0 / 1 |
+| [Port & Domains - поддомен и порты сервера](products/up/ports-domains.md) | draft | `network.connection-info.spec.ts`, `network.spec.ts` | 5 | 2 / 1 / 2 |
 | [Power - Start, Shut Down, Restart, Kill](products/up/power.md) | draft | `power.spec.ts`, `role.enforcement.spec.ts` | 6 | 4 / 1 / 2 |
 | [Referral - реферальная программа в панели](products/up/referral.md) | draft | `referral.spec.ts` | 1 | 1 / 0 / 1 |
 | [Overview сервера - Server Information и Edit Server](products/up/server-overview.md) | draft | `edit.server.spec.ts`, `network.connection-info.spec.ts`, `server.overview.spec.ts` | 5 | 3 / 1 / 2 |
@@ -111,7 +111,7 @@ sources:
 | [BIL - биллинг WHMCS (godlike.host/clientarea)](products/bil/README.md) | draft | все спеки продукта (8) | 17 | 0 / 0 / 0 |
 | [Аккаунты клиентов - регистрация, вход, соцсети](products/bil/accounts.md) | draft | `login.validation.spec.ts`, `registration-flow.spec.ts` | 3 | 2 / 1 / 2 |
 | [Add-on Custom Modpack Setup и trial конструктора модпаков](products/bil/addons-trials.md) | draft | `funnel.modpack-constructor.spec.ts` | 2 | 1 / 1 / 2 |
-| [Чекаут WHMCS - Review & Checkout и язык чекаута](products/bil/checkout.md) | draft | `funnel.seed.spec.ts`, `funnel.spec.ts`, `funnel.modded.spec.ts`, `vps.funnel.happy-path.spec.ts` | 6 | 4 / 0 / 1 |
+| [Чекаут WHMCS - Review & Checkout и язык чекаута](products/bil/checkout.md) | draft | `funnel.seed.spec.ts`, `funnel.spec.ts`, `funnel.modded.spec.ts`, `vps.funnel.happy-path.spec.ts` | 6 | 4 / 1 / 2 |
 | [Оплата - Stripe, PayPal, Crypto, кредитный баланс, валюта](products/bil/payments.md) | draft | `funnel.cart.paypal.spec.ts`, `funnel.with.credit.check.spec.ts` | 5 | 5 / 1 / 1 |
 | [Free-продукты и письма - бесплатные серверы, cart-free, цепочка eSputnik](products/bil/free-products.md) | draft | - | - | 0 / 3 / 3 |
 | [Услуги в кабинете - Product Details, статусы, отмена и возврат подписки](products/bil/services-cancellation.md) | draft | - | - | 0 / 1 / 2 |
