@@ -12,6 +12,7 @@ tests:
   - tests/game/panel/files.spec.ts
   - tests/game/panel/files.recycle.spec.ts
   - tests/game/panel/files.structure.spec.ts
+  - tests/game/panel/files.search.spec.ts
   - tests/game/panel/security.spec.ts
 sources:
   - agents.docs/game-panel/KNOWLEDGE_BASE.md §5b, §5j, §8b, §9c (recon 03..09-Jun-2026)
@@ -93,7 +94,8 @@ sources:
 | XSS в имени папки | `security.spec.ts` (SEC-003) | ✅ |
 | Правка файла → Save → откат, Move, Zip / Unzip | не покрыто | ❌ |
 | Окно World Backup при удалении `world` | только ручной QA [DEV-418](../../tickets/DEV-418.md) | ❌ авто нет |
-| Поиск файлов: стрим, 422, 429, обрезка 500 | только ручной QA [DEV-476](../../tickets/DEV-476.md), регресс-кандидат | ❌ авто нет |
+| Поиск файлов: стрим до complete, путь в таблице, 422 | `files.search.spec.ts` (TC-GP-FSRCH-001, 002), [DEV-476](../../tickets/DEV-476.md) | ✅ |
+| Поиск: обрезка на 500, 429 параллели и throttle | только ручной QA [DEV-476](../../tickets/DEV-476.md) (нужен большой модпак на сервере тест-аккаунта) | ❌ авто нет |
 
 ## История
 

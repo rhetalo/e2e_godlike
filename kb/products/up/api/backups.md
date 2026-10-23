@@ -4,7 +4,7 @@ title: API - backups (список, квота, ручные бэкапы и б�
 type: api
 product: UP
 status: draft
-updated: 2026-10-20
+updated: 2026-10-23
 verified_on: 2026-10-20        # DEV-484 итоговая проверка на prod (panel!1691 + new-panel!564)
 tickets: [DEV-452, DEV-484, DEV-418]
 features: [UP/backups, UP/modpack-catalog]
@@ -69,6 +69,8 @@ sources:
   ([UP/world-backup](../world-backup.md)).
 
 ## GET /servers/{uuid}/backups
+
+⚠️ Только **полный** UUID: короткий (`00915cdc`) даёт 400 «No query results for model [Pterodactyl\Models\Server]» (live 23-Oct-2026), хотя `GET /servers/{short}` короткий принимает. Контракт квоты - `utils/schemas/backups.ts`, автотест TC-GP-BKP-004.
 
 Возвращает `{ success, data, meta }`. `data` - единый список из таблиц бэкапов (у записей `type = "instance"`, независимо от таблицы 📖).
 `meta.quota` добавлен в [panel!1691](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1691) ✅:

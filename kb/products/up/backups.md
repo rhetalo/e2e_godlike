@@ -4,7 +4,7 @@ title: Backups - бэкапы сервера, базы и папки
 type: feature
 product: UP
 status: draft
-updated: 2026-10-20
+updated: 2026-10-23
 verified_on: 2026-10-20        # DEV-484 r2: общая квота, расписания, бэкапы баз; остальное recon 2026-06-09
 tickets: [DEV-418, DEV-452, DEV-484]
 flags: []
@@ -127,6 +127,7 @@ OBS-2 пропущенное одноразовое расписание вис�
 | XSS в имени бэкапа | `security.spec.ts` (SEC-002) | ✅ |
 | Общая квота, `meta.quota`, расписания, бэкапы баз (DEV-484) | руками, prod 20-Oct-2026 ([артефакт](https://claude.ai/artifact/537r7XRR8NiYidKCqNWy5C)), автотеста нет | руками |
 | Restore, Rename, Lock, Database / Folder, Ignored Files, создание расписания | не покрыто | ❌ |
+| Общая квота `meta.quota`: контракт и счётчик used/limit | `backups.spec.ts` (TC-GP-BKP-004), [DEV-484](../../tickets/DEV-484.md) | ✅ read-only |
 
 ## История
 

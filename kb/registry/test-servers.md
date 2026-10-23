@@ -3,7 +3,7 @@ id: KB-REG-SERVERS
 title: Тест-серверы (UP, VPS)
 type: registry
 status: draft
-updated: 2026-10-19
+updated: 2026-10-23
 verified_on: -        # с живой панелью ещё не сверяли
 sources:
   - utils/gameAuth.ts (env + фолбэки)
@@ -66,6 +66,25 @@ Suspended-сервер, для проверок баннера suspended. 🔴
 Удалён. Нигде не использовать.
 
 ❓ `GAME_PANEL_PLUGIN_SERVER_UUID` и `GAME_PANEL_THROTTLE_SERVER_UUID` - какие серверы за ними стоят, нужно уточнить.
+
+## Мутирующие регресс-тесты (D-026, env в `utils/gameAuth.ts`)
+
+Выданы владельцем 23-Oct-2026, тест-аккаунт [acc:shared-owner](test-accounts.md#shared-owner), тариф Double (2 ГБ, 10 ГБ диска).
+Мутировать можно всё, только serial и с teardown. Ядро - часть контракта: тест, сменивший его, возвращает обратно.
+
+### fd965a60
+`test_e2e_mut_java` (было `3kvfVx6l_481368`), Paper 26.2. Общие мутации: бэкапы и слоты ([DEV-484](../tickets/DEV-484.md)).
+- Env: `GAME_PANEL_SERVER_MUT_JAVA_UUID`. Трогать: 🟢.
+
+### 75d1175e
+`test_e2e_mut_fabric` (было `GxVxq7bw_480890`), 23-Oct переведён Paper → Fabric 1.21.1 (loader 0.20.1, Wipe Server Files).
+Клиентские моды ([DEV-558](../tickets/DEV-558.md)). Раньше - платный регресс [DEV-563](../tickets/DEV-563.md) (задача закрыта).
+- Env: `GAME_PANEL_SERVER_MUT_FABRIC_UUID`. Трогать: 🟢.
+
+### b62bffd0
+`test_e2e_mut_bedrock` (было `PPmTky5j_481131`, id 778464), 23-Oct сменена игра Paper → BEDROCK-Vanilla (egg 125, Delete files),
+BDS 1.26.52.3. UDP NetherNet ([DEV-564](../tickets/DEV-564.md)). ⚠️ Блок UDP после смены игры не выдан - [DEV-564/F5](../tickets/DEV-564.md#находки).
+- Env: `GAME_PANEL_SERVER_MUT_BEDROCK_UUID`. Трогать: 🟢. Остановлен.
 
 ## Java, версии, моды
 
@@ -191,9 +210,6 @@ Free-сервер, [DEV-563](../tickets/DEV-563.md). 🟡
 
 ### d716acea
 Free-сервер, [DEV-563](../tickets/DEV-563.md). 🟡
-
-### 75d1175e
-Платный, регресс [DEV-563](../tickets/DEV-563.md). 🟡
 
 ### 3f1e7d13
 Terraria free, [DEV-563](../tickets/DEV-563.md). 🟡
