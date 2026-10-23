@@ -8,7 +8,7 @@ updated: 2026-10-23
 verified_on: 2026-10-23        # окно Some mods were disabled - DEV-556
 tickets: [DEV-500, DEV-492, DEV-558, DEV-557, DEV-556]
 flags: [MOD_SCAN_BACKFILL]
-tests: []                      # автотестов нет, только ручной QA
+tests: [tests/game/panel/client-only-mods.spec.ts]
 sources:
   - kb/tickets/DEV-500.md, DEV-492.md
   - test-docs/ultra.panel/DEV-500/client-only-mods-hide-REPORT.md (+ RECHECK, RECHECK2, RECHECK3)
@@ -93,6 +93,14 @@ sources:
 - **Сервер 26.x:** пустой loader = loader сервера, а под 26.3 модов почти нет. Для выборок ставить фильтр руками
   (Forge 1.20.1, Fabric 1.21.1).
 - **Эталон для CF** - сайт-API `curseforge.com`, официальный CF API без ключа недоступен.
+- **Окно «Some mods were disabled» модальное:** пока открыто, Start / Shut Down не нажимаются - сначала «Got it».
+- **Источник правды - `client-only-notice`** (`mods` = неподтверждённые отключённые моды, лежащие как `.jar.disabled`); `installed`
+  кеширует пути ~5 мин и может ещё показывать `.jar`.
+- **Install асинхронный:** `POST /minecraft/mods` отвечает 200 раньше, чем jar скачан. Uninstall сразу после Install приходит
+  раньше файла, и файл остаётся на диске. Ждать мод в `installed` (появляется за секунды).
+- **Запись сканера может пережить Uninstall** ([DEV-558/OBS-5](../../tickets/DEV-558.md#находки)): через ~10 с после Uninstall отключённого мода
+  иногда появляется новая запись того же хеша, и следующий Install отключается молча, без окна. Надёжная чистка в тестах -
+  Install → Uninstall (Uninstall активного файла стирает запись по хешу).
 - **Отключение проверять на Fabric-сервере** (Forge всегда safe). Клиентский тест-мод: CF Controlling (250398), файлы
   19.0.3 Fabric 1.21.1 = 5759860, 18.0.4 Fabric 1.21 = 5603224; в каталоге скрыт, ставить `POST /minecraft/mods
   {provider, mod_id, version_id}`. Отключение срабатывает на Start, Restart (после «Yes, Restart») и принятии EULA;
@@ -103,7 +111,8 @@ sources:
 
 ## Покрытие
 
-- **Автотестов нет** (окно отключённых модов - кандидат на мутирующий спек на [srv:75d1175e](../../registry/test-servers.md#75d1175e)). Ручной QA: отчёты [DEV-500](../../../test-docs/ultra.panel/DEV-500/client-only-mods-hide-RECHECK3-REPORT.md)
+- **Автотест** `client-only-mods.spec.ts` на [srv:75d1175e](../../registry/test-servers.md#75d1175e): TC-GP-COM-001 (отключение на старте
+  + окно со списком), TC-GP-COM-002 (Uninstall → Install той же версии → снова отключён, [DEV-558](../../tickets/DEV-558.md)). Ручной QA: отчёты [DEV-500](../../../test-docs/ultra.panel/DEV-500/client-only-mods-hide-RECHECK3-REPORT.md)
   (финал) и [DEV-492](../../../test-docs/ultra.panel/DEV-492/dev492-post-install-mod-scan-REPORT.md).
 - Не покрыто: Forge-моды (by design safe), legacy Forge, перепроверка F5 после [panel!1665](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1665).
 

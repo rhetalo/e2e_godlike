@@ -74,6 +74,7 @@ Suspended-сервер, для проверок баннера suspended. 🔴
 
 ### fd965a60
 `test_e2e_mut_java` (было `3kvfVx6l_481368`), Paper 26.2. Общие мутации: бэкапы и слоты ([DEV-484](../tickets/DEV-484.md)).
+- 23-Oct-2026: `backups.throttle.spec.ts` (TC-GP-BKP-005) создаёт 1 бэкап `qa-484-window-a` и удаляет его в teardown.
 - 23-Oct-2026: EULA принята, первый старт создал `world` - он нужен `world-backup.spec.ts` ([DEV-571](../tickets/DEV-571.md)), не удалять
   (иначе тесты WB уйдут в skip; вернуть - один Start). Вне раскатки `extension-compatibility`: legacy ставит моды на Paper ([DEV-556](../tickets/DEV-556.md)).
 - Env: `GAME_PANEL_SERVER_MUT_JAVA_UUID`. Трогать: 🟢.
@@ -81,6 +82,8 @@ Suspended-сервер, для проверок баннера suspended. 🔴
 ### 75d1175e
 `test_e2e_mut_fabric` (было `GxVxq7bw_480890`), 23-Oct переведён Paper → Fabric 1.21.1 (loader 0.20.1, Wipe Server Files).
 Клиентские моды ([DEV-558](../tickets/DEV-558.md)). Раньше - платный регресс [DEV-563](../tickets/DEV-563.md) (задача закрыта).
+- 23-Oct-2026: `client-only-mods.spec.ts` (TC-GP-COM-001/002) ставит и удаляет CF Controlling, стартует и гасит сервер; после прогона Offline,
+  мода нет, notice подтверждён. Старые записи override `modmenu-11.0.x` (09:48 UTC) - не наши, не мешают.
 - Env: `GAME_PANEL_SERVER_MUT_FABRIC_UUID`. Трогать: 🟢.
 - ⚠️ Владелец 388101 вне раскатки `extension-compatibility`: отказов по ядру/лоадеру тут нет. 23-Oct ([DEV-556](../tickets/DEV-556.md)): окно
   «Some mods were disabled» подтверждено ack, /mods вернул к 2 файлам (godlikemetrics + fabric-api 0.116.13), offline.
