@@ -878,6 +878,10 @@ export const GAME_PANEL_BACKUPS = {
   // ⚠️ Эндпоинт принимает только ПОЛНЫЙ UUID (короткий → 400 «No query results for model»).
   listApi: /\/api\/v2\/servers\/[0-9a-f-]{36}\/backups(\?|$)/,
   createInstanceApi: /\/api\/v2\/servers\/[0-9a-f-]{36}\/backups\/instances(\?|$)/, // POST ручного бэкапа: 202 / 400 слоты / 429 окно
+  // Заглушка при free = 0 (DEV-484, live DOM 23-Oct-2026 на 9c891502): закрывает форму создания, удаление доступно
+  slotsLimitOverlay: ".backups__slots-limit-overlay",
+  slotsLimitTitle: ".backups__slots-limit-title",            // «Slots Limit Reached»
+  slotsLimitUpgrade: ".backups__slots-limit-upgrade-btn",    // <a href="/server/{short}/upgrade"> - ⚠️ НЕ жать (платёж)
   errorToast: ".panel-notification.error", // тост ошибки панели (на 429 - «Request failed with status code 429», live 23-Oct-2026)
 } as const;
 

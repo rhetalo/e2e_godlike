@@ -93,6 +93,21 @@ export class GamePanelBackupsPage extends GamePanelBasePage {
     return { status: resp.status(), message: body.message ?? "" };
   }
 
+  // ── заглушка «Slots Limit Reached» (free = 0) ──
+  get slotsLimitOverlay(): Locator {
+    return this.page.locator(GAME_PANEL_BACKUPS.slotsLimitOverlay).first();
+  }
+  get slotsLimitTitle(): Locator {
+    return this.page.locator(GAME_PANEL_BACKUPS.slotsLimitTitle).first();
+  }
+  /** Ссылка Upgrade в заглушке. ⚠️ Не кликать - ведёт в апгрейд тарифа. */
+  get slotsLimitUpgrade(): Locator {
+    return this.page.locator(GAME_PANEL_BACKUPS.slotsLimitUpgrade).first();
+  }
+  get footer(): Locator {
+    return this.page.locator(GAME_PANEL_BACKUPS.footer).first();
+  }
+
   /** Тосты ошибок панели (последний - самый свежий). */
   errorToasts(): Locator {
     return this.page.locator(GAME_PANEL_BACKUPS.errorToast);

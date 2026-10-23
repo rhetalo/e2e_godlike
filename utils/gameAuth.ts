@@ -80,6 +80,10 @@ export const GAME_SERVER_RENAME_NAME =
  */
 export const GAME_SERVER_MUT_JAVA_UUID =
   process.env.GAME_PANEL_SERVER_MUT_JAVA_UUID ?? "fd965a60-155b-41b9-95fc-6da029943abd";
+/** Сервер закрытой DEV-484 со слотами бэкапов 3/3 (бэкапы баз) - только read-only проверка заглушки «Slots Limit Reached». */
+export const GAME_SERVER_FULL_SLOTS_UUID =
+  process.env.GAME_PANEL_SERVER_FULL_SLOTS_UUID ?? "9c891502-143b-432b-9202-1de48408078f";
+export const GAME_SERVER_FULL_SLOTS_NAME = process.env.GAME_PANEL_SERVER_FULL_SLOTS_NAME ?? "DEV-484-db";
 export const GAME_SERVER_MUT_JAVA_NAME =
   process.env.GAME_PANEL_SERVER_MUT_JAVA_NAME ?? "test_e2e_mut_java"; // v-select сервера в форме Backups ищет по имени
 export const GAME_SERVER_MUT_FABRIC_UUID =
