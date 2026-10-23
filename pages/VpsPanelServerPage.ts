@@ -68,7 +68,7 @@ export class VpsPanelServerPage {
     // обнаружить rebuild view — наличие кнопки "Cancel Rebuild".
     // Если она есть — кликаем, чтобы вернуться в обычный режим сервера.
     const cancelRebuild = this.page.locator('button.btn-primary:has-text("Cancel Rebuild")');
-    const isRebuildView = await cancelRebuild.isVisible({ timeout: 2_000 }).catch(() => false);
+    const isRebuildView = await cancelRebuild.isVisible(); // мгновенно: страница уже после networkidle
     if (isRebuildView) {
       console.log('[goto] Rebuild view detected — clicking "Cancel Rebuild"');
       await cancelRebuild.click();

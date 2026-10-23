@@ -44,12 +44,7 @@ export class GamePanelSharingPage extends GamePanelBasePage {
 
   /** Есть ли email в карточках Sharing (Members/Pending) — т.е. у аккаунта есть доступ/инвайт. */
   async hasUser(email: string): Promise<boolean> {
-    return this.page
-      .locator(GAME_PANEL_SHARING.card)
-      .filter({ hasText: email })
-      .first()
-      .isVisible({ timeout: 5_000 })
-      .catch(() => false);
+    return this.isShownWithin(this.page.locator(GAME_PANEL_SHARING.card).filter({ hasText: email }).first(), 5_000);
   }
 
   /** v-select роли участника (есть только у не-owner; на тест-сервере — один, у invitee). */

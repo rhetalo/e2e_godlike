@@ -90,7 +90,7 @@ export class GamePanelFilesPage extends GamePanelBasePage {
   }
 
   async hasEntry(name: string): Promise<boolean> {
-    return this.fileEntry(name).isVisible({ timeout: 3_000 }).catch(() => false);
+    return this.isShownWithin(this.fileEntry(name), 3_000);
   }
 
   /** Создать папку с именем через диалог «Create folder». */

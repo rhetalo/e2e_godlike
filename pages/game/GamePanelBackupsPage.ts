@@ -102,7 +102,7 @@ export class GamePanelBackupsPage extends GamePanelBasePage {
       .first();
   }
   async hasBackup(name: string): Promise<boolean> {
-    return this.backupRow(name).isVisible({ timeout: 3_000 }).catch(() => false);
+    return this.isShownWithin(this.backupRow(name), 3_000);
   }
 
   /** Статус-чип строки (текст: COMPLETED / IN PROGRESS / …). */
@@ -123,7 +123,7 @@ export class GamePanelBackupsPage extends GamePanelBasePage {
    * Поэтому опрашивать через `refresh()` + `isCompleted()` в `expect.poll` (см. backups.spec.ts).
    */
   async isCompleted(name: string): Promise<boolean> {
-    return this.completedStatusOf(name).isVisible({ timeout: 3_000 }).catch(() => false);
+    return this.completedStatusOf(name).isVisible(); // мгновенно: опрашивается в expect.poll
   }
 
   /** Перезагрузить страницу (актуализировать статусы — они не обновляются реактивно). */

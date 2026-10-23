@@ -31,7 +31,7 @@ export class GamePanelTasksPage extends GamePanelBasePage {
     return this.page.locator(GAME_PANEL_TASKS.taskItem).filter({ hasText: title }).first();
   }
   async hasTask(title: string): Promise<boolean> {
-    return this.taskByTitle(title).isVisible({ timeout: 5_000 }).catch(() => false);
+    return this.isShownWithin(this.taskByTitle(title), 5_000);
   }
 
   /** Заголовок секции запланированных задач. */
@@ -64,7 +64,7 @@ export class GamePanelTasksPage extends GamePanelBasePage {
     return this.page.locator(GAME_PANEL_TASKS.taskItem, { hasText: name }).first();
   }
   async hasYourTask(name: string): Promise<boolean> {
-    return this.yourTask(name).isVisible({ timeout: 5_000 }).catch(() => false);
+    return this.isShownWithin(this.yourTask(name), 5_000);
   }
 
   /** Удалить созданную задачу: иконка-меню строки → Remove → confirm "Delete". */

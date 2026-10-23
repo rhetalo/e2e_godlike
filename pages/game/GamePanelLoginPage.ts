@@ -36,7 +36,7 @@ export class GamePanelLoginPage extends GamePanelBasePage {
 
   /** Раскрывает форму email/password, если она скрыта за чузером. */
   async revealForm(): Promise<void> {
-    if (await this.emailInput.isVisible({ timeout: 2_000 }).catch(() => false)) return;
+    if (await this.isShownWithin(this.emailInput, 2_000)) return;
     await this.chooserButton.click().catch(() => {});
     await this.emailInput.waitFor({ state: "visible", timeout: 10_000 });
   }

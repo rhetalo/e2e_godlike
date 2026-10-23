@@ -9,7 +9,7 @@
  *
  * Методы — действия и читатели состояния; assert'ы остаются в спеках.
  */
-import type { Page, Response } from "@playwright/test";
+import type { Locator, Page, Response } from "@playwright/test";
 import { ShepherdTour } from "../../components/game/ShepherdTour";
 import { GiveawayModal } from "../../components/game/GiveawayModal";
 import { GAME_PANEL_URL } from "../../utils/gameAuth";
@@ -24,6 +24,19 @@ export abstract class GamePanelBasePage {
     this.page = page;
     this.tour = new ShepherdTour(page);
     this.giveaway = new GiveawayModal(page);
+  }
+
+  /**
+   * Появится ли элемент за `timeoutMs`: true сразу, как только виден; false по истечении времени.
+   * ⚠️ `locator.isVisible({ timeout })` таймаут ИГНОРИРУЕТ (Playwright: проверка мгновенная) - там, где
+   * ожидание задумано (диалог после клика, список после навигации), только этот хелпер. Для мгновенной
+   * проверки в цикле / expect.poll - обычный `isVisible()` без параметров.
+   */
+  protected async isShownWithin(locator: Locator, timeoutMs: number): Promise<boolean> {
+    return locator.waitFor({ state: "visible", timeout: timeoutMs }).then(
+      () => true,
+      () => false,
+    );
   }
 
   /** Навигация по абсолютному пути панели + закрытие onboarding-тура и giveaway-модалки. */

@@ -39,7 +39,7 @@ export class GamePanelConfigPage extends GamePanelBasePage {
   }
 
   async hasField(prop: string): Promise<boolean> {
-    return this.row(prop).isVisible({ timeout: 5_000 }).catch(() => false);
+    return this.isShownWithin(this.row(prop), 5_000);
   }
 
   /** Текущее значение текстового свойства. */

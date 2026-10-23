@@ -32,6 +32,6 @@ export class GamePanelPlayersPage extends GamePanelBasePage {
   }
 
   async hasCard(name: string): Promise<boolean> {
-    return this.cardTitle(name).isVisible({ timeout: 5_000 }).catch(() => false);
+    return this.isShownWithin(this.cardTitle(name), 5_000);
   }
 }

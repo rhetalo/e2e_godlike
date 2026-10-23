@@ -62,7 +62,7 @@ export class GamePanelServerPage extends GamePanelBasePage {
   /** Принять EULA, если диалог появился после Start (первый старт). Возвращает, был ли он. */
   async acceptEulaIfPresent(timeoutMs = 6_000): Promise<boolean> {
     const dlg = this.dialogByTitle(GAME_PANEL_DIALOG.eulaTitle);
-    if (!(await dlg.isVisible({ timeout: timeoutMs }).catch(() => false))) return false;
+    if (!(await this.isShownWithin(dlg, timeoutMs))) return false;
     await dlg.locator(GAME_PANEL_DIALOG.confirmBtn).first().click();
     await dlg.waitFor({ state: "hidden", timeout: 8_000 }).catch(() => {});
     return true;
@@ -77,7 +77,7 @@ export class GamePanelServerPage extends GamePanelBasePage {
    */
   private async confirmDialogIfPresent(titleRe: RegExp, timeoutMs = 2_000): Promise<void> {
     const dlg = this.dialogByTitle(titleRe);
-    if (!(await dlg.isVisible({ timeout: timeoutMs }).catch(() => false))) return;
+    if (!(await this.isShownWithin(dlg, timeoutMs))) return;
     await dlg.locator(GAME_PANEL_DIALOG.confirmBtn).first().click();
     await dlg.waitFor({ state: "hidden", timeout: 8_000 }).catch(() => {});
   }
@@ -108,7 +108,7 @@ export class GamePanelServerPage extends GamePanelBasePage {
     if (await this.isOffline()) return; // уже оффлайн — «Shut Down» превратился в «Start»
     await this.shutDownButton.click({ timeout: GamePanelServerPage.POWER_CLICK_TIMEOUT });
     const dlg = this.page.locator(GAME_PANEL_DIALOG.root).first();
-    if (await dlg.isVisible({ timeout: 1_500 }).catch(() => false)) {
+    if (await this.isShownWithin(dlg, 1_500)) {
       await dlg.locator(GAME_PANEL_DIALOG.confirmBtn).first().click().catch(() => {});
       await dlg.waitFor({ state: "hidden", timeout: 5_000 }).catch(() => {});
     }
@@ -121,11 +121,12 @@ export class GamePanelServerPage extends GamePanelBasePage {
   private static readonly ONLINE_CONSOLE_RE =
     /Server marked as running|Done \(|For help, type|RCON running|players online/i;
 
+  // Мгновенные проверки: зовутся в циклах ожидания (waitForOnline) и перед кликом
   async isOnline(): Promise<boolean> {
-    return this.shutDownButton.isVisible({ timeout: 1_000 }).catch(() => false);
+    return this.shutDownButton.isVisible();
   }
   async isOffline(): Promise<boolean> {
-    return this.startButton.isVisible({ timeout: 1_000 }).catch(() => false);
+    return this.startButton.isVisible();
   }
 
   /** Строка лога-маркера запуска сервера (для web-first ожидания и reload-синхронизации). */
@@ -280,11 +281,8 @@ export class GamePanelServerPage extends GamePanelBasePage {
   }
   /** Видны ли power-контролы = доступ к серверу предоставлен (Start/Shut Down/Restart). */
   async hasPowerControls(): Promise<boolean> {
-    return (
-      (await this.startButton.isVisible({ timeout: 1_500 }).catch(() => false)) ||
-      (await this.shutDownButton.isVisible({ timeout: 500 }).catch(() => false)) ||
-      (await this.restartButton.isVisible({ timeout: 500 }).catch(() => false))
-    );
+    // Ждём любую из кнопок: сразу после goto они могут ещё не отрисоваться (ложный «нет доступа»)
+    return this.isShownWithin(this.startButton.or(this.shutDownButton).or(this.restartButton).first(), 5_000);
   }
 
   // ── Edit Server / rename (МУТАЦИЯ — self-cleaning в спеке) ─────
