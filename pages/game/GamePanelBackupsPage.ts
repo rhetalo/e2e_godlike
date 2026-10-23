@@ -75,6 +75,29 @@ export class GamePanelBackupsPage extends GamePanelBasePage {
     await this.backupRow(name).waitFor({ state: "visible", timeout: 30_000 });
   }
 
+  /**
+   * Нажать «Create Backup» и вернуть ответ POST backups/instances (202 / 400 / 429), не дожидаясь строки:
+   * при отказе строка не появляется. Слушатель ставится до клика.
+   */
+  async submitBackupCapturing(name: string): Promise<{ status: number; message: string }> {
+    await this.selectServer();
+    await this.nameInput.fill(name);
+    const [resp] = await Promise.all([
+      this.page.waitForResponse(
+        (r) => r.request().method() === "POST" && GAME_PANEL_BACKUPS.createInstanceApi.test(r.url()),
+        { timeout: 30_000 },
+      ),
+      this.createButton.click({ timeout: 15_000 }),
+    ]);
+    const body = (await resp.json().catch(() => ({}))) as { message?: string };
+    return { status: resp.status(), message: body.message ?? "" };
+  }
+
+  /** Тосты ошибок панели (последний - самый свежий). */
+  errorToasts(): Locator {
+    return this.page.locator(GAME_PANEL_BACKUPS.errorToast);
+  }
+
   // ── list ────────────────────────────────────────────────────────────────────
   get list(): Locator {
     return this.page.locator(GAME_PANEL_BACKUPS.list).first();
@@ -158,6 +181,19 @@ export class GamePanelBackupsPage extends GamePanelBasePage {
    * квоту слотов (3) → удаляем все совпадающие в цикле, иначе остаток блокирует создание
    * (overlay `backups__slots-limit-overlay`). Кап итераций — чтобы не зациклиться.
    */
+  /**
+   * Teardown-ожидание: дождаться, пока бэкап станет COMPLETED (или его нет), чтобы удалить надёжно.
+   * Статус не реактивен → reload в цикле. Не бросает: по таймауту просто возвращает.
+   */
+  async waitSettledForDelete(name: string, timeoutMs = 180_000): Promise<void> {
+    const deadline = Date.now() + timeoutMs;
+    while (Date.now() < deadline) {
+      await this.refresh();
+      if (!(await this.backupRow(name).isVisible()) || (await this.isCompleted(name))) return;
+      await this.completedStatusOf(name).waitFor({ state: "visible", timeout: 10_000 }).catch(() => {});
+    }
+  }
+
   async deleteIfPresent(name: string): Promise<void> {
     for (let i = 0; i < 5 && (await this.hasBackup(name)); i++) {
       await this.deleteBackup(name).catch(() => {});

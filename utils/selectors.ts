@@ -877,6 +877,8 @@ export const GAME_PANEL_BACKUPS = {
   // GET списка бэкапов, который страница грузит сама: data + meta.quota (DEV-484, live-проба 23-Oct-2026).
   // ⚠️ Эндпоинт принимает только ПОЛНЫЙ UUID (короткий → 400 «No query results for model»).
   listApi: /\/api\/v2\/servers\/[0-9a-f-]{36}\/backups(\?|$)/,
+  createInstanceApi: /\/api\/v2\/servers\/[0-9a-f-]{36}\/backups\/instances(\?|$)/, // POST ручного бэкапа: 202 / 400 слоты / 429 окно
+  errorToast: ".panel-notification.error", // тост ошибки панели (на 429 - «Request failed with status code 429», live 23-Oct-2026)
 } as const;
 
 // Versions (/server/{uuid}/minecraft/versions). Confirmed via live DOM 06-Jun-2026 (MCP recon).
@@ -941,6 +943,18 @@ export const GAME_PANEL_EXTENSIONS = {
  *   versions:  GET /servers/{uuid}/minecraft/plugins/{provider}-{external_id}/versions  (порядок newest-first)
  *   installed: GET /servers/{uuid}/minecraft/plugins/installed  (детекция по файлу; provider=null у не-каталожных)
  */
+/**
+ * Окно «Some mods were disabled» (DEV-492 / DEV-556): сканер отключил client-only моды на старте.
+ * Модальное (Vuetify v-dialog) - перехватывает клики, в т.ч. по power-кнопкам. Live DOM 23-Oct-2026.
+ * «Got it» - только localStorage (до роста revision), «Don't show again» - POST client-only-notice/ack.
+ */
+export const GAME_PANEL_CLIENT_ONLY_NOTICE = {
+  root: ".v-overlay__content:has(.client-only-mods-disabled__body)",
+  title: ".server__dialogs__action-dialog__title", // «Some mods were disabled»
+  modName: ".client-only-mods-disabled__list .client-only-mod-row__name", // имя файла, напр. Controlling-fabric-1.21.1-19.0.3.jar
+  gotIt: /^\s*Got it\s*$/i,
+} as const;
+
 export const GAME_PANEL_EXTENSIONS_API = {
   pluginsList: /\/api\/v2\/servers\/[^/]+\/minecraft\/plugins\?/,
   modsList: /\/api\/v2\/servers\/[^/]+\/minecraft\/mods\?/,

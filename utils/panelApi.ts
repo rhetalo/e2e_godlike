@@ -69,3 +69,15 @@ export function postServerV2(
     data: body,
   });
 }
+
+/** DELETE на v2-эндпоинт сервера (напр. Uninstall мода `minecraft/mods/{provider}-{id}`). Только в teardown/мутирующих спеках. */
+export function deleteServerV2(
+  request: APIRequestContext,
+  token: string,
+  serverUuid: string,
+  path: string,
+): Promise<APIResponse> {
+  return request.delete(`${PANEL_API_V2_BASE}/servers/${serverUuid}/${path}?locale=en`, {
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+  });
+}

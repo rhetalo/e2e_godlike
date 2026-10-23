@@ -80,6 +80,8 @@ export const GAME_SERVER_RENAME_NAME =
  */
 export const GAME_SERVER_MUT_JAVA_UUID =
   process.env.GAME_PANEL_SERVER_MUT_JAVA_UUID ?? "fd965a60-155b-41b9-95fc-6da029943abd";
+export const GAME_SERVER_MUT_JAVA_NAME =
+  process.env.GAME_PANEL_SERVER_MUT_JAVA_NAME ?? "test_e2e_mut_java"; // v-select сервера в форме Backups ищет по имени
 export const GAME_SERVER_MUT_FABRIC_UUID =
   process.env.GAME_PANEL_SERVER_MUT_FABRIC_UUID ?? "75d1175e-fcf7-4fdd-8279-86c5347f2264";
 export const GAME_SERVER_MUT_BEDROCK_UUID =

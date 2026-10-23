@@ -174,3 +174,15 @@ export const CurseForgeManifests = {
   }),
   broken: "{not json",
 } as const;
+
+/**
+ * Клиентский тест-мод для сканера client-only (DEV-492 / DEV-558): CF Controlling 19.0.3 под Fabric 1.21.1.
+ * В каталоге скрыт (DEV-500) → ставится прямым POST /minecraft/mods. Панель определяет файл по хешу как
+ * Modrinth-проект xv94TkTM → Uninstall идёт по `modrinth-xv94TkTM`. Live 23-Oct-2026 на test_e2e_mut_fabric.
+ */
+export const ClientOnlyTestMod = {
+  install: { provider: "curseforge", mod_id: "250398", version_id: "5759860" },
+  uninstallKey: "modrinth-xv94TkTM",
+  catalogName: "Controlling",
+  fileName: /^Controlling-fabric-1\.21\.1-19\.0\.3\.jar$/,
+} as const;
