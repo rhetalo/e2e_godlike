@@ -1007,6 +1007,12 @@ export const GAME_PANEL_PREMIUM = {
   dialog: ".premium-benefits",
   dialogTitle: ".premium-benefits__header-title",     // "Go Premium"
   ctaButton: ".premium-benefits__btn",                // "Get Premium (3-Days Free Trial)" — ⚠️ НЕ жать
+  // Сравнение планов в окне (live DOM 23-Oct-2026): блок текущего плана («You have Budget Plan», 8 фич)
+  // и блок Premium («Try Premium for 3 days», 9 фич). Тексты маркетинговые - в тестах только структура.
+  currentPlanTitle: ".premium-benefits__budget-block-header__title",
+  currentPlanItem: ".premium-benefits__budget-block-content__item",
+  premiumPlanTitle: ".premium-benefits__premium-block-header__title",
+  premiumPlanItem: ".premium-benefits__premium-block-content__item",
 } as const;
 
 // Console full-page (/server/{uuid}/console). Confirmed via MCP recon 06-Jun-2026.

@@ -116,6 +116,27 @@ export class VpsPanelOptionsPage {
     return this.settingsPane.getByText("UEFI", { exact: false }).first();
   }
 
+  /**
+   * Радио выбора Boot Type (`name="boot_type"`: value 0 = BIOS, 1 = UEFI). Визуально это
+   * btn-check: input скрыт, видны label «BIOS» / «UEFI». Live DOM 23-Oct-2026. ⚠️ Не кликать -
+   * смена Boot Type меняет загрузку реального VPS.
+   */
+  get bootTypeRadios(): Locator {
+    return this.settingsPane.locator('input[name="boot_type"]');
+  }
+
+  /** Видимые кнопки-лейблы Boot Type (BIOS / UEFI). */
+  get bootTypeButtons(): Locator {
+    return this.settingsPane.locator('input[name="boot_type"] + label');
+  }
+
+  /** Какие значения Boot Type сейчас отмечены (ожидаем ровно одно: "0" BIOS или "1" UEFI). */
+  async checkedBootTypes(): Promise<string[]> {
+    return this.bootTypeRadios.evaluateAll((els) =>
+      (els as HTMLInputElement[]).filter((e) => e.checked).map((e) => e.value),
+    );
+  }
+
   // ── VNC (vlang[168] / vlang[183] / vlang[215]) ────────────────────────────
 
   /**

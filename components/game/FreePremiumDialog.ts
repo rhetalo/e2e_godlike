@@ -23,6 +23,27 @@ export class FreePremiumDialog {
     return this.page.locator(GAME_PANEL_PREMIUM.ctaButton).first();
   }
 
+  /** Заголовок блока текущего плана («You have Budget Plan»). */
+  get currentPlanTitle(): Locator {
+    return this.dialog.locator(GAME_PANEL_PREMIUM.currentPlanTitle);
+  }
+  /** Фичи текущего плана. */
+  currentPlanItems(): Locator {
+    return this.dialog.locator(GAME_PANEL_PREMIUM.currentPlanItem);
+  }
+  /** Заголовок блока Premium («Try Premium for N days»). */
+  get premiumPlanTitle(): Locator {
+    return this.dialog.locator(GAME_PANEL_PREMIUM.premiumPlanTitle);
+  }
+  /** Фичи Premium. */
+  premiumPlanItems(): Locator {
+    return this.dialog.locator(GAME_PANEL_PREMIUM.premiumPlanItem);
+  }
+  /** Тексты фич (trim), чтобы в спеке проверить, что пустых строк нет. */
+  async itemTexts(items: Locator): Promise<string[]> {
+    return (await items.allInnerTexts()).map((t) => t.trim());
+  }
+
   async open(): Promise<void> {
     await this.openButton.click();
     await this.dialog.waitFor({ state: "visible", timeout: 10_000 }).catch(() => {});

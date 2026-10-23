@@ -136,17 +136,25 @@ test.describe("VPS-панель — Options: Reset Password", () => {
 // SUITE 4 — Settings под-таб: Boot Type (vlang[354–356])
 // ══════════════════════════════════════════════════════════════════════════════
 test.describe("VPS-панель — Options: Settings / Boot Type", () => {
-  test("@regression TC-VPS-OPT-004 | Settings: секция Boot Type и опции BIOS / UEFI присутствуют", async () => {
+  test("@regression TC-VPS-OPT-004 | Settings: Boot Type - BIOS / UEFI, отмечен ровно один текущий режим", async () => {
     await gotoOptions();
     await optionsPage.clickSubTab("Settings");
 
-    await test.step("заголовок Boot Type виден", async () => {
+    await test.step("заголовок Boot Type и описания BIOS (Legacy Mode) / UEFI видны", async () => {
       await expect(optionsPage.bootTypeLabel).toBeVisible({ timeout: 10_000 });
-    });
-
-    await test.step("опции BIOS (Legacy Mode) и UEFI присутствуют", async () => {
       await expect(optionsPage.biosOption).toBeVisible({ timeout: 8_000 });
       await expect(optionsPage.uefiOption).toBeVisible({ timeout: 8_000 });
+    });
+
+    await test.step("переключатель: две кнопки BIOS и UEFI", async () => {
+      await expect(optionsPage.bootTypeButtons).toHaveText(["BIOS", "UEFI"]);
+      await expect(optionsPage.bootTypeRadios).toHaveCount(2);
+    });
+
+    await test.step("текущий режим отмечен ровно один (0 = BIOS или 1 = UEFI)", async () => {
+      // Отметка ставится после загрузки настроек сервера → poll, а не однократное чтение (C1)
+      await expect.poll(() => optionsPage.checkedBootTypes(), { timeout: 10_000 }).toHaveLength(1);
+      expect(["0", "1"]).toContain((await optionsPage.checkedBootTypes())[0]);
     });
   });
 });

@@ -98,6 +98,20 @@ export class VpsPanelDashboardPage {
     return this.page.locator('[tt="Bookmark"], [tt="Remove bookmark"]').first();
   }
 
+  /**
+   * Имя сервера в списке /servers - кликабельный `span.c-pointer` (ссылки `<a href>` нет,
+   * переход делает JS). Live DOM 23-Oct-2026.
+   */
+  serverNameLink(name: string): Locator {
+    return this.page.locator("span.c-pointer", { hasText: name }).first();
+  }
+
+  /** Открыть сервер кликом по имени в списке. */
+  async openServerFromList(name: string): Promise<void> {
+    await this.serverNameLink(name).click();
+    await this.page.waitForURL(/\/server\//, { timeout: 30_000 });
+  }
+
   /** Дождаться отрисовки списка серверов (по вкладке All Servers). */
   async waitForServersList(): Promise<void> {
     await this.allServersTab.waitFor({ state: "visible", timeout: 15_000 });

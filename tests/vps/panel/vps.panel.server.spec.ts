@@ -150,8 +150,17 @@ test.describe("VPS-панель — список серверов (/servers)", (
     await dashboardPage.waitForServersList();
   });
 
-  test("@regression TC-VPS-SRV-005 | имя тестового сервера видно в списке", async () => {
-    await expect(serverPage.serverNameLabel(TEST_SERVER_NAME)).toBeVisible({ timeout: 15_000 });
+  test("@regression TC-VPS-SRV-005 | имя тестового сервера в списке ведёт на его страницу", async () => {
+    await test.step("имя тестового сервера видно в списке", async () => {
+      await expect(dashboardPage.serverNameLink(TEST_SERVER_NAME)).toBeVisible({ timeout: 15_000 });
+    });
+
+    await dashboardPage.openServerFromList(TEST_SERVER_NAME);
+
+    await test.step("клик по имени открывает страницу именно этого сервера", async () => {
+      await expect(serverPage.page).toHaveURL(new RegExp(`/server/${TEST_SERVER_UUID}`));
+      await expect(serverPage.serverNameLabel(TEST_SERVER_NAME)).toBeVisible({ timeout: 15_000 });
+    });
   });
 
   test("@regression TC-VPS-SRV-006 | вкладки All/Bookmarked есть, переключение работает, есть иконка закладки", async () => {

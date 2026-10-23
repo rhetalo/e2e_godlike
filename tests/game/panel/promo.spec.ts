@@ -2,12 +2,13 @@
  * Game panel — Промо: Boost/Upgrade + Free Premium, структурный, read-only.
  *
  * UPG-001: "Boost my server" (overview) → /upgrade с карточками планов и ценами.
- * PREM-001: модалка "What is a Free Premium?" со списком фич + CTA.
+ * PREM-001: окно Free Premium - сравнение текущего плана и Premium (списки фич) + CTA.
  *
  * ⚠️ ОБА — монетизация: план НЕ выбираем, checkout НЕ проходим, CTA "Get Premium" НЕ жмём.
  * Подтверждено MCP-recon 06-Jun-2026.
  */
-import { test, expect, type BrowserContext } from "@playwright/test";
+import type { BrowserContext } from "@playwright/test";
+import { test, expect } from "../../../fixtures/diagnostics";
 import { GamePanelUpgradePage } from "../../../pages/game/GamePanelUpgradePage";
 import { FreePremiumDialog } from "../../../components/game/FreePremiumDialog";
 import {
@@ -46,15 +47,33 @@ test.describe("@regression [game-panel] Промо: Boost/Upgrade + Free Premium
     });
   });
 
-  test("TC-GP-PREM-001 | Free Premium модалка открывается со списком и CTA (без покупки)", async () => {
-    const premium = new FreePremiumDialog(upgrade.page);
-
-    await test.step("модалка открывается и показывает CTA Get Premium", async () => {
+  test(
+    "TC-GP-PREM-001 | Free Premium: окно сравнивает текущий план и Premium, CTA есть (без покупки)",
+    { tag: "@regression" },
+    async () => {
+      const premium = new FreePremiumDialog(upgrade.page);
       await premium.open();
-      await expect(premium.dialog).toBeVisible();
-      await expect(premium.cta).toBeVisible();
-    });
 
-    await premium.close();
-  });
+      await test.step("окно открыто, CTA Get Premium на месте (не жмём)", async () => {
+        await expect(premium.dialog).toBeVisible();
+        await expect(premium.cta).toBeVisible();
+      });
+
+      await test.step("блок текущего плана: заголовок и непустой список фич", async () => {
+        await expect(premium.currentPlanTitle).toHaveText(/\S/);
+        await expect(premium.currentPlanItems().first()).toBeVisible();
+        expect(await premium.itemTexts(premium.currentPlanItems())).not.toContain("");
+      });
+
+      await test.step("блок Premium: заголовок и список фич не короче текущего плана", async () => {
+        await expect(premium.premiumPlanTitle).toHaveText(/\S/);
+        await expect(premium.premiumPlanItems().first()).toBeVisible();
+        const current = await premium.currentPlanItems().count();
+        expect(await premium.premiumPlanItems().count()).toBeGreaterThanOrEqual(current);
+        expect(await premium.itemTexts(premium.premiumPlanItems())).not.toContain("");
+      });
+
+      await premium.close();
+    },
+  );
 });
