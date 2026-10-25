@@ -128,6 +128,13 @@ test.describe("VPS-панель — управление питанием", () =
 test.describe("VPS-панель — навигация по вкладкам", () => {
   const tabLabels = ["Overview", "Media", "Options", "Network", "Storage", "Sharing"] as const;
 
+  // VirtFusion запоминает последнюю вкладку (контекст общий) → после цикла сервер открывался
+  // сразу на Sharing, Overview с именем сервера скрыт → SRV-005 падал в полном прогоне (25-Oct-2026).
+  test.afterAll(async () => {
+    await serverPage.goto();
+    await serverPage.clickTab("Overview");
+  });
+
   for (const tabLabel of tabLabels) {
     test(`@regression вкладка "${tabLabel}" — кликабельна и становится активной`, async () => {
       await serverPage.goto();
