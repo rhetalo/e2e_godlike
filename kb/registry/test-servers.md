@@ -168,6 +168,7 @@ DEV-418, Bedrock. 🟡
 
 ### 7d7041c8
 DEV-418. 21-Oct-2026 под [DEV-564](../tickets/DEV-564.md): Paper → Bedrock → обратно на Paper, имя `18k6mMw5_462880`. 🟡
+26-Oct-2026 под [DEV-595](../tickets/DEV-595.md): апгрейд на Budget Double / 12 Months → теперь **Premium Double (359), Annually**, следующая оплата 26-Oct-2027. Сократить цикл апгрейдом нельзя.
 
 ### b4089560
 DEV-418. 🟡

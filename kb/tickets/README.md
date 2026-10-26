@@ -50,6 +50,7 @@ updated: 2026-10-26
 | [DEV-571](DEV-571.md) | World Backup - «готово» только после ноды, Continue without backup отменяет незавершённые копии | UP | done | PASS | covered | 2026-10-23 |
 | [DEV-576](DEV-576.md) | Checkout v2 - «Your plan» без разовой настройки модпака в месячной цене | BIL | done | PASS | blocked | 2026-10-26 |
 | [DEV-579](DEV-579.md) | Project Zomboid - лимит -Xmx в ProjectZomboid64.json следует за тарифом | UP | done | PASS | candidate | 2026-10-21 |
+| [DEV-595](DEV-595.md) | Правило «длинный цикл → Premium» - один список циклов для заказа и апгрейда | BIL | in-qa | PASS | no | 2026-10-26 |
 | [TASK-missing-mod-deps](TASK-missing-mod-deps.md) | Окно Missing mod dependencies (автодозагрузка зависимостей) | UP | done | PASS-with-issues | - | 2026-09-29 |
 | [TASK-palworld-settings](TASK-palworld-settings.md) | Palworld Settings: UI-редактор PalWorldSettings.ini | UP | partial | PASS-with-issues | - | 2026-08-20 |
 | [TASK-split-server](TASK-split-server.md) | Split Server: управление ресурсами split-серверов в новой панели | UP | done | PASS | - | 2026-09-10 |

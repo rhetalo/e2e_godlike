@@ -3,7 +3,7 @@ id: KB-REG-ACCOUNTS
 title: Тест-аккаунты (по ролям)
 type: registry
 status: draft
-updated: 2026-10-15
+updated: 2026-10-26
 sources:
   - fixtures/test-data.ts, utils/gameAuth.ts, utils/credentials.ts (имена env)
   - memory: stage-admin-account-scope, dev455-free-server-gift, custom-modpack-setup-qa, v2-subuser-permission-fix
@@ -22,7 +22,8 @@ sources:
 - **Где работает:** UP (ultra.panel), WPGL/BIL (клиентская зона), автотесты.
 - **Env:** `GAME_PANEL_EMAIL` / `GAME_PANEL_PASSWORD`, `CLIENTAREA_EMAIL` / `CLIENTAREA_PASSWORD`.
 - **Можно:** мутации на своих тест-серверах с откатом.
-- **Нельзя:** покупки, оплата, удаление чужого.
+- **Нельзя:** покупки, оплата, удаление чужого. Исключение - по явному ок владельца на конкретную сумму (оплата с кредитов, EUR; 26-Oct заказы под [DEV-595](../tickets/DEV-595.md)).
+- **Не VIP** (`groupid = 0`): на нём проверяются правила подарка Premium при заказе.
 
 ### admin
 
@@ -32,6 +33,8 @@ sources:
 - **Env:** нет, логинится владелец сам.
 - **Правило:** чужие серверы не открывать. В ADM - только по явному ок на действие.
 - **Важно:** часть флагов включена только на этом аккаунте (`cancellation-retention-steps`, `world-backup`), см. [flags.md](flags.md).
+- **VIP (сверено в billing DB 26-Oct):** клиент 379911 в группе VIP (`groupid = 2` = `vip_client_groupid`). Новый заказ VIP-клиента обрабатывает `OrderCreationVipHook`, а он меняет Budget на Premium на **любом** цикле, даже на monthly. Поэтому правила подарка при заказе (quarterly+ → Premium) на этом аккаунте **не проверяются**, только на не-VIP клиенте (shared-owner). Апгрейд через панель (`UpgradeProductAction`) группу не смотрит, его проверять можно ([DEV-595](../tickets/DEV-595.md)).
+- **Админская сессия:** открыть чужой сервер в ultra.panel можно, но апгрейд из-под неё бэкенд отклоняет (`POST /api/v2/tariffs-new/upgrade` → 404 «This upgrade is not available for this service»). Апгрейд проверяется под владельцем сервера.
 
 ### invitee
 

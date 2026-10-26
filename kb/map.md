@@ -126,7 +126,7 @@ mindmap
 - 📄 [Услуги в кабинете, отмена и возврат](products/bil/services-cancellation.md) - 🎫 [DEV-401](tickets/DEV-401.md)
 - 📄 [Free-продукты 282 / 1127 и письма eSputnik](products/bil/free-products.md) - 🎫 [DEV-455](tickets/DEV-455.md)
 - 📄 [Add-on Custom Modpack Setup и trial конструктора](products/bil/addons-trials.md) - 🎫 [DEV-458](tickets/DEV-458.md)
-- 📄 [Тарифы и апгрейд: tariffs-new](products/bil/tariffs.md) - 🎫 [TASK-tariff-list-400](tickets/TASK-tariff-list-400.md)
+- 📄 [Тарифы и апгрейд: tariffs-new, подарок Premium за цикл](products/bil/tariffs.md) - 🎫 [TASK-tariff-list-400](tickets/TASK-tariff-list-400.md), [DEV-595](tickets/DEV-595.md)
 
 ### [UP - игровая панель ultra.panel + API v2](products/up/README.md)
 
