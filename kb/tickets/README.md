@@ -2,7 +2,7 @@
 id: KB-TICKETS
 title: Тикеты и задачи
 type: index
-updated: 2026-10-23
+updated: 2026-10-26
 ---
 
 # Тикеты и задачи
@@ -42,12 +42,13 @@ updated: 2026-10-23
 | [DEV-549](DEV-549.md) | Фікси після DEV-515 - сценарії туторіалу на заглушках, блокування кнопки кастомних модпаків та API | UP | done | PASS | blocked | 2026-10-19 |
 | [DEV-556](DEV-556.md) | Ошибки установки модов понятно в интерфейсе | UP | done | PASS | covered | 2026-10-23 |
 | [DEV-557](DEV-557.md) | Jar больше 100 МБ никогда не получает вердикт сканера клиентских модов | UP, INFRA | done | FAIL | no | 2026-10-23 |
-| [DEV-558](DEV-558.md) | Переустановленный клиентский мод не отключается (правило DEV-275) | UP | done | PASS | candidate | 2026-10-21 |
+| [DEV-558](DEV-558.md) | Переустановленный клиентский мод не отключается (правило DEV-275) | UP | done | PASS | covered | 2026-10-21 |
 | [DEV-562](DEV-562.md) | Steam Port для подключения к серверу Project Zomboid в Overview | UP | done | PASS | no | 2026-10-15 |
 | [DEV-563](DEV-563.md) | Запретить Free-серверам изменять тип сервера (Ultra Panel и PlayFreeHost) | UP, PFH | partial | PASS-with-issues | candidate | 2026-10-15 |
 | [DEV-564](DEV-564.md) | Bedrock NetherNet - UDP-порты под каждый слот вместо transport nethernet | UP | partial | PASS-with-issues | candidate | 2026-10-21 |
 | [DEV-566](DEV-566.md) | Каталог Minecraft-схематик /minecraft-schematics/ | WPGL | done | PASS | blocked | 2026-10-22 |
 | [DEV-571](DEV-571.md) | World Backup - «готово» только после ноды, Continue without backup отменяет незавершённые копии | UP | done | PASS | covered | 2026-10-23 |
+| [DEV-576](DEV-576.md) | Checkout v2 - «Your plan» без разовой настройки модпака в месячной цене | BIL | done | PASS | blocked | 2026-10-26 |
 | [DEV-579](DEV-579.md) | Project Zomboid - лимит -Xmx в ProjectZomboid64.json следует за тарифом | UP | done | PASS | candidate | 2026-10-21 |
 | [TASK-missing-mod-deps](TASK-missing-mod-deps.md) | Окно Missing mod dependencies (автодозагрузка зависимостей) | UP | done | PASS-with-issues | - | 2026-09-29 |
 | [TASK-palworld-settings](TASK-palworld-settings.md) | Palworld Settings: UI-редактор PalWorldSettings.ini | UP | partial | PASS-with-issues | - | 2026-08-20 |
@@ -74,12 +75,12 @@ updated: 2026-10-23
 
 > Собирается из `regression:` карточек. Порядок и детали - в разделе «Регресс» каждой карточки.
 
-- **candidate**: [DEV-558](DEV-558.md) - Переустановленный клиентский мод не отключается (правило DEV-275)
 - **candidate**: [DEV-563](DEV-563.md) - Запретить Free-серверам изменять тип сервера (Ultra Panel и PlayFreeHost)
 - **candidate**: [DEV-564](DEV-564.md) - Bedrock NetherNet - UDP-порты под каждый слот вместо transport nethernet
 - **candidate**: [DEV-579](DEV-579.md) - Project Zomboid - лимит -Xmx в ProjectZomboid64.json следует за тарифом
 - **blocked**: [DEV-546](DEV-546.md) - Блок «Boost your server» на чекауте v2 (только UI и QA-превью под флагом)
 - **blocked**: [DEV-549](DEV-549.md) - Фікси після DEV-515 - сценарії туторіалу на заглушках, блокування кнопки кастомних модпаків та API
 - **blocked**: [DEV-566](DEV-566.md) - Каталог Minecraft-схематик /minecraft-schematics/
+- **blocked**: [DEV-576](DEV-576.md) - Checkout v2 - «Your plan» без разовой настройки модпака в месячной цене
 
 Только упоминаются, карточек нет: DEV-145 (ARK settings), DEV-275, DEV-315 (конструктор модпаков), DEV-321, DEV-441, DEV-523, PROD-126, GROWTH-95.

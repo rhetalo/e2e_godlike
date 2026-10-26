@@ -70,3 +70,9 @@ sources:
 ### registration
 
 - **Env:** `TEST_USER_PASSWORD` - пароль для аккаунтов, которые создаёт `registration-flow.spec.ts`.
+
+### dev576-checkout
+
+- **Кто:** тест-клиент WHMCS DEV576@testmail.com (Client ID 633684 ❓ со слов владельца), создан владельцем под [DEV-576](../tickets/DEV-576.md).
+- **Где:** BIL, чекаут v2. Состоит в списке «Checkout Boost QA clients», вариант b держится без параметра.
+- **Env:** нет, логинится владелец.
