@@ -134,6 +134,7 @@ SkyBlock, на нём воспроизводился баг tariff-list 400. 20-
 квота ядра, сервер сверх лимита, окно частоты [DEV-484](../tickets/DEV-484.md); тестовые бэкапы оставлены. 🟡
 - 23-Oct-2026: ядро **NeoForge 1.21.1** (не Paper), владелец 307989 в раскатке `extension-compatibility` - стенд отказа по лоадеру
   ([DEV-556](../tickets/DEV-556.md)); 477 модов, Essential от теста убран в корзину.
+- 27-Oct-2026: [DEV-586](../tickets/DEV-586.md) prod - создан бэкап `DEV-586-prod-T1-first`, слоты **3/3**; удалять с ок владельца.
 
 ### 7c5aa3cf
 `test`, сплит от [srv:1d7d34aa](#1d7d34aa), Paper 26.2, владелец 307989 в раскатке `extension-compatibility`. Стенд «ядро без модов»:
@@ -144,6 +145,7 @@ legacy 400 и v2 409 `mods_not_supported`, кнопка Upload custom modpack di
 базы `s779874_cjyV9C2A` (id 26530, таблица `dev484_probe`) и `s779874_Ebhns6Vr` (26531), бэкапы баз оставлены до ок владельца. 🟡
 - 23-Oct-2026: слоты 3/3 - на этом держится read-only `backups.slots-full.spec.ts` (TC-GP-BKP-006, заглушка «Slots Limit Reached»).
   Освободишь слот - тест уйдёт в skip с причиной. Env: `GAME_PANEL_SERVER_FULL_SLOTS_UUID`.
+- 27-Oct-2026: [DEV-586](../tickets/DEV-586.md) - отказы «нет слотов» Server/Database (POST отклонён 400), состояние не менялось.
 
 ### 7166c707
 **Одноразовый, деструктив разрешён** (restore, version change и т.п.). 🟢
@@ -253,6 +255,8 @@ Palworld (stage). 🟡
 
 ### 9efab4bc
 Palworld (stage). 🟡
+- 27-Oct-2026: переименован в `DEV-586-throttle` (было `DEV-484-backup-throttle`), [DEV-586](../tickets/DEV-586.md); удалены 3 старых
+  «Pre-modpack-install backup», оставлен `DEV-586-T1-first` (2/3).
 
 ### 62c8289b
 NeoForge `neoforge_test` (stage), проверка unix_args. 🟡

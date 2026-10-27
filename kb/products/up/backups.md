@@ -4,9 +4,9 @@ title: Backups - бэкапы сервера, базы и папки
 type: feature
 product: UP
 status: draft
-updated: 2026-10-23
+updated: 2026-10-27
 verified_on: 2026-10-20        # DEV-484 r2: общая квота, расписания, бэкапы баз; остальное recon 2026-06-09
-tickets: [DEV-418, DEV-452, DEV-484]
+tickets: [DEV-418, DEV-452, DEV-484, DEV-582, DEV-586]
 flags: []
 tests: [tests/game/panel/backups.spec.ts, tests/game/panel/backups.throttle.spec.ts, tests/game/panel/backups.slots-full.spec.ts, tests/game/panel/role.enforcement.spec.ts, tests/game/panel/security.spec.ts]
 sources:
@@ -55,6 +55,8 @@ sources:
 - **Сервер сверх лимита** (бэкапы остались с до-DEV-484): видно, например, «4/3» и заглушку, создать нельзя, удалить можно.
 - **Лимит частоты** (прод: 1 бэкап в 3600 с) общий для серверных и папочных бэкапов. **Вне окна:** пре-инсталл бэкап модпака
   (`is_system_initiated`) и бэкапы баз. Слоты они занимают.
+- **Тост отказа** (с [DEV-586](../../tickets/DEV-586.md), 27-Oct-2026): один; окно занято - «Backup limit reached for this server. Please try again in N minutes» (минуты вверх, последняя минута - «in a minute»), остальное - текст сервера.
+- **Зависший бэкап** (Wings не ответил) через 6 ч становится FAILED и освобождает слот ([DEV-582](../../tickets/DEV-582.md)).
 - **Отказы:** нет слотов - 400 «Cannot create a new backup, this server has reached its limit of N backups.», у установки модпака 409
   `no_free_backup_slots` и окно «No Free Backup Slots»; окно занято - 429 «Only N backups may be generated within T second span of time.».
 - **Расписания:** шаблон без архива слоты не тратит; при полных слотах запуск пропускается (интервальное переносится на интервал,
@@ -128,7 +130,7 @@ OBS-2 пропущенное одноразовое расписание вис�
 | Общая квота, `meta.quota`, расписания, бэкапы баз (DEV-484) | руками, prod 20-Oct-2026 ([артефакт](https://claude.ai/artifact/537r7XRR8NiYidKCqNWy5C)), автотеста нет | руками |
 | Restore, Rename, Lock, Database / Folder, Ignored Files, создание расписания | не покрыто | ❌ |
 | Общая квота `meta.quota`: контракт и счётчик used/limit | `backups.spec.ts` (TC-GP-BKP-004), [DEV-484](../../tickets/DEV-484.md) | ✅ read-only |
-| Окно частоты: `throttled` + `retry_after`, 429 с единым текстом, тост, строки нет | `backups.throttle.spec.ts` (TC-GP-BKP-005), mut-сервер fd965a60 | ✅ мутация |
+| Окно частоты: `throttled` + `retry_after`, 429 с единым текстом, `error_code` + `Retry-After`, ровно один тост с минутами ([DEV-586](../../tickets/DEV-586.md)), строки нет | `backups.throttle.spec.ts` (TC-GP-BKP-005), mut-сервер fd965a60 | ✅ мутация |
 | Заглушка «Slots Limit Reached» (free = 0): Create неактивна, Upgrade, счётчик/футер, удаление доступно | `backups.slots-full.spec.ts` (TC-GP-BKP-006), read-only на 9c891502 (3/3) | ✅ read-only |
 
 ## История
@@ -141,3 +143,5 @@ OBS-2 пропущенное одноразовое расписание вис�
 | 16-Sep-2026 | [DEV-484](../../tickets/DEV-484.md) | Пре-инсталл бэкап вне лимита частоты (QA 16-Oct-2026) |
 | 16-Oct-2026 | [DEV-452](../../tickets/DEV-452.md) | Описаны два хранилища и раздельные счётчики (по QA DEV-452/DEV-484) |
 | 20-Oct-2026 | [DEV-484](../../tickets/DEV-484.md) | Общая квота на 4 таблицы, `meta.quota`, «Slots Limit Reached», расписания (QA prod PASS) |
+| 27-Oct-2026 | [DEV-582](../../tickets/DEV-582.md) | Зависшие PENDING старше 6 ч → FAILED раз в 30 мин, слот освобождается; проба фальшивых COMPLETED удалена (QA prod PASS, SQL) |
+| 27-Oct-2026 | [DEV-586](../../tickets/DEV-586.md) | Отказ в бэкапе - один тост; по окну «Backup limit reached… try again in N minutes» (QA prod PASS) |

@@ -4,7 +4,7 @@ title: API - backups (список, квота, ручные бэкапы и б�
 type: api
 product: UP
 status: draft
-updated: 2026-10-23
+updated: 2026-10-27
 verified_on: 2026-10-20        # DEV-484 итоговая проверка на prod (panel!1691 + new-panel!564)
 tickets: [DEV-452, DEV-484, DEV-418]
 features: [UP/backups, UP/modpack-catalog]
@@ -115,13 +115,16 @@ sources:
 ```
 
 ```json
-{ "success": false, "message": "Only 1 backups may be generated within a 3600 second span of time." }
+{ "success": false, "message": "Only 1 backups may be generated within a 3600 second span of time.",
+  "error_code": "backup_throttled", "retry_after": 3575 }
 ```
 
 - Текст 429 после DEV-484 **один для всех источников** («Only N backups…», без слова `instances`; до 20-Oct ручной бэкап отвечал
   «Only N backup instances…»). Шаблон: `Only {limit} backups may be generated within a {period} second span of time.`
-- Заголовка `Retry-After` в v2 **нет** ✅: время ждать берётся из `meta.quota.retry_after` списка.
-- В UI на 429 два тоста: технический «Request failed with status code 429» и текст бэка, времени ожидания нет ([OBS-1](../../../tickets/DEV-484.md#находки)).
+- С [DEV-586](../../../tickets/DEV-586.md) (`panel!1708`, prod 26-Oct-2026) 429 несёт `error_code: backup_throttled`, `retry_after` (секунды)
+  и заголовок `Retry-After` с тем же значением ✅ prod 27-Oct-2026 (instances и folders). До этого заголовка не было.
+- UI (`new-panel!574`): один тост «Backup limit reached for this server. Please try again in N minutes» (N = ceil(retry_after/60),
+  ≤ 60 с - «in a minute», `null` - текст про саппорт); 400 и 422 - текст сервера одним тостом. Было два тоста ([DEV-484/OBS-1](../../../tickets/DEV-484.md#находки)).
 
 ## POST /servers/{uuid}/backups/databases
 
@@ -172,6 +175,8 @@ sources:
 | 2026-09-09 | [DEV-452](../../../tickets/DEV-452.md) | префлайт троттлинга для установки модпака (счётчик `backups`) |
 | 2026-09-16 | [DEV-484](../../../tickets/DEV-484.md) | `panel!1611` (+ `!1614` тест): пре-инсталл бэкап вне лимита частоты, флаг `is_system_initiated` |
 | 2026-10-20 | [DEV-484](../../../tickets/DEV-484.md) | [panel!1691](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1691): общая квота по 4 таблицам, `meta.quota`, единый текст 429, расписания не «умирают» при отказе, хотфикс бэкапа чужой базы (404) и PUT `database_id`. [new-panel!564](https://git.godlike.ovh/panel/godlike-new-panel/-/merge_requests/564): счётчик из `meta.quota`, заглушка «Slots Limit Reached» |
+| 2026-10-26 | [DEV-586](../../../tickets/DEV-586.md) | `panel!1708`: 429 создания бэкапа с `error_code: backup_throttled`, `retry_after`, `Retry-After`; `new-panel!574` (27-Oct): один тост с минутами |
+| 2026-10-27 | [DEV-582](../../../tickets/DEV-582.md) | `panel!1713`: зависшие PENDING (старше `backups.prune_age` 360 мин) → FAILED командой `gl:backups:fail-stale-pending` раз в 30 мин; бэкфил `status` |
 
 **Как проверено.** Prod, 20-Oct-2026, серверы [srv:f8e7df56](../../../registry/test-servers.md#f8e7df56) (квота ядра, сверх лимита, окно),
 [srv:546bc52e](../../../registry/test-servers.md#546bc52e) (расписания), [srv:ca326e28](../../../registry/test-servers.md#ca326e28) (`retain_count`),
