@@ -4,6 +4,8 @@
  *
  * BKP-005: окно занято → meta.quota `refusal=throttled` + `retry_after`, Create Backup → 429 с единым текстом,
  *          в UI тост ошибки, строки нового бэкапа нет.
+ *          DEV-586 (prod 27-Oct-2026): в 429 `error_code: backup_throttled` + `retry_after` = заголовок Retry-After,
+ *          в UI ровно один тост «Backup limit reached… try again in N minutes» (было два).
  *
  * ⚠️ МУТАЦИЯ, только test_e2e_mut_java (fd965a60, D-026; ок владельца 23-Oct-2026). Если окно свободно - создаём
  * один бэкап, чтобы его занять. Повторный прогон в пределах часа окно уже застаёт занятым и бэкап не создаёт.
@@ -24,6 +26,12 @@ import {
 
 const OCCUPY = "qa-484-window-a"; // занимает окно частоты (создаётся, только если окно свободно)
 const REFUSED = "qa-484-window-b"; // должен получить 429 и не появиться
+
+/** Текст тоста отказа по окну (DEV-586, new-panel!574): минуты округляются вверх, последняя минута - «in a minute». */
+const throttledToastText = (retryAfter: number): string =>
+  `Backup limit reached for this server. Please try again ${
+    retryAfter <= 60 ? "in a minute" : `in ${Math.ceil(retryAfter / 60)} minutes`
+  }.`;
 
 test.describe.configure({ mode: "serial" });
 
@@ -76,13 +84,17 @@ test.describe("@regression [game-panel] Бэкапы: лимит частоты 
 
       const result = await backups.submitBackupCapturing(REFUSED);
 
-      await test.step("POST backups/instances → 429 с единым текстом лимита", async () => {
+      await test.step("POST backups/instances → 429 с единым текстом лимита, error_code и retry_after (DEV-586)", async () => {
         expect(result.status).toBe(429);
         expect(result.message).toMatch(/^Only \d+ backups may be generated within a \d+ second span of time\.$/);
+        expect(result.errorCode).toBe("backup_throttled");
+        expect(result.retryAfter ?? 0).toBeGreaterThan(0);
+        expect(result.retryAfterHeader).toBe(String(result.retryAfter));
       });
 
-      await test.step("в UI тост ошибки, строки отклонённого бэкапа нет", async () => {
-        await expect(backups.errorToasts().last()).toBeVisible();
+      await test.step("в UI ровно один тост с минутами до повтора (DEV-586), строки отклонённого бэкапа нет", async () => {
+        await expect(backups.errorToasts()).toContainText(throttledToastText(result.retryAfter ?? 0));
+        await expect(backups.errorToasts()).toHaveCount(1); // до DEV-586 было два: «Request failed with status code 429» + текст бэка
         await backups.refresh();
         await expect(backups.backupRow(REFUSED)).toHaveCount(0);
       });

@@ -79,7 +79,13 @@ export class GamePanelBackupsPage extends GamePanelBasePage {
    * Нажать «Create Backup» и вернуть ответ POST backups/instances (202 / 400 / 429), не дожидаясь строки:
    * при отказе строка не появляется. Слушатель ставится до клика.
    */
-  async submitBackupCapturing(name: string): Promise<{ status: number; message: string }> {
+  async submitBackupCapturing(name: string): Promise<{
+    status: number;
+    message: string;
+    errorCode: string | null;
+    retryAfter: number | null;
+    retryAfterHeader: string | null;
+  }> {
     await this.selectServer();
     await this.nameInput.fill(name);
     const [resp] = await Promise.all([
@@ -89,8 +95,15 @@ export class GamePanelBackupsPage extends GamePanelBasePage {
       ),
       this.createButton.click({ timeout: 15_000 }),
     ]);
-    const body = (await resp.json().catch(() => ({}))) as { message?: string };
-    return { status: resp.status(), message: body.message ?? "" };
+    // 429 с DEV-586: error_code + retry_after в теле и заголовок Retry-After
+    const body = (await resp.json().catch(() => ({}))) as { message?: string; error_code?: string; retry_after?: number };
+    return {
+      status: resp.status(),
+      message: body.message ?? "",
+      errorCode: body.error_code ?? null,
+      retryAfter: body.retry_after ?? null,
+      retryAfterHeader: resp.headers()["retry-after"] ?? null,
+    };
   }
 
   // ── заглушка «Slots Limit Reached» (free = 0) ──
