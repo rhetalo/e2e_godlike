@@ -1,12 +1,14 @@
-"""Зеркало KB в Notion: git - источник, Notion - витрина для людей. Пилот: UP (Фичи + Тикеты + Флаги).
+"""Зеркало KB в Notion: git - источник, Notion - витрина для людей.
 
 Usage: python -I kb/_tools/notion_sync.py <repo_root> [--dry-run] [--force]
 Env (.env в корне репо или окружение): NOTION_TOKEN (обязателен), NOTION_KB_ROOT (id корневой страницы, есть дефолт).
 
 Как работает:
-- под корневой страницей ищет (или создаёт) три базы: «Фичи UP», «Тикеты», «Флаги»; связи Фичи <-> Тикеты,
-  Фичи <-> Флаги, Флаги <-> Тикеты двусторонние, поэтому в Notion всё кликабельно в обе стороны;
+- под корневой страницей ищет (или создаёт) пять баз: «Продукты», «Фичи», «Тикеты», «Флаги», «Словарь»;
+  связи двусторонние (Продукт <-> Фичи/Тикеты/Словарь, Фичи <-> Тикеты/Флаги/Словарь, Флаги <-> Тикеты),
+  поэтому в Notion всё кликабельно в обе стороны;
 - строка базы находится по свойству «KB ID», поэтому повторный запуск обновляет, а не плодит дубли;
+  строки, которых больше нет в kb/, уходят в корзину Notion (archived);
 - проход 1 создаёт недостающие строки, проход 2 пишет свойства, связи и тело страницы
   (ссылки на другие страницы KB становятся ссылками на их Notion-страницы, остальное - на GitLab);
 - тело перезаписывается только если поменялся хэш исходника (свойство «sync_hash»), --force - всегда.
@@ -22,8 +24,8 @@ API = "https://api.notion.com/v1"
 NOTION_VERSION = "2022-06-28"
 DEFAULT_ROOT = "4061d168df3f80da83b8c46b559b5ef5"  # «godlike KB» в личном workspace владельца
 GITLAB_BLOB = "https://git.godlike.ovh/e2e/godlike-tests/-/blob/main/"
-PRODUCT = "up"
-DB_FEATURES, DB_TICKETS, DB_FLAGS = "Фичи UP", "Тикеты", "Флаги"
+DB = {"p": ("Продукты", "🧭"), "f": ("Фичи", "🎮"), "t": ("Тикеты", "🎫"), "g": ("Флаги", "🚩"), "w": ("Словарь", "📖")}
+LEGACY_TITLES = {"f": ["Фичи UP"]}  # имя базы из пилота (27-Oct-2026), переименовывается на месте
 RT_LIMIT = 1900  # лимит Notion 2000 символов на кусок rich_text
 CODE_LANGS = {"ts": "typescript", "typescript": "typescript", "js": "javascript", "javascript": "javascript",
               "json": "json", "bash": "bash", "sh": "shell", "shell": "shell", "python": "python", "py": "python",
@@ -136,7 +138,7 @@ def md_to_blocks(body, resolve):
             flush()
             rows = []
             while i < len(lines) and lines[i].strip().startswith("|"):
-                cells = [c.strip() for c in re.split(r"(?<!\\)\|", lines[i].strip().strip("|"))]
+                cells = table_cells(lines[i])
                 if not all(re.fullmatch(r":?-{2,}:?", c) for c in cells if c):
                     rows.append(cells)
                 i += 1
@@ -190,6 +192,10 @@ def md_to_blocks(body, resolve):
     return blocks
 
 
+def table_cells(line):
+    return [c.strip() for c in re.split(r"(?<!\\)\|", line.strip().strip("|"))]
+
+
 # ---------- источники ----------
 
 def read_md(path):
@@ -199,43 +205,55 @@ def read_md(path):
     return fm, text[m.end():] if m else text, hashlib.sha1(text.encode()).hexdigest()[:16]
 
 
-def first_heading(body):
-    m = re.search(r"^#\s+(.+)$", body, re.M)
-    return m.group(1).strip() if m else ""
-
-
 def load(root):
+    """Источники по видам: p - обзоры продуктов, f - фичи и API, t - тикеты, g - флаги, w - термины словаря."""
     kb = os.path.join(root, "kb")
-    features, tickets, flags = {}, {}, {}
-    pdir = os.path.join(kb, "products", PRODUCT)
-    for dirpath, _, files in os.walk(pdir):
+    items = {k: {} for k in DB}
+    for dirpath, _, files in os.walk(os.path.join(kb, "products")):
         for f in sorted(files):
             if f.endswith(".md"):
                 path = os.path.join(dirpath, f)
                 fm, body, h = read_md(path)
-                features[fm["id"]] = dict(fm=fm, body=body, hash=h, path=path)
-    wanted = {t for x in features.values() for t in as_list(x["fm"].get("tickets"))}
+                kind = "p" if fm.get("type") == "product-overview" else "f"
+                items[kind][fm["id"]] = dict(fm=fm, body=body, hash=h, path=path)
     for f in sorted(os.listdir(os.path.join(kb, "tickets"))):
-        if not f.endswith(".md") or f == "README.md":
-            continue
-        path = os.path.join(kb, "tickets", f)
-        fm, body, h = read_md(path)
-        if PRODUCT.upper() in as_list(fm.get("product")) or fm.get("id") in wanted:
-            tickets[fm["id"]] = dict(fm=fm, body=body, hash=h, path=path)
+        if f.endswith(".md") and f != "README.md":
+            path = os.path.join(kb, "tickets", f)
+            fm, body, h = read_md(path)
+            items["t"][fm["id"]] = dict(fm=fm, body=body, hash=h, path=path)
     # флаги: разделы «### name» реестра; флаги из фич без раздела - строки «нет в реестре»
     reg_path = os.path.join(kb, "registry", "flags.md")
     _, reg_body, _ = read_md(reg_path)
     for m in re.finditer(r"^###\s+(\S+)\s*\n(.*?)(?=^#{2,3}\s|\Z)", reg_body, re.M | re.S):
         name, section = m.group(1), m.group(2).strip()
         st = re.search(r"\*\*Состояние:\*\*\s*(.+)", section)
-        flags[name] = dict(body=section, hash=hashlib.sha1(section.encode()).hexdigest()[:16], path=reg_path,
-                           state=st.group(1).strip() if st else ("❓ " + section.splitlines()[0][:150] if section.startswith("❓") else ""),
-                           tickets=sorted(set(re.findall(r"\(\.\./tickets/([A-Z]+-[\w-]+)\.md", section))), registered=True)
-    for x in features.values():
+        items["g"][name] = dict(body=section, hash=hashlib.sha1(section.encode()).hexdigest()[:16], path=reg_path,
+                                state=st.group(1).strip() if st else ("❓ " + section.splitlines()[0][:150] if section.startswith("❓") else ""),
+                                tickets=sorted(set(re.findall(r"\(\.\./tickets/([A-Z]+-[\w-]+)\.md", section))), registered=True)
+    for x in items["f"].values():
         for name in as_list(x["fm"].get("flags")):
-            flags.setdefault(name, dict(body="Флага нет в kb/registry/flags.md - описать там.", hash="unregistered",
-                                        path=reg_path, state="", tickets=[], registered=False))
-    return features, tickets, flags
+            items["g"].setdefault(name, dict(body="Флага нет в kb/registry/flags.md - описать там.", hash="unregistered",
+                                             path=reg_path, state="", tickets=[], registered=False))
+    # словарь: строки таблиц «| **Термин** | Что это | Подробно |» под заголовками «## Раздел»
+    gl_path = os.path.join(kb, "glossary.md")
+    _, gl_body, _ = read_md(gl_path)
+    section = ""
+    for line in gl_body.splitlines():
+        hm = re.match(r"^##\s+(.+)$", line)
+        if hm:
+            section = hm.group(1).strip()
+            continue
+        if not line.startswith("|"):
+            continue
+        cells = table_cells(line)
+        if len(cells) < 3 or cells[0] in ("Термин", "") or re.fullmatch(r":?-{2,}:?", cells[0]):
+            continue
+        term = cells[0].replace("**", "").replace("`", "").strip()
+        key = term if term not in items["w"] else f"{term} ({section})"
+        raw = "|".join(cells)
+        items["w"][key] = dict(term=term, section=section, definition=cells[1], more=cells[2], path=gl_path,
+                               hash=hashlib.sha1(raw.encode()).hexdigest()[:16])
+    return items
 
 
 # ---------- синк ----------
@@ -258,42 +276,61 @@ def select(val):
 def ensure_databases(api, root_id):
     existing = {b["child_database"]["title"]: b["id"] for b in api.paginate("GET", f"/blocks/{root_id}/children")
                 if b["type"] == "child_database"}
+    ids = {}
 
-    def create(title, emoji, props):
+    def create(kind, props):
+        title, emoji = DB[kind]
+        for old in LEGACY_TITLES.get(kind, []):
+            if title not in existing and old in existing:
+                api.call("PATCH", f"/databases/{existing[old]}", {"title": [{"type": "text", "text": {"content": title}}]})
+                existing[title] = existing.pop(old)
+                print(f"  база «{old}» переименована в «{title}»")
         if title in existing:
-            return existing[title]
-        res = api.call("POST", "/databases", {"parent": {"type": "page_id", "page_id": root_id}, "is_inline": False,
-                                              "icon": {"type": "emoji", "emoji": emoji},
-                                              "title": [{"type": "text", "text": {"content": title}}], "properties": props})
-        print(f"  создана база «{title}»")
-        return res["id"]
+            db_id = existing[title]
+            have = api.call("GET", f"/databases/{db_id}")["properties"]
+            # тип свойства через API не меняется: свойство другого типа удаляем и создаём заново
+            drop = {n: None for n, p in props.items() if n in have and next(iter(p)) != have[n]["type"]
+                    and not (next(iter(p)) == "title" or have[n]["type"] == "title")}
+            if drop:
+                api.call("PATCH", f"/databases/{db_id}", {"properties": drop})
+            missing = {n: p for n, p in props.items() if n not in have or n in drop}
+            if missing:
+                api.call("PATCH", f"/databases/{db_id}", {"properties": missing})
+                print(f"  «{title}»: добавлены свойства {', '.join(missing)}")
+        else:
+            db_id = api.call("POST", "/databases", {"parent": {"type": "page_id", "page_id": root_id}, "is_inline": False,
+                                                    "icon": {"type": "emoji", "emoji": emoji},
+                                                    "title": [{"type": "text", "text": {"content": title}}],
+                                                    "properties": props})["id"]
+            print(f"  создана база «{title}»")
+        ids[kind] = db_id
 
-    common = {"KB ID": {"rich_text": {}}, "Исходник": {"url": {}}, "sync_hash": {"rich_text": {}}}
-    tickets_db = create(DB_TICKETS, "🎫", dict(common, **{
-        "Название": {"title": {}}, "Продукт": {"multi_select": {}}, "Статус": {"select": {}},
-        "QA": {"select": {}}, "Регресс": {"select": {}}, "Сверено": {"date": {}}, "Обновлено": {"date": {}},
-        "Jira": {"url": {}}, "Артефакт": {"url": {}}}))
-    flags_db = create(DB_FLAGS, "🚩", dict(common, **{
-        "Название": {"title": {}}, "Состояние": {"rich_text": {}}, "В реестре": {"checkbox": {}},
-        "Тикеты": {"relation": {"database_id": tickets_db, "type": "dual_property", "dual_property": {}}}}))
-    features_db = create(DB_FEATURES, "🎮", dict(common, **{
-        "Название": {"title": {}}, "Тип": {"select": {}}, "Статус доки": {"select": {}},
-        "Сверено": {"date": {}}, "Обновлено": {"date": {}}, "Тесты": {"rich_text": {}}, "Автотест": {"checkbox": {}},
-        "Тикеты": {"relation": {"database_id": tickets_db, "type": "dual_property", "dual_property": {}}},
-        "Флаги": {"relation": {"database_id": flags_db, "type": "dual_property", "dual_property": {}}}}))
+    def rel(kind):
+        return {"relation": {"database_id": ids[kind], "type": "dual_property", "dual_property": {}}}
+
+    common = {"Название": {"title": {}}, "KB ID": {"rich_text": {}}, "Исходник": {"url": {}}, "sync_hash": {"rich_text": {}}}
+    doc = {"Статус доки": {"select": {}}, "Сверено": {"date": {}}, "Обновлено": {"date": {}}}
+    create("p", dict(common, **doc))
+    create("t", dict(common, **{"Продукт": rel("p"), "Статус": {"select": {}}, "QA": {"select": {}}, "Регресс": {"select": {}},
+                                "Сверено": {"date": {}}, "Обновлено": {"date": {}}, "Jira": {"url": {}}, "Артефакт": {"url": {}}}))
+    create("g", dict(common, **{"Состояние": {"rich_text": {}}, "В реестре": {"checkbox": {}}, "Тикеты": rel("t")}))
+    create("f", dict(common, **doc, **{"Продукт": rel("p"), "Тип": {"select": {}}, "Тесты": {"rich_text": {}},
+                                       "Автотест": {"checkbox": {}}, "Тикеты": rel("t"), "Флаги": rel("g")}))
+    create("w", dict(common, **{"Раздел": {"select": {}}, "Определение": {"rich_text": {}}, "Продукт": rel("p"),
+                                "Фича": rel("f"), "Подробно": {"url": {}}}))
     # обратные стороны связей Notion называет «Related to ...» - даём человеческие имена
-    names = {features_db: "Фичи", flags_db: "Флаги"}
-    for db_id in (tickets_db, flags_db):
+    names = {ids[k].replace("-", ""): DB[k][0] for k in ids}
+    for db_id in ids.values():
         props = api.call("GET", f"/databases/{db_id}")["properties"]
         renames = {}
         for name, p in props.items():
             if p["type"] == "relation" and name.startswith("Related to"):
-                new = names.get(p["relation"]["database_id"].replace("-", ""), names.get(p["relation"]["database_id"]))
-                if new and new not in props:
+                new = names.get(p["relation"]["database_id"].replace("-", ""))
+                if new and new not in props and new not in [r["name"] for r in renames.values()]:
                     renames[name] = {"name": new}
         if renames:
             api.call("PATCH", f"/databases/{db_id}", {"properties": renames})
-    return features_db, tickets_db, flags_db
+    return ids
 
 
 def rows_by_id(api, db_id):
@@ -313,6 +350,17 @@ def replace_body(api, page_id, blocks):
         api.call("PATCH", f"/blocks/{page_id}/children", {"children": blocks[k:k + 90]})
 
 
+def sync_page(api, row, props, item, resolve, force):
+    body_changed = force or row["hash"] != item["hash"]
+    if body_changed:
+        props = dict(props, sync_hash={"rich_text": rt(item["hash"])})
+    api.call("PATCH", f"/pages/{row['id']}", {"properties": props})
+    if body_changed and "body" in item:
+        replace_body(api, row["id"], md_to_blocks(item["body"], resolve))
+    row["hash"] = item["hash"]
+    return int(body_changed)
+
+
 def main(argv):
     root = argv[1] if len(argv) > 1 and not argv[1].startswith("--") else "."
     dry, force = "--dry-run" in argv, "--force" in argv
@@ -326,98 +374,115 @@ def main(argv):
     token = os.environ.get("NOTION_TOKEN") or env.get("NOTION_TOKEN")
     root_id = os.environ.get("NOTION_KB_ROOT") or env.get("NOTION_KB_ROOT") or DEFAULT_ROOT
 
-    features, tickets, flags = load(root)
-    print(f"KB: фич {len(features)}, тикетов {len(tickets)}, флагов {len(flags)}")
-    by_path = {os.path.normpath(x["path"]): ("f", k) for k, x in features.items()}
-    by_path.update({os.path.normpath(x["path"]): ("t", k) for k, x in tickets.items()})
-    pages = {"f": {}, "t": {}, "g": {}}
+    items = load(root)
+    print("KB: " + ", ".join(f"{DB[k][0]} {len(v)}" for k, v in items.items()))
+    by_path = {os.path.normpath(x["path"]): (k, i) for k in "pft" for i, x in items[k].items()}
     flags_reg = os.path.normpath(os.path.join(root, "kb", "registry", "flags.md"))
+    pages = {k: {} for k in DB}
+
+    def target(href, src_path):
+        """(вид, KB ID) страницы KB, на которую ведёт относительная ссылка, или None."""
+        path, _, anchor = href.partition("#")
+        if re.match(r"^[a-z]+:", href) or not path:
+            return None
+        full = os.path.normpath(os.path.join(os.path.dirname(src_path), path))
+        if full == flags_reg and anchor in items["g"]:
+            return "g", anchor
+        return by_path.get(full)
 
     def resolver(src_path):
         def resolve(href):
             if re.match(r"^[a-z]+:", href):
                 return href
-            target, _, anchor = href.partition("#")
-            if not target:
-                return GITLAB_BLOB + os.path.relpath(src_path, root).replace(os.sep, "/") + "#" + anchor
-            full = os.path.normpath(os.path.join(os.path.dirname(src_path), target))
-            hit = by_path.get(full)
+            hit = target(href, src_path)
             if hit and hit[1] in pages[hit[0]]:
                 return "https://www.notion.so/" + pages[hit[0]][hit[1]]["id"].replace("-", "")
-            if full == flags_reg and anchor in pages["g"]:
-                return "https://www.notion.so/" + pages["g"][anchor]["id"].replace("-", "")
+            path, _, anchor = href.partition("#")
+            full = os.path.normpath(os.path.join(os.path.dirname(src_path), path)) if path else src_path
             return GITLAB_BLOB + os.path.relpath(full, root).replace(os.sep, "/") + ("#" + anchor if anchor else "")
         return resolve
 
     if dry:
-        for k, x in list(features.items()) + list(tickets.items()):
-            n = len(md_to_blocks(x["body"], resolver(x["path"])))
-            print(f"  {k}: блоков {n}")
+        for k in "pft":
+            for i, x in items[k].items():
+                md_to_blocks(x["body"], resolver(x["path"]))
+        unreg = [k for k, v in items["g"].items() if not v["registered"]]
+        print(f"разбор ок; флаги вне реестра: {unreg or 'нет'}")
         return 0
     if not token:
         print("NOTION_TOKEN не задан (.env или окружение)")
         return 1
 
     api = Notion(token)
-    fdb, tdb, gdb = ensure_databases(api, root_id)
-    pages["f"], pages["t"], pages["g"] = rows_by_id(api, fdb), rows_by_id(api, tdb), rows_by_id(api, gdb)
+    ids = ensure_databases(api, root_id)
+    for k in DB:
+        pages[k] = rows_by_id(api, ids[k])
 
-    # проход 1: недостающие строки, чтобы у всех появился page id для ссылок и связей
-    for kind, db, items, title in (("f", fdb, features, lambda k, x: x["fm"].get("title") or k),
-                                   ("t", tdb, tickets, lambda k, x: f"{k} - {x['fm'].get('title', '')}"),
-                                   ("g", gdb, flags, lambda k, x: k)):
-        for k, x in items.items():
-            if k not in pages[kind]:
-                res = api.call("POST", "/pages", {"parent": {"database_id": db}, "properties": {
-                    "Название": {"title": rt(title(k, x))}, "KB ID": {"rich_text": rt(k)}}})
-                pages[kind][k] = dict(id=res["id"], hash="")
-                print(f"  + {k}")
+    titles = {"p": lambda i, x: x["fm"].get("title") or i, "f": lambda i, x: x["fm"].get("title") or i,
+              "t": lambda i, x: f"{i} - {x['fm'].get('title', '')}", "g": lambda i, x: i, "w": lambda i, x: x["term"]}
+    # проход 1: недостающие строки (чтобы у всех появился page id для ссылок и связей) и уборка удалённых из kb/
+    archived = 0
+    for k in DB:
+        for i, x in items[k].items():
+            if i not in pages[k]:
+                res = api.call("POST", "/pages", {"parent": {"database_id": ids[k]}, "properties": {
+                    "Название": {"title": rt(titles[k](i, x))}, "KB ID": {"rich_text": rt(i)}}})
+                pages[k][i] = dict(id=res["id"], hash="")
+                print(f"  + {DB[k][0]}: {i}")
+        for i in [i for i in pages[k] if i not in items[k]]:
+            api.call("PATCH", f"/pages/{pages[k].pop(i)['id']}", {"archived": True})
+            archived += 1
+            print(f"  - {DB[k][0]}: {i} (нет в kb/)")
 
-    def rel(kind, ids):
-        return {"relation": [{"id": pages[kind][i]["id"]} for i in ids if i in pages[kind]]}
+    def rel(kind, keys):
+        return {"relation": [{"id": pages[kind][i]["id"]} for i in keys if i in pages[kind]]}
 
-    def src(path):
-        return {"url": GITLAB_BLOB + os.path.relpath(path, root).replace(os.sep, "/")}
+    def base(k, i, x):
+        return {"Название": {"title": rt(titles[k](i, x))}, "KB ID": {"rich_text": rt(i)},
+                "Исходник": {"url": GITLAB_BLOB + os.path.relpath(x["path"], root).replace(os.sep, "/")}}
+
+    def doc(fm):
+        return {"Статус доки": select(fm.get("status")), "Сверено": date(fm.get("verified_on")),
+                "Обновлено": date(fm.get("updated"))}
 
     # проход 2: свойства и тело
     changed = 0
-    for k, x in tickets.items():
+    for i, x in items["p"].items():
+        changed += sync_page(api, pages["p"][i], dict(base("p", i, x), **doc(x["fm"])), x, resolver(x["path"]), force)
+    for i, x in items["t"].items():
         fm = x["fm"]
         artifacts = re.findall(r"https://claude\.ai/(?:code/)?artifact/\S+", fm.get("sources", ""))
-        props = {"Название": {"title": rt(f"{k} - {fm.get('title', '')}")}, "KB ID": {"rich_text": rt(k)},
-                 "Продукт": {"multi_select": [{"name": p} for p in as_list(fm.get("product"))]},
-                 "Статус": select(fm.get("status")), "QA": select(fm.get("qa_verdict")),
-                 "Регресс": select(fm.get("regression")), "Сверено": date(fm.get("verified_on")),
-                 "Обновлено": date(fm.get("updated")), "Jira": {"url": fm.get("jira") or None},
-                 "Артефакт": {"url": artifacts[-1].rstrip(").,") if artifacts else None}, "Исходник": src(x["path"])}
-        changed += sync_page(api, pages["t"][k], props, x, resolver(x["path"]), force)
-    for k, x in flags.items():
-        props = {"Название": {"title": rt(k)}, "KB ID": {"rich_text": rt(k)}, "Состояние": {"rich_text": rt(x["state"])},
-                 "В реестре": {"checkbox": x["registered"]}, "Тикеты": rel("t", x["tickets"]), "Исходник": src(x["path"])}
-        changed += sync_page(api, pages["g"][k], props, x, resolver(x["path"]), force)
-    for k, x in features.items():
+        props = dict(base("t", i, x), **{
+            "Продукт": rel("p", as_list(fm.get("product"))), "Статус": select(fm.get("status")),
+            "QA": select(fm.get("qa_verdict")), "Регресс": select(fm.get("regression")),
+            "Сверено": date(fm.get("verified_on")), "Обновлено": date(fm.get("updated")),
+            "Jira": {"url": fm.get("jira") or None},
+            "Артефакт": {"url": artifacts[-1].rstrip(").,") if artifacts else None}})
+        changed += sync_page(api, pages["t"][i], props, x, resolver(x["path"]), force)
+    for i, x in items["g"].items():
+        props = dict(base("g", i, x), **{"Состояние": {"rich_text": rt(x["state"])}, "В реестре": {"checkbox": x["registered"]},
+                                         "Тикеты": rel("t", x["tickets"])})
+        changed += sync_page(api, pages["g"][i], props, x, resolver(x["path"]), force)
+    for i, x in items["f"].items():
         fm = x["fm"]
         tests = as_list(fm.get("tests"))
-        props = {"Название": {"title": rt(fm.get("title") or k)}, "KB ID": {"rich_text": rt(k)},
-                 "Тип": select(fm.get("type")), "Статус доки": select(fm.get("status")),
-                 "Сверено": date(fm.get("verified_on")), "Обновлено": date(fm.get("updated")),
-                 "Тесты": {"rich_text": rt("\n".join(tests))}, "Автотест": {"checkbox": bool(tests)},
-                 "Тикеты": rel("t", as_list(fm.get("tickets"))), "Флаги": rel("g", as_list(fm.get("flags"))),
-                 "Исходник": src(x["path"])}
-        changed += sync_page(api, pages["f"][k], props, x, resolver(x["path"]), force)
-    print(f"Готово: тел страниц перезаписано {changed}. Корень: https://www.notion.so/{root_id.replace('-', '')}")
+        props = dict(base("f", i, x), **doc(fm), **{
+            "Продукт": rel("p", as_list(fm.get("product"))), "Тип": select(fm.get("type")),
+            "Тесты": {"rich_text": rt("\n".join(tests))}, "Автотест": {"checkbox": bool(tests)},
+            "Тикеты": rel("t", as_list(fm.get("tickets"))), "Флаги": rel("g", as_list(fm.get("flags")))})
+        changed += sync_page(api, pages["f"][i], props, x, resolver(x["path"]), force)
+    for i, x in items["w"].items():
+        resolve = resolver(x["path"])
+        links = re.findall(r"\]\(([^)\s]+)\)", x["more"])
+        hits = [target(h, x["path"]) for h in links]
+        props = dict(base("w", i, x), **{
+            "Раздел": select(x["section"]), "Определение": {"rich_text": rich(x["definition"], resolve)[:100]},
+            "Продукт": rel("p", [h[1] for h in hits if h and h[0] == "p"]),
+            "Фича": rel("f", [h[1] for h in hits if h and h[0] == "f"]),
+            "Подробно": {"url": resolve(links[0]) if links else None}})
+        changed += sync_page(api, pages["w"][i], props, x, resolve, force)
+    print(f"Готово: перезаписано {changed}, в корзину {archived}. Корень: https://www.notion.so/{root_id.replace('-', '')}")
     return 0
-
-
-def sync_page(api, row, props, item, resolve, force):
-    body_changed = force or row["hash"] != item["hash"]
-    if body_changed:
-        props = dict(props, sync_hash={"rich_text": rt(item["hash"])})
-    api.call("PATCH", f"/pages/{row['id']}", {"properties": props})
-    if body_changed:
-        replace_body(api, row["id"], md_to_blocks(item["body"], resolve))
-        row["hash"] = item["hash"]
-    return int(body_changed)
 
 
 if __name__ == "__main__":
