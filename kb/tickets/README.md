@@ -2,7 +2,7 @@
 id: KB-TICKETS
 title: Тикеты и задачи
 type: index
-updated: 2026-10-27
+updated: 2026-10-28
 ---
 
 # Тикеты и задачи
@@ -48,6 +48,7 @@ updated: 2026-10-27
 | [DEV-564](DEV-564.md) | Bedrock NetherNet - UDP-порты под каждый слот вместо transport nethernet | UP | partial | PASS-with-issues | candidate | 2026-10-21 |
 | [DEV-566](DEV-566.md) | Каталог Minecraft-схематик /minecraft-schematics/ | WPGL | done | PASS | blocked | 2026-10-22 |
 | [DEV-571](DEV-571.md) | World Backup - «готово» только после ноды, Continue without backup отменяет незавершённые копии | UP | done | PASS | covered | 2026-10-23 |
+| [DEV-574](DEV-574.md) | Поля контакта и события серверов панели в eSputnik | UP | n/a | - | no | 2026-10-28 |
 | [DEV-576](DEV-576.md) | Checkout v2 - «Your plan» без разовой настройки модпака в месячной цене | BIL | done | PASS | blocked | 2026-10-26 |
 | [DEV-579](DEV-579.md) | Project Zomboid - лимит -Xmx в ProjectZomboid64.json следует за тарифом | UP | done | PASS | candidate | 2026-10-21 |
 | [DEV-582](DEV-582.md) | Зависшие PENDING бэкапы новой панели переводить в FAILED по возрасту, убрать reconcile-пробу, бэкфил status | UP | done | PASS | no | 2026-10-27 |

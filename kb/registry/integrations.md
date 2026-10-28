@@ -3,7 +3,7 @@ id: KB-REG-INTEGRATIONS
 title: Внешние интеграции
 type: registry
 status: draft
-updated: 2026-10-15
+updated: 2026-10-28
 sources:
   - kb/_meta/inventory-2026-10-15.md §2
   - agents.docs/godlike-mcp-usage.md, agents.docs/game-panel/KNOWLEDGE_BASE.md
@@ -24,7 +24,7 @@ sources:
 | WHMCS | BIL | Биллинг: услуги, инвойсы, отмены | Язык чекаута отдельно от витрины. Free-продукты 282 / 1127 |
 | Stripe, PayPal, Crypto | BIL | Оплата | Stripe внутри iframe. Оплату автотестами не трогаем |
 | Amplitude | WPGL, UP | Аналитика и A/B ([flags](flags.md#ab-эксперименты-amplitude)) | События отмены шлёт бэкенд: `/api/v2/whmcs/cancel/{uuid}/event` |
-| eSputnik | BIL / WPGL | Письма (цепочка Free Server Gift, [DEV-455](../tickets/DEV-455.md)) | - |
+| eSputnik | BIL / WPGL / UP | Письма (цепочка Free Server Gift, [DEV-455](../tickets/DEV-455.md)); поля контакта и события серверов из панели ([DEV-574](../tickets/DEV-574.md)) | Контакт создаёт биллинг, панель только обновляет. Панель вкл. env `ESPUTNIK_ENABLED` (прод с 28-Oct-2026), очередь `esputnik` |
 | Polylang | WPGL | 8 языков | - |
 | Yoast | WPGL | SEO-мета, schema | - |
 | WP Rocket + Cloudflare | WPGL | Кеш | Cloudflare чистится руками. Устаревшая страница после правки - это ожидаемо |
