@@ -109,6 +109,7 @@ Java-сервер (id 771938).
 Моды: [DEV-405](../tickets/DEV-405.md), [DEV-500](../tickets/DEV-500.md), [DEV-532](../tickets/DEV-532.md).
 - Сейчас на нём BMC4 (425 папок, 5003 файла).
 - 20-Oct-2026 переименован в `DEV-476-search` (было `FYkKLp1D_474959`): эталон поиска файлов [DEV-476](../tickets/DEV-476.md), база для DEV-480.
+- 29-Oct-2026 эталон [DEV-480](../tickets/DEV-480.md) (wing1004, новая нода): native 345 мс vs bfs 5 419 мс. В Recycle Bin тестовый файл с N1/S6, уйдёт сам через 24 ч.
 - Трогать: 🔴, не менять. Read-only поиск разрешён.
 
 ### 546bc52e
@@ -213,6 +214,7 @@ Project Zomboid, [DEV-562](../tickets/DEV-562.md), [DEV-579](../tickets/DEV-579.
 ### 976c89c3
 Bedrock, `DEV-564-BR-C` (было `tJf6lPCi_482724`, WHMCS 482724), куплен владельцем 21-Oct-2026 под [DEV-564](../tickets/DEV-564.md).
 - Оставлен под ретест DEV-564; удаление (LIFE-09) - после ретеста.
+- 29-Oct-2026: старая нода (wing4500) для [DEV-480](../tickets/DEV-480.md), только поиск.
 - Трогать: 🟡.
 
 ### 1db4a8bb

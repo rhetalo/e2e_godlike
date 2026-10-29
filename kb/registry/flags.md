@@ -3,7 +3,7 @@ id: KB-REG-FLAGS
 title: Фичефлаги и эксперименты
 type: registry
 status: draft
-updated: 2026-10-15
+updated: 2026-10-29
 verified_on: -
 sources:
   - memory: dev485-java-start-gate, dev515-mods-loader-gating, cf-modrinth-source-swap, prod-134-world-backup, cancel-retention-dev401, mc-extensions-refactor-epic, dev492-post-install-mod-scan, dev477-node-resource-limits
@@ -38,6 +38,13 @@ sources:
 - **Состояние:** **раскатан на всех клиентов** (код `WorldBackupFeature`: «ROLLED OUT TO EVERY CLIENT», сверка 23-Oct-2026,
   у тест-аккаунта есть в `/features`). Класс оставлен как рычаг отката. Раньше - только [acc:admin](test-accounts.md#admin) с 11-Aug.
   Не путать с [DEV-571](../tickets/DEV-571.md) (abandon): тот на 23-Oct только на stage.
+
+### wings-native-file-search
+- **Что:** поиск файлов на самой ноде вместо обхода из панели ([DEV-480](../tickets/DEV-480.md)). Нода без нового Wings - откат на обход.
+- **Состояние (29-Oct-2026):** режим **Staff** - 8 пользователей с «Feature Flags Enabled», в том числе [acc:admin](test-accounts.md#admin)
+  и 388101. Считается по владельцу сервера. Новые ноды: wing1000, 1001, 1002, 1004. Раскатка на Everyone - после апрува QA.
+- **Где переключать:** `panel.godlike.host/admin/feature-flags/wings-native-file-search` (Off / Staff / Everyone + per-user overrides), без деплоя.
+- **Как увидеть:** кадр `end` ответа `files/search` - поля `engine` и `fallback_reason`.
 
 ### cancellation-retention-steps
 - **Что:** экраны удержания в cancel-модуле ([DEV-401](../tickets/DEV-401.md)).

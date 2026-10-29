@@ -4,12 +4,13 @@ title: API - files (потоковый поиск файлов сервера)
 type: api
 product: UP
 status: draft
-updated: 2026-10-23
-verified_on: 2026-10-20
-tickets: [DEV-476]
+updated: 2026-10-29
+verified_on: 2026-10-29
+tickets: [DEV-476, DEV-480]
 features: [UP/files]
 sources:
   - test-docs/ultra.panel/DEV-476/DEV-476-jira-comment.md
+  - test-docs/ultra.panel/DEV-480/DEV-480-report.html
   - test-docs/ultra.panel/DEV-476/DEV-476_QA_report.pdf
   - memory: dev476-file-search-perf
 ---
@@ -42,10 +43,26 @@ sources:
 |---|---|
 | `match` | одно совпадение, есть `path` ✅ |
 | `progress` | ход обхода ✅, состав полей ❓ |
-| `end` | `status`, `reason`, `failed_directories` ✅ |
+| `end` | `status`, `reason`, `listings`, `matches`, `elapsed_ms`, `failed_directories` ✅; с DEV-480 ещё `engine` и `fallback_reason` ✅ |
 
 `status` в `end`: `complete` (всё обошли) или `truncated` с `reason` `matches` (упёрлись в 500) ✅. Остальные значения `reason`
 (дедлайн, лимит листингов, обрыв) по источникам ❓, в Graylog пишется `event=file_search` с `reason=aborted` 📖.
+
+### Двигатель: native или bfs (DEV-480)
+
+С [DEV-480](../../../tickets/DEV-480.md) поиск может идти на самой ноде (Wings `GET /api/servers/{uuid}/files/search`), а не обходом из панели.
+Решает флаг [wings-native-file-search](../../../registry/flags.md#wings-native-file-search) **по владельцу сервера** и то, умеет ли нода.
+
+| `engine` | `fallback_reason` | Когда |
+|---|---|---|
+| `native` | `null` | флаг у владельца + нода с новым Wings ✅ |
+| `bfs` | `null` | флаг Off или у владельца нет флага ✅ |
+| `bfs` | `unsupported` | флаг есть, нода без endpoint (первый поиск) ✅ |
+| `bfs` | `known_unsupported` | повтор на той же ноде в течение 15 мин (кеш Redis) ✅ |
+| `bfs` | `server_error` | нода ответила 5xx до начала стрима 📖 |
+
+Кадры, лимиты, guard 429 и защита от `../` на обоих путях одинаковые ✅. На BMC4 `jar`: native 345 мс, bfs 5 419 мс,
+выдача 1:1. Лаунчер (`{results, truncated}`) ходит через тот же диспетчер ✅.
 
 ### Лимиты
 
@@ -85,3 +102,4 @@ sources:
 | Дата | Тикет | Что |
 |---|---|---|
 | 14-Sep-2026 | [DEV-476](../../../tickets/DEV-476.md) | panel!1597 + new-panel!519: поиск стал потоковым, добавлены лимиты и защита от параллели |
+| 28-Oct-2026 | [DEV-480](../../../tickets/DEV-480.md) | panel!1696 + wings!11: нативный поиск на ноде за флагом, `engine` / `fallback_reason` в `end` |

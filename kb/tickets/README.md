@@ -2,7 +2,7 @@
 id: KB-TICKETS
 title: Тикеты и задачи
 type: index
-updated: 2026-10-28
+updated: 2026-10-29
 ---
 
 # Тикеты и задачи
@@ -25,6 +25,7 @@ updated: 2026-10-28
 | [DEV-472](DEV-472.md) | Автодетект версии Java и попап ошибки Java | UP | done | PASS | - | 2026-10-08 |
 | [DEV-476](DEV-476.md) | Поиск файлов /files/search - потоковый, с лимитами, без долгих PHP-FPM запросов | UP | done | PASS | covered | 2026-10-20 |
 | [DEV-477](DEV-477.md) | Лимиты ресурсов нод (Unlimited / Percentage / Fixed) вместо overallocation | ADM, INFRA | n/a | - | - | - |
+| [DEV-480](DEV-480.md) | Пошук файлів на стороні Wings - нативний обхід на ноді за флагом wings-native-file-search | UP | done | PASS | blocked | 2026-10-29 |
 | [DEV-484](DEV-484.md) | Единый лимит бэкапов - вывести pre-install бэкап из-под троттлинга и свести счётчики | UP | done | PASS | covered | 2026-10-20 |
 | [DEV-485](DEV-485.md) | Фоновая проверка Java при старте сервера (гейт java-start-gate) | UP | done | PASS-with-issues | - | 2026-10-09 |
 | [DEV-486](DEV-486.md) | Старый Version Changer ломался на образах yolks-javaNN-libxrender | OLDP | done | PASS | - | 2026-09-25 |
@@ -83,6 +84,7 @@ updated: 2026-10-28
 - **candidate**: [DEV-563](DEV-563.md) - Запретить Free-серверам изменять тип сервера (Ultra Panel и PlayFreeHost)
 - **candidate**: [DEV-564](DEV-564.md) - Bedrock NetherNet - UDP-порты под каждый слот вместо transport nethernet
 - **candidate**: [DEV-579](DEV-579.md) - Project Zomboid - лимит -Xmx в ProjectZomboid64.json следует за тарифом
+- **blocked**: [DEV-480](DEV-480.md) - Пошук файлів на стороні Wings - нативний обхід на ноді за флагом wings-native-file-search
 - **blocked**: [DEV-546](DEV-546.md) - Блок «Boost your server» на чекауте v2 (только UI и QA-превью под флагом)
 - **blocked**: [DEV-549](DEV-549.md) - Фікси після DEV-515 - сценарії туторіалу на заглушках, блокування кнопки кастомних модпаків та API
 - **blocked**: [DEV-566](DEV-566.md) - Каталог Minecraft-схематик /minecraft-schematics/
