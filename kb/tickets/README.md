@@ -44,6 +44,7 @@ updated: 2026-10-29
 | [DEV-556](DEV-556.md) | Ошибки установки модов понятно в интерфейсе | UP | done | PASS | covered | 2026-10-23 |
 | [DEV-557](DEV-557.md) | Jar больше 100 МБ никогда не получает вердикт сканера клиентских модов | UP, INFRA | done | FAIL | no | 2026-10-23 |
 | [DEV-558](DEV-558.md) | Переустановленный клиентский мод не отключается (правило DEV-275) | UP | done | PASS | covered | 2026-10-21 |
+| [DEV-559](DEV-559.md) | Определять клиентские моды Forge/NeoForge в mod-scan-service | UP | done | PASS | candidate | 2026-10-29 |
 | [DEV-562](DEV-562.md) | Steam Port для подключения к серверу Project Zomboid в Overview | UP | done | PASS | no | 2026-10-15 |
 | [DEV-563](DEV-563.md) | Запретить Free-серверам изменять тип сервера (Ultra Panel и PlayFreeHost) | UP, PFH | partial | PASS-with-issues | candidate | 2026-10-15 |
 | [DEV-564](DEV-564.md) | Bedrock NetherNet - UDP-порты под каждый слот вместо transport nethernet | UP | partial | PASS-with-issues | candidate | 2026-10-21 |
@@ -81,6 +82,7 @@ updated: 2026-10-29
 
 > Собирается из `regression:` карточек. Порядок и детали - в разделе «Регресс» каждой карточки.
 
+- **candidate**: [DEV-559](DEV-559.md) - Определять клиентские моды Forge/NeoForge в mod-scan-service
 - **candidate**: [DEV-563](DEV-563.md) - Запретить Free-серверам изменять тип сервера (Ultra Panel и PlayFreeHost)
 - **candidate**: [DEV-564](DEV-564.md) - Bedrock NetherNet - UDP-порты под каждый слот вместо transport nethernet
 - **candidate**: [DEV-579](DEV-579.md) - Project Zomboid - лимит -Xmx в ProjectZomboid64.json следует за тарифом

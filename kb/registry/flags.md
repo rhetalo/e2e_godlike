@@ -39,6 +39,13 @@ sources:
   у тест-аккаунта есть в `/features`). Класс оставлен как рычаг отката. Раньше - только [acc:admin](test-accounts.md#admin) с 11-Aug.
   Не путать с [DEV-571](../tickets/DEV-571.md) (abandon): тот на 23-Oct только на stage.
 
+### mod-scan-side-detection-enforce
+- **Что:** включает Forge/NeoForge-правила определения клиентских модов в mod-scan-service ([DEV-559](../tickets/DEV-559.md)).
+  Без флага правила в режиме observe: в базе старый вердикт, `reason` начинается с `observe: would be …`.
+- **Состояние (29-Oct-2026):** **Everyone** с 26-Oct-2026 08:59. Откат: `off`, новые breaking станут safe на следующем цикле,
+  но уже переименованные `*.jar.disabled` сами не вернутся.
+- **Как увидеть:** `minecraft_mod_scan_results.reason` начинается с `enforced:`.
+
 ### wings-native-file-search
 - **Что:** поиск файлов на самой ноде вместо обхода из панели ([DEV-480](../tickets/DEV-480.md)). Нода без нового Wings - откат на обход.
 - **Состояние (29-Oct-2026):** режим **Staff** - 8 пользователей с «Feature Flags Enabled», в том числе [acc:admin](test-accounts.md#admin)

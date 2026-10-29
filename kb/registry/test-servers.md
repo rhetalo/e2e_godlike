@@ -129,6 +129,9 @@ SMP.
 
 ### 45b14521
 SMP Private, переименован в `DEV-562-MC` под [DEV-562](../tickets/DEV-562.md). 🟡
+- 28-Oct-2026: `DEV-589-MC` (DEV-589), отдан под тесты и мутации.
+- 29-Oct-2026: переименован в `DEV-559-neoforge` ([DEV-559](../tickets/DEV-559.md)), NeoForge 1.21.1 (21.1.265) с вайпом, Offline.
+  В `mods/`: Controlling 19.0.5 и Sodium 0.8.13 `.jar.disabled`, JEI 19.70.0.464, GodlikeMetrics. Свободен после закрытия DEV-559.
 
 ### f8e7df56
 SkyBlock, на нём воспроизводился баг tariff-list 400. 20-Oct-2026 переименован в `DEV-484-backup-throttle` (было `JBl1Dqfw_474692`):
@@ -197,6 +200,9 @@ Cancel Amplitude (события отмены). 🟡
 
 ### 1d7d34aa
 Основной сервер Split. 🟡
+- 21-Oct-2026: `DEV-558-Backup` ([DEV-558](../tickets/DEV-558.md)), свободен под тесты.
+- 29-Oct-2026: переименован в `DEV-559-forge` ([DEV-559](../tickets/DEV-559.md)). Был Forge 1.20.1, после теста переустановлен
+  с вайпом на **Forge 1.12.2** (14.23.5.2864), Offline: Controlling 3.0.12.4 `.jar.disabled`, JEI 4.24, GodlikeMetrics. Свободен после закрытия DEV-559.
 
 ### 0c7b82c3
 Саб-сервер Split. 🟡

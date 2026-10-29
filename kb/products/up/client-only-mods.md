@@ -4,16 +4,17 @@ title: Client-only моды - скрытие в каталоге и отключ
 type: feature
 product: UP
 status: draft
-updated: 2026-10-23
-verified_on: 2026-10-23        # окно Some mods were disabled - DEV-556
-tickets: [DEV-500, DEV-492, DEV-558, DEV-557, DEV-556]
-flags: [MOD_SCAN_BACKFILL]
+updated: 2026-10-29
+verified_on: 2026-10-29        # Forge/NeoForge/legacy - DEV-559
+tickets: [DEV-500, DEV-492, DEV-558, DEV-557, DEV-556, DEV-559]
+flags: [MOD_SCAN_BACKFILL, mod-scan-side-detection-enforce]
 tests: [tests/game/panel/client-only-mods.spec.ts]
 sources:
   - kb/tickets/DEV-500.md, DEV-492.md
   - test-docs/ultra.panel/DEV-500/client-only-mods-hide-REPORT.md (+ RECHECK, RECHECK2, RECHECK3)
   - test-docs/ultra.panel/DEV-492/dev492-post-install-mod-scan-REPORT.md
-  - memory: dev500-client-only-mods-hide, dev492-post-install-mod-scan
+  - kb/tickets/DEV-559.md (Forge/NeoForge, гард)
+  - memory: dev500-client-only-mods-hide, dev492-post-install-mod-scan, dev559-forge-neoforge-client-mods
 ---
 
 # Client-only моды - скрытие в каталоге и отключение на сервере
@@ -67,9 +68,7 @@ sources:
 
 ## Правила и граничные случаи
 
-1. **Сторона мода известна только у Fabric** (`fabric.mod.json`). Forge/NeoForge jar всегда `safe`
-   («side detection deferred») - клиентские Forge-моды на сервере **не отключаются**
-   ([DEV-492/F9](../../tickets/DEV-492.md#находки), вынесено в DEV-321 v1, ❓ ключ). Legacy Forge 1.12.2 и ниже (`mcmod.info`) - тоже всегда safe.
+1. **Сторона мода (DEV-559, parser v9, прод с 26-Oct-2026).** Fabric - `fabric.mod.json`. Forge/NeoForge - `clientSideOnly=true` или зависимость minecraft/forge/neoforge с `side=CLIENT` в `mods.toml`, плюс байткод `@Mod clientSideOnly=true` (работает и для legacy 1.12.2 с `mcmod.info`). Флаг `mod-scan-side-detection-enforce`. Моды без признаков (Mouse Tweaks, старые Controlling) остаются safe. Гард: Forge/NeoForge breaking-мод, который жёстко требует включённый мод (по `mod_id`/`provides`), не отключается, а ранее отключённый возвращается - [DEV-559/K1](../../tickets/DEV-559.md) (на обсуждении): так возвращается и Sodium, роняющий NeoForge-сервер.
 2. **Сброс override (DEV-558, prod 21-Oct-2026).** Uninstall стирает запись по хешу файла; Reinstall, смена версии с
    Wipe, модпак `delete`/`backup`, удаление модпака стирают все записи сервера. Файл, исчезнувший и вернувшийся через
    файловый менеджер/SFTP, записи не сбрасывает (неотличим от ручного включения). Исправляет
@@ -101,7 +100,7 @@ sources:
 - **Запись сканера может пережить Uninstall** ([DEV-558/OBS-5](../../tickets/DEV-558.md#находки)): через ~10 с после Uninstall отключённого мода
   иногда появляется новая запись того же хеша, и следующий Install отключается молча, без окна. Надёжная чистка в тестах -
   Install → Uninstall (Uninstall активного файла стирает запись по хешу).
-- **Отключение проверять на Fabric-сервере** (Forge всегда safe). Клиентский тест-мод: CF Controlling (250398), файлы
+- **Отключение проверять на Fabric, Forge 1.20.1 или NeoForge 1.21.1** (с DEV-559 Forge/NeoForge тоже размечаются; гочи - [DEV-559](../../tickets/DEV-559.md#гочи-для-тестирования)). Клиентский тест-мод: CF Controlling (250398), файлы
   19.0.3 Fabric 1.21.1 = 5759860, 18.0.4 Fabric 1.21 = 5603224; в каталоге скрыт, ставить `POST /minecraft/mods
   {provider, mod_id, version_id}`. Отключение срабатывает на Start, Restart (после «Yes, Restart») и принятии EULA;
   если старт блокирует префлайт `server-jar/status` (`ambiguous_loader`), сканер не запускается.
@@ -114,7 +113,7 @@ sources:
 - **Автотест** `client-only-mods.spec.ts` на [srv:75d1175e](../../registry/test-servers.md#75d1175e): TC-GP-COM-001 (отключение на старте
   + окно со списком), TC-GP-COM-002 (Uninstall → Install той же версии → снова отключён, [DEV-558](../../tickets/DEV-558.md)). Ручной QA: отчёты [DEV-500](../../../test-docs/ultra.panel/DEV-500/client-only-mods-hide-RECHECK3-REPORT.md)
   (финал) и [DEV-492](../../../test-docs/ultra.panel/DEV-492/dev492-post-install-mod-scan-REPORT.md).
-- Не покрыто: Forge-моды (by design safe), legacy Forge, перепроверка F5 после [panel!1665](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1665).
+- Не покрыто автотестом: Forge/NeoForge-ветка ([DEV-559](../../tickets/DEV-559.md), `regression: candidate`, нужен NeoForge-сервер под мутации), гард зависимостей, перепроверка F5 после [panel!1665](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1665).
 
 ## История
 
@@ -127,6 +126,7 @@ sources:
 | 12-Oct-2026 | [DEV-500](../../tickets/DEV-500.md) | [panel!1672](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1672) + [new-panel!547](https://git.godlike.ovh/panel/godlike-new-panel/-/merge_requests/547): CF по файлу под loader+version, 14 из 131. PASS |
 | 23-Oct-2026 | [DEV-556](../../tickets/DEV-556.md) | [panel!1701](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1701) + [new-panel!571](https://git.godlike.ovh/panel/godlike-new-panel/-/merge_requests/571): в окне список модов, Got It до роста `revision`. PASS |
 | 22..23-Oct-2026 | [DEV-557](../../tickets/DEV-557.md) | Jar больше 100 МБ (Cobblemon) без вердикта: mod-scan-service!7 на проде не действует, FAIL; сервис переписан (!8-!11), перепроверяет DevOps |
+| 29-Oct-2026 | [DEV-559](../../tickets/DEV-559.md) | Forge/NeoForge клиентские моды отключаются ([mod-scan-service!14](https://git.godlike.ovh/panel/mod-scan-service/-/merge_requests/14), parser v9, флаг `mod-scan-side-detection-enforce`). PASS, K1 Sodium + гард на обсуждении |
 
 Связано: пост-инсталл скан как отдельная фича (`UP/post-install-mod-scan`) пока описан здесь; окно
 «Missing mod dependencies» - [TASK-missing-mod-deps](../../tickets/TASK-missing-mod-deps.md).
