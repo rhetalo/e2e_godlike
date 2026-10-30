@@ -22,7 +22,7 @@ pages/*.ts              Page Objects — storefront funnel + VirtFusion panel.
                         VpsPanelServerPage is the reference ("etalon") implementation.
 
 components/*.ts          Component Objects — Header, Footer, CookieBanner,
-                         StripeCardFields (iframe), SeedCard, StorefrontTariffCard, ...
+                         StripeCardFields (iframe), SeoMeta (head/og), SeedCard, StorefrontTariffCard, ...
 
 utils/selectors.ts       SINGLE SOURCE OF TRUTH for selectors (documented priority).
 utils/auth.ts            VirtFusion login + storageState persistence + TEST_SERVER_*

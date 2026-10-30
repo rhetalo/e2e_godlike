@@ -26,6 +26,9 @@ export class StripeCardFields {
   readonly cardContainer: Locator;
   readonly expiryContainer: Locator;
   readonly cvcContainer: Locator;
+  /** Общий контейнер Stripe Elements + iframe поля номера карты (по title, без random-хешей). */
+  readonly elementsContainer: Locator;
+  readonly cardIframe: Locator;
 
   constructor(private page: Page) {
     this.cardFrame = stripeCardFrame(page);
@@ -34,6 +37,8 @@ export class StripeCardFields {
     this.cardContainer = page.locator(CHECKOUT.stripeCardContainer);
     this.expiryContainer = page.locator(CHECKOUT.stripeExpiryContainer);
     this.cvcContainer = page.locator(CHECKOUT.stripeCvcContainer);
+    this.elementsContainer = page.locator(CHECKOUT.stripeElementsContainer);
+    this.cardIframe = page.locator(CHECKOUT.stripeCardIframe);
   }
 
   /* ---------- Waiting ---------- */
