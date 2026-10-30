@@ -29,13 +29,15 @@ VirtFusion держит в разметке **скрытые элементы, �
 
 ## 3. Решение по ТЗ Install/Build/Delete
 
-- **Install** = воронка покупки (`tests/vps/funnel/vps.funnel.spec.ts`) — покрыто до WHMCS checkout.
+- **Install** = воронка покупки (`tests/vps/funnel/vps.funnel.*.spec.ts`) — покрыто до WHMCS checkout.
 - **Build** = **реальный rebuild** сервера в панели (переустановка ОС). Ребилдить можно `c13d2e04`.
 - **Delete** = **ВНЕ СКОУПА.** В панели удаления сервера НЕТ (в списке `/servers` только Manage).
   Удаление = отмена услуги в биллинге (WHMCS), не действие панели. Подтверждено владельцем 03-Jun-2026.
   → Delete-автотест не пишем; легаси delete-локаторы (фантомные) удаляем.
 
 ## 4. Legacy page objects (к удалению/миграции)
+
+> ✅ Все три удалены из репо (см. `TEST_PLAN.md` «Сделано 03-Jun-2026», `HANDOFF.md`). Таблица - историческая.
 
 | PO | Статус | Замена |
 |---|---|---|
@@ -45,7 +47,7 @@ VirtFusion держит в разметке **скрытые элементы, �
 
 ## 5. Rebuild — что известно (нужно подтвердить recon'ом со скринами)
 
-Флоу (из `VpsPanelRebuildPage` + `vps.panel.rebuild.spec.ts`):
+Флоу (из `VpsPanelRebuildPage` + `vps.panel.rebuild.*.spec.ts`, до сплита - монолит `vps.panel.rebuild.spec.ts`):
 1. Страница сервера → кнопка Rebuild (`button[data-bs-target="#reinstallServerModal"]`).
 2. Модал подтверждения → Continue → страница выбора ОС.
 3. ОС-карточки: `div.card.os-select`; выбранная — `.selected-card.border-success`;

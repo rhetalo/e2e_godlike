@@ -7,14 +7,15 @@
 
 | Сценарий | Маппинг | Статус | Что есть / что надо |
 |---|---|---|---|
-| **Install** | Воронка покупки VPS | ✅ покрыто (до WHMCS checkout) | `vps.funnel.spec.ts`; косметически усилить ассерты (visible вместо count) |
-| **Build** | **Реальный rebuild** сервера | ✅ **ПОКРЫТО** | `vps.panel.rebuild.spec.ts` SUITE 7 (TC-VPS-BUILD-001, `@critical`, последний тест): реальный rebuild → Build → Complete → Running (~30с). Там же все UI-проверки rebuild. **23/23 зелёных, 0 skipped.** |
+| **Install** | Воронка покупки VPS | ✅ покрыто (до WHMCS checkout) | `tests/vps/funnel/` (`vps.funnel.configure` / `.billing` / `.happy-path.spec.ts`, монолит `vps.funnel.spec.ts` разбит 18-Jun); косметически усилить ассерты (visible вместо count) |
+| **Build** | **Реальный rebuild** сервера | ✅ **ПОКРЫТО** | `vps.panel.rebuild.real.spec.ts` (TC-VPS-BUILD-001, `@critical`): реальный rebuild → Build → Complete → Running (~30с). UI-проверки rebuild - `vps.panel.rebuild.selection.spec.ts` и `vps.panel.rebuild.os-selection.spec.ts` (хелперы - `vps.panel.rebuild.helpers.ts`). На 03-Jun, до сплита монолита `vps.panel.rebuild.spec.ts`: **23/23 зелёных, 0 skipped.** |
 | **Delete** | Удаление сервера | ❌ **вне скоупа** | В панели delete НЕТ (= отмена услуги в биллинге). Решение владельца — не покрываем. Legacy delete-локаторы удалены |
 
 ## Существующие тесты (полный список — см. walk-through в чате/аудите)
 
-`funnel/vps.funnel.spec.ts` (Install) · `panel/`: `vps.build.spec.ts` (legacy build), `vps.panel.rebuild.spec.ts`
-(build UI-only), `vps.panel.power.actions.spec.ts` (power, эталон), `vps.panel.server.spec.ts`,
+`funnel/`: `vps.funnel.configure.spec.ts`, `vps.funnel.billing.spec.ts`, `vps.funnel.happy-path.spec.ts` (Install) ·
+`panel/`: `vps.panel.rebuild.real.spec.ts` (реальный build), `vps.panel.rebuild.selection.spec.ts` +
+`vps.panel.rebuild.os-selection.spec.ts` (build UI-only), `vps.panel.power.actions.spec.ts` (power, эталон), `vps.panel.server.spec.ts`,
 `vps.panel.media.spec.ts`, `vps.panel.network.spec.ts`, `vps.panel.options.spec.ts`,
 `vps.panel.storage.spec.ts`, `vps.panel.login.spec.ts`.
 
