@@ -13,9 +13,9 @@
  */
 import { test, expect } from "../../fixtures/base";
 import { StorefrontPages } from "../../fixtures/test-data";
-import { SEO } from "../../utils/selectors";
 import { Footer } from "../../components/Footer";
 import { Header } from "../../components/Header";
+import { SeoMeta } from "../../components/SeoMeta";
 
 test.use({ viewport: { width: 1800, height: 900 }, deviceScaleFactor: 1 });
 
@@ -23,6 +23,7 @@ test.describe("@regression storefront — SEO/meta", () => {
   for (const p of StorefrontPages) {
     test(`SEO-теги: ${p.label}`, async ({ page }) => {
       await page.goto(p.path, { waitUntil: "domcontentloaded" });
+      const seo = new SeoMeta(page);
 
       await test.step("title непустой", async () => {
         const title = (await page.title()).trim();
@@ -31,25 +32,25 @@ test.describe("@regression storefront — SEO/meta", () => {
       });
 
       await test.step("meta description присутствует и осмысленна", async () => {
-        const desc = await page.locator(SEO.description).first().getAttribute("content");
+        const desc = await seo.description.getAttribute("content");
         expect((desc ?? "").trim().length).toBeGreaterThan(30);
       });
 
       await test.step("canonical указывает на godlike.host", async () => {
-        const canonical = await page.locator(SEO.canonical).first().getAttribute("href");
+        const canonical = await seo.canonical.getAttribute("href");
         expect(canonical ?? "").toMatch(/^https:\/\/godlike\.host\//);
       });
 
       // ⚠️ На страницах по 2 og-тега (тема + SEO-плагин) — берём .first(): проверяем наличие, не уникальность.
       await test.step("OpenGraph: og:title + og:image", async () => {
-        const ogTitle = await page.locator(SEO.ogTitle).first().getAttribute("content");
+        const ogTitle = await seo.ogTitle.getAttribute("content");
         expect((ogTitle ?? "").trim().length).toBeGreaterThan(0);
-        const ogImage = await page.locator(SEO.ogImage).first().getAttribute("content");
+        const ogImage = await seo.ogImage.getAttribute("content");
         expect(ogImage ?? "").toMatch(/^https?:\/\//);
       });
 
       await test.step("есть хотя бы один <h1>", async () => {
-        await expect(page.locator(SEO.h1).first()).toBeVisible();
+        await expect(seo.h1).toBeVisible();
       });
     });
   }

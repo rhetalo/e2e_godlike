@@ -1,4 +1,5 @@
 import { type Page, type Locator } from "@playwright/test";
+import { CHECKOUT } from "../utils/selectors";
 
 export class PaymentMethodSelector {
   constructor(private page: Page) {}
@@ -38,5 +39,10 @@ export class PaymentMethodSelector {
     return this.page.locator(
       'input[name="paymentmethod"][value="coinpayments"]',
     );
+  }
+
+  /** Контейнер PayPal Smart Button (SDK-кнопка рендерится внутрь после выбора шлюза). */
+  get paypalButtonContainer(): Locator {
+    return this.page.locator(CHECKOUT.paypalContainer);
   }
 }

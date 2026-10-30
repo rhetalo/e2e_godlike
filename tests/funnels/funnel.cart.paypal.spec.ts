@@ -13,7 +13,7 @@ import { CartPage } from "../../pages/CartPage";
 import { CheckoutPage } from "../../pages/CheckoutPage";
 import { CreditBalanceSelector } from "../../components/CreditBalanceSelector";
 import { PaymentMethodSelector } from "../../components/PaymentMethodSelector";
-import { CHECKOUT } from "../../utils/selectors";
+import { StripeCardFields } from "../../components/StripeCardFields";
 
 test.use({ viewport: { width: 1800, height: 900 }, deviceScaleFactor: 1 });
 
@@ -53,13 +53,14 @@ test("@critical оплата Stripe и PayPal", async ({ page }) => {
   await reachCheckout(page);
   await revealGateways(page);
   const payment = new PaymentMethodSelector(page);
+  const stripe = new StripeCardFields(page);
 
   await test.step("Stripe — поля карты рендерятся", async () => {
     await payment.selectStripe();
     // Стабильная проверка вместо хрупкого конкатенированного текста полей: контейнер Stripe
     // Elements + iframe поля номера карты (по title, без random-хешей; см. iframe-helper).
-    await expect(page.locator(CHECKOUT.stripeElementsContainer)).toBeVisible({ timeout: 15_000 });
-    await expect(page.locator(CHECKOUT.stripeCardIframe)).toBeVisible({ timeout: 15_000 });
+    await expect(stripe.elementsContainer).toBeVisible({ timeout: 15_000 });
+    await expect(stripe.cardIframe).toBeVisible({ timeout: 15_000 });
   });
 
   await test.step("PayPal — шлюз предложен, выбирается, SDK-кнопка рендерится", async () => {
@@ -69,7 +70,7 @@ test("@critical оплата Stripe и PayPal", async ({ page }) => {
     await payment.selectPayPal();
     await expect(payment.paypalRadio).toBeChecked();
 
-    const paypalContainer = page.locator(CHECKOUT.paypalContainer);
+    const paypalContainer = payment.paypalButtonContainer;
     await expect(paypalContainer).toBeVisible({ timeout: 20_000 });
     await expect(paypalContainer).toBeEnabled({ timeout: 20_000 });
   });
@@ -93,7 +94,7 @@ test("@regression only_local PayPal popup открывает paypal.com (не о
   const payment = new PaymentMethodSelector(page);
 
   await payment.selectPayPal();
-  const paypalContainer = page.locator(CHECKOUT.paypalContainer);
+  const paypalContainer = payment.paypalButtonContainer;
   await expect(paypalContainer).toBeVisible({ timeout: 20_000 });
   await expect(paypalContainer).toBeEnabled({ timeout: 20_000 });
 

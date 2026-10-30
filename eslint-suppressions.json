@@ -1,8 +1,5 @@
 {
   "tests/funnels/funnel.cart.paypal.spec.ts": {
-    "no-restricted-syntax": {
-      "count": 4
-    },
     "playwright/no-conditional-expect": {
       "count": 2
     },
@@ -33,11 +30,6 @@
   "tests/game/panel/plugins.spec.ts": {
     "playwright/no-conditional-in-test": {
       "count": 1
-    }
-  },
-  "tests/general/storefront.breadth.spec.ts": {
-    "no-restricted-syntax": {
-      "count": 5
     }
   },
   "tests/general/valid.links.spec.ts": {
