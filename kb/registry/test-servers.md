@@ -142,7 +142,7 @@ SMP Private, переименован в `DEV-562-MC` под [DEV-562](../ticket
   В `mods/`: Controlling 19.0.5 и Sodium 0.8.13 `.jar.disabled`, JEI 19.70.0.464, GodlikeMetrics. Свободен после закрытия DEV-559.
 - 30-Oct-2026: переименован в `DEV-580-A` - маршрут атак [DEV-580](../tickets/DEV-580.md), ничего не менялось. Свободен.
 - 30-Oct-2026: клиент A для [DEV-593](../tickets/DEV-593.md): через квиз апгрейд **Quadra Premium → Ultra Budget** за $5.94 кредитом
-  (инвойс 331374), теперь Ultra Budget ($23.99). В Sharing добавлен сабюзер Co-owner (временный аккаунт владельца) - оставлен до решения владельца.
+  (инвойс 331374), теперь Ultra Budget ($23.99). В Sharing добавлен сабюзер Co-owner (временный аккаунт владельца) - оставлен по решению владельца (30-Oct).
 
 ### f8e7df56
 SkyBlock, на нём воспроизводился баг tariff-list 400. 20-Oct-2026 переименован в `DEV-484-backup-throttle` (было `JBl1Dqfw_474692`):
