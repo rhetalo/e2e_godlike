@@ -21,6 +21,8 @@ import glob, os, re, subprocess, sys, collections
 PRODUCT_PREFIXES = {"UP": ["GP", "UP"], "VPS": ["VPS"], "WPGL": ["GAMES", "LOC"]}
 TICKET_PREFIXES = {"DEV", "PROD", "GROWTH", "B2B", "TASK", "OLDP", "ADM", "BIL", "PFH", "WPGL", "UP", "VPS"}
 TC_ID = re.compile(r"\bTC-[A-Z0-9]+(?:-[A-Z0-9]+)*-\d{3}\b")
+# ID из шаблонной строки в цикле: `TC-GP-BKP-SCOPE-00${i + 1}` - статически известен только префикс.
+TC_TPL = re.compile(r"\bTC-[A-Z0-9]+(?:-[A-Z0-9]+)*-\d{0,2}(?=\$\{)")
 SHORT_ID = re.compile(r"\b[A-Z][A-Z0-9]{1,6}(?:-[A-Z0-9]+)*-\d{3}\b")
 TEST_CALL = re.compile(r"^\s*test(?:\.(?:only|fixme|fail|slow))?\(\s*[`\"']", re.M)
 OUT = "kb/coverage.md"
@@ -82,12 +84,14 @@ def main(root, mode):
         specs = sorted(p for p in out.splitlines() if p.endswith(".spec.ts"))
     except (OSError, subprocess.CalledProcessError):
         specs = sorted(rel(p) for p in glob.glob(os.path.join(root, "tests", "**", "*.spec.ts"), recursive=True))
-    tests_in, ids_in = {}, collections.defaultdict(set)
+    tests_in, ids_in, tpl_in = {}, collections.defaultdict(set), collections.defaultdict(set)
     for s in specs:
         src = open(os.path.join(root, s), encoding="utf-8").read()
         tests_in[s] = len(TEST_CALL.findall(src))
         for tc in TC_ID.findall(src):
             ids_in[tc].add(s)
+        for px in TC_TPL.findall(src):
+            tpl_in[px].add(s)
 
     # ── KB: страницы фич и обзоров ──
     pages = []
@@ -130,7 +134,7 @@ def main(root, mode):
                 continue
             else:
                 full = [f"TC-{px}-{short}" for px in PRODUCT_PREFIXES.get(prod, [])] + [f"TC-{short}"]
-            if any(f in ids_in for f in full):
+            if any(f in ids_in or any(f.startswith(px) and f[len(px):].isdigit() for px in tpl_in) for f in full):
                 found += 1
             else:
                 stale.append(short)
