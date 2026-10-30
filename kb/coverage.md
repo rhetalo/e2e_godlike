@@ -3,7 +3,7 @@ id: KB-COVERAGE
 title: Матрица покрытия - фичи KB и автотесты
 type: index
 status: draft
-updated: 2026-10-27
+updated: 2026-10-30
 verified_on: null              # генерируется из KB и tests/, с продуктом не сверяется
 sources:
   - kb/products/**/*.md (шапка tests:, раздел «Покрытие»)
@@ -31,7 +31,7 @@ sources:
 | [Config - server.properties и блок Docker/Java](products/up/config.md) | draft | `config.spec.ts`, `security.spec.ts` | 6 | 3 / 1 / 1 |
 | [Console - лог сервера и ввод команд](products/up/console.md) | draft | `console.palette.spec.ts`, `console.spec.ts`, `players.spec.ts`, `security.console.spec.ts` | 6 | 5 / 0 / 1 |
 | [Каталог расширений - моды, плагины, модпаки](products/up/extensions-catalog.md) | draft | `extension.sources.spec.ts`, `extensions.spec.ts`, `mods.spec.ts`, `plugins.spec.ts` | 17 | 4 / 2 / 4 |
-| [Files - файловый менеджер, Recycle Bin, SFTP](products/up/files.md) | draft | `files.recycle.spec.ts`, `files.search.spec.ts`, `files.spec.ts`, `files.structure.spec.ts`, `security.spec.ts` | 15 | 6 / 3 / 4 |
+| [Files - файловый менеджер, Recycle Bin, SFTP](products/up/files.md) | draft | `files.recycle.spec.ts`, `files.search.spec.ts`, `files.spec.ts`, `files.structure.spec.ts`, `security.spec.ts` | 15 | 6 / 4 / 4 |
 | [Java detection и гейт старта](products/up/java-detection.md) | draft | `mods.spec.ts` | 5 | 0 / 0 / 0 |
 | [Вход в панель и дашборд My Servers](products/up/login-dashboard.md) | draft | `auth.logout.spec.ts`, `dashboard.spec.ts`, `login.spec.ts`, `security.spec.ts` | 15 | 4 / 0 / 1 |
 | [Модпаки - каталог, видимость и установка](products/up/modpack-catalog.md) | draft | `extension.sources.spec.ts`, `extensions.spec.ts` | 6 | 2 / 4 / 3 |
@@ -96,13 +96,14 @@ sources:
 
 ## ADM
 
-Страниц: 3, с автотестами: 0, тестов в их спеках: 0.
+Страниц: 4, с автотестами: 0, тестов в их спеках: 0.
 
 | Фича | Статус | Спеки | Тестов | Покрытие ✅ / руками / ❌ |
 |---|---|---|---|---|
 | [ADM - админка панели (panel.godlike.host/admin)](products/adm/README.md) | draft | - | - | 0 / 0 / 0 |
 | [Каталог модпаков v2 в админке - скрытие из клиентского каталога (is_listed)](products/adm/modpack-catalog.md) | draft | - | - | 0 / 0 / 0 |
 | [Сервер в админке - Startup (образ Docker, смена egg) и Build](products/adm/server-startup.md) | draft | - | - | 0 / 0 / 0 |
+| [Сервер в админке - Transfer (перенос на другую ноду)](products/adm/server-transfer.md) | draft | - | - | 0 / 0 / 0 |
 
 ## BIL
 

@@ -372,6 +372,9 @@ MR: panel!1691 (бэк, влит 20-Oct-2026) + new-panel!564 (фронт). По
   «paper 1.21.11» (§3 устарел). Адрес/план прежние: `srv6.godlike.club:26150`, Double, 5-10
   slots, 2 GiB, storage ~321 MiB, статус Offline. ⚠️ В диалоге **Edit Server** «Server Type» =
   `PC-Paper` (внутренний лейбл расходится с фактическим neoforge — не пугаться).
+  ⚠️ **Устарело с 29-Oct-2026:** на диске `ebb03adc` давно Paper (нет `mods/`), автоопределение ядра
+  пересчитало ~18k серверов и записало `PAPER` → Mods/Modpacks под гейтом «plugins only». Модовые тесты
+  ходят на `GAME_SERVER_MODS_UUID` (75d1175e, Fabric) - см. `kb/registry/test-servers.md`.
 - **Shepherd-тур = 6 шагов** и всплывает на КАЖДОЙ навигации (Step 1 «Your server» на дашборде,
   Step 2 «Main Menu» на сервере, …). Кнопка гашения — **«Skip for now»**.
 - **Чузер логина** — текст «Through login/password» (нижний регистр); рядом OAuth-ссылка

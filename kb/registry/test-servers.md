@@ -30,7 +30,10 @@ sources:
 Канонический e2e-сервер, `GAME_PANEL_SERVER_UUID`.
 - Имя сейчас `Fcz3VN5n_439772`, раньше было `test_e2e`.
 - Используется также для v2-subuser.
-- Трогать: 🟢. В `.env` не менять.
+- Ядро - **Paper 1.21.11** (на диске `plugins/`, `world_nether`, нет `mods/`). 29-Oct-2026 автоопределение ядра
+  пересчитало ~18k серверов и сняло устаревшее «NeoForge» → вкладки Mods/Modpacks = «core supports plugins only»,
+  Upload custom modpack disabled. Модовые тесты отсюда переехали на `GAME_PANEL_MODS_SERVER_UUID` (= 75d1175e).
+- Трогать: 🟢. В `.env` не менять. Ядро не менять: на Paper завязаны `files.search` (`/plugins`) и плагины.
 
 ### f9793ddc
 Power, `GAME_PANEL_SERVER_POWER_UUID`. Имя `test_e2e_power`. 🟢
@@ -55,6 +58,7 @@ Steam-игра, `GAME_PANEL_STEAM_SERVER_UUID`. 🟢
 
 ### 0c743c25
 Спек источников CF/Modrinth, `GAME_PANEL_SOURCE_SERVER_UUID`. Имя `test_e2e`. 🟢
+- Paper 1.21.11: здесь только плагины (SRC-002, шаг Plugins в SRC-004). Моды и сборки - на модовом сервере (29-Oct-2026).
 
 ### d2f7fff5
 `extension.sources`. 🟢
@@ -86,6 +90,9 @@ Suspended-сервер, для проверок баннера suspended. 🔴
 - 23-Oct-2026: `client-only-mods.spec.ts` (TC-GP-COM-001/002) ставит и удаляет CF Controlling, стартует и гасит сервер; после прогона Offline,
   мода нет, notice подтверждён. Старые записи override `modmenu-11.0.x` (09:48 UTC) - не наши, не мешают.
 - Env: `GAME_PANEL_SERVER_MUT_FABRIC_UUID`. Трогать: 🟢.
+- 29-Oct-2026: он же **модовый сервер для read-only тестов** (`GAME_SERVER_MODS_UUID`, env `GAME_PANEL_MODS_SERVER_UUID`):
+  каталог модов (mods.spec, EXT-001/002), источники Mods/Modpacks (SRC-001/003/004), Upload custom modpack (CF-001/002).
+  Fabric держать: если ядро сменится на Paper, эти тесты упадут так же, как упали 29-Oct на ebb03adc.
 - ⚠️ Владелец 388101 вне раскатки `extension-compatibility`: отказов по ядру/лоадеру тут нет. 23-Oct ([DEV-556](../tickets/DEV-556.md)): окно
   «Some mods were disabled» подтверждено ack, /mods вернул к 2 файлам (godlikemetrics + fabric-api 0.116.13), offline.
 
