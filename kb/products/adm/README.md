@@ -29,6 +29,7 @@ sources:
 | Сервер → Startup | `/admin/servers/view/{id}/startup`: `custom_docker_image` (свой образ Java), смена egg (`#pEggId`, `skip_scripts`) | [ADM/server-startup](server-startup.md) |
 | Сервер → Build | Memory сервера в обход биллинга, лимит World Backup 0/N | [ADM/server-startup](server-startup.md#как-работает-под-капотом) |
 | Сервер → Transfer | `/admin/servers/view/{id}/manage-transfer`: модалка переноса, локация сервера первой, ноды по реальной нагрузке (Load/CPU/Mem/Disk/Name). Только просмотр | [ADM/server-transfer](server-transfer.md) |
+| Prepared Servers / Pool Policies | `/admin/prepared-servers`: пул готовых серверов с модпаком, политики, Fill now / Reinstall / Rebuild, failed-строки | [ADM/prepared-servers](prepared-servers.md) |
 | Каталог модпаков v2 | `/admin/modpacks-v2/view/{id}`: чекбокс «Client catalog» (`is_listed`), колонка Listed / Hidden, `PATCH .../listing`; пулы `/pools/new` | [ADM/modpack-catalog](modpack-catalog.md) |
 | Ноды | лимиты disk / RAM: режимы Unlimited / Percentage / Fixed вместо overallocation (env [flag:GODLIKE_NODE_RESOURCE_LIMITS_ENABLED](../../registry/flags.md#godlike_node_resource_limits_enabled)). Отдельной страницы нет: QA не участвовал, фактов мало | [DEV-477](../../tickets/DEV-477.md) |
 | Фичефлаги | тумблеры Laravel Pennant, после включения нужен `php artisan pennant:purge <flag>` (DevOps) | [реестр флагов](../../registry/flags.md), [DEV-418](../../tickets/DEV-418.md) |

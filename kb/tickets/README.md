@@ -22,6 +22,7 @@ updated: 2026-10-30
 | [DEV-455](DEV-455.md) | Попап Free Server Gift и цепочка писем (GROWTH-95) | WPGL, BIL | done | PASS-with-issues | no | 2026-10-15 |
 | [DEV-458](DEV-458.md) | Custom Modpack Setup как one-time add-on в биллинге | BIL, WPGL | blocked | FAIL | - | 2026-09-28 |
 | [DEV-459](DEV-459.md) | Custom Modpack Setup - точки входа в воронке и в игровой панели | WPGL, UP | done | PASS | - | 2026-09-28 |
+| [DEV-462](DEV-462.md) | Lifecycle подготовленных серверов в Pool Policies | ADM, BIL | partial | PASS | no | 2026-10-30 |
 | [DEV-472](DEV-472.md) | Автодетект версии Java и попап ошибки Java | UP | done | PASS | - | 2026-10-08 |
 | [DEV-476](DEV-476.md) | Поиск файлов /files/search - потоковый, с лимитами, без долгих PHP-FPM запросов | UP | done | PASS | covered | 2026-10-20 |
 | [DEV-477](DEV-477.md) | Лимиты ресурсов нод (Unlimited / Percentage / Fixed) вместо overallocation | ADM, INFRA | n/a | - | - | - |
