@@ -21,12 +21,12 @@ sources:
 
 ## UP - игровая панель
 
-Страниц: 29, с автотестами: 22, тестов в их спеках: 91.
+Страниц: 30, с автотестами: 22, тестов в их спеках: 92.
 
 | Фича | Статус | Спеки | Тестов | Покрытие ✅ / руками / ❌ |
 |---|---|---|---|---|
-| [UP - игровая панель ultra.panel + API v2](products/up/README.md) | draft | все спеки продукта (35) | 91 | 0 / 0 / 0 |
-| [Backups - бэкапы сервера, базы и папки](products/up/backups.md) | draft | `backups.slots-full.spec.ts`, `backups.spec.ts`, `backups.throttle.spec.ts`, `role.enforcement.spec.ts`, `security.spec.ts` | 13 | 9 / 1 / 1 |
+| [UP - игровая панель ultra.panel + API v2](products/up/README.md) | draft | все спеки продукта (36) | 92 | 0 / 0 / 0 |
+| [Backups - бэкапы сервера, базы и папки](products/up/backups.md) | draft | `backups.server-scope.api.spec.ts`, `backups.slots-full.spec.ts`, `backups.spec.ts`, `backups.throttle.spec.ts`, `role.enforcement.spec.ts`, `security.spec.ts` | 14 | 9 / 1 / 1 |
 | [Client-only моды - скрытие в каталоге и отключение на сервере](products/up/client-only-mods.md) | draft | `client-only-mods.spec.ts` | 2 | 0 / 0 / 0 |
 | [Config - server.properties и блок Docker/Java](products/up/config.md) | draft | `config.spec.ts`, `security.spec.ts` | 6 | 3 / 1 / 1 |
 | [Console - лог сервера и ввод команд](products/up/console.md) | draft | `console.palette.spec.ts`, `console.spec.ts`, `players.spec.ts`, `security.console.spec.ts` | 6 | 5 / 0 / 1 |
@@ -54,6 +54,7 @@ sources:
 | [Missing mod dependencies - автодозагрузка зависимостей модов](products/up/missing-mod-deps.md) | draft | - | - | 0 / 0 / 0 |
 | [Модалки и оверлеи панели](products/up/modals.md) | draft | - | - | 0 / 0 / 0 |
 | [Split Server - деление сервера на основной и саб-серверы](products/up/split-server.md) | draft | - | - | 0 / 0 / 0 |
+| [Квиз апгрейда (Upgrade Quiz) - подбор тарифа и оффер](products/up/upgrade-quiz.md) | draft | - | - | 1 / 2 / 2 |
 
 ## VPS - панель VirtFusion
 

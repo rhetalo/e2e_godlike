@@ -94,6 +94,7 @@ Google-OAuth (`stage.panel.godlike.host/oauth2/callback`), сессия живё
 | Tasks | Send command / Send power action, Configure, Run, расписание | [UP/tasks](tasks.md) | - | tasks | ✅ |
 | Databases | Create Database, таблица кредов | [UP/databases](databases.md) | - | - | ⚠️ |
 | Upgrade / Boost | `/upgrade?promocode=...`, карточки планов, квиз | [UP/upgrade](upgrade.md) | [TASK-tariff-list-400](../../tickets/TASK-tariff-list-400.md) | promo (UPG-001) | ⚠️ |
+| ↳ Квиз апгрейда | Подбор тарифа, оффер, токен владельца в биллинге | [UP/upgrade-quiz](upgrade-quiz.md) | [DEV-593](../../tickets/DEV-593.md) | upgrade-quiz.token.api | ⚠️ |
 | Free Premium | Модалка «What is a Free Premium?», CTA 3-Days Trial | [UP/free-premium](upgrade.md#где-в-интерфейсе) | - | promo (PREM-001) | ✅ |
 | Referral | `/referral`, реф-ссылка `affiliate.godlike.host/ref/<code>`, Request Withdrawal | [UP/referral](referral.md) | - | referral | ✅ |
 | Throttling | Вебхук → модалка «Lag Detected» с апгрейдом | [UP/throttling](throttling.md) | [TASK-throttling-webhook](../../tickets/TASK-throttling-webhook.md) | throttling.notification (env-gate) | ⚠️ |

@@ -43,6 +43,7 @@ sources:
 | [backups](backups.md) | бэкапы, общая квота `meta.quota`, лимит частоты, бэкапы баз, расписания | `GET .../backups`, `POST .../backups/instances`, `POST`/`PUT .../backups/databases` | [DEV-452](../../../tickets/DEV-452.md), [DEV-484](../../../tickets/DEV-484.md) |
 | [files](files.md) | потоковый поиск файлов, лимиты и 429 | `GET .../files/search`, `GET .../files?dir=` | [DEV-476](../../../tickets/DEV-476.md), [DEV-480](../../../tickets/DEV-480.md) |
 | [minecraft-mods](minecraft-mods.md) | установка мода, manifest.json (validate/install, retry), окно отключённых модов, legacy-установка | `POST .../minecraft/mods`, `POST .../minecraft/manifest/validate`, `.../install`, `GET`/`POST .../client-only-notice(/ack)` | [DEV-556](../../../tickets/DEV-556.md) |
+| [upgrade-quiz](upgrade-quiz.md) | токен квиза апгрейда и JSON API биллинга `upsell_quiz` (коды отказов, CORS, журнал) | `GET .../upgrade-quiz/token`, `m=upsell_quiz&resource=..&action=..` | [DEV-593](../../../tickets/DEV-593.md) |
 | [minecraft-version](minecraft-version.md) | ядро сервера и `extension_capabilities` | `GET .../minecraft/version` | [DEV-515](../../../tickets/DEV-515.md), [DEV-549](../../../tickets/DEV-549.md) |
 
 Уже описанные в других местах куски API (пока не вынесены сюда):

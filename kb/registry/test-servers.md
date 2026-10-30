@@ -141,6 +141,8 @@ SMP Private, переименован в `DEV-562-MC` под [DEV-562](../ticket
 - 29-Oct-2026: переименован в `DEV-559-neoforge` ([DEV-559](../tickets/DEV-559.md)), NeoForge 1.21.1 (21.1.265) с вайпом, Offline.
   В `mods/`: Controlling 19.0.5 и Sodium 0.8.13 `.jar.disabled`, JEI 19.70.0.464, GodlikeMetrics. Свободен после закрытия DEV-559.
 - 30-Oct-2026: переименован в `DEV-580-A` - маршрут атак [DEV-580](../tickets/DEV-580.md), ничего не менялось. Свободен.
+- 30-Oct-2026: клиент A для [DEV-593](../tickets/DEV-593.md): через квиз апгрейд **Quadra Premium → Ultra Budget** за $5.94 кредитом
+  (инвойс 331374), теперь Ultra Budget ($23.99). В Sharing добавлен сабюзер Co-owner (временный аккаунт владельца) - оставлен до решения владельца.
 
 ### f8e7df56
 SkyBlock, на нём воспроизводился баг tariff-list 400. 20-Oct-2026 переименован в `DEV-484-backup-throttle` (было `JBl1Dqfw_474692`):
@@ -149,6 +151,7 @@ SkyBlock, на нём воспроизводился баг tariff-list 400. 20-
   ([DEV-556](../tickets/DEV-556.md)); 477 модов, Essential от теста убран в корзину.
 - 27-Oct-2026: [DEV-586](../tickets/DEV-586.md) prod - создан бэкап `DEV-586-prod-T1-first`, слоты **3/3**; удалять с ок владельца.
 - 30-Oct-2026: переименован в `DEV-580-B` ([DEV-580](../tickets/DEV-580.md)): удалены 2 XSS-бэкапа DEV-484 и тестовый folder, остался `DEV-586-prod-T1-first` (1/3). БД на сервере не создаётся (DEV-580/OBS-4).
+- 30-Oct-2026: [DEV-593](../tickets/DEV-593.md) Q1 - квиз (Quadra Premium) пройден до вопроса про игроков, варианты «5-10»/«10-20» скрыты; оффер не создавался.
 
 ### 7c5aa3cf
 `test`, сплит от [srv:1d7d34aa](#1d7d34aa), Paper 26.2, владелец 307989 в раскатке `extension-compatibility`. Стенд «ядро без модов»:
@@ -225,7 +228,14 @@ Cancel Amplitude (события отмены). 🟡
 ### d70813d3
 Project Zomboid, [DEV-562](../tickets/DEV-562.md), [DEV-579](../tickets/DEV-579.md).
 - 21-Oct-2026 переименован в `DEV-579-PZ` (было `DEV-562-PZ`). Panel memory 4096, в биллинге тариф 6 ГБ (бейдж «6 Ram»), остановлен.
+- 30-Oct-2026: «игра без квиза» для [DEV-593](../tickets/DEV-593.md) - квиза и кнопки «Go to quiz» нет, только смотрели.
 - Трогать: 🟡.
+
+### a493f744
+`DEV-593-trial` (было `dFDKkIj9_484820`, WHMCS 484820), аккаунт QA 307989. Создан 30-Oct-2026 через конструктор модпаков → «Start 3-hour Demo»
+(Forge 1.20.1 + Cloth Config API, 4 GB Quadra) под [DEV-593](../tickets/DEV-593.md). В панели `free=0`, trial виден через `/api/v2/whmcs/trial/{uuid}`.
+Через 3 часа без оплаты - suspend, через 72 ч - terminate. Новую демо-сессию на аккаунте не поднять, пока эта не истекла.
+- Трогать: 🟢 (одноразовый).
 
 ### 976c89c3
 Bedrock, `DEV-564-BR-C` (было `tJf6lPCi_482724`, WHMCS 482724), куплен владельцем 21-Oct-2026 под [DEV-564](../tickets/DEV-564.md).

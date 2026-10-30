@@ -57,6 +57,7 @@ updated: 2026-10-30
 | [DEV-582](DEV-582.md) | Зависшие PENDING бэкапы новой панели переводить в FAILED по возрасту, убрать reconcile-пробу, бэкфил status | UP | done | PASS | no | 2026-10-27 |
 | [DEV-583](DEV-583.md) | Трансфер в админке - локация сервера первой, ноды по реальной нагрузке | ADM | done | PASS | no | 2026-10-27 |
 | [DEV-586](DEV-586.md) | При отказе по лимиту частоты два тоста ошибки и не видно, когда повторить | UP | done | PASS | covered | 2026-10-27 |
+| [DEV-593](DEV-593.md) | Безопасность API квиза апгрейда - токен владельца вместо открытого JSON API | UP, BIL, OLDP | done | PASS | covered | 2026-10-30 |
 | [DEV-595](DEV-595.md) | Правило «длинный цикл → Premium» - один список циклов для заказа и апгрейда | BIL | in-qa | PASS | no | 2026-10-26 |
 | [TASK-missing-mod-deps](TASK-missing-mod-deps.md) | Окно Missing mod dependencies (автодозагрузка зависимостей) | UP | done | PASS-with-issues | - | 2026-09-29 |
 | [TASK-palworld-settings](TASK-palworld-settings.md) | Palworld Settings: UI-редактор PalWorldSettings.ini | UP | partial | PASS-with-issues | - | 2026-08-20 |
