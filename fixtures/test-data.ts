@@ -40,7 +40,16 @@ export const Urls = {
    * cart. Tests stop here — they NEVER click "Continue" on this page.
    */
   cartCheckout: "/clientarea/cart.php?a=checkout",
+
+  /**
+   * JSON API квиза апгрейда в биллинге (аддон upsell_quiz, DEV-593). Ресурс и действие - query-параметрами
+   * (`resource=offer&action=index&quiz_id=..&service_id=..`), авторизация - токен панели в `Authorization: Bearer`.
+   */
+  upsellQuizApi: "/clientarea/index.php?m=upsell_quiz&format=json",
 } as const;
+
+/** Квиз Minecraft Vanilla в биллинге (mod_upsell_quiz_quizes.id, live 30-Oct-2026). */
+export const UPSELL_QUIZ_MC_VANILLA_ID = process.env.UPSELL_QUIZ_MC_VANILLA_ID ?? "9";
 
 /**
  * Ключевые публичные storefront-страницы для структурных SEO/breadth-проверок.
