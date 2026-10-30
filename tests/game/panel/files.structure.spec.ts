@@ -20,6 +20,7 @@ import {
   loginAndSaveGameSession,
   GAME_STORAGE_STATE_PATH,
   GAME_SERVER_FILE_UUID,
+  GAME_SERVER_MODS_UUID,
 } from "../../../utils/gameAuth";
 
 // Ядровый текстовый файл MC — гарантированно есть на сервере (его же правит Config-таб).
@@ -67,6 +68,37 @@ test.describe("@regression [game-panel] File manager — диалоги/меню
     });
 
     await files.closeOverlay();
+  });
+
+  test("TC-GP-FILE-005 | CodeMirror-редактор открывает текстовый файл (read-only)", async () => {
+    await files.goto(); // к чистому списку файлов (предыдущий тест мог оставить overlay)
+    await files.openFileInEditor(EDITOR_FILE);
+
+    await test.step("редактор смонтирован и содержит контент файла", async () => {
+      await expect(files.editorContent).toBeVisible();
+      expect((await files.getEditorText()).length).toBeGreaterThan(0);
+    });
+
+    await files.leaveEditor(); // уходим без сохранения (ничего не редактировали)
+  });
+});
+
+// «Upload custom modpack» активна только на модовом ядре (DEV-549: кнопка по ядру). С 29-Oct-2026
+// автоопределение честно пометило файловый сервер ec78834c как Paper → кнопка disabled →
+// CF-001/CF-002 гоняем на сервере с модовым ядром (GAME_SERVER_MODS_UUID). Оба read-only.
+test.describe("@regression [game-panel] File manager — Upload custom modpack (модовое ядро)", () => {
+  let context: BrowserContext;
+  let files: GamePanelFilesPage;
+
+  test.beforeAll(async ({ browser }) => {
+    await loginAndSaveGameSession(browser);
+    context = await browser.newContext({ storageState: GAME_STORAGE_STATE_PATH });
+    files = new GamePanelFilesPage(await context.newPage(), GAME_SERVER_MODS_UUID);
+    await files.goto();
+  });
+
+  test.afterAll(async () => {
+    await context.close();
   });
 
   test("TC-GP-CF-001 | Upload custom modpack: апселл Modpack setup → «I’ll upload it myself» → CurseForge диалог (без заказа/загрузки)", async () => {
@@ -119,15 +151,4 @@ test.describe("@regression [game-panel] File manager — диалоги/меню
     },
   );
 
-  test("TC-GP-FILE-005 | CodeMirror-редактор открывает текстовый файл (read-only)", async () => {
-    await files.goto(); // к чистому списку файлов (предыдущий тест мог оставить overlay)
-    await files.openFileInEditor(EDITOR_FILE);
-
-    await test.step("редактор смонтирован и содержит контент файла", async () => {
-      await expect(files.editorContent).toBeVisible();
-      expect((await files.getEditorText()).length).toBeGreaterThan(0);
-    });
-
-    await files.leaveEditor(); // уходим без сохранения (ничего не редактировали)
-  });
 });

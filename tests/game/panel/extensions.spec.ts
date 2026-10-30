@@ -13,7 +13,7 @@ import { GamePanelExtensionsPage } from "../../../pages/game/GamePanelExtensions
 import {
   loginAndSaveGameSession,
   GAME_STORAGE_STATE_PATH,
-  GAME_SERVER_UUID,
+  GAME_SERVER_MODS_UUID,
 } from "../../../utils/gameAuth";
 import { GAME_PANEL_EXTENSIONS_API } from "../../../utils/selectors";
 
@@ -26,7 +26,7 @@ test.describe("@regression [game-panel] Plugins/Mods + Modpacks (каталог)
   test.beforeAll(async ({ browser }) => {
     await loginAndSaveGameSession(browser);
     context = await browser.newContext({ storageState: GAME_STORAGE_STATE_PATH });
-    ext = new GamePanelExtensionsPage(await context.newPage(), GAME_SERVER_UUID);
+    ext = new GamePanelExtensionsPage(await context.newPage(), GAME_SERVER_MODS_UUID); // вкладка Mods есть только на модовом ядре (29-Oct-2026)
   });
 
   test.afterAll(async () => {

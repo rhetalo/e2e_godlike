@@ -17,18 +17,22 @@
  * отсутствует (нет индикатора «доступна новее версия», нет кнопки Update, нет поля в /installed) -
  * см. test-docs/ultra.panel/cf-modrinth-source-REPORT.md. Появится фича → добавить update-flow тест.
  *
- * Сервер: 0c743c25 «test_e2e» (Minecraft/Paper, тестовый акк), env GAME_PANEL_SOURCE_SERVER_UUID.
+ * Сервер: 0c743c25 «test_e2e» (Minecraft/Paper, тестовый акк), env GAME_PANEL_SOURCE_SERVER_UUID;
+ * моды и сборки - на сервере с модовым ядром (GAME_SERVER_MODS_UUID), env GAME_PANEL_SOURCE_MODS_SERVER_UUID.
  * Подтверждено live network+DOM 03-Sep и 05-Oct-2026.
  */
 import { test, expect, type BrowserContext, type Page, type Response } from "@playwright/test";
 import { GamePanelExtensionsPage } from "../../../pages/game/GamePanelExtensionsPage";
-import { loginAndSaveGameSession, GAME_STORAGE_STATE_PATH } from "../../../utils/gameAuth";
+import { loginAndSaveGameSession, GAME_STORAGE_STATE_PATH, GAME_SERVER_MODS_UUID } from "../../../utils/gameAuth";
 import { GAME_PANEL_EXTENSIONS_API } from "../../../utils/selectors";
 
 // Сервер из ТЗ (источник CF/Modrinth). Переопределяемо env (сервера не вечны).
 // Прежние ac8aa1e0 (05-Oct) и d2f7fff5 (07-Oct) ушли в suspended и роняли весь serial-спек →
 // 0c743c25 «test_e2e» (Paper, тест-акк, больше никем из спеков не занят).
 const SERVER = process.env.GAME_PANEL_SOURCE_SERVER_UUID ?? "0c743c25";
+// Моды и сборки (SRC-001/003, шаги Mods/Modpacks в SRC-004) - только на модовом ядре: на Paper вкладка Mods = «plugins only», mods API не зовётся
+// (29-Oct-2026 автоопределение ядра честно пометило 0c743c25 как Paper). Плагины - на SERVER (Paper).
+const MODS_SERVER = process.env.GAME_PANEL_SOURCE_MODS_SERVER_UUID ?? GAME_SERVER_MODS_UUID;
 
 interface CatalogItem {
   provider: string;
@@ -49,12 +53,14 @@ test.describe("@regression [game-panel] Источник расширений = 
   let context: BrowserContext;
   let page: Page;
   let ext: GamePanelExtensionsPage;
+  let modsExt: GamePanelExtensionsPage; // Mods/Modpacks: только на модовом ядре
 
   test.beforeAll(async ({ browser }) => {
     await loginAndSaveGameSession(browser);
     context = await browser.newContext({ storageState: GAME_STORAGE_STATE_PATH });
     page = await context.newPage();
     ext = new GamePanelExtensionsPage(page, SERVER);
+    modsExt = new GamePanelExtensionsPage(page, MODS_SERVER);
   });
 
   test.afterAll(async () => {
@@ -80,7 +86,7 @@ test.describe("@regression [game-panel] Источник расширений = 
     await test.step("CurseForge (дефолтный источник) — /minecraft/mods?provider=curseforge", async () => {
       const [resp] = await Promise.all([
         page.waitForResponse((r) => GAME_PANEL_EXTENSIONS_API.modsList.test(r.url()), { timeout: 30_000 }),
-        ext.gotoExtensions(),
+        modsExt.gotoExtensions(),
       ]);
       await assertDirectSource(resp, "curseforge");
     });
@@ -91,7 +97,7 @@ test.describe("@regression [game-panel] Источник расширений = 
           (r) => GAME_PANEL_EXTENSIONS_API.modsList.test(r.url()) && r.url().includes("provider=modrinth"),
           { timeout: 30_000 },
         ),
-        ext.selectSource("Modrinth"),
+        modsExt.selectSource("Modrinth"),
       ]);
       await assertDirectSource(resp, "modrinth");
     });
@@ -123,7 +129,7 @@ test.describe("@regression [game-panel] Источник расширений = 
     await test.step("CurseForge — /minecraft/modpacks?provider=curseforge", async () => {
       const [resp] = await Promise.all([
         page.waitForResponse((r) => GAME_PANEL_EXTENSIONS_API.modpacksList.test(r.url()), { timeout: 30_000 }),
-        ext.gotoModpacks(),
+        modsExt.gotoModpacks(),
       ]);
       await assertDirectSource(resp, "curseforge");
     });
@@ -134,7 +140,7 @@ test.describe("@regression [game-panel] Источник расширений = 
           (r) => GAME_PANEL_EXTENSIONS_API.modpacksList.test(r.url()) && r.url().includes("provider=modrinth"),
           { timeout: 30_000 },
         ),
-        ext.selectSource("Modrinth"),
+        modsExt.selectSource("Modrinth"),
       ]);
       await assertDirectSource(resp, "modrinth");
     });
@@ -144,9 +150,9 @@ test.describe("@regression [game-panel] Источник расширений = 
     const has = (opts: string[], name: RegExp): boolean => opts.some((o) => name.test(o));
 
     await test.step("Mods: только Curseforge + Modrinth (оба — прямой API)", async () => {
-      await ext.gotoExtensions();
-      await ext.cards().first().waitFor({ state: "visible", timeout: 20_000 });
-      const opts = await ext.sourceOptions();
+      await modsExt.gotoExtensions();
+      await modsExt.cards().first().waitFor({ state: "visible", timeout: 20_000 });
+      const opts = await modsExt.sourceOptions();
       expect(has(opts, /curseforge/i)).toBe(true);
       expect(has(opts, /modrinth/i)).toBe(true);
       // у модов нет own-library провайдеров (Hangar — только для плагинов)
@@ -164,9 +170,9 @@ test.describe("@regression [game-panel] Источник расширений = 
     });
 
     await test.step("Modpacks: CF/Modrinth + ATLauncher/FTB/Technic/VoidsWrath/All (own library)", async () => {
-      await ext.gotoModpacks();
-      await ext.cards().first().waitFor({ state: "visible", timeout: 20_000 });
-      const opts = await ext.sourceOptions();
+      await modsExt.gotoModpacks();
+      await modsExt.cards().first().waitFor({ state: "visible", timeout: 20_000 });
+      const opts = await modsExt.sourceOptions();
       for (const p of [/curseforge/i, /modrinth/i, /atlauncher/i, /feed the beast/i, /technic/i, /voidswrath/i]) {
         expect(has(opts, p)).toBe(true);
       }

@@ -88,6 +88,13 @@ export const GAME_SERVER_MUT_JAVA_NAME =
   process.env.GAME_PANEL_SERVER_MUT_JAVA_NAME ?? "test_e2e_mut_java"; // v-select сервера в форме Backups ищет по имени
 export const GAME_SERVER_MUT_FABRIC_UUID =
   process.env.GAME_PANEL_SERVER_MUT_FABRIC_UUID ?? "75d1175e-fcf7-4fdd-8279-86c5347f2264";
+/**
+ * Сервер с МОДОВЫМ ядром для read-only тестов каталога модов / Upload custom modpack.
+ * 29-Oct-2026 автоопределение ядра пересчитало ~18k серверов: ebb03adc/0c743c25/ec78834c честно
+ * оказались Paper → вкладка Mods = «core supports plugins only», Upload custom modpack disabled.
+ * По умолчанию = mut-fabric (Fabric 1.21.1, на диске реально Fabric - детектор не перевернёт).
+ */
+export const GAME_SERVER_MODS_UUID = process.env.GAME_PANEL_MODS_SERVER_UUID ?? GAME_SERVER_MUT_FABRIC_UUID;
 export const GAME_SERVER_MUT_BEDROCK_UUID =
   process.env.GAME_PANEL_SERVER_MUT_BEDROCK_UUID ?? "b62bffd0-8f39-40d0-9ff4-2eb25a94ef3b";
 
