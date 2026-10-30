@@ -2,7 +2,7 @@
 id: KB-TICKETS
 title: Тикеты и задачи
 type: index
-updated: 2026-10-29
+updated: 2026-10-30
 ---
 
 # Тикеты и задачи
@@ -53,6 +53,7 @@ updated: 2026-10-29
 | [DEV-574](DEV-574.md) | Поля контакта и события серверов панели в eSputnik | UP | n/a | - | no | 2026-10-28 |
 | [DEV-576](DEV-576.md) | Checkout v2 - «Your plan» без разовой настройки модпака в месячной цене | BIL | done | PASS | blocked | 2026-10-26 |
 | [DEV-579](DEV-579.md) | Project Zomboid - лимит -Xmx в ProjectZomboid64.json следует за тарифом | UP | done | PASS | candidate | 2026-10-21 |
+| [DEV-580](DEV-580.md) | Бэкапы всех типов (новая и старая панель) - поиск по uuid только в рамках сервера из роута | UP | done | PASS | covered | 2026-10-30 |
 | [DEV-582](DEV-582.md) | Зависшие PENDING бэкапы новой панели переводить в FAILED по возрасту, убрать reconcile-пробу, бэкфил status | UP | done | PASS | no | 2026-10-27 |
 | [DEV-583](DEV-583.md) | Трансфер в админке - локация сервера первой, ноды по реальной нагрузке | ADM | done | PASS | no | 2026-10-27 |
 | [DEV-586](DEV-586.md) | При отказе по лимиту частоты два тоста ошибки и не видно, когда повторить | UP | done | PASS | covered | 2026-10-27 |

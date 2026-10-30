@@ -4,9 +4,9 @@ title: API - backups (список, квота, ручные бэкапы и б�
 type: api
 product: UP
 status: draft
-updated: 2026-10-27
+updated: 2026-10-30
 verified_on: 2026-10-20        # DEV-484 итоговая проверка на prod (panel!1691 + new-panel!564)
-tickets: [DEV-452, DEV-484, DEV-418]
+tickets: [DEV-452, DEV-484, DEV-418, DEV-580]
 features: [UP/backups, UP/modpack-catalog]
 sources:
   - memory: dev484-backup-throttle, dev452-modpack-backup-fail-reasons
@@ -142,6 +142,27 @@ sources:
 Меняет имя бэкапа базы. Поле `database_id` из запроса убрано (`UpdateBackupDatabaseRequest`) 📖: если прислать `database_id`
 другой базы, ответ 200, имя меняется, база остаётся прежней ✅. Раньше через этот PUT можно было перепривязать бэкап к чужой базе.
 
+## Поиск бэкапа в рамках сервера (DEV-580)
+
+С [DEV-580](../../../tickets/DEV-580.md) (panel!1723, 29-Oct-2026) бэкап по `{backupUUID}` ищется **только среди бэкапов сервера из роута**.
+Чужой и несуществующий uuid дают одинаковый ответ, по нему нельзя понять, существует ли чужой бэкап. Заблокированный чужой - так же.
+
+| Роут | Чужой / выдуманный uuid | Тело |
+|---|---|---|
+| v2 `PUT`, `GET …/download`, `POST …/restore`, `DELETE` на `backups/instances/{uuid}` | 400 ✅ | `{"message":"No query results for model [Pterodactyl\Models\Backup]."}` (последний шаг fallback instance → core) |
+| то же на `backups/folders/{uuid}` | 400 ✅ | `… [Godlike\Domain\Backup\Models\BackupFolder].` |
+| то же на `backups/databases/{uuid}` | 400 ✅ | `… [Godlike\Domain\Backup\Models\BackupDatabase].` |
+| v1 `GET /api/client/servers/{server}/backups/{uuid}`, `/lock`, `/download`, `/restore`, `DELETE` | 404 ✅ | `NotFoundHttpException … could not be found on the server.` |
+
+- `PUT backups/instances/{uuid бэкапа старой панели}` своего сервера → 200 `{"success":true}`: меняются только `name` и `locked`,
+  `retainCount` / `autoReplace` игнорируются ✅ (до фикса 500).
+- v1 `POST …/lock` бэкапа новой панели → 200 с `is_locked` ✅ (до фикса 500). v1 несуществующий uuid → 404 ✅ (до фикса 500).
+- Uuid бэкапа одного типа на роуте другого типа своего сервера → 400 ✅.
+- `PUT backups/instances|databases` отвечает `{"success":true}` без данных, `PUT backups/folders` - объектом бэкапа ✅ (не менялось).
+- `POST backups/databases/{uuid}/restore` при ошибке Wings → 400 с сырым `file_get_contents(https://wing…:8080/download/file?token=…)` ✅
+  ([DEV-580/OBS-3](../../../tickets/DEV-580.md#находки)).
+- Автотест: `tests/game/panel/backups.server-scope.api.spec.ts` (TC-GP-BKP-SCOPE-001/002), только GET.
+
 ## Расписания (scheduled backups)
 
 Планировщик - команда `gl:handle-scheduled-backups`, запускается раз в минуту 📖.
@@ -176,6 +197,7 @@ sources:
 | 2026-09-16 | [DEV-484](../../../tickets/DEV-484.md) | `panel!1611` (+ `!1614` тест): пре-инсталл бэкап вне лимита частоты, флаг `is_system_initiated` |
 | 2026-10-20 | [DEV-484](../../../tickets/DEV-484.md) | [panel!1691](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1691): общая квота по 4 таблицам, `meta.quota`, единый текст 429, расписания не «умирают» при отказе, хотфикс бэкапа чужой базы (404) и PUT `database_id`. [new-panel!564](https://git.godlike.ovh/panel/godlike-new-panel/-/merge_requests/564): счётчик из `meta.quota`, заглушка «Slots Limit Reached» |
 | 2026-10-26 | [DEV-586](../../../tickets/DEV-586.md) | `panel!1708`: 429 создания бэкапа с `error_code: backup_throttled`, `retry_after`, `Retry-After`; `new-panel!574` (27-Oct): один тост с минутами |
+| 2026-10-29 | [DEV-580](../../../tickets/DEV-580.md) | [panel!1723](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1723): поиск бэкапа по uuid только в рамках сервера из роута (v2 и v1), чужой uuid = несуществующий; v1 lock бэкапа новой панели и v2 PUT core без 500 |
 | 2026-10-27 | [DEV-582](../../../tickets/DEV-582.md) | `panel!1713`: зависшие PENDING (старше `backups.prune_age` 360 мин) → FAILED командой `gl:backups:fail-stale-pending` раз в 30 мин; бэкфил `status` |
 
 **Как проверено.** Prod, 20-Oct-2026, серверы [srv:f8e7df56](../../../registry/test-servers.md#f8e7df56) (квота ядра, сверх лимита, окно),

@@ -3,7 +3,7 @@ id: KB-REG-SERVERS
 title: Тест-серверы (UP, VPS)
 type: registry
 status: draft
-updated: 2026-10-23
+updated: 2026-10-30
 verified_on: -        # с живой панелью ещё не сверяли
 sources:
   - utils/gameAuth.ts (env + фолбэки)
@@ -124,6 +124,7 @@ SMP.
 - Владелец с [flag:extension-compatibility](flags.md#extension-compatibility).
 - Задачи: [DEV-515](../tickets/DEV-515.md), [DEV-529](../tickets/DEV-529.md).
 - 20-Oct-2026 переименован в `DEV-484-schedules` (было `aDFt94f8_474690`): расписания [DEV-484](../tickets/DEV-484.md), бэкапы оставлены.
+- 30-Oct-2026: переименован в `DEV-580-B2` - core-бэкап `bc9161e2` (той же ноды 427, что A) как жертва [DEV-580](../tickets/DEV-580.md); имя и lock возвращены, сервер восстановлен из этого бэкапа.
 - Трогать: 🟡.
 
 ### 0cf8346f
@@ -139,6 +140,7 @@ SMP Private, переименован в `DEV-562-MC` под [DEV-562](../ticket
 - 28-Oct-2026: `DEV-589-MC` (DEV-589), отдан под тесты и мутации.
 - 29-Oct-2026: переименован в `DEV-559-neoforge` ([DEV-559](../tickets/DEV-559.md)), NeoForge 1.21.1 (21.1.265) с вайпом, Offline.
   В `mods/`: Controlling 19.0.5 и Sodium 0.8.13 `.jar.disabled`, JEI 19.70.0.464, GodlikeMetrics. Свободен после закрытия DEV-559.
+- 30-Oct-2026: переименован в `DEV-580-A` - маршрут атак [DEV-580](../tickets/DEV-580.md), ничего не менялось. Свободен.
 
 ### f8e7df56
 SkyBlock, на нём воспроизводился баг tariff-list 400. 20-Oct-2026 переименован в `DEV-484-backup-throttle` (было `JBl1Dqfw_474692`):
@@ -146,6 +148,7 @@ SkyBlock, на нём воспроизводился баг tariff-list 400. 20-
 - 23-Oct-2026: ядро **NeoForge 1.21.1** (не Paper), владелец 307989 в раскатке `extension-compatibility` - стенд отказа по лоадеру
   ([DEV-556](../tickets/DEV-556.md)); 477 модов, Essential от теста убран в корзину.
 - 27-Oct-2026: [DEV-586](../tickets/DEV-586.md) prod - создан бэкап `DEV-586-prod-T1-first`, слоты **3/3**; удалять с ок владельца.
+- 30-Oct-2026: переименован в `DEV-580-B` ([DEV-580](../tickets/DEV-580.md)): удалены 2 XSS-бэкапа DEV-484 и тестовый folder, остался `DEV-586-prod-T1-first` (1/3). БД на сервере не создаётся (DEV-580/OBS-4).
 
 ### 7c5aa3cf
 `test`, сплит от [srv:1d7d34aa](#1d7d34aa), Paper 26.2, владелец 307989 в раскатке `extension-compatibility`. Стенд «ядро без модов»:
@@ -262,6 +265,7 @@ Trial конструктора модпаков. 🟡
 
 ### 83d391c4
 Paper, плагины в [DEV-500](../tickets/DEV-500.md). 🟡
+- 30-Oct-2026: переименован в `DEV-580-C` (было `K6eCbHz9_426586`), [DEV-580](../tickets/DEV-580.md): бэкап базы `db_fix` (битый, Wings 500) удалён с ок владельца, база `s724329_тест` на месте; слоты 2/3.
 
 ## stage
 
