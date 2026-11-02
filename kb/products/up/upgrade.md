@@ -4,9 +4,9 @@ title: Upgrade / Boost - смена тарифа из панели
 type: feature
 product: UP
 status: draft
-updated: 2026-10-30
+updated: 2026-11-03
 verified_on: 2026-10-09        # страница сломана, TASK-tariff-list-400
-tickets: [TASK-tariff-list-400, DEV-534, DEV-579, DEV-593]
+tickets: [TASK-tariff-list-400, DEV-534, DEV-579, DEV-593, DEV-594]
 flags: []
 tests: [tests/game/panel/promo.spec.ts]
 sources:
@@ -45,7 +45,10 @@ sources:
 1. **Баг Critical (09-Oct):** `tariffs-new/.../list` ~19 с → 400 TypeError `TariffListService::filterProducts`, в ответе
    внутренний путь и имя класса. Воспроизводится на всех открытых серверах. Найден при QA [DEV-534](../../tickets/DEV-534.md),
    карточка [TASK-tariff-list-400](../../tickets/TASK-tariff-list-400.md), Jira-ключ и статус фикса ❓.
-2. Кнопка выбора у части планов неактивна (`simple-plan-card__select-btn-disabled`) - по какому правилу ❓.
+2. **`?ram=N` (DEV-594):** сводится к наименьшему плану `>= N` из сетки тарифов (прод 02-Nov: 2..16 шагом 2, 20, 32, 64, 96, 130 GB),
+   выше сетки - максимальный; мусор, `0`, дробь или `<=` текущей RAM платного - без Recommended. Тир (Budget/Premium) сохраняется.
+   Сюда ведут RAM-диалог модпака и Lag Score.
+3. Кнопка выбора у части планов неактивна (`simple-plan-card__select-btn-disabled`) - по какому правилу ❓.
 
 ## Гочи для тестирования
 
@@ -59,6 +62,7 @@ sources:
 |---|---|---|
 | Boost ведёт на Upgrade, карточки планов и цены | `promo.spec.ts` (UPG-001) | ✅ структурно (при баге 400 упадёт) |
 | Окно Free Premium | `promo.spec.ts` (PREM-001) | ✅ |
+| `?ram=` → Recommended и конфигуратор (DEV-594) | ручной QA 02-Nov, автотест - candidate | ⚠️ |
 | Оплата апгрейда, промокод | не покрыто (платёж) | ❌ |
 
 ## История
@@ -69,3 +73,4 @@ sources:
 | 09-Oct-2026 | [TASK-tariff-list-400](../../tickets/TASK-tariff-list-400.md) | Список тарифов падает с 400, Upgrade не работает |
 | 21-Oct-2026 | [DEV-579](../../tickets/DEV-579.md) | Project Zomboid: -Xmx в ProjectZomboid64.json пересчитывается от памяти тарифа при каждом старте (panel!1695). PASS |
 | 30-Oct-2026 | [DEV-593](../../tickets/DEV-593.md) | Квиз апгрейда только с токеном владельца; апгрейд из квиза за кредиты прошёл (VIP, Quadra Premium → Ultra Budget). PASS |
+| 02-Nov-2026 | [DEV-594](../../tickets/DEV-594.md) | `?ram=` округляется до реального плана, RAM-диалог модпака ведёт на ceil GB (new-panel!576). PASS |

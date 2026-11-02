@@ -446,6 +446,9 @@ preflight и нет канала причин (known gap, вне scope).
   Delete / Create Backup and Install / Install Over + поле World Folder) → **Install** → возможный RAM-диалог
   «This modpack needs more RAM» (Install anyway) → возможный World Backup попап (PROD-134) →
   `POST /servers/{uuid}/minecraft/modpacks`.
+- **RAM-диалог (DEV-594, prod 02-Nov-2026):** показывается только если `max(best_ram || 4096, 4096)` > RAM сервера, иначе Install
+  СРАЗУ ставит модпак. `best_ram` - из ответа API списка (`ram_requirements` / FTB `estimated_mb`), не из `modpacks.ram` в БД;
+  слот по maxPlayers из `/players` (offline → 4). Кнопка «Upgrade RAM» → `/upgrade?ram=ceil(GB)`, там `snapRamToPlan` до ступени сетки.
 - **API живёт на `https://panel.godlike.host/api/v2`**, НЕ на origin ultra.panel (там отдаётся SPA HTML).
   Bearer = `localStorage.access_token`.
 - **Sync-ответы 409 на POST** (проверяются preflight'ом: сначала throttle, потом слоты):

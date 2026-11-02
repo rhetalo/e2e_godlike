@@ -4,9 +4,9 @@ title: Модпаки - каталог, видимость и установка
 type: feature
 product: UP
 status: draft
-updated: 2026-10-21
+updated: 2026-11-03
 verified_on: 2026-10-21        # последняя живая сверка - DEV-452 ретест
-tickets: [DEV-532, DEV-405, DEV-472, DEV-492, DEV-459, DEV-452, DEV-484]
+tickets: [DEV-532, DEV-405, DEV-472, DEV-492, DEV-459, DEV-452, DEV-484, DEV-594]
 flags: [is-listed, modpack-catalog-v2, extension-compatibility, VITE_MANAGED_MODPACK_URL]
 tests: [tests/game/panel/extensions.spec.ts, tests/game/panel/extension.sources.spec.ts]
 sources:
@@ -101,6 +101,10 @@ sources:
 
 ## Гочи для тестирования
 
+- ⚠️ **RAM-диалог или сразу установка (DEV-594):** диалог «needs more RAM» только если `max(best_ram || 4096, 4096)` > RAM сервера,
+  иначе Install сразу ставит модпак. `best_ram` - из ответа API списка (`ram_requirements` / FTB `estimated_mb`), не из `modpacks.ram`
+  в БД (FTB Ultimate Reloaded: БД 5120, API 4096). Перед Install сверять по network. Кнопка диалога «Upgrade RAM» → `/upgrade?ram=ceil(GB)`.
+
 - **Установка модпака = переустановка сервера** (overwrite). Только с ок владельца и на своих серверах; AC 7 DEV-405
   для сборок поэтому не проверялся.
 - **Модалки цепочки снимать по очереди**, ждать короткими шагами (≤60-90 с). EULA и свои окна закрываем сами.
@@ -133,3 +137,4 @@ sources:
 | 09-Oct-2026 | [DEV-492](../../tickets/DEV-492.md) | Скан модов сразу после установки, манифест не рвёт установку |
 | 09-Sep-2026 | [DEV-452](../../tickets/DEV-452.md) | Префлайт лимита и слотов, 8 причин отказа, диалог и тосты (QA 16-Oct-2026) |
 | 16-Sep-2026 | [DEV-484](../../tickets/DEV-484.md) | Пре-инсталл бэкап вне лимита частоты |
+| 02-Nov-2026 | [DEV-594](../../tickets/DEV-594.md) | RAM-диалог: ceil GB, «Upgrade RAM» → план из сетки (QA prod PASS) |

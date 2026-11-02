@@ -125,6 +125,7 @@ SMP.
 - Задачи: [DEV-515](../tickets/DEV-515.md), [DEV-529](../tickets/DEV-529.md).
 - 20-Oct-2026 переименован в `DEV-484-schedules` (было `aDFt94f8_474690`): расписания [DEV-484](../tickets/DEV-484.md), бэкапы оставлены.
 - 30-Oct-2026: переименован в `DEV-580-B2` - core-бэкап `bc9161e2` (той же ноды 427, что A) как жертва [DEV-580](../tickets/DEV-580.md); имя и lock возвращены, сервер восстановлен из этого бэкапа.
+- 02-Nov-2026: [DEV-594](../tickets/DEV-594.md) read-only - RAM-диалог модпака (Ultra Modded Lite, Install не жали) и `?ram=` на апгрейде. Не менялся.
 - Трогать: 🟡.
 
 ### 0cf8346f
@@ -143,6 +144,7 @@ SMP Private, переименован в `DEV-562-MC` под [DEV-562](../ticket
 - 30-Oct-2026: переименован в `DEV-580-A` - маршрут атак [DEV-580](../tickets/DEV-580.md), ничего не менялось. Свободен.
 - 30-Oct-2026: клиент A для [DEV-593](../tickets/DEV-593.md): через квиз апгрейд **Quadra Premium → Ultra Budget** за $5.94 кредитом
   (инвойс 331374), теперь Ultra Budget ($23.99). В Sharing добавлен сабюзер Co-owner (временный аккаунт владельца) - оставлен по решению владельца (30-Oct).
+- 02-Nov-2026: [DEV-594](../tickets/DEV-594.md) read-only - `?ram=` на апгрейде (6 GB Budget). Не менялся.
 
 ### f8e7df56
 SkyBlock, на нём воспроизводился баг tariff-list 400. 20-Oct-2026 переименован в `DEV-484-backup-throttle` (было `JBl1Dqfw_474692`):
@@ -188,12 +190,14 @@ DEV-418, Bedrock. 🟡
 ### 7d7041c8
 DEV-418. 21-Oct-2026 под [DEV-564](../tickets/DEV-564.md): Paper → Bedrock → обратно на Paper, имя `18k6mMw5_462880`. 🟡
 26-Oct-2026 под [DEV-595](../tickets/DEV-595.md): апгрейд на Budget Double / 12 Months → теперь **Premium Double (359), Annually**, следующая оплата 26-Oct-2027. Сократить цикл апгрейдом нельзя.
+- 02-Nov-2026: переименован в `DEV-594-modpack` (было `18k6mMw5_462880`) под [DEV-594](../tickets/DEV-594.md), не использован (Paper - модпаки под гейтом). Свободен.
 
 ### b4089560
 DEV-418. 🟡
 
 ### 09f8d87d
 DEV-418 и [DEV-401](../tickets/DEV-401.md). **Free, suspended** (15-Oct). 🔴
+- 02-Nov-2026: страница апгрейда открывается, [DEV-594](../tickets/DEV-594.md) read-only `?ram=1/5` (сетка с 2 GB). Не менялся.
 
 ### feede8c1
 DEV-418 и [DEV-401](../tickets/DEV-401.md). **Free, suspended** (15-Oct). 🔴
