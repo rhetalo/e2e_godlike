@@ -55,7 +55,10 @@ sources:
    С Wither (64 GB, Budget и Premium) апгрейд на Warden / Ender Dragon недоступен - конфигуратор пустой (подтверждено владельцем
    на 4 живых услугах). Цепочка: panel `TariffListService` → billing `product_features.php` `group_pairs` (группы по паре;
    нет пары - пустой список) → `group_products` (скрытые `hidden = 1` отбрасываются намеренно). Поэтому у **Hytale** (пары есть,
-   все 12 тарифов скрыты) апгрейд тоже пустой, тот же 404 (~104 живые услуги). Баг Important, оформлен в `test-docs/ultra.panel/BUG-max-plan-tier-pairs/BUG.md`, найден при [DEV-594](../../tickets/DEV-594.md).
+   все 12 тарифов скрыты) апгрейд тоже пустой, тот же 404 (~104 живые услуги). 03-Nov владелец добавил пары и открыл Hytale:
+   Wither на своей услуге считается (96 GB $4319.21, 130 GB $5915.44); Hytale не подтверждён (у Premium 915/921 нет путей в
+   `tblproduct_upgrade_products`). ⚠️ **Под админ-видом расчёт `tariffs-new/upgrade` даёт 404 на ЛЮБОЙ чужой услуге** - проверять
+   расчёт только на своей услуге. Баг Important, оформлен в `test-docs/ultra.panel/BUG-max-plan-tier-pairs/BUG.md`, найден при [DEV-594](../../tickets/DEV-594.md).
 4. Кнопка выбора у части планов неактивна (`simple-plan-card__select-btn-disabled`) - по какому правилу ❓.
 
 ## Гочи для тестирования
