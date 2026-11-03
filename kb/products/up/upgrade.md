@@ -48,7 +48,12 @@ sources:
 2. **`?ram=N` (DEV-594):** сводится к наименьшему плану `>= N` из сетки тарифов (прод 02-Nov: 2..16 шагом 2, 20, 32, 64, 96, 130 GB),
    выше сетки - максимальный; мусор, `0`, дробь или `<=` текущей RAM платного - без Recommended. Тир (Budget/Premium) сохраняется.
    Сюда ведут RAM-диалог модпака и Lag Score.
-3. Кнопка выбора у части планов неактивна (`simple-plan-card__select-btn-disabled`) - по какому правилу ❓.
+3. **Тир (Budget/Premium) берётся из пар `godlike_budget_premium_pair` (billing), а не из группы продукта** - флаг
+   `is_premium` в `mod_godlike_product_attributes` = 0 у всех. 03-Nov-2026: пар нет для Wither 714/718, Warden 715/719,
+   Ender Dragon 716/720 → Premium-клиент видит «Budget», `tariffs-new/{id}/list` отдаёт `isPremium: false` и `products: []`,
+   а страница шлёт `tariffs-new/upgrade` с `product_id: 343` → 404 «This upgrade is not available for this service».
+   Баг Minor, оформлен в `test-docs/ultra.panel/BUG-max-plan-tier-pairs/BUG.md`, найден при [DEV-594](../../tickets/DEV-594.md).
+4. Кнопка выбора у части планов неактивна (`simple-plan-card__select-btn-disabled`) - по какому правилу ❓.
 
 ## Гочи для тестирования
 
