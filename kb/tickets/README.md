@@ -37,6 +37,7 @@ updated: 2026-11-03
 | [DEV-512](DEV-512.md) | Смена версии теряет суффикс libxrender у Docker-образа | UP, OLDP | done | PASS | - | 2026-10-07 |
 | [DEV-513](DEV-513.md) | Устаревший «Образ Docker» в Параметрах запуска после серверной смены образа | OLDP, ADM | done | PASS | - | 2026-10-12 |
 | [DEV-515](DEV-515.md) | Автофильтр версий во вкладке модов и блокировка вкладок для несовместимых ядер | UP | done | PASS | - | 2026-10-07 |
+| [DEV-528](DEV-528.md) | A/B - после Boost конфигуратор апгрейда предлагает следующий план, события страницы апгрейда и разметка оплат | UP, BIL | done | PASS-with-issues | blocked | 2026-11-03 |
 | [DEV-529](DEV-529.md) | Versions - Arclight на Forge/NeoForge после запуска сервера превращается в Forge/NeoForge | UP | done | PASS | - | 2026-10-08 |
 | [DEV-532](DEV-532.md) | Убрать дубли модпаков CurseForge / Modrinth из выбора на modded-странице | UP, ADM, WPGL | done | PASS | - | 2026-10-08 |
 | [DEV-534](DEV-534.md) | Фильтры «All» и «All versions» в каталоге модов и плагинов не расширяют список | UP | done | PASS-with-issues | - | 2026-10-09 |
@@ -92,6 +93,7 @@ updated: 2026-11-03
 - **candidate**: [DEV-564](DEV-564.md) - Bedrock NetherNet - UDP-порты под каждый слот вместо transport nethernet
 - **candidate**: [DEV-579](DEV-579.md) - Project Zomboid - лимит -Xmx в ProjectZomboid64.json следует за тарифом
 - **blocked**: [DEV-480](DEV-480.md) - Пошук файлів на стороні Wings - нативний обхід на ноді за флагом wings-native-file-search
+- **blocked**: [DEV-528](DEV-528.md) - A/B - после Boost конфигуратор апгрейда предлагает следующий план, события страницы апгрейда и разметка оплат
 - **blocked**: [DEV-546](DEV-546.md) - Блок «Boost your server» на чекауте v2 (только UI и QA-превью под флагом)
 - **blocked**: [DEV-549](DEV-549.md) - Фікси після DEV-515 - сценарії туторіалу на заглушках, блокування кнопки кастомних модпаків та API
 - **blocked**: [DEV-566](DEV-566.md) - Каталог Minecraft-схематик /minecraft-schematics/

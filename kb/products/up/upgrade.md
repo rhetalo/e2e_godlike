@@ -5,7 +5,7 @@ type: feature
 product: UP
 status: draft
 updated: 2026-11-03
-verified_on: 2026-10-09        # страница сломана, TASK-tariff-list-400
+verified_on: 2026-11-03
 tickets: [TASK-tariff-list-400, DEV-534, DEV-579, DEV-593, DEV-594]
 flags: []
 tests: [tests/game/panel/promo.spec.ts, tests/game/panel/upgrade.ram-query.spec.ts]
@@ -14,6 +14,7 @@ sources:
   - kb/tickets/TASK-tariff-list-400.md
   - test-docs/ultra.panel/tariff-list-400-BUG.md
   - kb/products/up/README.md (раздел «Связь с соседними продуктами», пробел 7)
+  - kb/tickets/DEV-528.md (A/B предвыбор, события, разметка оплат)
 ---
 
 # Upgrade / Boost - смена тарифа из панели
@@ -25,7 +26,8 @@ sources:
 
 ## Где в интерфейсе
 
-- Overview → **Boost My Server** (`current__tariff-button`) → `/server/{uuid}/upgrade?promocode=UPGRADE50F`. KB §7c.
+- Overview → **Boost My Server** (`current__tariff-button`) → `/server/{uuid}/upgrade?entry=boost` (с 15-Oct-2026, [DEV-528](../../tickets/DEV-528.md);
+  раньше `?promocode=UPGRADE50F`). Страница убирает маркер из URL и запоминает вход `boost_my_server`. KB §7c.
 - Страница `server__upgrade`: карточка текущего плана `current-plan-card__*`, карточки планов `simple-plan-card__*` с реальными
   ценами (`€ 6.29 / 1 Month`), категории **Budget / Premium**, кнопки **See all plans**, **See Premium benefits**, квиз
   «Not sure what you need? → Go to quiz» ([UP/upgrade-quiz](upgrade-quiz.md)), кнопка «назад».
@@ -39,6 +41,18 @@ sources:
 - `service_id` = ID услуги WHMCS, он же суффикс имени сервера `_NNNNNN`.
 - Выбор плана ведёт в оплату биллинга (BIL). На тест-аккаунте апгрейды оплачиваются кредитным балансом.
 - Как работает промокод `UPGRADE50F` и оплата Boost - ❓ не описано ([обзор UP, пробел 7](README.md#пробелы)).
+
+## A/B «следующий план после Boost» ([DEV-528](../../tickets/DEV-528.md))
+
+- Группа B (treatment): после Boost справа сразу следующий по RAM видимый план того же типа (Budget → Budget, Premium → Premium),
+  цикл и опции как у текущего, метка **Recommended** и кнопка «Upgrade for €X». Смена RAM или типа снимает метку, возврат возвращает.
+- Без предложения: группа A, бесплатный сервер, максимальный план, вход не через Boost (F5, Back, прямой URL), сабюзер, админ на чужом сервере,
+  у следующего плана нет текущего цикла или опции.
+- Флаг `off / 50 / all` + QA-allowlist по client id ([flag](../../registry/flags.md#upgrade-next-plan-ab)). Вариант ждёт до 5 с, потом экран A.
+- Входы различаются в событиях и оплате: `boost_my_server`, `backups`, `cancellation`, `free_to_paid`, `modpack_requirement`, `premium_banner`,
+  `upgrade_quiz`, `lagscore`... Поля - [API - апгрейд](api/upgrade.md).
+- Оплата: нативный апгрейд WHMCS (кредит списывается при создании счёта) или, если есть промокод, ручной счёт панели (кредит сам не списывается,
+  редирект на счёт) - [DEV-528/O2](../../tickets/DEV-528.md#находки).
 
 ## Правила и граничные случаи
 
@@ -76,6 +90,7 @@ sources:
 | Окно Free Premium | `promo.spec.ts` (PREM-001) | ✅ |
 | `?ram=` → Recommended и конфигуратор (DEV-594) | `upgrade.ram-query.spec.ts` (UPG-RAM-001..003) | ✅ |
 | Оплата апгрейда, промокод | не покрыто (платёж) | ❌ |
+| A/B предвыбор после Boost, события страницы | ручной QA [DEV-528](../../tickets/DEV-528.md) | ⏳ blocked до раскатки флага |
 
 ## История
 
@@ -86,3 +101,4 @@ sources:
 | 21-Oct-2026 | [DEV-579](../../tickets/DEV-579.md) | Project Zomboid: -Xmx в ProjectZomboid64.json пересчитывается от памяти тарифа при каждом старте (panel!1695). PASS |
 | 30-Oct-2026 | [DEV-593](../../tickets/DEV-593.md) | Квиз апгрейда только с токеном владельца; апгрейд из квиза за кредиты прошёл (VIP, Quadra Premium → Ultra Budget). PASS |
 | 02-Nov-2026 | [DEV-594](../../tickets/DEV-594.md) | `?ram=` округляется до реального плана, RAM-диалог модпака ведёт на ceil GB (new-panel!576). PASS |
+| 03-Nov-2026 | [DEV-528](../../tickets/DEV-528.md) | A/B: после Boost предлагается следующий план, 5 событий страницы, разметка оплат. PASS с замечаниями (F1, F2), prod через allowlist |

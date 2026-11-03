@@ -110,6 +110,7 @@ Java-сервер (id 771938).
 - 20-Oct-2026 переименован в `DEV-484-retain` (было `Ft2FVM1G_474664`): расписание с `retain_count=3` для [DEV-484](../tickets/DEV-484.md), 3 бэкапа оставлены.
 - 21-Oct-2026 переименован в `DEV-558-Fabric` под [DEV-558](../tickets/DEV-558.md): Fabric 1.21 + пак Sodium Plus, статус `reinstall_failed` после теста Reinstall. Бэкапы DEV-484 не тронуты.
 - 22-Oct-2026 переименован в `DEV-557-scan` (было `DEV-558-Fabric`) под [DEV-557](../tickets/DEV-557.md): сейчас egg PC-Paper, offline; создана `/mods` с `Cobblemon-fabric-1.8.1+1.21.1.jar` (131 МиБ, через files/pull с Modrinth CDN) и `dev557-control-95mib.jar` (синтетика) - ждут суточного обхода mod-scan-service. В тот же день переведён на Fabric 1.21.1 (без вайпа) и через Plugins/Mods поставлен Cobblemon 1.8.2 (133 МиБ). Обход 22-Oct: контроль разобран, оба Cobblemon без вердикта (FAIL). 23-Oct задача закрыта (сервис переписан Сергеем, проверяет сам); 3 тестовых jar в `/mods` оставлены по решению владельца - стенд для проверки Сергея (хеши в артефакте DEV-557).
+- 03-Nov-2026 [DEV-528](../tickets/DEV-528.md): control (Boost на текущем плане) и окно отмены `?canceled=true` → Change Plan до шага причины; отмены нет (tblcancelrequests 0, Active).
 - Трогать: 🟡.
 
 ### 8c2a6bd7
@@ -203,6 +204,7 @@ DEV-418. 🟡
 ### 09f8d87d
 DEV-418 и [DEV-401](../tickets/DEV-401.md). **Free, suspended** (15-Oct). 🔴
 - 02-Nov-2026: страница апгрейда открывается, [DEV-594](../tickets/DEV-594.md) read-only `?ram=1/5` (сетка с 2 GB). Не менялся.
+- 03-Nov-2026: **владелец снял с саспенда** под [DEV-528](../tickets/DEV-528.md): Boost (control) и входы free_to_paid / premium_banner, read-only.
 
 ### feede8c1
 DEV-418 и [DEV-401](../tickets/DEV-401.md). **Free, suspended** (15-Oct). 🔴

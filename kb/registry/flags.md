@@ -78,6 +78,13 @@ sources:
 
 ## Не флаги, но работают как переключатели
 
+### upgrade-next-plan-ab
+- **Что:** A/B «после Boost конфигуратор предлагает следующий план» ([DEV-528](../tickets/DEV-528.md)). Не Pennant: строки в `settings` панели.
+- **Режим:** `settings::godlike:upgrade:next_plan_ab_mode` = `off` (нет строки) / `50` / `all`, команда `php artisan gl:upgrade:next-plan-ab` (DevOps).
+  Вариант пользователя - `GET /api/v2/experiments/upgrade-next-plan`, в `/features` его нет.
+- **QA-allowlist:** `settings::godlike:upgrade:next_plan_ab_qa` = `494912:treatment,379911:control` (включил разработчик 03-Nov-2026 под QA).
+- **Состояние 03-Nov-2026:** режим `off` на проде, allowlist включён (выключить после QA). Даты переключений режима пишут в DEV-528.
+
 ### is-listed
 - **Что:** колонка `modpacks_v2.is_listed`, видимость модпака в клиентском каталоге ([DEV-532](../tickets/DEV-532.md)).
 - **Где:** отдельно для каждого модпака, правится в ADM.
