@@ -997,6 +997,13 @@ export const GAME_PANEL_UPGRADE = {
   // цену проверяем по тексту валюты в корне (классы цены грузятся async / варьируются)
   priceText: /[€$]\s?\d/,
   backButton: ".server__upgrade__btn-back",
+  // ?ram=N (DEV-594, live DOM 03-Nov-2026): при валидном N карточка текущего плана становится
+  // Recommended - метка «Recommended plan» вместо «Your current Plan», в категориях «RAM: N GB».
+  // Конфигуратор = .simple-plan-card, первый селект в категориях - RAM («32 GB»).
+  currentPlanPriceLabel: ".current-plan-card__price-label",
+  currentPlanCategory: ".current-plan-card__category",
+  configuratorRamValue: ".simple-plan-card__categories .simple-plan-card__select .v-select__selection-text",
+  recommendedLabelText: /recommended/i,
 } as const;
 
 // Throttling / «Lag Detected» upgrade-модалка (вебхук CPU-троттлинга → предложение апгрейда).
