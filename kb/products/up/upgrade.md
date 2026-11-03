@@ -53,7 +53,9 @@ sources:
    Ender Dragon 716/720 → Premium-клиент видит «Budget», `tariffs-new/{id}/list` отдаёт `isPremium: false` и `products: []`,
    а страница шлёт `tariffs-new/upgrade` с `product_id: 343` → 404 «This upgrade is not available for this service».
    С Wither (64 GB, Budget и Premium) апгрейд на Warden / Ender Dragon недоступен - конфигуратор пустой (подтверждено владельцем
-   на 4 живых услугах). Баг Important, оформлен в `test-docs/ultra.panel/BUG-max-plan-tier-pairs/BUG.md`, найден при [DEV-594](../../tickets/DEV-594.md).
+   на 4 живых услугах). Цепочка: panel `TariffListService` → billing `product_features.php` `group_pairs` (группы по паре;
+   нет пары - пустой список) → `group_products` (скрытые `hidden = 1` отбрасываются намеренно). Поэтому у **Hytale** (пары есть,
+   все 12 тарифов скрыты) апгрейд тоже пустой, тот же 404 (~104 живые услуги). Баг Important, оформлен в `test-docs/ultra.panel/BUG-max-plan-tier-pairs/BUG.md`, найден при [DEV-594](../../tickets/DEV-594.md).
 4. Кнопка выбора у части планов неактивна (`simple-plan-card__select-btn-disabled`) - по какому правилу ❓.
 
 ## Гочи для тестирования
