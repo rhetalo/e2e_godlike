@@ -52,7 +52,8 @@ sources:
    `is_premium` в `mod_godlike_product_attributes` = 0 у всех. 03-Nov-2026: пар нет для Wither 714/718, Warden 715/719,
    Ender Dragon 716/720 → Premium-клиент видит «Budget», `tariffs-new/{id}/list` отдаёт `isPremium: false` и `products: []`,
    а страница шлёт `tariffs-new/upgrade` с `product_id: 343` → 404 «This upgrade is not available for this service».
-   Баг Minor, оформлен в `test-docs/ultra.panel/BUG-max-plan-tier-pairs/BUG.md`, найден при [DEV-594](../../tickets/DEV-594.md).
+   С Wither (64 GB, Budget и Premium) апгрейд на Warden / Ender Dragon недоступен - конфигуратор пустой (подтверждено владельцем
+   на 4 живых услугах). Баг Important, оформлен в `test-docs/ultra.panel/BUG-max-plan-tier-pairs/BUG.md`, найден при [DEV-594](../../tickets/DEV-594.md).
 4. Кнопка выбора у части планов неактивна (`simple-plan-card__select-btn-disabled`) - по какому правилу ❓.
 
 ## Гочи для тестирования
