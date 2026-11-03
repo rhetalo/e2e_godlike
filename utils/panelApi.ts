@@ -30,6 +30,17 @@ export function readPanelToken(storageStatePath: string): string {
   throw new Error(`panelApi: access_token не найден в ${storageStatePath} (сессия не залогинена?)`);
 }
 
+/** API старой панели (Pterodactyl client API v1): тот же хост и тот же bearer `ptlc_…`, что у v2. */
+export const PANEL_API_CLIENT_BASE =
+  process.env.PANEL_API_CLIENT_BASE ?? PANEL_API_V2_BASE.replace(/\/api\/v2$/, "/api/client");
+
+/** GET на эндпоинт старой панели (`account`, `servers/{uuid}/backups/...`) от имени актёра. Проверки — в спеке. */
+export function getClientV1(request: APIRequestContext, token: string, path: string): Promise<APIResponse> {
+  return request.get(`${PANEL_API_CLIENT_BASE}/${path}`, {
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+  });
+}
+
 /** GET на v2-эндпоинт сервера от имени актёра (read-only проверки, напр. 422 валидации). Проверки — в спеке. */
 export function getServerV2(
   request: APIRequestContext,
