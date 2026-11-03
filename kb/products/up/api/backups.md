@@ -179,7 +179,7 @@ sources:
 - Subject событий для бэкапов новой панели - только сервер из роута; у core-бэкапа ещё и сам бэкап.
 - Диск не `wings` / `s3` → 400 «…unknown disk driver type and cannot be downloaded.» для всех 4 типов (на проде воспроизвести нечем, юнит-тест).
 - `ignored_files` непустой - массив по запятой, пустой или отсутствующий - `[]` (до фикса `[""]`).
-- В v2 download и delete бэкапов в журнал не пишутся и роль не проверяют (отдельный баг, см. [DEV-638 «Связи»](../../../tickets/DEV-638.md#связи)).
+- В v2 download и delete бэкапов в журнал не пишутся и роль не проверяют (баг [DEV-667](https://antihost.atlassian.net/browse/DEV-667), детали в [DEV-638 «Связи»](../../../tickets/DEV-638.md#связи)).
 - Автотест: `tests/game/panel/backups.server-scope.api.spec.ts` (TC-GP-BKP-SCOPE-003), только GET.
 
 ## World Backups: поиск в рамках сервера (DEV-641)
