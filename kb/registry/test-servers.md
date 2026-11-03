@@ -125,6 +125,7 @@ SMP.
 - Владелец с [flag:extension-compatibility](flags.md#extension-compatibility).
 - Задачи: [DEV-515](../tickets/DEV-515.md), [DEV-529](../tickets/DEV-529.md).
 - 20-Oct-2026 переименован в `DEV-484-schedules` (было `aDFt94f8_474690`): расписания [DEV-484](../tickets/DEV-484.md), бэкапы оставлены.
+- 03-Nov-2026: [DEV-638](../tickets/DEV-638.md) - регресс core-бэкапа `bc9161e2` через v1 (lock/unlock, download), вернулся unlocked.
 - 30-Oct-2026: переименован в `DEV-580-B2` - core-бэкап `bc9161e2` (той же ноды 427, что A) как жертва [DEV-580](../tickets/DEV-580.md); имя и lock возвращены, сервер восстановлен из этого бэкапа.
 - 02-Nov-2026: [DEV-594](../tickets/DEV-594.md) read-only - RAM-диалог модпака (Ultra Modded Lite, Install не жали) и `?ram=` на апгрейде. Не менялся.
 - 03-Nov-2026: [DEV-641](../tickets/DEV-641.md) - роут «чужого» сервера для world-бэкапов, только отказы 400. Не менялся.
@@ -148,6 +149,7 @@ SMP Private, переименован в `DEV-562-MC` под [DEV-562](../ticket
   (инвойс 331374), теперь Ultra Budget ($23.99). В Sharing добавлен сабюзер Co-owner (временный аккаунт владельца) - оставлен по решению владельца (30-Oct).
 - 02-Nov-2026: [DEV-594](../tickets/DEV-594.md) read-only - `?ram=` на апгрейде (6 GB Budget). Не менялся.
 - 03-Nov-2026: [DEV-641](../tickets/DEV-641.md) - создан world-бэкап, restore из него (мир тот же) и delete; сервер в прежнем состоянии, копий нет. Свободен.
+- 03-Nov-2026: [DEV-638](../tickets/DEV-638.md) - временный сабюзер gtl.rmn+638 (приглашён, удалён), временные роли `DEV-638-*` удалены, жертвенные бэкапы `DEV-638-victim*` удалены; бэкап `test` (87becc3a) на месте, unlocked. Свободен.
 
 ### f8e7df56
 SkyBlock, на нём воспроизводился баг tariff-list 400. 20-Oct-2026 переименован в `DEV-484-backup-throttle` (было `JBl1Dqfw_474692`):
@@ -287,6 +289,7 @@ Trial конструктора модпаков. 🟡
 ### 83d391c4
 Paper, плагины в [DEV-500](../tickets/DEV-500.md). 🟡
 - 30-Oct-2026: переименован в `DEV-580-C` (было `K6eCbHz9_426586`), [DEV-580](../tickets/DEV-580.md): бэкап базы `db_fix` (битый, Wings 500) удалён с ок владельца, база `s724329_тест` на месте; слоты 2/3.
+- 03-Nov-2026: [DEV-638](../tickets/DEV-638.md) read-only по сути - lock/unlock и download folder-бэкапа `aff8065b`, вернулся unlocked.
 
 ## stage
 

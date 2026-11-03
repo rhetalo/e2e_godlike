@@ -163,6 +163,25 @@ sources:
   ([DEV-580/OBS-3](../../../tickets/DEV-580.md#находки)).
 - Автотест: `tests/game/panel/backups.server-scope.api.spec.ts` (TC-GP-BKP-SCOPE-001/002), только GET.
 
+## Старая панель: ссылка и журнал для бэкапов новой панели (DEV-638)
+
+С [DEV-638](../../../tickets/DEV-638.md) (panel!1757, 03-Nov-2026) v1 `/api/client/servers/{server}/backups/{backup}` для бэкапов новой
+панели (instance, folder, database) ведёт себя как для core-бэкапов. API v1 принимает тот же bearer `ptlc_…`, что и v2.
+
+| Роут v1 | Ответ | Activity |
+|---|---|---|
+| `GET …/download` | 200 `{object:"signed_url", attributes:{url}}`, JWT в `?token=` с `user_id` / `user_uuid` того, кто запросил ✅ | `server:backup.download` `{name}` ✅ |
+| `POST …/lock` | 200, объект бэкапа, `is_locked` переключён, `ignored_files: []` если пусто ✅ | `server:backup.lock` / `.unlock` `{name}` ✅ |
+| `DELETE …` | 204 ✅ | `server:backup.delete` `{name, failed}` ✅ |
+| чужой / выдуманный uuid | 404 ✅ | не пишется ✅ |
+
+- Claims JWT: `iss`, `aud` (адрес Wings ноды), `backup_uuid`, `server_uuid`, `user_uuid`, `user_id`, `unique_id`, `exp` ≈ 15 мин.
+- Subject событий для бэкапов новой панели - только сервер из роута; у core-бэкапа ещё и сам бэкап.
+- Диск не `wings` / `s3` → 400 «…unknown disk driver type and cannot be downloaded.» для всех 4 типов (на проде воспроизвести нечем, юнит-тест).
+- `ignored_files` непустой - массив по запятой, пустой или отсутствующий - `[]` (до фикса `[""]`).
+- В v2 download и delete бэкапов в журнал не пишутся и роль не проверяют (отдельный баг, см. [DEV-638 «Связи»](../../../tickets/DEV-638.md#связи)).
+- Автотест: `tests/game/panel/backups.server-scope.api.spec.ts` (TC-GP-BKP-SCOPE-003), только GET.
+
 ## World Backups: поиск в рамках сервера (DEV-641)
 
 С [DEV-641](../../../tickets/DEV-641.md) (panel!1750, 03-Nov-2026) то же правило для world-бэкапов
@@ -216,6 +235,7 @@ sources:
 | 2026-10-20 | [DEV-484](../../../tickets/DEV-484.md) | [panel!1691](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1691): общая квота по 4 таблицам, `meta.quota`, единый текст 429, расписания не «умирают» при отказе, хотфикс бэкапа чужой базы (404) и PUT `database_id`. [new-panel!564](https://git.godlike.ovh/panel/godlike-new-panel/-/merge_requests/564): счётчик из `meta.quota`, заглушка «Slots Limit Reached» |
 | 2026-10-26 | [DEV-586](../../../tickets/DEV-586.md) | `panel!1708`: 429 создания бэкапа с `error_code: backup_throttled`, `retry_after`, `Retry-After`; `new-panel!574` (27-Oct): один тост с минутами |
 | 2026-10-29 | [DEV-580](../../../tickets/DEV-580.md) | [panel!1723](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1723): поиск бэкапа по uuid только в рамках сервера из роута (v2 и v1), чужой uuid = несуществующий; v1 lock бэкапа новой панели и v2 PUT core без 500 |
+| 2026-11-03 | [DEV-638](../../../tickets/DEV-638.md) | [panel!1757](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1757): v1 download бэкапа новой панели подписан на запросившего, проверка диска для всех типов, Activity lock/unlock/download/delete, `ignored_files` `[]` |
 | 2026-11-03 | [DEV-641](../../../tickets/DEV-641.md) | [panel!1750](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1750): world-бэкапы retry/restore/destroy ищут по серверу и uuid, чужой uuid = несуществующий (400 вместо 404 «does not belong») |
 | 2026-10-27 | [DEV-582](../../../tickets/DEV-582.md) | `panel!1713`: зависшие PENDING (старше `backups.prune_age` 360 мин) → FAILED командой `gl:backups:fail-stale-pending` раз в 30 мин; бэкфил `status` |
 
