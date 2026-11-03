@@ -3,7 +3,7 @@ id: KB-COVERAGE
 title: Матрица покрытия - фичи KB и автотесты
 type: index
 status: draft
-updated: 2026-10-30
+updated: 2026-11-03
 verified_on: null              # генерируется из KB и tests/, с продуктом не сверяется
 sources:
   - kb/products/**/*.md (шапка tests:, раздел «Покрытие»)
@@ -21,11 +21,11 @@ sources:
 
 ## UP - игровая панель
 
-Страниц: 30, с автотестами: 22, тестов в их спеках: 92.
+Страниц: 30, с автотестами: 23, тестов в их спеках: 98.
 
 | Фича | Статус | Спеки | Тестов | Покрытие ✅ / руками / ❌ |
 |---|---|---|---|---|
-| [UP - игровая панель ultra.panel + API v2](products/up/README.md) | draft | все спеки продукта (36) | 92 | 0 / 0 / 0 |
+| [UP - игровая панель ultra.panel + API v2](products/up/README.md) | draft | все спеки продукта (38) | 98 | 0 / 0 / 0 |
 | [Backups - бэкапы сервера, базы и папки](products/up/backups.md) | draft | `backups.server-scope.api.spec.ts`, `backups.slots-full.spec.ts`, `backups.spec.ts`, `backups.throttle.spec.ts`, `role.enforcement.spec.ts`, `security.spec.ts` | 14 | 9 / 1 / 1 |
 | [Client-only моды - скрытие в каталоге и отключение на сервере](products/up/client-only-mods.md) | draft | `client-only-mods.spec.ts` | 2 | 0 / 0 / 0 |
 | [Config - server.properties и блок Docker/Java](products/up/config.md) | draft | `config.spec.ts`, `security.spec.ts` | 6 | 3 / 1 / 1 |
@@ -44,7 +44,8 @@ sources:
 | [Sharing, роли участников и Audit Log](products/up/sharing-roles.md) | draft | `role.enforcement.spec.ts`, `sharing.audit.spec.ts`, `sharing.spec.ts` | 9 | 5 / 0 / 2 |
 | [Tasks - задачи и расписание (команда, power-действие)](products/up/tasks.md) | draft | `tasks.spec.ts` | 3 | 3 / 0 / 1 |
 | [Throttling - окно «Lag Detected» при нехватке CPU](products/up/throttling.md) | draft | `throttling.notification.spec.ts` | 1 | 0 / 0 / 0 |
-| [Upgrade / Boost - смена тарифа из панели](products/up/upgrade.md) | draft | `promo.spec.ts` | 2 | 2 / 0 / 1 |
+| [Квиз апгрейда (Upgrade Quiz) - подбор тарифа и оффер](products/up/upgrade-quiz.md) | draft | `upgrade-quiz.token.api.spec.ts` | 3 | 1 / 2 / 2 |
+| [Upgrade / Boost - смена тарифа из панели](products/up/upgrade.md) | draft | `promo.spec.ts`, `upgrade.ram-query.spec.ts` | 5 | 3 / 0 / 1 |
 | [Versions - смена ядра и версии Minecraft](products/up/versions.md) | draft | `versions.spec.ts` | 2 | 2 / 1 / 2 |
 | [World Backup - копия мира перед опасными действиями](products/up/world-backup.md) | draft | `world-backup.spec.ts` | 2 | 0 / 0 / 0 |
 | [Cancel module - отмена сервера, пауза и удержание](products/up/cancel-module.md) | draft | - | - | 0 / 0 / 0 |
@@ -54,7 +55,6 @@ sources:
 | [Missing mod dependencies - автодозагрузка зависимостей модов](products/up/missing-mod-deps.md) | draft | - | - | 0 / 0 / 0 |
 | [Модалки и оверлеи панели](products/up/modals.md) | draft | - | - | 0 / 0 / 0 |
 | [Split Server - деление сервера на основной и саб-серверы](products/up/split-server.md) | draft | - | - | 0 / 0 / 0 |
-| [Квиз апгрейда (Upgrade Quiz) - подбор тарифа и оффер](products/up/upgrade-quiz.md) | draft | - | - | 1 / 2 / 2 |
 
 ## VPS - панель VirtFusion
 
@@ -97,12 +97,13 @@ sources:
 
 ## ADM
 
-Страниц: 4, с автотестами: 0, тестов в их спеках: 0.
+Страниц: 5, с автотестами: 0, тестов в их спеках: 0.
 
 | Фича | Статус | Спеки | Тестов | Покрытие ✅ / руками / ❌ |
 |---|---|---|---|---|
 | [ADM - админка панели (panel.godlike.host/admin)](products/adm/README.md) | draft | - | - | 0 / 0 / 0 |
 | [Каталог модпаков v2 в админке - скрытие из клиентского каталога (is_listed)](products/adm/modpack-catalog.md) | draft | - | - | 0 / 0 / 0 |
+| [Пул подготовленных серверов (Pool Policies)](products/adm/prepared-servers.md) | verified | - | - | 0 / 0 / 0 |
 | [Сервер в админке - Startup (образ Docker, смена egg) и Build](products/adm/server-startup.md) | draft | - | - | 0 / 0 / 0 |
 | [Сервер в админке - Transfer (перенос на другую ноду)](products/adm/server-transfer.md) | draft | - | - | 0 / 0 / 0 |
 

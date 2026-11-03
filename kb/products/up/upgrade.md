@@ -8,7 +8,7 @@ updated: 2026-11-03
 verified_on: 2026-10-09        # страница сломана, TASK-tariff-list-400
 tickets: [TASK-tariff-list-400, DEV-534, DEV-579, DEV-593, DEV-594]
 flags: []
-tests: [tests/game/panel/promo.spec.ts]
+tests: [tests/game/panel/promo.spec.ts, tests/game/panel/upgrade.ram-query.spec.ts]
 sources:
   - agents.docs/game-panel/KNOWLEDGE_BASE.md §7c, §9d (recon 06-Jun-2026)
   - kb/tickets/TASK-tariff-list-400.md
@@ -62,7 +62,7 @@ sources:
 |---|---|---|
 | Boost ведёт на Upgrade, карточки планов и цены | `promo.spec.ts` (UPG-001) | ✅ структурно (при баге 400 упадёт) |
 | Окно Free Premium | `promo.spec.ts` (PREM-001) | ✅ |
-| `?ram=` → Recommended и конфигуратор (DEV-594) | ручной QA 02-Nov, автотест - candidate | ⚠️ |
+| `?ram=` → Recommended и конфигуратор (DEV-594) | `upgrade.ram-query.spec.ts` (UPG-RAM-001..003) | ✅ |
 | Оплата апгрейда, промокод | не покрыто (платёж) | ❌ |
 
 ## История

@@ -59,7 +59,7 @@ updated: 2026-11-03
 | [DEV-583](DEV-583.md) | Трансфер в админке - локация сервера первой, ноды по реальной нагрузке | ADM | done | PASS | no | 2026-10-27 |
 | [DEV-586](DEV-586.md) | При отказе по лимиту частоты два тоста ошибки и не видно, когда повторить | UP | done | PASS | covered | 2026-10-27 |
 | [DEV-593](DEV-593.md) | Безопасность API квиза апгрейда - токен владельца вместо открытого JSON API | UP, BIL, OLDP | done | PASS | covered | 2026-10-30 |
-| [DEV-594](DEV-594.md) | Округление RAM модпака до плана - ?ram= на странице апгрейда сводится к ступени сетки | UP | done | PASS | candidate | 2026-11-02 |
+| [DEV-594](DEV-594.md) | Округление RAM модпака до плана - ?ram= на странице апгрейда сводится к ступени сетки | UP | done | PASS | covered | 2026-11-02 |
 | [DEV-595](DEV-595.md) | Правило «длинный цикл → Premium» - один список циклов для заказа и апгрейда | BIL | in-qa | PASS | no | 2026-10-26 |
 | [TASK-missing-mod-deps](TASK-missing-mod-deps.md) | Окно Missing mod dependencies (автодозагрузка зависимостей) | UP | done | PASS-with-issues | - | 2026-09-29 |
 | [TASK-palworld-settings](TASK-palworld-settings.md) | Palworld Settings: UI-редактор PalWorldSettings.ini | UP | partial | PASS-with-issues | - | 2026-08-20 |
@@ -90,7 +90,6 @@ updated: 2026-11-03
 - **candidate**: [DEV-563](DEV-563.md) - Запретить Free-серверам изменять тип сервера (Ultra Panel и PlayFreeHost)
 - **candidate**: [DEV-564](DEV-564.md) - Bedrock NetherNet - UDP-порты под каждый слот вместо transport nethernet
 - **candidate**: [DEV-579](DEV-579.md) - Project Zomboid - лимит -Xmx в ProjectZomboid64.json следует за тарифом
-- **candidate**: [DEV-594](DEV-594.md) - Округление RAM модпака до плана - ?ram= на странице апгрейда сводится к ступени сетки
 - **blocked**: [DEV-480](DEV-480.md) - Пошук файлів на стороні Wings - нативний обхід на ноді за флагом wings-native-file-search
 - **blocked**: [DEV-546](DEV-546.md) - Блок «Boost your server» на чекауте v2 (только UI и QA-превью под флагом)
 - **blocked**: [DEV-549](DEV-549.md) - Фікси після DEV-515 - сценарії туторіалу на заглушках, блокування кнопки кастомних модпаків та API
