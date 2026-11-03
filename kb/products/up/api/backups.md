@@ -4,9 +4,9 @@ title: API - backups (список, квота, ручные бэкапы и б�
 type: api
 product: UP
 status: draft
-updated: 2026-10-30
+updated: 2026-11-03
 verified_on: 2026-10-20        # DEV-484 итоговая проверка на prod (panel!1691 + new-panel!564)
-tickets: [DEV-452, DEV-484, DEV-418, DEV-580]
+tickets: [DEV-452, DEV-484, DEV-418, DEV-580, DEV-641]
 features: [UP/backups, UP/modpack-catalog]
 sources:
   - memory: dev484-backup-throttle, dev452-modpack-backup-fail-reasons
@@ -163,6 +163,24 @@ sources:
   ([DEV-580/OBS-3](../../../tickets/DEV-580.md#находки)).
 - Автотест: `tests/game/panel/backups.server-scope.api.spec.ts` (TC-GP-BKP-SCOPE-001/002), только GET.
 
+## World Backups: поиск в рамках сервера (DEV-641)
+
+С [DEV-641](../../../tickets/DEV-641.md) (panel!1750, 03-Nov-2026) то же правило для world-бэкапов
+([UP/world-backup](../world-backup.md)).
+
+| Роут | Свой uuid | Чужой / выдуманный uuid |
+|---|---|---|
+| `POST /servers/{uuid}/world-backups/{backupUuid}/retry` | 202 для FAILED 📖; для COMPLETED 400 «…completed successfully and does not need to be retried.» ✅ | 400 ✅ |
+| `POST /servers/{uuid}/world-backups/{backupUuid}/restore` | 200 `{"success":true,"data":null}` ✅ | 400 ✅ |
+| `DELETE /servers/{uuid}/world-backups/{backupUuid}` | 200 `{"success":true,"data":null}` ✅ | 400 ✅ |
+
+- Тело на чужой и выдуманный uuid одинаковое, байт в байт: `{"message":"No query results for model [Godlike\Domain\Backup\Models\WorldBackup]."}` ✅.
+- До фикса чужой uuid отвечал `This World Backup does not belong to this server.` (restore/destroy 404, retry 400) - признак старой сборки.
+- Чужие вызовы не мутировали и до фикса, их можно слать на проде. Автотеста нет: при регрессе свой POST/DELETE изменил бы чужой бэкап
+  ([DEV-641, Регресс](../../../tickets/DEV-641.md#регресс)).
+- Как проверено: prod 03-Nov-2026, аккаунт 307989 (серверы [srv:45b14521](../../../registry/test-servers.md#45b14521) и
+  [srv:546bc52e](../../../registry/test-servers.md#546bc52e)) + второй аккаунт 388101.
+
 ## Расписания (scheduled backups)
 
 Планировщик - команда `gl:handle-scheduled-backups`, запускается раз в минуту 📖.
@@ -198,6 +216,7 @@ sources:
 | 2026-10-20 | [DEV-484](../../../tickets/DEV-484.md) | [panel!1691](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1691): общая квота по 4 таблицам, `meta.quota`, единый текст 429, расписания не «умирают» при отказе, хотфикс бэкапа чужой базы (404) и PUT `database_id`. [new-panel!564](https://git.godlike.ovh/panel/godlike-new-panel/-/merge_requests/564): счётчик из `meta.quota`, заглушка «Slots Limit Reached» |
 | 2026-10-26 | [DEV-586](../../../tickets/DEV-586.md) | `panel!1708`: 429 создания бэкапа с `error_code: backup_throttled`, `retry_after`, `Retry-After`; `new-panel!574` (27-Oct): один тост с минутами |
 | 2026-10-29 | [DEV-580](../../../tickets/DEV-580.md) | [panel!1723](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1723): поиск бэкапа по uuid только в рамках сервера из роута (v2 и v1), чужой uuid = несуществующий; v1 lock бэкапа новой панели и v2 PUT core без 500 |
+| 2026-11-03 | [DEV-641](../../../tickets/DEV-641.md) | [panel!1750](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1750): world-бэкапы retry/restore/destroy ищут по серверу и uuid, чужой uuid = несуществующий (400 вместо 404 «does not belong») |
 | 2026-10-27 | [DEV-582](../../../tickets/DEV-582.md) | `panel!1713`: зависшие PENDING (старше `backups.prune_age` 360 мин) → FAILED командой `gl:backups:fail-stale-pending` раз в 30 мин; бэкфил `status` |
 
 **Как проверено.** Prod, 20-Oct-2026, серверы [srv:f8e7df56](../../../registry/test-servers.md#f8e7df56) (квота ядра, сверх лимита, окно),

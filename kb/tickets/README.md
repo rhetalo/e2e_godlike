@@ -61,6 +61,7 @@ updated: 2026-11-03
 | [DEV-593](DEV-593.md) | Безопасность API квиза апгрейда - токен владельца вместо открытого JSON API | UP, BIL, OLDP | done | PASS | covered | 2026-10-30 |
 | [DEV-594](DEV-594.md) | Округление RAM модпака до плана - ?ram= на странице апгрейда сводится к ступени сетки | UP | done | PASS | covered | 2026-11-02 |
 | [DEV-595](DEV-595.md) | Правило «длинный цикл → Premium» - один список циклов для заказа и апгрейда | BIL | in-qa | PASS | no | 2026-10-26 |
+| [DEV-641](DEV-641.md) | World Backups - искать бэкап в рамках сервера, не раскрывать существование чужого uuid | UP | done | PASS | no | 2026-11-03 |
 | [TASK-missing-mod-deps](TASK-missing-mod-deps.md) | Окно Missing mod dependencies (автодозагрузка зависимостей) | UP | done | PASS-with-issues | - | 2026-09-29 |
 | [TASK-palworld-settings](TASK-palworld-settings.md) | Palworld Settings: UI-редактор PalWorldSettings.ini | UP | partial | PASS-with-issues | - | 2026-08-20 |
 | [TASK-split-server](TASK-split-server.md) | Split Server: управление ресурсами split-серверов в новой панели | UP | done | PASS | - | 2026-09-10 |

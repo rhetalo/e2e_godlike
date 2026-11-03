@@ -4,9 +4,9 @@ title: World Backup - копия мира перед опасными дейст
 type: feature
 product: UP
 status: draft
-updated: 2026-10-23
+updated: 2026-11-03
 verified_on: 2026-08-14        # клиентская часть, итоговый прогон DEV-418
-tickets: [DEV-418, DEV-401, DEV-506, DEV-571]
+tickets: [DEV-418, DEV-401, DEV-506, DEV-571, DEV-641]
 flags: [world-backup]
 tests: [tests/game/panel/world-backup.spec.ts]
 sources:
@@ -61,7 +61,9 @@ sources:
 - **Хранение:** адаптер `wings` (общая шара ноды), как у остальных бэкапов.
 - **Флаг** [flag:world-backup](../../registry/flags.md#world-backup) - Pennant. С 23-Oct-2026 (сверка) раскатан на всех, класс оставлен
   как рычаг отката (сузить тело или `deactivate` для аккаунта). Раньше включался тумблером + `php artisan pennant:purge world-backup`.
-  `POST /world-backups/abandon` ([DEV-571](../../tickets/DEV-571.md)) на проде с 23-Oct-2026. Лимит 0/N живёт в бэкенд-админке Pterodactyl (Build).
+  `POST /world-backups/abandon` ([DEV-571](../../tickets/DEV-571.md)) на проде с 23-Oct-2026.
+- **Поиск по uuid в рамках сервера** ([DEV-641](../../tickets/DEV-641.md), 03-Nov-2026): retry / restore / destroy с uuid бэкапа
+  другого сервера отвечают как с выдуманным - 400 `No query results for model [...WorldBackup]`. Детали - [API - backups](api/backups.md#world-backups-поиск-в-рамках-сервера-dev-641). Лимит 0/N живёт в бэкенд-админке Pterodactyl (Build).
 
 ## Правила и граничные случаи
 
@@ -104,3 +106,4 @@ sources:
 | 05-Oct-2026 | [DEV-506](../../tickets/DEV-506.md) | Окно на Versions → Install + Wipe; «Continue without backup» шлёт `delete_files:true` |
 | 19..20-Oct-2026 | [DEV-571](../../tickets/DEV-571.md) | «Готово» только после ноды, Continue → abandon, права и Audit. Stage PASS |
 | 23-Oct-2026 | [DEV-571](../../tickets/DEV-571.md) | Флаг раскатан на всех, DEV-571 выкачен на прод (panel!1710 + фронт), автотест `world-backup.spec.ts` (WB-001/002) |
+| 03-Nov-2026 | [DEV-641](../../tickets/DEV-641.md) | panel!1750: retry / restore / destroy ищут копию только у сервера из роута, чужой uuid = выдуманный. Prod PASS |
