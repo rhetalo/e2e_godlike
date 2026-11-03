@@ -192,6 +192,7 @@ DEV-418. 21-Oct-2026 под [DEV-564](../tickets/DEV-564.md): Paper → Bedrock 
 26-Oct-2026 под [DEV-595](../tickets/DEV-595.md): апгрейд на Budget Double / 12 Months → теперь **Premium Double (359), Annually**, следующая оплата 26-Oct-2027. Сократить цикл апгрейдом нельзя.
 - 02-Nov-2026: переименован в `DEV-594-modpack` (было `18k6mMw5_462880`) под [DEV-594](../tickets/DEV-594.md), не использован (Paper - модпаки под гейтом). Свободен.
 - 03-Nov-2026: [DEV-594](../tickets/DEV-594.md) fallback 4096: ядро Paper 26.2 → Forge 1.20.1 (47.4.28, без вайпа) → обратно Paper 26.2 (#135, без вайпа). RAM-диалог War Crazy открыт, Install не жали.
+- 03-Nov-2026: [DEV-594](../tickets/DEV-594.md) услуга 462880 в WHMCS-админке Double (359) → Ender Dragon (720) без module-команды и обратно, ~09:21-09:24 UTC. Сумма $95.99, Annually, due 2027-10-26 не менялись, память в панели 2048 не трогалась (сверено billing-sql + panel-sql).
 
 ### b4089560
 DEV-418. 🟡
