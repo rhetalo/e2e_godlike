@@ -4,9 +4,9 @@ title: Каталог игр - сетка с фильтрами и список 
 type: feature
 product: WPGL
 status: draft
-updated: 2026-10-18
+updated: 2026-11-04
 verified_on: 2026-10-16        # сетка и «List of games» перепроверены в браузере 16-Oct
-tickets: [DEV-402]
+tickets: [DEV-402, DEV-604]
 flags: []
 tests: [tests/general/games.catalog.spec.ts]
 sources:
@@ -67,3 +67,4 @@ sources:
 | 20-Aug-2026 | [DEV-402](../../tickets/DEV-402.md) | Карточки игр ведут в новую Vue-воронку |
 | 15-Oct-2026 | - | Пилот Playwright Test Agents: тесты «List of games» |
 | 16-Oct-2026 | - | Исправлено: сетка ≠ «List of games»; тесты сетки GAMES-005/006 |
+| 03-Nov-2026 | [DEV-604](../../tickets/DEV-604.md) | Тарифы страниц игр в HTML для ботов и JSON-LD ProductGroup, см. [WPGL/tariffs-for-bots](tariffs-for-bots.md) |
