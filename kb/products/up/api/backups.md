@@ -33,7 +33,7 @@ sources:
 | GET | `/servers/{uuid}/backups` | объединённый список бэкапов сервера + `meta.quota` |
 | POST | `/servers/{uuid}/backups/instances` | ручной бэкап сервера (вкладка Server); с полями расписания создаёт ещё и расписание |
 | POST | `/servers/{uuid}/backups/databases` | бэкап базы данных сервера (`databaseId`) |
-| PUT | `/servers/{uuid}/backups/databases/{backupUUID}` | изменить бэкап базы (имя); `database_id` игнорируется |
+| PUT | `/servers/{uuid}/backups/{instances\|folders\|databases}/{backupUUID}` | изменить бэкап: имя, lock, расписание, у папки path ([правила](#put-бэкапа-поля-и-правила-dev-643)); у базы `database_id` игнорируется |
 | POST | бэкап папки (вкладка Folder) | путь ❓, пишет в `backup_folders` |
 | - | эндпоинты расписаний (создание, удаление) | путь ❓, создавали тем же запросом, что отправляет форма |
 
@@ -142,6 +142,23 @@ sources:
 Меняет имя бэкапа базы. Поле `database_id` из запроса убрано (`UpdateBackupDatabaseRequest`) 📖: если прислать `database_id`
 другой базы, ответ 200, имя меняется, база остаётся прежней ✅. Раньше через этот PUT можно было перепривязать бэкап к чужой базе.
 
+## PUT бэкапа: поля и правила (DEV-643)
+
+С [DEV-643](../../../tickets/DEV-643.md) (panel!1739, 04-Nov-2026) у трёх типов один маппинг тела в колонки 📖, поведение прежнее ✅ (prod 04-Nov-2026, все три типа).
+
+| Поле тела (camelCase) | Колонка | Правило |
+|---|---|---|
+| `name`, `locked`, `autoReplace`, `schedule`, `setInterval`, `repeatValue`, `repeatUnit`, `retainCount` | snake_case | пишется, если передано; `false` и `0` пишутся, отсутствие поля = не трогать ✅ |
+| `scheduleDate`, `scheduleTime` | `schedule_date`, `schedule_time` | только вместе с `schedule: true`, иначе молча игнорируются ✅ (DEV-585; DEV-632 будет отвечать 422) |
+| `path` | `path` | только папка ✅ |
+| `ignoredFiles` | - | не мапится (колонки нет), 200 ✅ |
+| `databaseId` | - | игнорируется ✅ ([DEV-484](../../../tickets/DEV-484.md)) |
+
+- `schedule: true` + разовый запуск (`setInterval: false`) на прошедшую дату → 422 «The schedule date must be a date after or equal to today.» ✅
+- `{}` → 200, ничего не меняется ✅. Обнулить поле через PUT нельзя: `null` = «не передано» - после выключения расписания `schedule_date`
+  и `next_run_date` остаются в строке ✅ ([DEV-643/OBS-1](../../../tickets/DEV-643.md#находки)).
+- Бэкап старой панели через `instances` - по-прежнему только `name` и `locked` ✅.
+
 ## Поиск бэкапа в рамках сервера (DEV-580)
 
 С [DEV-580](../../../tickets/DEV-580.md) (panel!1723, 29-Oct-2026) бэкап по `{backupUUID}` ищется **только среди бэкапов сервера из роута**.
@@ -237,6 +254,7 @@ sources:
 | 2026-10-29 | [DEV-580](../../../tickets/DEV-580.md) | [panel!1723](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1723): поиск бэкапа по uuid только в рамках сервера из роута (v2 и v1), чужой uuid = несуществующий; v1 lock бэкапа новой панели и v2 PUT core без 500 |
 | 2026-11-03 | [DEV-638](../../../tickets/DEV-638.md) | [panel!1757](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1757): v1 download бэкапа новой панели подписан на запросившего, проверка диска для всех типов, Activity lock/unlock/download/delete, `ignored_files` `[]` |
 | 2026-11-03 | [DEV-641](../../../tickets/DEV-641.md) | [panel!1750](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1750): world-бэкапы retry/restore/destroy ищут по серверу и uuid, чужой uuid = несуществующий (400 вместо 404 «does not belong») |
+| 2026-11-04 | [DEV-643](../../../tickets/DEV-643.md) | [panel!1739](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1739): один маппинг PUT для instance/folder/database (`toColumns()`), scope `forServer` на 4 моделях; поведение не менялось |
 | 2026-10-27 | [DEV-582](../../../tickets/DEV-582.md) | `panel!1713`: зависшие PENDING (старше `backups.prune_age` 360 мин) → FAILED командой `gl:backups:fail-stale-pending` раз в 30 мин; бэкфил `status` |
 
 **Как проверено.** Prod, 20-Oct-2026, серверы [srv:f8e7df56](../../../registry/test-servers.md#f8e7df56) (квота ядра, сверх лимита, окно),

@@ -4,9 +4,9 @@ title: Backups - бэкапы сервера, базы и папки
 type: feature
 product: UP
 status: draft
-updated: 2026-11-03
+updated: 2026-11-04
 verified_on: 2026-10-20        # DEV-484 r2: общая квота, расписания, бэкапы баз; остальное recon 2026-06-09
-tickets: [DEV-418, DEV-452, DEV-484, DEV-580, DEV-582, DEV-586, DEV-638]
+tickets: [DEV-418, DEV-452, DEV-484, DEV-580, DEV-582, DEV-586, DEV-638, DEV-643]
 flags: []
 tests: [tests/game/panel/backups.spec.ts, tests/game/panel/backups.server-scope.api.spec.ts, tests/game/panel/backups.throttle.spec.ts, tests/game/panel/backups.slots-full.spec.ts, tests/game/panel/role.enforcement.spec.ts, tests/game/panel/security.spec.ts]
 sources:
@@ -128,7 +128,7 @@ OBS-2 пропущенное одноразовое расписание вис�
 | Member без управления бэкапами | `role.enforcement.spec.ts` (ROLE-002) | ✅ |
 | XSS в имени бэкапа | `security.spec.ts` (SEC-002) | ✅ |
 | Общая квота, `meta.quota`, расписания, бэкапы баз (DEV-484) | руками, prod 20-Oct-2026 ([артефакт](https://claude.ai/artifact/537r7XRR8NiYidKCqNWy5C)), автотеста нет | руками |
-| Restore, Rename, Lock, Database / Folder, Ignored Files, создание расписания | не покрыто | ❌ |
+| Restore, Rename, Lock, Database / Folder, Ignored Files, создание расписания | не покрыто; PUT всех полей по 3 типам - руками prod 04-Nov-2026 ([DEV-643](../../tickets/DEV-643.md)), кандидат в автотест | ❌ |
 | Общая квота `meta.quota`: контракт и счётчик used/limit | `backups.spec.ts` (TC-GP-BKP-004), [DEV-484](../../tickets/DEV-484.md) | ✅ read-only |
 | Окно частоты: `throttled` + `retry_after`, 429 с единым текстом, `error_code` + `Retry-After`, ровно один тост с минутами ([DEV-586](../../tickets/DEV-586.md)), строки нет | `backups.throttle.spec.ts` (TC-GP-BKP-005), mut-сервер fd965a60 | ✅ мутация |
 | Бэкап чужого сервера по uuid = «не найдено» (IDOR, [DEV-580](../../tickets/DEV-580.md)): v2 download свой роут 200 / чужой 400 как выдуманный | `backups.server-scope.api.spec.ts` (TC-GP-BKP-SCOPE-001/002), read-only | ✅ read-only |
@@ -149,3 +149,4 @@ OBS-2 пропущенное одноразовое расписание вис�
 | 27-Oct-2026 | [DEV-586](../../tickets/DEV-586.md) | Отказ в бэкапе - один тост; по окну «Backup limit reached… try again in N minutes» (QA prod PASS) |
 | 29-Oct-2026 | [DEV-580](../../tickets/DEV-580.md) | Бэкап ищется только среди бэкапов сервера из роута (v2 и старая панель), чужой uuid = несуществующий; lock/rename бэкапа старой панели без 500 (QA prod PASS 30-Oct) |
 | 03-Nov-2026 | [DEV-638](../../tickets/DEV-638.md) | Старая панель для бэкапов новой панели: ссылка подписана на того, кто качает, проверка диска для всех типов, lock/unlock/download/delete в Activity, `ignored_files` = `[]` (QA prod PASS) |
+| 04-Nov-2026 | [DEV-643](../../tickets/DEV-643.md) | Рефакторинг без изменения поведения: один маппинг PUT (`toColumns()`) для instance/folder/database и scope `forServer` вместо 16 копий (QA prod PASS, регресс всех типов) |

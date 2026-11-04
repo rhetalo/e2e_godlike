@@ -173,6 +173,11 @@ IDOR — read-only. XSS — мутации (свой бэкап/папка, уд
   database.", error:"SQLSTATE[HY000] [2002] Connection refused (... CREATE DATABASE ... )"}`.
   Похоже на проблему ноды; на плане Double к тому же «0 databases remaining». Тесты Databases
   **запаркованы** до починки (проверено и со стороны пользователя). Кандидат в баг-репорт.
+- **04-Nov-2026: Databases - phpMyAdmin и импорт SQL не подключаются к MySQL.** Open Database →
+  `phpmyadmin/signon.php` «Невозможно подключиться к серверу MySQL» (4/4 базы, все хосты), импорт `.sql`
+  в старой панели → 500 `mysqli_sql_exception` (5/5). Создание базы, rotate-password, `is-empty` - работают.
+  Следствие: новую базу не наполнить → бэкап базы не создать («database is empty»), PUT бэкапа базы
+  (DEV-643) руками не проверить. Баг: DEV-677 (`test-docs/ultra.panel/BUG-db-user-connect/`).
 
 ## Известные риски / заметки
 

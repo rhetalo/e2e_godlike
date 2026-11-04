@@ -131,6 +131,7 @@ SMP.
 - 30-Oct-2026: переименован в `DEV-580-B2` - core-бэкап `bc9161e2` (той же ноды 427, что A) как жертва [DEV-580](../tickets/DEV-580.md); имя и lock возвращены, сервер восстановлен из этого бэкапа.
 - 02-Nov-2026: [DEV-594](../tickets/DEV-594.md) read-only - RAM-диалог модпака (Ultra Modded Lite, Install не жали) и `?ram=` на апгрейде. Не менялся.
 - 03-Nov-2026: [DEV-641](../tickets/DEV-641.md) - роут «чужого» сервера для world-бэкапов, только отказы 400. Не менялся.
+- 04-Nov-2026: переименован в `DEV-643-core` - [DEV-643](../tickets/DEV-643.md): v2 PUT и v1 lock core-бэкапа `bc9161e2`, имя и lock возвращены; слоты 3/3.
 - Трогать: 🟡.
 
 ### 0cf8346f
@@ -152,6 +153,7 @@ SMP Private, переименован в `DEV-562-MC` под [DEV-562](../ticket
 - 02-Nov-2026: [DEV-594](../tickets/DEV-594.md) read-only - `?ram=` на апгрейде (6 GB Budget). Не менялся.
 - 03-Nov-2026: [DEV-641](../tickets/DEV-641.md) - создан world-бэкап, restore из него (мир тот же) и delete; сервер в прежнем состоянии, копий нет. Свободен.
 - 03-Nov-2026: [DEV-638](../tickets/DEV-638.md) - временный сабюзер gtl.rmn+638 (приглашён, удалён), временные роли `DEV-638-*` удалены, жертвенные бэкапы `DEV-638-victim*` удалены; бэкап `test` (87becc3a) на месте, unlocked. Свободен.
+- 04-Nov-2026: переименован в `DEV-643-B` - «чужой» сервер [DEV-643](../tickets/DEV-643.md), ничего не менялось. Свободен.
 
 ### f8e7df56
 SkyBlock, на нём воспроизводился баг tariff-list 400. 20-Oct-2026 переименован в `DEV-484-backup-throttle` (было `JBl1Dqfw_474692`):
@@ -172,6 +174,7 @@ legacy 400 и v2 409 `mods_not_supported`, кнопка Upload custom modpack di
 - 23-Oct-2026: слоты 3/3 - на этом держится read-only `backups.slots-full.spec.ts` (TC-GP-BKP-006, заглушка «Slots Limit Reached»).
   Освободишь слот - тест уйдёт в skip с причиной. Env: `GAME_PANEL_SERVER_FULL_SLOTS_UUID`.
 - 27-Oct-2026: [DEV-586](../tickets/DEV-586.md) - отказы «нет слотов» Server/Database (POST отклонён 400), состояние не менялось.
+- 04-Nov-2026: [DEV-643](../tickets/DEV-643.md) с ок владельца - PUT-матрица на бэкапе базы `DEV-484-db-1-put` (`a9232c9a`), откачено: имя, lock, retain как было, COMPLETED, слоты 3/3; остались `schedule_date`/`next_run_date` 2026-12-04 при schedule=false. phpMyAdmin на этом сервере тоже не пускает ([DEV-677](https://antihost.atlassian.net/browse/DEV-677)).
 
 ### 7166c707
 **Одноразовый, деструктив разрешён** (restore, version change и т.п.). 🟢
@@ -292,6 +295,7 @@ Trial конструктора модпаков. 🟡
 Paper, плагины в [DEV-500](../tickets/DEV-500.md). 🟡
 - 30-Oct-2026: переименован в `DEV-580-C` (было `K6eCbHz9_426586`), [DEV-580](../tickets/DEV-580.md): бэкап базы `db_fix` (битый, Wings 500) удалён с ок владельца, база `s724329_тест` на месте; слоты 2/3.
 - 03-Nov-2026: [DEV-638](../tickets/DEV-638.md) read-only по сути - lock/unlock и download folder-бэкапа `aff8065b`, вернулся unlocked.
+- 04-Nov-2026: переименован в `DEV-643-A`, [DEV-643](../tickets/DEV-643.md) - PUT-матрица на instance `b99d9784` и folder `aff8065b`, откачено (остались `schedule_date`/`next_run_date` 2026-12-04 при schedule=false). Базы: `s724329_тест` (wing902) пустая, `s724329_test111` (wing24, создал владелец) пустая, `s724329_dev643` (wing15, создана при обходе [DEV-677](https://antihost.atlassian.net/browse/DEV-677), rotate-password) пустая. Слоты 2/3.
 
 ## stage
 

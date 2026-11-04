@@ -64,6 +64,7 @@ updated: 2026-11-04
 | [DEV-595](DEV-595.md) | Правило «длинный цикл → Premium» - один список циклов для заказа и апгрейда | BIL | in-qa | PASS | no | 2026-10-26 |
 | [DEV-638](DEV-638.md) | Старая панель и бэкапы новой панели - ссылка на того, кто качает, проверка диска, Activity | UP | done | PASS | covered | 2026-11-03 |
 | [DEV-641](DEV-641.md) | World Backups - искать бэкап в рамках сервера, не раскрывать существование чужого uuid | UP | done | PASS | no | 2026-11-03 |
+| [DEV-643](DEV-643.md) | Тех. долг Backup-домена - один маппинг PUT бэкапа и scope «бэкапы сервера» | UP | done | PASS | candidate | 2026-11-04 |
 | [TASK-missing-mod-deps](TASK-missing-mod-deps.md) | Окно Missing mod dependencies (автодозагрузка зависимостей) | UP | done | PASS-with-issues | - | 2026-09-29 |
 | [TASK-palworld-settings](TASK-palworld-settings.md) | Palworld Settings: UI-редактор PalWorldSettings.ini | UP | partial | PASS-with-issues | - | 2026-08-20 |
 | [TASK-split-server](TASK-split-server.md) | Split Server: управление ресурсами split-серверов в новой панели | UP | done | PASS | - | 2026-09-10 |
@@ -93,6 +94,7 @@ updated: 2026-11-04
 - **candidate**: [DEV-563](DEV-563.md) - Запретить Free-серверам изменять тип сервера (Ultra Panel и PlayFreeHost)
 - **candidate**: [DEV-564](DEV-564.md) - Bedrock NetherNet - UDP-порты под каждый слот вместо transport nethernet
 - **candidate**: [DEV-579](DEV-579.md) - Project Zomboid - лимит -Xmx в ProjectZomboid64.json следует за тарифом
+- **candidate**: [DEV-643](DEV-643.md) - Тех. долг Backup-домена - один маппинг PUT бэкапа и scope «бэкапы сервера»
 - **blocked**: [DEV-480](DEV-480.md) - Пошук файлів на стороні Wings - нативний обхід на ноді за флагом wings-native-file-search
 - **blocked**: [DEV-528](DEV-528.md) - A/B - после Boost конфигуратор апгрейда предлагает следующий план, события страницы апгрейда и разметка оплат
 - **blocked**: [DEV-546](DEV-546.md) - Блок «Boost your server» на чекауте v2 (только UI и QA-превью под флагом)
