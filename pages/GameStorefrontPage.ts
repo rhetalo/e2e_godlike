@@ -34,6 +34,14 @@ export interface TariffPromoResult {
   text: string;
 }
 
+/** Серверная карточка тарифа (DEV-604), как её видит бот без JS. */
+export interface SsrTariffCard {
+  title: string;
+  price: string | null;
+  cartHref: string | null;
+  cartUrl: string | null;
+}
+
 /** Фильтр сетки каталога = значение `data-filter` у кнопки. */
 export type GridFilter = "all" | "pc" | "mobile" | "console";
 
@@ -107,6 +115,70 @@ export class GameStorefrontPage extends BasePage {
       .locator(STOREFRONT.gameTitle)
       .filter({ hasText: new RegExp(`^${name}$`) })
       .first();
+  }
+
+  /** Лендинг игры по пути (тарифы, DEV-604). */
+  async openLanding(path: string): Promise<void> {
+    await this.goto(path);
+  }
+
+  /**
+   * Лендинг глазами бота (контекст с javaScriptEnabled: false): без снятия баннеров -
+   * их рисует JS, а dismissAll() без JS ждёт до таймаута теста.
+   */
+  async openLandingAsBot(path: string): Promise<void> {
+    await this.page.goto(path, { waitUntil: "domcontentloaded", timeout: 60_000 });
+  }
+
+  /**
+   * Серверные карточки тарифов (DEV-604): то, что видит бот без JS. С включённым JS Vue их убирает.
+   * price = текст большой цены или null (Custom); cartHref - href кнопки, cartUrl - data-cart-url.
+   */
+  async ssrTariffCards(): Promise<SsrTariffCard[]> {
+    return this.page.locator(STOREFRONT.ssrTariffCard).evaluateAll(
+      (cards, sel) =>
+        cards.map((card) => {
+          const btn = card.querySelector(sel.cart);
+          return {
+            title: (card.querySelector(sel.title)?.textContent ?? "").trim(),
+            price: card.querySelector(sel.price)?.textContent?.trim() ?? null,
+            cartHref: btn?.getAttribute("href") ?? null,
+            cartUrl: btn?.getAttribute("data-cart-url") ?? null,
+          };
+        }),
+      { title: STOREFRONT.ssrTariffTitle, price: STOREFRONT.ssrTariffPrice, cart: STOREFRONT.ssrTariffCartButton },
+    );
+  }
+
+  /** Корневые ноды всех JSON-LD страницы (`@graph` раскрыт). Без ассертов: тип и контракт проверяет спек. */
+  async jsonLdNodes(): Promise<Array<Record<string, unknown>>> {
+    const scripts = await this.page.locator(STOREFRONT.ldJson).allTextContents();
+    return scripts.flatMap((raw) => {
+      const doc = JSON.parse(raw) as Record<string, unknown> | Array<Record<string, unknown>>;
+      if (Array.isArray(doc)) return doc;
+      return Array.isArray(doc["@graph"]) ? (doc["@graph"] as Array<Record<string, unknown>>) : [doc];
+    });
+  }
+
+  /** Последний из тарифов `ids`, который сейчас не выделен рамкой (не «Most Popular»), или undefined. */
+  async lastUnhighlightedTariff(ids: readonly string[]): Promise<string | undefined> {
+    for (const id of [...ids].reverse()) {
+      if (!(await this.tariffHighlightState(id)).highlighted) return id;
+    }
+    return undefined;
+  }
+
+  /** Vue-карточка тарифа по id (`?plan=<id>` из JSON-LD): выделена ли рамкой и видна ли в окне. */
+  async tariffHighlightState(id: string): Promise<{ highlighted: boolean; inViewport: boolean }> {
+    const card = this.page.locator(STOREFRONT.tariffById(id));
+    await card.waitFor({ state: "visible" });
+    return card.evaluate(
+      (el, cls) => {
+        const r = el.getBoundingClientRect();
+        return { highlighted: el.classList.contains(cls), inViewport: r.top >= 0 && r.bottom <= window.innerHeight };
+      },
+      STOREFRONT.tariffHighlighted,
+    );
   }
 
   /**

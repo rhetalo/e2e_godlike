@@ -64,6 +64,26 @@ export const StorefrontPages = [
 ] as const;
 
 /**
+ * Страницы игр с блоком тарифов, где тарифы приходят ботам текстом (DEV-604, live 02-04 Nov 2026).
+ * game - ожидаемое имя ProductGroup в JSON-LD (подпись игры, не адрес страницы).
+ * botUserAgent - так страницу видят AI-боты (JS не выполняют).
+ */
+export const TariffsForBots = {
+  botUserAgent: "Mozilla/5.0 (compatible; GPTBot/1.0; +https://openai.com/gptbot)",
+  pages: [
+    { path: "/minecraft-java-servers-hosting/", game: "Minecraft Java Server Hosting" },
+    { path: "/minecraft-bedrock-servers-hosting/", game: "Minecraft Bedrock Server Hosting" },
+    { path: "/terraria-server-hosting/", game: "Terraria Server Hosting" },
+    { path: "/palworld-server-hosting/", game: "Palworld Server Hosting" },
+    { path: "/ark-survival-ascended-server-hosting/", game: "ARK: Survival Ascended Server Hosting" },
+    { path: "/vintage-story-server-hosting/", game: "Vintage Story Server Hosting" },
+    { path: "/rust-server-hosting/", game: "Rust Server Hosting" },
+    // wp!783: раньше имя собиралось из адреса («Altv Server Hosting»).
+    { path: "/altv-server-hosting/", game: "GTA 5 Alt:V Server Hosting" },
+  ],
+} as const;
+
+/**
  * Каталог игр /game-servers-en/, блок «List of games» (live-recon 15-Oct-2026: 20 ссылок).
  * coreGames — игры, которые точно должны быть (структурная проверка: список может расти).
  * landing — путь лендинга; у Minecraft ссылка ведёт на главную.

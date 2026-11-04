@@ -15,6 +15,7 @@ export * from "./backups";
 export * from "./extensions";
 export * from "./minecraftServer";
 export * from "./upgradeQuiz";
+export * from "./tariffsSchema";
 
 /** Проблемы валидации как «путь: сообщение» (пустой массив = ответ соответствует схеме). Не больше `limit` строк. */
 export function schemaIssues(schema: z.ZodType, data: unknown, limit = 20): string[] {
