@@ -757,12 +757,19 @@ export const GAME_PANEL_FILES = {
 // справа видна ТОЛЬКО активная группа → нужное свойство открываем поиском «Search all settings».
 // Строка = .property-setting, ключ свойства - <code> в заголовке; у текстовых/числовых полей
 // стабильный id `property-<key>` (у сегментов вроде difficulty инпута нет).
-// ⚠️ Save-кнопки НЕТ — форма автосейвит при изменении поля; персист проверяем через reload.
+// ⚠️ Автосейва больше НЕТ: правка → строка --dirty + метка «Unsaved» + save-bar
+// «N unsaved change(s) / Applied after a server restart» с Discard и «Save & restart».
+// Save & restart БЕЗ подтверждения: PUT .../properties + POST .../power → offline-сервер ЗАПУСКАЕТСЯ.
+// Превью «Preview in the multiplayer list» (группа Server list) рендерит motd с §-кодами, HTML экранирует.
 export const GAME_PANEL_CONFIG = {
   search: '.properties-search input[type="search"]', // поиск по всем свойствам
-  row: ".property-setting",                          // одна строка-свойство
+  group: ".properties-sidebar__group",               // группа в сайдбаре (Gameplay/.../Server list)
+  row: ".property-setting",                         // одна строка-свойство
   rowKey: ".property-setting__title code",           // ключ server.properties в заголовке строки
   input: "input",                                    // инпут внутри строки (text/number)
+  dirtyRow: ".property-setting--dirty",              // строка с несохранённой правкой
+  saveBar: ".properties-save-bar",                   // плашка несохранённых правок (Discard / Save & restart)
+  previewMotd: ".minecraft-list-preview__motd",      // motd в превью списка серверов
   // примеры ключей server.properties (для структурных проверок)
   keys: ["motd", "difficulty", "max-players", "level-name"],
 } as const;

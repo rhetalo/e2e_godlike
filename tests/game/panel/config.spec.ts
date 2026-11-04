@@ -1,28 +1,33 @@
 /**
- * Game panel — Server Properties tab (до 04-Nov-2026 «Config»; Phase 3, soft mutation, self-cleaning).
+ * Game panel — Server Properties tab (до 04-Nov-2026 «Config»; Phase 3).
  *
- * Таб Config = редактор server.properties. Save-кнопки нет → форма автосейвит при
- * изменении поля; персист проверяем через reload (повторный goto). Тест меняет только
- * `motd` (косметическая строка), затем ВОЗВРАЩАЕТ исходное значение. serial + общий
- * контекст; afterAll best-effort восстанавливает оригинал, чтобы прогон был чистым.
+ * Таб = редактор server.properties. С 04-Nov-2026 автосейва нет: правка → save-bar
+ * «Applied after a server restart» с Discard / Save & restart. Save & restart без подтверждения
+ * сохраняет И перезапускает сервер (offline-сервер запускается) →
  *
- * Не требует запущенного сервера (форма доступна в любом статусе).
+ * - TC-GP-CFG-001 (stateful): на mut-сервере test_e2e_mut_java меняем motd, Save & restart,
+ *   reload → значение сохранилось; возвращаем оригинал тем же путём. afterAll: откат motd
+ *   (если отличается) + ensureOffline. serial + общий контекст.
+ * - TC-GP-CFG-002 (read-only): на основном сервере ключевые свойства рендерятся.
  */
 import { test, expect, type BrowserContext } from "@playwright/test";
 import { GamePanelConfigPage } from "../../../pages/game/GamePanelConfigPage";
+import { GamePanelServerPage } from "../../../pages/game/GamePanelServerPage";
 import {
   loginAndSaveGameSession,
   GAME_STORAGE_STATE_PATH,
   GAME_SERVER_UUID,
+  GAME_SERVER_MUT_JAVA_UUID,
 } from "../../../utils/gameAuth";
 
 const PROBE_SUFFIX = " [e2e]";
 
 test.describe.configure({ mode: "serial" });
 
-test.describe("@critical [game-panel] Config (server.properties)", () => {
+test.describe("@critical [game-panel] Server Properties — сохранение (Save & restart, mut-сервер)", () => {
   let context: BrowserContext;
   let config: GamePanelConfigPage;
+  let srv: GamePanelServerPage;
   let originalMotd: string;
 
   test.beforeAll(async ({ browser }) => {
@@ -30,47 +35,72 @@ test.describe("@critical [game-panel] Config (server.properties)", () => {
     await loginAndSaveGameSession(browser);
     context = await browser.newContext({ storageState: GAME_STORAGE_STATE_PATH });
     const page = await context.newPage();
-    config = new GamePanelConfigPage(page, GAME_SERVER_UUID);
+    config = new GamePanelConfigPage(page, GAME_SERVER_MUT_JAVA_UUID);
+    srv = new GamePanelServerPage(page, GAME_SERVER_MUT_JAVA_UUID);
     await config.goto();
     // оригинал; самолечение от возможного мусора прошлого упавшего прогона (срезаем хвост " [e2e]")
     originalMotd = (await config.getValue("motd")).replace(/( \[e2e\])+$/, "");
   });
 
   test.afterAll(async () => {
+    test.setTimeout(180_000); // откат (Save & restart) + ensureOffline
     try {
-      if (originalMotd !== undefined) {
+      await config.goto();
+      if (originalMotd !== undefined && (await config.getValue("motd")) !== originalMotd) {
         await config.setValue("motd", originalMotd);
       }
+    } catch {
+      /* best-effort teardown */
+    }
+    try {
+      await srv.goto();
+      await srv.ensureOffline(90_000); // Save & restart запускает сервер — гасим
     } catch {
       /* best-effort teardown */
     }
     await context.close();
   });
 
-  test("TC-GP-CFG-001 | изменение motd сохраняется (автосейв) и откатывается", async () => {
-    test.setTimeout(120_000);
+  test("TC-GP-CFG-001 | изменение motd: Unsaved → Save & restart → сохранилось → откат", async () => {
+    test.setTimeout(180_000);
     const probeMotd = originalMotd + PROBE_SUFFIX; // гарантированно отличается от оригинала
 
-    await test.step("задать тестовый motd и перезагрузить страницу", async () => {
-      await config.setValue("motd", probeMotd);
-      await config.goto(); // reload → проверяем, что значение реально сохранилось
+    await test.step("ввести тестовый motd → строка Unsaved, появился save-bar", async () => {
+      await config.typeValue("motd", probeMotd);
+      expect(await config.isDirty("motd")).toBe(true);
+      await expect(config.saveBar).toContainText(/1 unsaved change/i);
+      await expect(config.saveBar).toContainText(/after a server restart/i);
     });
 
-    await test.step("значение сохранилось", async () => {
+    await test.step("Save & restart → после reload значение сохранилось", async () => {
+      await config.saveAndRestart();
+      await config.goto();
       expect(await config.getValue("motd")).toBe(probeMotd);
     });
 
-    await test.step("вернуть оригинал и перезагрузить", async () => {
+    await test.step("вернуть оригинал (Save & restart) → после reload откат подтверждён", async () => {
       await config.setValue("motd", originalMotd);
       await config.goto();
-    });
-
-    await test.step("откат подтверждён", async () => {
       expect(await config.getValue("motd")).toBe(originalMotd);
     });
   });
+});
 
-  test("TC-GP-CFG-002 | Config рендерит ключевые свойства server.properties", async () => {
+test.describe("@critical [game-panel] Server Properties — структура (read-only)", () => {
+  let context: BrowserContext;
+  let config: GamePanelConfigPage;
+
+  test.beforeAll(async ({ browser }) => {
+    await loginAndSaveGameSession(browser);
+    context = await browser.newContext({ storageState: GAME_STORAGE_STATE_PATH });
+    config = new GamePanelConfigPage(await context.newPage(), GAME_SERVER_UUID);
+  });
+
+  test.afterAll(async () => {
+    await context.close();
+  });
+
+  test("TC-GP-CFG-002 | Server Properties рендерит ключевые свойства server.properties", async () => {
     await config.goto();
 
     await test.step("ключевые поля присутствуют", async () => {

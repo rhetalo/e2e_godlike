@@ -29,8 +29,7 @@ const FOREIGN_UUIDS = [
 ];
 const XSS_NAME = "<img src=x onerror=alert(1)>"; // имя бэкапа (лимит 38)
 const XSS_FOLDER = "<img src=x onerror=alert(2)>"; // имя папки в файловом менеджере
-const XSS_MOTD = "<img src=x onerror=alert(7)>"; // payload в config motd (sink — значение <input>)
-const SQLI_MOTD = "'; DROP TABLE servers;-- e2e"; // SQLi-строка в motd: round-trip = БД не пострадала
+const XSS_MOTD = "<img src=x onerror=alert(7)>"; // payload в motd (sink — превью списка серверов)
 
 test.describe.configure({ mode: "serial" });
 
@@ -62,8 +61,6 @@ test.describe("[game-panel] Security — IDOR + input validation", () => {
     config = new GamePanelConfigPage(page, GAME_SERVER_UUID);
     await config.goto();
     originalMotd = await config.getValue("motd");
-    // самолечение: если прошлый упавший прогон оставил payload — не берём его за «оригинал»
-    if (/onerror=alert|DROP TABLE/i.test(originalMotd)) originalMotd = "A Minecraft Server";
   });
 
   test.afterAll(async () => {
@@ -72,7 +69,7 @@ test.describe("[game-panel] Security — IDOR + input validation", () => {
       await backups.deleteIfPresent(XSS_NAME);
       await files.goto();
       await files.deleteEntryIfPresent(XSS_FOLDER);
-      await config.setValue("motd", originalMotd); // обязательный откат motd
+      // motd в SEC-004 не сохраняется (только Discard); уход со страницы и так сбрасывает правку
     } catch {
       /* best-effort teardown */
     }
@@ -147,29 +144,27 @@ test.describe("[game-panel] Security — IDOR + input validation", () => {
     });
   });
 
-  test("@regression TC-GP-SEC-004 | XSS/SQLi в config motd не исполняются и хранятся как текст (self-cleaning)", async () => {
+  // 04-Nov-2026: автосейва нет, сохранение = Save & restart (перезапуск сервера) → payload НЕ
+  // сохраняем. Проверяем новый sink — превью «Preview in the multiplayer list», которое рендерит
+  // motd с §-кодами: HTML должен остаться текстом. SQLi round-trip без сохранения не проверить - снят.
+  test("@regression TC-GP-SEC-004 | XSS в motd: превью показывает payload как текст, без исполнения; Discard откатывает", async () => {
     test.setTimeout(120_000);
 
-    await test.step("XSS-payload в motd → автосейв → reload: значение как текст, без диалога", async () => {
+    await test.step("XSS-payload в motd → превью списка серверов показывает его текстом", async () => {
       dialogFired = false;
       await config.goto();
-      await config.setValue("motd", XSS_MOTD);
-      await config.goto(); // reload → проверяем персист
-      expect(await config.getValue("motd")).toContain(XSS_MOTD); // сохранён дословно (как текст)
-      expect(dialogFired).toBe(false); // alert не сработал → stored-XSS нет
+      await config.openGroup("Server list");
+      await config.typeValue("motd", XSS_MOTD);
+      await config.openGroup("Server list"); // поиск в typeValue прячет превью → вернуть группу
+      await expect(config.previewMotd).toContainText(XSS_MOTD); // литерал = экранировано
+      await expect(config.previewMotd.locator("img")).toHaveCount(0); // <img> не создан
+      expect(dialogFired).toBe(false); // alert не сработал
     });
 
-    await test.step("SQLi-строка в motd → автосейв → reload: строка цела (инъекции нет)", async () => {
-      await config.setValue("motd", SQLI_MOTD);
-      await config.goto();
-      expect(await config.getValue("motd")).toContain(SQLI_MOTD);
-      expect(dialogFired).toBe(false);
-    });
-
-    await test.step("откат motd к оригиналу (обязательный recovery)", async () => {
-      await config.setValue("motd", originalMotd);
-      await config.goto();
+    await test.step("Discard → значение вернулось, save-bar пропал (ничего не сохранено)", async () => {
+      await config.discard();
       expect(await config.getValue("motd")).toBe(originalMotd);
+      await expect(config.saveBar).toBeHidden();
     });
   });
 });

@@ -75,7 +75,7 @@ Google-OAuth (`stage.panel.godlike.host/oauth2/callback`), сессия живё
 | Power | Start/Shut Down/Restart/Kill, EULA, гейт по Java | [UP/power](power.md) | [DEV-485](../../tickets/DEV-485.md) | power | ✅ |
 | Console | xterm-лог, ввод команд, палитра Commands, Help | [UP/console](console.md) | - | console, console.palette, security.console | ✅ |
 | Files | Файл-менеджер, Recycle Bin 24ч, CodeMirror, SFTP, Upload custom modpack | [UP/files](files.md) | - | files, files.recycle, files.structure | ✅ |
-| Config | Редактор `server.properties` (автосейв) + блок Docker/Java (Docker Image combobox) | [UP/config](config.md) | - | config, security (SEC-004) | ✅ |
+| Server Properties (бывш. Config) | Редактор `server.properties` (с 04-Nov: группы + поиск, Save & restart вместо автосейва) + Java & startup | [UP/config](config.md) | - | config, security (SEC-004) | ✅ |
 | Startup / Docker image | Смена образа Java; в UP через Config, `/server/{id}/startup` рендерит пусто | [UP/startup](config.md#как-работает-под-капотом) | [DEV-513](../../tickets/DEV-513.md) (OLDP) | permission.enforcement.api (docker_access) | ❌ |
 | Players | Админы, Players List, Whitelist, Ban List (нужен online) | [UP/players](players.md) | - | players | ✅ |
 | Versions | 18 ядер, drill-down версия → билд → Install (+Wipe) | [UP/versions](versions.md) | [DEV-506](../../tickets/DEV-506.md), [DEV-529](../../tickets/DEV-529.md) | versions | ⚠️ |

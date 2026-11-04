@@ -17,9 +17,12 @@ sources:
 
 # Config - server.properties и блок Docker/Java
 
-> **В двух словах.** Вкладка Config - это форма поверх файла `server.properties` Minecraft: название,
-> сложность, PvP, слоты, порт и прочее. Кнопки Save нет: каждое поле сохраняется само. Внизу блок
-> Docker/Java, где клиент выбирает образ Java и включает автодетект ядра и версии.
+> **В двух словах.** Вкладка Server Properties (до 04-Nov-2026 - Config) - это форма поверх файла `server.properties`
+> Minecraft: название, сложность, PvP, слоты, порт и прочее. С 04-Nov-2026 автосейва нет: правки копятся, а кнопка
+> **Save & restart** сохраняет их и перезапускает сервер. Блок Docker/Java - группа «Java & startup».
+
+> ⚠️ **Редизайн 04-Nov-2026.** Разделы «Где в интерфейсе» и «Гочи» ниже про `.server__config-switch` и автосейв
+> устарели. Актуальная вёрстка, save-bar и превью motd - KB §5c (блок «РЕДИЗАЙН»).
 
 ## Где в интерфейсе
 
@@ -60,8 +63,9 @@ sources:
 | Что | Где | Статус |
 |---|---|---|
 | Ключевые свойства рендерятся | `config.spec.ts` (CFG-002) | ✅ |
-| motd автосейв + откат | `config.spec.ts` (CFG-001) | ✅ |
-| XSS / SQLi в motd | `security.spec.ts` (SEC-004) | ✅ |
+| motd: Unsaved → Save & restart → сохранилось → откат (mut-сервер) | `config.spec.ts` (CFG-001) | ✅ |
+| XSS в motd: превью показывает текстом, Discard | `security.spec.ts` (SEC-004) | ✅ |
+| SQLi round-trip motd | снят 04-Nov-2026 (нужен Save & restart) | ❌ |
 | Docker Image, автодетект | только ручной QA [DEV-472](../../tickets/DEV-472.md), [DEV-485](../../tickets/DEV-485.md) | ❌ авто нет |
 
 ## История
@@ -72,3 +76,4 @@ sources:
 | 09-Jun-2026 | - | SEC-004: XSS / SQLi в motd хранятся как текст |
 | 02..08-Oct-2026 | [DEV-472](../../tickets/DEV-472.md) | Автодетект, попап Java ведёт в Config |
 | 09-Oct-2026 | [DEV-485](../../tickets/DEV-485.md) | Restart после смены образа под гейтом Java |
+| 04-Nov-2026 | - | Редизайн без анонса: таб → «Server Properties», группы + поиск, автосейв убран → Save & restart; CFG-001 на mut-сервер, SEC-004 через превью + Discard |

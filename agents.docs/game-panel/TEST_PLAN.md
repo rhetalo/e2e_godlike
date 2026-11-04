@@ -71,7 +71,7 @@
 
 | TC | Проверка |
 |----|----------|
-| TC-GP-CFG-001 | изменить `motd` → reload → значение сохранилось (автосейв) → **вернуть оригинал** → reload → откат подтверждён |
+| TC-GP-CFG-001 | (с 04-Nov-2026, mut-сервер `fd965a60`) ввести `motd` → «Unsaved» + save-bar → **Save & restart** → reload → сохранилось → **вернуть оригинал** тем же путём; afterAll откат + `ensureOffline` (Save & restart запускает сервер) |
 | TC-GP-CFG-002 | Config рендерит ключевые поля (`motd`/`difficulty`/`max-players`/`level-name`), `level-name` непуст |
 
 Детали Config-таба (автосейв без Save-кнопки, динамические id, локаторы) — `KNOWLEDGE_BASE.md` §5c.
@@ -80,7 +80,7 @@
 
 | TC | Проверка |
 |----|----------|
-| TC-GP-PLR-001 (`@regression`) | таб `/players` рендерит `.server__players` + карточку «Server Administrators» (offline-ok) |
+| TC-GP-PLR-001 (`@regression`) | таб `/players` рендерит менеджер игроков `.players-manager`: whitelist, фильтры (Operators/Banned), список с UUID (offline-ok; редизайн 04-Nov-2026) |
 | TC-GP-PLR-002 (`@critical`) | whitelist add → list → remove игрока (`Notch`) через консоль; ответы «Added/Removed … whitelist» (online, обязательный откат) |
 
 Управление игроками требует Online-сервера → делаем через консоль (источник правды).
@@ -157,7 +157,7 @@ Enforcement — через присутствие/отсутствие конт�
 | TC-GP-SEC-001 (`@critical`) | **IDOR**: чужой/несуществующий UUID сервера → «resource does not exist» + нет power-контролов; свой сервер (baseline) → контролы есть. Read-only |
 | TC-GP-SEC-002 (`@critical`) | **stored XSS** в имени бэкапа (`<img onerror>`) НЕ исполняется (нет нативного диалога) и экранируется (рендер как текст); self-cleaning (создать→дождаться→удалить) |
 | TC-GP-SEC-003 (`@critical`) | **stored XSS** в имени папки (файл-менеджер) НЕ исполняется и экранируется; self-cleaning (создать→удалить). Быстрее SEC-002 (без async-джобы) |
-| TC-GP-SEC-004 (`@regression`) | **XSS + SQLi в config `motd`**: payload `<img onerror>` и `'; DROP TABLE…` автосейвятся и round-trip'ятся **как текст** (нет исполнения/инъекции), нативный диалог не срабатывает; self-cleaning (откат motd к оригиналу). Offline. Закрывает config-инпут Phase 5 |
+| TC-GP-SEC-004 (`@regression`) | **XSS в `motd`** (с 04-Nov-2026 без сохранения): payload `<img onerror>` в поле → превью списка серверов показывает его **текстом**, `<img>` не создан, диалога нет → **Discard** → значение исходное. SQLi round-trip снят (сохранение = Save & restart с перезапуском) |
 | TC-GP-SEC-005 (`@regression`, online) | **XSS в выводе консоли**: `say <img onerror>` → сервер эхо-печатает в `.terminal` → payload виден **как текст** (`onerror=alert` в логе), нативный диалог не срабатывает → XSS нет. SQLi для консоли N/A (stdin игры, не БД). Recovery: `ensureOffline`. **Завершает Phase 5** |
 
 IDOR — read-only. XSS — мутации (свой бэкап/папка, удаляются). Детали и сигналы — `KNOWLEDGE_BASE.md` §5j.

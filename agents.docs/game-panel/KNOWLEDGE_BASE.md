@@ -132,6 +132,20 @@ Restart/Kill — отдельные кнопки. ⚠️ **Раньше** отк
 
 ## 5c. Config tab — server.properties (подтверждено DOM 04-Jun-2026)
 
+> ⚠️ **РЕДИЗАЙН 04-Nov-2026 (live recon) - разделы ниже про `.server__config-switch` и автосейв УСТАРЕЛИ.**
+> - Таб переименован **Config → «Server Properties»** (роут тот же `/config`). В ряду табов новый **Split Server**.
+> - Слева группы `.properties-sidebar__group` (Gameplay / World / Players & access / Performance / Server list /
+>   Resource pack / Network & RCON / Other + Java & startup), справа ТОЛЬКО активная группа → свойство открываем поиском
+>   `.properties-search input` («Search all settings»). Строка `.property-setting`, ключ в `.property-setting__title code`,
+>   у text/number полей **стабильный id `property-<key>`** (у сегментов вроде difficulty инпута нет).
+> - **Автосейва НЕТ.** Правка → строка `--dirty` + «Unsaved» + `.properties-save-bar` «1 unsaved change / Applied after a
+>   server restart» с **Discard** и **Save & restart**. Save & restart **без подтверждения**: `PUT /api/v2/servers/{uuid}/properties`
+>   + `POST .../power` → **offline-сервер запускается**. Поэтому сохранение - только на mut-сервере (CFG-001 на `fd965a60`
+>   + `ensureOffline`), на основном `ebb03adc` - только Discard.
+> - Группа Server list: превью `.minecraft-list-preview__motd` рендерит motd с §-кодами (§c → цвет), HTML **экранирует**
+>   (SEC-004 проверяет `<img onerror>` → текст, `<img>` не создан).
+> - PO: `GamePanelConfigPage` - `reveal`, `openGroup`, `typeValue`, `discard`, `saveAndRestart`, `setValue` (= type + Save & restart).
+
 `/server/{uuid}/config`. Это **редактор `server.properties`** в виде Vuetify-формы.
 Сервер Online **не требуется** (форма доступна в любом статусе).
 
@@ -152,6 +166,11 @@ Restart/Kill — отдельные кнопки. ⚠️ **Раньше** отк
 - В тестах безопасно меняем только `motd` (косметическая строка) с обязательным откатом.
 
 ## 5d. Players tab (подтверждено DOM 05-Jun-2026)
+
+> ⚠️ **РЕДИЗАЙН 04-Nov-2026:** `.server__players` и карточки («Server Administrators») УДАЛЕНЫ. Теперь менеджер
+> `.players-manager`: `.players-whitelist` (переключатель On/Off + счётчик), `.players-filters` (All / Online / Whitelist /
+> Operators / Banned), `.players-list` (PLAYER / UUID / ACCESS / ACTIONS; «запомненные» игроки с кнопками Whitelist / OP / Ban /
+> Player data). Виден offline. Кнопки действий не разведаны - мутации по-прежнему через консоль (PLR-002).
 
 `/server/{uuid}/players`. Рендерит блок `.server__players` с карточками
 (`.server__players-card__title`, напр. **«Server Administrators»**) — сам таб виден и offline.

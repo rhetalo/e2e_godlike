@@ -6,9 +6,9 @@
  * «Search all settings». Строка = `.property-setting`, ключ - `<code>` в заголовке; якоримся
  * по точному ключу.
  *
- * ⚠️ Save-кнопки нет — форма АВТОСЕЙВИТ при изменении поля (PATCH на blur). Поэтому
- * setValue() делает fill → blur → ждёт ответ PATCH автосейва; персист проверяется в спеке через
- * reload + getValue().
+ * ⚠️ Автосейва больше нет. typeValue() только вводит значение (строка --dirty, save-bar);
+ * discard() откатывает, saveAndRestart() сохраняет И перезапускает сервер (offline-сервер
+ * при этом ЗАПУСКАЕТСЯ, подтверждения нет) → сохранение только на mut-серверах + ensureOffline.
  *
  * Методы — действия и читатели состояния; assert'ы в спеке.
  */
@@ -32,10 +32,26 @@ export class GamePanelConfigPage extends GamePanelBasePage {
     return this.page.locator(GAME_PANEL_CONFIG.search).first();
   }
 
+  /** Плашка несохранённых правок («N unsaved change», Discard / Save & restart). */
+  get saveBar(): Locator {
+    return this.page.locator(GAME_PANEL_CONFIG.saveBar).first();
+  }
+
+  /** motd в превью «Preview in the multiplayer list» (видно в группе Server list). */
+  get previewMotd(): Locator {
+    return this.page.locator(GAME_PANEL_CONFIG.previewMotd).first();
+  }
+
   /** Показать строку свойства: на экране только активная группа, поиск открывает любую. */
   async reveal(prop: string): Promise<void> {
     await this.search.fill(prop);
     await this.row(prop).waitFor({ state: "visible", timeout: 10_000 });
+  }
+
+  /** Открыть группу сайдбара (Gameplay / World / ... / Server list) со сброшенным поиском. */
+  async openGroup(name: string): Promise<void> {
+    await this.search.fill("");
+    await this.page.locator(GAME_PANEL_CONFIG.group).filter({ hasText: name }).first().click();
   }
 
   /** Строка-свойство по точному ключу (motd/difficulty/...). */
@@ -66,26 +82,45 @@ export class GamePanelConfigPage extends GamePanelBasePage {
     return (await this.input(prop).inputValue().catch(() => "")) ?? "";
   }
 
-  /**
-   * Задать значение текстового свойства и дождаться автосейва.
-   * Автосейв триггерится blur'ом, затем ждём сеть.
-   */
-  async setValue(prop: string, value: string): Promise<void> {
+  /** Есть ли у свойства несохранённая правка (строка --dirty, метка «Unsaved»). */
+  async isDirty(prop: string): Promise<boolean> {
+    return this.row(prop).evaluate(
+      (el, cls) => el.classList.contains(cls),
+      GAME_PANEL_CONFIG.dirtyRow.slice(1),
+    );
+  }
+
+  /** Ввести значение БЕЗ сохранения (появляется save-bar). */
+  async typeValue(prop: string, value: string): Promise<void> {
     await this.reveal(prop);
-    const field = this.input(prop);
-    // Ждём ответ автосейва (PATCH к api/v2 сервера), а не networkidle — тот на странице сервера не
-    // наступает (websocket-консоль). Слушатель ДО действия. Значение не изменилось → PATCH нет →
-    // ограниченный таймаут без падения; персист в любом случае проверяет спек перезагрузкой.
-    const saved = this.page
-      .waitForResponse(
-        (r) => r.request().method() === "PATCH" && /\/api\/v2\/servers\//.test(r.url()),
-        { timeout: 8_000 },
-      )
-      .catch(() => null);
-    await field.click();
-    await field.fill(value);
-    await field.blur(); // триггерит PATCH (автосейв)
+    await this.input(prop).fill(value);
+    await this.saveBar.waitFor({ state: "visible", timeout: 10_000 });
+  }
+
+  /** Discard: откатить все несохранённые правки. */
+  async discard(): Promise<void> {
+    await this.saveBar.getByRole("button", { name: /Discard/i }).click();
+    await this.saveBar.waitFor({ state: "hidden", timeout: 10_000 });
+  }
+
+  /**
+   * Save & restart: сохранить server.properties и перезапустить сервер (без подтверждения).
+   * Ждём ответ PUT .../properties, а не networkidle (websocket-консоль его не даёт).
+   */
+  async saveAndRestart(): Promise<void> {
+    const saved = this.page.waitForResponse(
+      (r) => r.request().method() === "PUT" && /\/api\/v2\/servers\/[^/]+\/properties/.test(r.url()),
+      { timeout: 20_000 },
+    );
+    await this.saveBar.getByRole("button", { name: /Save & restart/i }).click();
     await saved;
+    await this.saveBar.waitFor({ state: "hidden", timeout: 10_000 });
+  }
+
+  /** Ввести значение и сохранить (Save & restart). ⚠️ Перезапускает сервер. */
+  async setValue(prop: string, value: string): Promise<void> {
+    await this.typeValue(prop, value);
+    await this.saveAndRestart();
   }
 }
 

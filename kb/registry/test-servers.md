@@ -82,6 +82,8 @@ Suspended-сервер, для проверок баннера suspended. 🔴
 - 23-Oct-2026: `backups.throttle.spec.ts` (TC-GP-BKP-005) создаёт 1 бэкап `qa-484-window-a` и удаляет его в teardown.
 - 23-Oct-2026: EULA принята, первый старт создал `world` - он нужен `world-backup.spec.ts` ([DEV-571](../tickets/DEV-571.md)), не удалять
   (иначе тесты WB уйдут в skip; вернуть - один Start). Вне раскатки `extension-compatibility`: legacy ставит моды на Paper ([DEV-556](../tickets/DEV-556.md)).
+- 04-Nov-2026: `config.spec.ts` (TC-GP-CFG-001) меняет `motd` через Save & restart (сервер стартует) и возвращает
+  «A Minecraft Server»; afterAll гасит сервер.
 - Env: `GAME_PANEL_SERVER_MUT_JAVA_UUID`. Трогать: 🟢.
 
 ### 75d1175e
