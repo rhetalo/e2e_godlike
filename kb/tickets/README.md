@@ -63,11 +63,12 @@ updated: 2026-11-04
 | [DEV-594](DEV-594.md) | Округление RAM модпака до плана - ?ram= на странице апгрейда сводится к ступени сетки | UP | done | PASS | covered | 2026-11-02 |
 | [DEV-595](DEV-595.md) | Правило «длинный цикл → Premium» - один список циклов для заказа и апгрейда | BIL | in-qa | PASS | no | 2026-10-26 |
 | [DEV-597](DEV-597.md) | Palworld - импорт мира с компьютера (вкладка World) | UP, OLDP | done | PASS-with-issues | blocked | 2026-11-04 |
+| [DEV-598](DEV-598.md) | Palworld Settings - блок «Popular settings» вверху вкладки | UP | done | PASS | blocked | 2026-11-04 |
 | [DEV-638](DEV-638.md) | Старая панель и бэкапы новой панели - ссылка на того, кто качает, проверка диска, Activity | UP | done | PASS | covered | 2026-11-03 |
 | [DEV-641](DEV-641.md) | World Backups - искать бэкап в рамках сервера, не раскрывать существование чужого uuid | UP | done | PASS | no | 2026-11-03 |
 | [DEV-643](DEV-643.md) | Тех. долг Backup-домена - один маппинг PUT бэкапа и scope «бэкапы сервера» | UP | done | PASS | candidate | 2026-11-04 |
 | [TASK-missing-mod-deps](TASK-missing-mod-deps.md) | Окно Missing mod dependencies (автодозагрузка зависимостей) | UP | done | PASS-with-issues | - | 2026-09-29 |
-| [TASK-palworld-settings](TASK-palworld-settings.md) | Palworld Settings: UI-редактор PalWorldSettings.ini | UP | partial | PASS-with-issues | - | 2026-08-20 |
+| [TASK-palworld-settings](TASK-palworld-settings.md) | Palworld Settings: UI-редактор PalWorldSettings.ini | UP | partial | PASS-with-issues | blocked | 2026-08-20 |
 | [TASK-split-server](TASK-split-server.md) | Split Server: управление ресурсами split-серверов в новой панели | UP | done | PASS | - | 2026-09-10 |
 | [TASK-tariff-list-400](TASK-tariff-list-400.md) | Список тарифов для апгрейда падает с 400, Upgrade бесконечно грузится | UP, BIL | blocked | FAIL | - | 2026-10-09 |
 | [TASK-throttling-webhook](TASK-throttling-webhook.md) | Throttling: алерт троттлинга CPU и модалка «Lag Detected» | UP | in-qa | - | - | 2026-06-15 |
@@ -103,5 +104,7 @@ updated: 2026-11-04
 - **blocked**: [DEV-566](DEV-566.md) - Каталог Minecraft-схематик /minecraft-schematics/
 - **blocked**: [DEV-576](DEV-576.md) - Checkout v2 - «Your plan» без разовой настройки модпака в месячной цене
 - **blocked**: [DEV-597](DEV-597.md) - Palworld - импорт мира с компьютера (вкладка World)
+- **blocked**: [DEV-598](DEV-598.md) - Palworld Settings - блок «Popular settings» вверху вкладки
+- **blocked**: [TASK-palworld-settings](TASK-palworld-settings.md) - Palworld Settings: UI-редактор PalWorldSettings.ini
 
 Только упоминаются, карточек нет: DEV-145 (ARK settings), DEV-275, DEV-315 (конструктор модпаков), DEV-321, DEV-441, DEV-523, PROD-126, GROWTH-95.

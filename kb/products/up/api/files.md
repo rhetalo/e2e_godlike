@@ -4,9 +4,9 @@ title: API - files (потоковый поиск файлов сервера)
 type: api
 product: UP
 status: draft
-updated: 2026-10-29
-verified_on: 2026-10-29
-tickets: [DEV-476, DEV-480]
+updated: 2026-11-04
+verified_on: 2026-11-04
+tickets: [DEV-476, DEV-480, DEV-598]
 features: [UP/files]
 sources:
   - test-docs/ultra.panel/DEV-476/DEV-476-jira-comment.md
@@ -19,7 +19,8 @@ sources:
 
 > **В двух словах.** Поиск по файлам сервера отдаёт результат потоком (`text/event-stream`): совпадения приходят по мере
 > обхода, в конце кадр `end` со статусом. У поиска жёсткие лимиты по длине запроса, числу совпадений, времени и числу
-> параллельных поисков. Остальные эндпоинты файлового менеджера здесь пока не описаны ❓.
+> параллельных поисков. Чтение, запись и переименование описаны на примере `PalWorldSettings.ini`; остальные эндпоинты
+> файлового менеджера пока не описаны ❓.
 
 Знаки: ✅ живьём, 🧪 подмена ответа в браузере, 📖 из тикета, ❓ нет в источниках. Легенда: [README](README.md#легенда).
 
@@ -29,6 +30,25 @@ sources:
 |---|---|---|
 | GET | `/servers/{uuid}/files/search` | потоковый поиск по имени файла ✅ |
 | GET | `/servers/{uuid}/files?dir=/` | листинг папки; Config берёт из него иконку сервера ✅ |
+| GET | `/servers/{uuid}/files/contents?path=` | содержимое файла в `data` (строка) ✅ |
+| PUT | `/servers/{uuid}/files?path=` | записать файл целиком, тело = текст ✅ |
+| POST | `/servers/{uuid}/files/move` | переименовать/переместить `{dir, files:[{from,to}]}` ✅ (PUT - 400) |
+
+## PalWorldSettings.ini: чтение и запись
+
+Вкладка Settings Palworld ([UP/game-settings](../game-settings.md)) читает и пишет
+`/Pal/Saved/Config/LinuxServer/PalWorldSettings.ini` этими же эндпоинтами ✅ ([DEV-598](../../../tickets/DEV-598.md), 04-Nov-2026).
+
+| Случай | Ответ |
+|---|---|
+| Полный uuid, `?path=` | 200, `{"success":true,"data":"<текст .ini>"}` ✅ |
+| Короткий uuid (`6b9ec05d`) | 400 «No query results for model [Pterodactyl\Models\Server]» ✅ - файлам нужен полный uuid, хотя `GET /servers/6b9ec05d` работает |
+| `?file=` вместо `?path=` | 422 «The path field is required.» ✅ |
+| PUT от сабюзера с ролью Member (`files.read` без `files.write`) | 403 «This action is unauthorized.» ✅ |
+| PUT владельца | 200 `{"success":true,"data":null}` ✅; файл пишется как есть (откат исходным текстом = byte-identical) |
+
+Формат строки: `OptionSettings=(Key=Value,...)`, строки в кавычках, `"` внутри экранируется `\"` ✅. Фронт меняет только
+изменённые ключи, остальные (122 ключа на проде) и порядок сохраняет ✅.
 
 ## GET /servers/{uuid}/files/search
 
@@ -103,3 +123,4 @@ sources:
 |---|---|---|
 | 14-Sep-2026 | [DEV-476](../../../tickets/DEV-476.md) | panel!1597 + new-panel!519: поиск стал потоковым, добавлены лимиты и защита от параллели |
 | 28-Oct-2026 | [DEV-480](../../../tickets/DEV-480.md) | panel!1696 + wings!11: нативный поиск на ноде за флагом, `engine` / `fallback_reason` в `end` |
+| 04-Nov-2026 | [DEV-598](../../../tickets/DEV-598.md) | описаны contents / PUT / move на примере `PalWorldSettings.ini` (API не менялся) |

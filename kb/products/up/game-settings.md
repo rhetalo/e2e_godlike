@@ -5,13 +5,14 @@ type: feature
 product: UP
 status: draft
 updated: 2026-11-04
-verified_on: 2026-08-20        # Palworld на stage
-tickets: [TASK-palworld-settings, DEV-597]
+verified_on: 2026-11-04        # Palworld Settings на проде (DEV-598)
+tickets: [TASK-palworld-settings, DEV-597, DEV-598]
 flags: []
 tests: []                      # автотестов нет
 sources:
   - kb/tickets/TASK-palworld-settings.md
   - kb/tickets/DEV-597.md
+  - kb/tickets/DEV-598.md
   - test-docs/ultra.panel/palworld-settings-REPORT.md
   - memory: palworld-settings-qa
 ---
@@ -19,12 +20,20 @@ sources:
 # Game settings - настройки не-Minecraft игр (Palworld, ARK)
 
 > **В двух словах.** Для Palworld в панели есть вкладка с настройками игры: вместо ручной правки файла
-> `PalWorldSettings.ini` - 8 карточек с переключателями и полями. Проверено на stage в августе 2026. Для
+> `PalWorldSettings.ini` - блок «Popular settings» (12 самых нужных) и 8 карточек по категориям. Проверено на проде
+> 04-Nov-2026 (DEV-598). Для
 > ARK есть аналогичная задача DEV-145, но описания нет.
 
 ## Где в интерфейсе
 
-- Вкладка **Palworld Settings** - только на Palworld-серверах. 8 карточек с настройками.
+- Вкладка **Settings** (`/server/{id}/palworld/settings`) - только на Palworld-серверах. Сверху плашка про рестарт и Save,
+  затем блок **Popular settings** ([DEV-598](../../tickets/DEV-598.md)): Server name, Server password, Max players (server),
+  EXP, Pal capture chance, Egg hatching time, Death penalty, Work speed, Inventory item weight, Max working Pals per base,
+  Resource drop rate, PvP. Ниже 8 карточек: Server and connection, Time, Progress and resources, Player, Pals,
+  Base building and guild, Gameplay, Cleanup and guild inactivity. Всего 57 полей, каждое один раз.
+- Состав блока задаёт массив `PALWORLD_POPULAR_SETTING_KEYS` во фронте (new-panel!595); перенесённые ключи из категорий вырезаются.
+- Права: без `files.write` (роль Member) все поля disabled и Save неактивна, PUT `.ini` - 403. Нет `.ini` - плашка
+  «first start the server», формы нет.
 - ARK - ❓ (упоминается DEV-145, не разведано).
 
 ## Как работает (под капотом)
@@ -50,7 +59,9 @@ sources:
 
 | Кажется багом | На самом деле |
 |---|---|
-| Тумблер PvP пишет `bEnablePlayerToPlayerDamage`, а не `bIsPvP` | так и нужно ([TASK-palworld-settings/O1](../../tickets/TASK-palworld-settings.md#находки)) |
+| Тумблер PvP пишет только `bIsPvP`, `bEnablePlayerToPlayerDamage` не трогает | ❓ не ясно, задумано ли: урон в Palworld включается парой ключей. Вопрос передан ([DEV-598/Q1](../../tickets/DEV-598.md#находки)); старая запись O1 была неверной |
+| Заголовки групп и подписи на английском в любом языке панели | переводы Palworld Settings есть только в `en.json` ([DEV-598/OBS-1](../../tickets/DEV-598.md#находки)) |
+| Нет предупреждения о несохранённых изменениях при уходе со вкладки | так у всех категорий |
 | В ТЗ файл называется `GameUserSettings.ini` | ошибка ТЗ (наследие ARK), реализация верна ([O2](../../tickets/TASK-palworld-settings.md#находки)) |
 | `ExpRate` записан как `2.5` без нулей | косметика ([O3](../../tickets/TASK-palworld-settings.md#находки)) |
 
@@ -67,7 +78,7 @@ sources:
 
 - **Автотестов нет.** Ручной QA блоков A-F и H: [palworld-settings-REPORT.md](../../../test-docs/ultra.panel/palworld-settings-REPORT.md).
 - Импорт мира: автотестов нет, `regression: blocked` (нет Palworld-стенда на тест-аккаунте), ручной QA [DEV-597](../../tickets/DEV-597.md).
-- Не проверен блок G: сабюзер с `files.read` без `files.write` (нужен такой аккаунт).
+- Блок «Popular settings»: автотестов нет, `regression: blocked` (нет Palworld-стенда), ручной QA [DEV-598](../../tickets/DEV-598.md) 22/22 на проде, включая сабюзера только на чтение.
 
 ## История
 
@@ -75,3 +86,4 @@ sources:
 |---|---|---|
 | 20-Aug-2026 | [TASK-palworld-settings](../../tickets/TASK-palworld-settings.md) | Palworld Settings на stage, PASS A-F, H |
 | 04-Nov-2026 | [DEV-597](../../tickets/DEV-597.md) | Импорт мира (вкладка World), prod, 4 раунда, PASS-with-issues |
+| 04-Nov-2026 | [DEV-598](../../tickets/DEV-598.md) | Блок «Popular settings» (12 настроек сверху), prod, PASS 22/22 |
