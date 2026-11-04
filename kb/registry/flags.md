@@ -3,7 +3,7 @@ id: KB-REG-FLAGS
 title: Фичефлаги и эксперименты
 type: registry
 status: draft
-updated: 2026-10-29
+updated: 2026-11-04
 verified_on: -
 sources:
   - memory: dev485-java-start-gate, dev515-mods-loader-gating, cf-modrinth-source-swap, prod-134-world-backup, cancel-retention-dev401, mc-extensions-refactor-epic, dev492-post-install-mod-scan, dev477-node-resource-limits
@@ -83,7 +83,7 @@ sources:
 - **Режим:** `settings::godlike:upgrade:next_plan_ab_mode` = `off` (нет строки) / `50` / `all`, команда `php artisan gl:upgrade:next-plan-ab` (DevOps).
   Вариант пользователя - `GET /api/v2/experiments/upgrade-next-plan`, в `/features` его нет.
 - **QA-allowlist:** `settings::godlike:upgrade:next_plan_ab_qa` = `494912:treatment,379911:control` (включил разработчик 03-Nov-2026 под QA).
-- **Состояние 03-Nov-2026:** режим `off` на проде, allowlist включён (выключить после QA). Даты переключений режима пишут в DEV-528.
+- **Состояние 04-Nov-2026:** глобально `off` на проде, QA-allowlist выключен разработчиком после ретеста (494912 и 379911 получают `off`). Ждём решения продукта о раскатке.
 
 ### is-listed
 - **Что:** колонка `modpacks_v2.is_listed`, видимость модпака в клиентском каталоге ([DEV-532](../tickets/DEV-532.md)).
