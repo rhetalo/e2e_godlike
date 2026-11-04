@@ -8,7 +8,7 @@ updated: 2026-11-04
 verified_on: 2026-11-04        # prod, wp!750/751/755/783
 tickets: [DEV-604]
 flags: [flash-sale]
-tests: []
+tests: [tests/general/tariffs.for-bots.spec.ts]
 sources:
   - kb/tickets/DEV-604.md
   - MR wp!750, !751, !755, !783 (код inc/tariffs-ssr.php, inc/tariffs-schema.php, template-parts/storefront/game-tariffs-*.php)
@@ -62,7 +62,7 @@ sources:
 - Тип акции берётся из `crb_flash_sale_type_<lang>`; на 04-Nov все 8 активных языков `evergreen`.
 
 ## Покрытие
-Автотестов нет, `candidate` в [DEV-604](../../tickets/DEV-604.md#регресс). Ручная матрица - отчёты DEV-604 r1-r3.
+`tests/general/tariffs.for-bots.spec.ts`: TC-TARIFFS-BOT-001 (8 страниц глазами бота: карточки + ProductGroup = карточки), TC-TARIFFS-BOT-002 (`?plan=` у посетителя). Не покрыто: акция (по IP), локали, Rich Results. Подробно - [DEV-604](../../tickets/DEV-604.md#регресс).
 
 ## История
 - 28-Oct-2026 [DEV-604](../../tickets/DEV-604.md) wp!750 - серверные карточки; 29-Oct wp!751 - кнопка корзины через onclick.

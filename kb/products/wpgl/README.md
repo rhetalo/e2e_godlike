@@ -53,7 +53,7 @@ sources:
 | Языки и валюты | 8 языков URL-префиксом `/{code}/`; **21 валюта** в cookie, по умолчанию по IP (live 15-Oct) | - | `locale` (LOC-001..003, все 21 валюта) | ✅ [WPGL/locale-currency](locale-currency.md) |
 | CookieYes | Баннер `.cky-consent-container`, гасится `CookieBanner.dismissAll` | - | косвенно | ⚠️ поведение не описано |
 | Страницы игр и каталог | сетка каталога ~46 карточек с фильтрами (ведут в корзину) + SEO-список «List of games» на 20 ссылок; 46 лендингов (см. [Игры](#игры-live-15-oct-исправлено-16-oct)); тарифы в Vue-cart с 20-Aug | [DEV-402](../../tickets/DEV-402.md) | `games.valid.promo`, `games.invalid.promo`, `game-slider` | ✅ [WPGL/games-catalog](games-catalog.md) |
-| Тарифы для AI-ботов | серверные карточки тарифов в HTML + JSON-LD ProductGroup, `?plan=<id>` | [DEV-604](../../tickets/DEV-604.md) | нет (candidate) | ✅ [WPGL/tariffs-for-bots](tariffs-for-bots.md) |
+| Тарифы для AI-ботов | серверные карточки тарифов в HTML + JSON-LD ProductGroup, `?plan=<id>` | [DEV-604](../../tickets/DEV-604.md) | `tariffs.for-bots` | ✅ [WPGL/tariffs-for-bots](tariffs-for-bots.md) |
 | Кастомайзер тарифа игры | Customize server: слайдеры Slots, RAM, Days, синхронизация Slots ↔ RAM | - | `game-slider` | ✅ [WPGL/game-customizer](game-customizer.md) |
 | Витрина серверов игроков | `/servers/` - 34 сервера игроков, фильтры по тегам, версиям, лоадерам, режимам (тип записи `server`) | - | нет | ⏸ отложено владельцем 15-Oct [WPGL/landings](landings.md) |
 | Каталог схематик | `/minecraft-schematics/`: подборки, фильтры версия / формат / свои группы, модалка, скачивание; пока только stage | [DEV-566](../../tickets/DEV-566.md) | нет | ⚠️ [WPGL/schematics](schematics.md) |
