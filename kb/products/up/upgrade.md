@@ -4,7 +4,7 @@ title: Upgrade / Boost - смена тарифа из панели
 type: feature
 product: UP
 status: draft
-updated: 2026-11-03
+updated: 2026-11-04
 verified_on: 2026-11-03
 tickets: [TASK-tariff-list-400, DEV-534, DEV-579, DEV-593, DEV-594]
 flags: []
@@ -48,7 +48,7 @@ sources:
   цикл и опции как у текущего, метка **Recommended** и кнопка «Upgrade for €X». Смена RAM или типа снимает метку, возврат возвращает.
 - Без предложения: группа A, бесплатный сервер, максимальный план, вход не через Boost (F5, Back, прямой URL), сабюзер, админ на чужом сервере,
   у следующего плана нет текущего цикла или опции.
-- Флаг `off / 50 / all` + QA-allowlist по client id ([flag](../../registry/flags.md#upgrade-next-plan-ab)). Вариант ждёт до 5 с, потом экран A.
+- Флаг `off / 50 / all` + QA-allowlist по client id ([flag](../../registry/flags.md#upgrade-next-plan-ab)). Вариант ждёт до 5 с, потом экран A с `variant=error` в событиях (с 04-Nov).
 - Входы различаются в событиях и оплате: `boost_my_server`, `backups`, `cancellation`, `free_to_paid`, `modpack_requirement`, `premium_banner`,
   `upgrade_quiz`, `lagscore`... Поля - [API - апгрейд](api/upgrade.md).
 - Оплата: нативный апгрейд WHMCS (кредит списывается при создании счёта) или, если есть промокод, ручной счёт панели (кредит сам не списывается,
@@ -102,3 +102,4 @@ sources:
 | 30-Oct-2026 | [DEV-593](../../tickets/DEV-593.md) | Квиз апгрейда только с токеном владельца; апгрейд из квиза за кредиты прошёл (VIP, Quadra Premium → Ultra Budget). PASS |
 | 02-Nov-2026 | [DEV-594](../../tickets/DEV-594.md) | `?ram=` округляется до реального плана, RAM-диалог модпака ведёт на ceil GB (new-panel!576). PASS |
 | 03-Nov-2026 | [DEV-528](../../tickets/DEV-528.md) | A/B: после Boost предлагается следующий план, 5 событий страницы, разметка оплат. PASS с замечаниями (F1, F2), prod через allowlist |
+| 04-Nov-2026 | [DEV-528](../../tickets/DEV-528.md) | Ретест: сбой группы = `error` вместо `control`, оплата кредитом с полной разметкой (panel!1764, billing!769, new-panel!606). PASS |

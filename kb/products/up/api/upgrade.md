@@ -4,7 +4,7 @@ title: API - апгрейд тарифа (вариант A/B, события с�
 type: api
 product: UP
 status: verified
-updated: 2026-11-03
+updated: 2026-11-04
 verified_on: 2026-11-03
 tickets: [DEV-528]
 features: [UP/upgrade]
@@ -38,7 +38,7 @@ sources:
   Поверх режима QA-allowlist `settings::godlike:upgrade:next_plan_ab_qa` (`<client>:<group>,...`) ✅. Без `external_id` → `off` 📖.
 - Ключа эксперимента в `GET /features` нет ✅.
 - Фронт спрашивает вариант только у владельца и только при Boost на сервере, где предложение возможно (у бесплатного запроса нет) ✅.
-  Таймаут 5 с, ошибка или таймаут → фронт ставит `control` ([DEV-528/F1](../../../tickets/DEV-528.md#находки)) ✅.
+  Таймаут 5 с, ошибка или таймаут → экран control, но в событиях и оплате `variant`/`ab_variant=error` (с 04-Nov-2026, фикс [DEV-528/F1](../../../tickets/DEV-528.md#находки)); сервер в `ab_group` пишет назначенную группу ✅.
 
 ### POST /tariffs-new/upgrade (расчёт)
 - Тело: `external_id` (id услуги WHMCS), `product_id`, `billing_cycle`, `config_options` `[[option, value], ...]`, `calc_only: true`, `promocode`.
@@ -59,7 +59,7 @@ sources:
 - `opened` уходит после ответа расчёта цены ([DEV-528/O1](../../../tickets/DEV-528.md#находки)). Параметр `game` до Amplitude не доходит.
 
 ### POST /upgrades (котировка)
-- Тело: как у расчёта без `calc_only` + `flow_name`, `open_id` (uuid), `ab_variant` (off/control/treatment), `preselect_applied` (bool). Заголовок `Idempotency-Key`.
+- Тело: как у расчёта без `calc_only` + `flow_name`, `open_id` (uuid), `ab_variant` (off/control/treatment/error), `preselect_applied` (bool). Заголовок `Idempotency-Key`.
 - 201: `{"data":{"uuid","price","old_price","is_discounted","expires_at"}}` ✅.
 - Невалидные `open_id`, `ab_variant`, `preselect_applied` → 422, intent не создаётся ✅.
 - Пишет строку в `upgrade_intents` (panel DB) с полями разметки ✅.

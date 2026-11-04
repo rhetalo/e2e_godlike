@@ -2,7 +2,7 @@
 id: KB-TICKETS
 title: Тикеты и задачи
 type: index
-updated: 2026-11-03
+updated: 2026-11-04
 ---
 
 # Тикеты и задачи
@@ -37,7 +37,7 @@ updated: 2026-11-03
 | [DEV-512](DEV-512.md) | Смена версии теряет суффикс libxrender у Docker-образа | UP, OLDP | done | PASS | - | 2026-10-07 |
 | [DEV-513](DEV-513.md) | Устаревший «Образ Docker» в Параметрах запуска после серверной смены образа | OLDP, ADM | done | PASS | - | 2026-10-12 |
 | [DEV-515](DEV-515.md) | Автофильтр версий во вкладке модов и блокировка вкладок для несовместимых ядер | UP | done | PASS | - | 2026-10-07 |
-| [DEV-528](DEV-528.md) | A/B - после Boost конфигуратор апгрейда предлагает следующий план, события страницы апгрейда и разметка оплат | UP, BIL | done | PASS-with-issues | blocked | 2026-11-03 |
+| [DEV-528](DEV-528.md) | A/B - после Boost конфигуратор апгрейда предлагает следующий план, события страницы апгрейда и разметка оплат | UP, BIL | done | PASS | blocked | 2026-11-04 |
 | [DEV-529](DEV-529.md) | Versions - Arclight на Forge/NeoForge после запуска сервера превращается в Forge/NeoForge | UP | done | PASS | - | 2026-10-08 |
 | [DEV-532](DEV-532.md) | Убрать дубли модпаков CurseForge / Modrinth из выбора на modded-странице | UP, ADM, WPGL | done | PASS | - | 2026-10-08 |
 | [DEV-534](DEV-534.md) | Фильтры «All» и «All versions» в каталоге модов и плагинов не расширяют список | UP | done | PASS-with-issues | - | 2026-10-09 |
