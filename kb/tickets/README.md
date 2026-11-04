@@ -42,6 +42,7 @@ updated: 2026-11-04
 | [DEV-532](DEV-532.md) | Убрать дубли модпаков CurseForge / Modrinth из выбора на modded-странице | UP, ADM, WPGL | done | PASS | - | 2026-10-08 |
 | [DEV-534](DEV-534.md) | Фильтры «All» и «All versions» в каталоге модов и плагинов не расширяют список | UP | done | PASS-with-issues | - | 2026-10-09 |
 | [DEV-546](DEV-546.md) | Блок «Boost your server» на чекауте v2 (только UI и QA-превью под флагом) | BIL | done | PASS | blocked | 2026-10-19 |
+| [DEV-547](DEV-547.md) | Апгрейд с Premium-сервера остаётся в Premium - тир плана = тир сервера во всех входах + аналитика тира | UP, BIL | done | PASS | candidate | 2026-11-04 |
 | [DEV-549](DEV-549.md) | Фікси після DEV-515 - сценарії туторіалу на заглушках, блокування кнопки кастомних модпаків та API | UP | done | PASS | blocked | 2026-10-19 |
 | [DEV-556](DEV-556.md) | Ошибки установки модов понятно в интерфейсе | UP | done | PASS | covered | 2026-10-23 |
 | [DEV-557](DEV-557.md) | Jar больше 100 МБ никогда не получает вердикт сканера клиентских модов | UP, INFRA | done | FAIL | no | 2026-10-23 |
@@ -93,6 +94,7 @@ updated: 2026-11-04
 
 > Собирается из `regression:` карточек. Порядок и детали - в разделе «Регресс» каждой карточки.
 
+- **candidate**: [DEV-547](DEV-547.md) - Апгрейд с Premium-сервера остаётся в Premium - тир плана = тир сервера во всех входах + аналитика тира
 - **candidate**: [DEV-559](DEV-559.md) - Определять клиентские моды Forge/NeoForge в mod-scan-service
 - **candidate**: [DEV-563](DEV-563.md) - Запретить Free-серверам изменять тип сервера (Ultra Panel и PlayFreeHost)
 - **candidate**: [DEV-564](DEV-564.md) - Bedrock NetherNet - UDP-порты под каждый слот вместо transport nethernet

@@ -132,6 +132,7 @@ SMP.
 - 02-Nov-2026: [DEV-594](../tickets/DEV-594.md) read-only - RAM-диалог модпака (Ultra Modded Lite, Install не жали) и `?ram=` на апгрейде. Не менялся.
 - 03-Nov-2026: [DEV-641](../tickets/DEV-641.md) - роут «чужого» сервера для world-бэкапов, только отказы 400. Не менялся.
 - 04-Nov-2026: переименован в `DEV-643-core` - [DEV-643](../tickets/DEV-643.md): v2 PUT и v1 lock core-бэкапа `bc9161e2`, имя и lock возвращены; слоты 3/3.
+- 04-Nov-2026: [DEV-547](../tickets/DEV-547.md) read-only - сетка See All Plans, `?ram=`, диалог модпака BMC4 (POST установки заблокирован `page.route`, модпак не ставился). Не менялся.
 - Трогать: 🟡.
 
 ### 0cf8346f
@@ -154,6 +155,7 @@ SMP Private, переименован в `DEV-562-MC` под [DEV-562](../ticket
 - 03-Nov-2026: [DEV-641](../tickets/DEV-641.md) - создан world-бэкап, restore из него (мир тот же) и delete; сервер в прежнем состоянии, копий нет. Свободен.
 - 03-Nov-2026: [DEV-638](../tickets/DEV-638.md) - временный сабюзер gtl.rmn+638 (приглашён, удалён), временные роли `DEV-638-*` удалены, жертвенные бэкапы `DEV-638-victim*` удалены; бэкап `test` (87becc3a) на месте, unlocked. Свободен.
 - 04-Nov-2026: переименован в `DEV-643-B` - «чужой» сервер [DEV-643](../tickets/DEV-643.md), ничего не менялось. Свободен.
+- 04-Nov-2026: [DEV-547](../tickets/DEV-547.md) - сетка/`?ram=` read-only, квиз Vanilla / 30-40 / stable: оставлен pending-оффер 6705 (Unstoppable Budget, Accept не жали), вход из клиентской зоны WHMCS. План не менялся.
 
 ### f8e7df56
 SkyBlock, на нём воспроизводился баг tariff-list 400. 20-Oct-2026 переименован в `DEV-484-backup-throttle` (было `JBl1Dqfw_474692`):
@@ -204,6 +206,8 @@ DEV-418. 21-Oct-2026 под [DEV-564](../tickets/DEV-564.md): Paper → Bedrock 
 - 03-Nov-2026: [DEV-594](../tickets/DEV-594.md) fallback 4096: ядро Paper 26.2 → Forge 1.20.1 (47.4.28, без вайпа) → обратно Paper 26.2 (#135, без вайпа). RAM-диалог War Crazy открыт, Install не жали.
 - 03-Nov-2026: [DEV-594](../tickets/DEV-594.md) услуга 462880 в WHMCS-админке Double (359) → Ender Dragon (720) без module-команды и обратно, ~09:21-09:24 UTC. Сумма $95.99, Annually, due 2027-10-26 не менялись, память в панели 2048 не трогалась (сверено billing-sql + panel-sql).
 - 03-Nov-2026 ~10:40: [DEV-594](../tickets/DEV-594.md) / BUG-max-plan-tier-pairs - 462880 Double (359) → Wither (718) → обратно, расчёт апгрейда снят (Save Setup не жали). Сумма, цикл, due, память не менялись, апгрейдов и счетов нет.
+- 04-Nov-2026 21:50: [DEV-547](../tickets/DEV-547.md) - услуга 474692 (сервер `DEV-580-B`) апгрейд из сетки See All Plans **Quadra Premium (357) → Ultra Premium (356)** за $9.03 кредитом (инвойс 334677, tblupgrades 21681). Теперь Ultra Premium 6 GB, $29.99/мес.
+- 04-Nov-2026: [DEV-547](../tickets/DEV-547.md) - до апгрейда квиз Vanilla / 20-30 / stable: оставлен pending-оффер 6704 (Ultra Premium, Accept не жали).
 
 ### b4089560
 DEV-418. 🟡
@@ -212,6 +216,7 @@ DEV-418. 🟡
 DEV-418 и [DEV-401](../tickets/DEV-401.md). **Free, suspended** (15-Oct). 🔴
 - 02-Nov-2026: страница апгрейда открывается, [DEV-594](../tickets/DEV-594.md) read-only `?ram=1/5` (сетка с 2 GB). Не менялся.
 - 03-Nov-2026: **владелец снял с саспенда** под [DEV-528](../tickets/DEV-528.md): Boost (control) и входы free_to_paid / premium_banner, read-only.
+- 04-Nov-2026: [DEV-547](../tickets/DEV-547.md) read-only - See All Plans (все карточки Budget). Не менялся.
 
 ### feede8c1
 DEV-418 и [DEV-401](../tickets/DEV-401.md). **Free, suspended** (15-Oct). 🔴

@@ -5,8 +5,8 @@ type: feature
 product: UP
 status: draft
 updated: 2026-11-04
-verified_on: 2026-11-03
-tickets: [TASK-tariff-list-400, DEV-534, DEV-579, DEV-593, DEV-594]
+verified_on: 2026-11-04
+tickets: [TASK-tariff-list-400, DEV-534, DEV-579, DEV-593, DEV-594, DEV-528, DEV-547]
 flags: []
 tests: [tests/game/panel/promo.spec.ts, tests/game/panel/upgrade.ram-query.spec.ts]
 sources:
@@ -91,6 +91,7 @@ sources:
 | `?ram=` → Recommended и конфигуратор (DEV-594) | `upgrade.ram-query.spec.ts` (UPG-RAM-001..003) | ✅ |
 | Оплата апгрейда, промокод | не покрыто (платёж) | ❌ |
 | A/B предвыбор после Boost, события страницы | ручной QA [DEV-528](../../tickets/DEV-528.md) | ⏳ blocked до раскатки флага |
+| Тир плана = тир сервера (сетка, `?ram=`, модпак, квиз) | ручной QA [DEV-547](../../tickets/DEV-547.md) | ⏳ candidate (Premium-сервер 8a112a28 на тест-аккаунте) |
 
 ## История
 
@@ -103,3 +104,4 @@ sources:
 | 02-Nov-2026 | [DEV-594](../../tickets/DEV-594.md) | `?ram=` округляется до реального плана, RAM-диалог модпака ведёт на ceil GB (new-panel!576). PASS |
 | 03-Nov-2026 | [DEV-528](../../tickets/DEV-528.md) | A/B: после Boost предлагается следующий план, 5 событий страницы, разметка оплат. PASS с замечаниями (F1, F2), prod через allowlist |
 | 04-Nov-2026 | [DEV-528](../../tickets/DEV-528.md) | Ретест: сбой группы = `error` вместо `control`, оплата кредитом с полной разметкой (panel!1764, billing!769, new-panel!606). PASS |
+| 04-Nov-2026 | [DEV-547](../../tickets/DEV-547.md) | Тир предложенного плана = тир сервера во всех входах (сетка, `?ram=`, модпак, квиз, Lag Score), новые поля событий, `entry=client_area`, `previous_*` в оплате (new-panel!568, panel!1699, billing!740). PASS |
