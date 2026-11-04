@@ -63,6 +63,63 @@ export class GamePanelUpgradePage extends GamePanelBasePage {
   get priceText(): RegExp {
     return GAME_PANEL_UPGRADE.priceText;
   }
+
+  // --- Тир Budget / Premium (DEV-547). Только UI и calc: Save Setup / Confirm не жмём. ---
+
+  /** Открыть страницу апгрейда без параметров (вход server_management). */
+  async goto(): Promise<void> {
+    await this.open(`/server/${this.uuid}/upgrade`);
+    await this.root.waitFor({ state: "visible", timeout: 20_000 });
+  }
+
+  /** Выбранный тир конфигуратора («Budget» / «Premium»). */
+  get configuratorTierSelected(): Locator {
+    return this.page.locator(GAME_PANEL_UPGRADE.configuratorTierSelected).first();
+  }
+
+  /** Открыть сетку See All Plans и дождаться карточек. */
+  async openAllPlans(): Promise<void> {
+    await this.page.locator(GAME_PANEL_UPGRADE.seeAllPlansButton).first().click();
+    await this.allPlansCards().first().waitFor({ state: "visible", timeout: 20_000 });
+  }
+
+  allPlansCards(): Locator {
+    return this.page.locator(`${GAME_PANEL_UPGRADE.allPlansRoot} ${GAME_PANEL_UPGRADE.allPlansCard}`);
+  }
+
+  /** Выбранный тир каждой карточки сетки (по порядку), «» - у карточки нет выбранного тира. */
+  async allPlansCardTiers(): Promise<string[]> {
+    const cards = await this.allPlansCards().all();
+    return Promise.all(
+      cards.map(async (card) => {
+        const active = card.locator(GAME_PANEL_UPGRADE.allPlansTierActive);
+        return (await active.count()) ? (await active.first().innerText()).trim() : "";
+      }),
+    );
+  }
+
+  /** Карточка сетки по имени плана («Ultra»). */
+  allPlansCard(planName: string): Locator {
+    return this.allPlansCards().filter({
+      has: this.page.locator(GAME_PANEL_UPGRADE.allPlansCardName, { hasText: new RegExp(`^\\s*${planName}\\s*$`) }),
+    });
+  }
+
+  /** Выбранный тир карточки сетки. */
+  allPlansCardTierActive(planName: string): Locator {
+    return this.allPlansCard(planName).locator(GAME_PANEL_UPGRADE.allPlansTierActive);
+  }
+
+  /** Переключить тир на карточке сетки (только calc, без Save Setup). */
+  async chooseAllPlansTier(planName: string, tier: "Budget" | "Premium"): Promise<void> {
+    await this.allPlansCard(planName).locator(GAME_PANEL_UPGRADE.allPlansTierButton, { hasText: tier }).click();
+  }
+
+  /** Вернуться из сетки в конфигуратор (Back). */
+  async backToConfigurator(): Promise<void> {
+    await this.page.locator(GAME_PANEL_UPGRADE.backButton).first().click();
+    await this.configuratorTierSelected.waitFor({ state: "visible", timeout: 20_000 });
+  }
 }
 
 function parseGb(text: string | undefined): number | null {

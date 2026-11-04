@@ -56,6 +56,15 @@ export const STOREFRONT = {
   tariffTitle: ".storefront__tariff-title",
   tariffPrice: ".storefront__tariff-footer",
   tariffAddToCart: ".storefront__tariff-action__cart",
+  // DEV-604/wp!755 (live 03-Nov-2026): Vue-карточка несёт id тарифа (= sku в JSON-LD), ?plan=<id> красит её классом популярной.
+  tariffById: (id: string) => `.storefront__tariff[data-tariff-id="${id}"]`,
+  tariffHighlighted: "storefront__tariff-popular",
+  // DEV-604/wp!750-751 (live 02-Nov-2026): серверные карточки для ботов внутри Vue-контейнера, видны только без JS.
+  ssrTariffCard: "li.storefront__tariffs-ssr__card",
+  ssrTariffTitle: "h3",
+  ssrTariffPrice: "strong",
+  ssrTariffCartButton: "a[data-cart-url]",
+  ldJson: 'script[type="application/ld+json"]',
   gameTitle: "a.game__title",
   customizeButton: "button.storefront__tariff-action__cart",
   discountBadge: ".storefront__tariffs-discount__percentage",
@@ -1017,6 +1026,17 @@ export const GAME_PANEL_UPGRADE = {
   currentPlanCategory: ".current-plan-card__category",
   configuratorRamValue: ".simple-plan-card__categories .simple-plan-card__select .v-select__selection-text",
   recommendedLabelText: /recommended/i,
+  // Тир Budget / Premium (DEV-547, live DOM 04-Nov-2026). Конфигуратор: кнопки .simple-plan-card__selector,
+  // выбранная с модификатором -select. Сетка See All Plans (.server__upgrade-all): карточка .plan-card__wrapper,
+  // имя .plan-card__name, переключатель .plan-card__toggle-btn, выбранный - .v-btn--active.
+  configuratorTierButton: ".simple-plan-card__selector",
+  configuratorTierSelected: ".simple-plan-card__selector.simple-plan-card__selector-select",
+  seeAllPlansButton: "button.server__upgrade__btn",
+  allPlansRoot: ".server__upgrade-all",
+  allPlansCard: ".plan-card__wrapper",
+  allPlansCardName: ".plan-card__name",
+  allPlansTierButton: ".plan-card__toggle-btn",
+  allPlansTierActive: ".plan-card__toggle-btn.v-btn--active",
 } as const;
 
 // Throttling / «Lag Detected» upgrade-модалка (вебхук CPU-троттлинга → предложение апгрейда).
