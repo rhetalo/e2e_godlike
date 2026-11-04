@@ -3,7 +3,7 @@ id: KB-COVERAGE
 title: Матрица покрытия - фичи KB и автотесты
 type: index
 status: draft
-updated: 2026-11-03
+updated: 2026-11-04
 verified_on: null              # генерируется из KB и tests/, с продуктом не сверяется
 sources:
   - kb/products/**/*.md (шапка tests:, раздел «Покрытие»)
@@ -26,9 +26,9 @@ sources:
 | Фича | Статус | Спеки | Тестов | Покрытие ✅ / руками / ❌ |
 |---|---|---|---|---|
 | [UP - игровая панель ultra.panel + API v2](products/up/README.md) | draft | все спеки продукта (38) | 99 | 0 / 0 / 0 |
-| [Backups - бэкапы сервера, базы и папки](products/up/backups.md) | draft | `backups.server-scope.api.spec.ts`, `backups.slots-full.spec.ts`, `backups.spec.ts`, `backups.throttle.spec.ts`, `role.enforcement.spec.ts`, `security.spec.ts` | 15 | 10 / 1 / 1 |
+| [Backups - бэкапы сервера, базы и папки](products/up/backups.md) | draft | `backups.server-scope.api.spec.ts`, `backups.slots-full.spec.ts`, `backups.spec.ts`, `backups.throttle.spec.ts`, `role.enforcement.spec.ts`, `security.spec.ts` | 15 | 10 / 2 / 1 |
 | [Client-only моды - скрытие в каталоге и отключение на сервере](products/up/client-only-mods.md) | draft | `client-only-mods.spec.ts` | 2 | 0 / 0 / 0 |
-| [Config - server.properties и блок Docker/Java](products/up/config.md) | draft | `config.spec.ts`, `security.spec.ts` | 6 | 3 / 1 / 1 |
+| [Config - server.properties и блок Docker/Java](products/up/config.md) | draft | `config.spec.ts`, `security.spec.ts` | 6 | 3 / 1 / 2 |
 | [Console - лог сервера и ввод команд](products/up/console.md) | draft | `console.palette.spec.ts`, `console.spec.ts`, `players.spec.ts`, `security.console.spec.ts` | 6 | 5 / 0 / 1 |
 | [Каталог расширений - моды, плагины, модпаки](products/up/extensions-catalog.md) | draft | `extension.sources.spec.ts`, `extensions.spec.ts`, `mods.spec.ts`, `plugins.spec.ts` | 17 | 4 / 2 / 4 |
 | [Files - файловый менеджер, Recycle Bin, SFTP](products/up/files.md) | draft | `files.recycle.spec.ts`, `files.search.spec.ts`, `files.spec.ts`, `files.structure.spec.ts`, `security.spec.ts` | 15 | 6 / 4 / 4 |
@@ -45,7 +45,7 @@ sources:
 | [Tasks - задачи и расписание (команда, power-действие)](products/up/tasks.md) | draft | `tasks.spec.ts` | 3 | 3 / 0 / 1 |
 | [Throttling - окно «Lag Detected» при нехватке CPU](products/up/throttling.md) | draft | `throttling.notification.spec.ts` | 1 | 0 / 0 / 0 |
 | [Квиз апгрейда (Upgrade Quiz) - подбор тарифа и оффер](products/up/upgrade-quiz.md) | draft | `upgrade-quiz.token.api.spec.ts` | 3 | 1 / 2 / 2 |
-| [Upgrade / Boost - смена тарифа из панели](products/up/upgrade.md) | draft | `promo.spec.ts`, `upgrade.ram-query.spec.ts` | 5 | 3 / 1 / 1 |
+| [Upgrade / Boost - смена тарифа из панели](products/up/upgrade.md) | draft | `promo.spec.ts`, `upgrade.ram-query.spec.ts` | 5 | 4 / 2 / 2 |
 | [Versions - смена ядра и версии Minecraft](products/up/versions.md) | draft | `versions.spec.ts` | 2 | 2 / 1 / 2 |
 | [World Backup - копия мира перед опасными действиями](products/up/world-backup.md) | draft | `world-backup.spec.ts` | 2 | 0 / 0 / 0 |
 | [Cancel module - отмена сервера, пауза и удержание](products/up/cancel-module.md) | draft | - | - | 0 / 0 / 0 |
@@ -75,7 +75,7 @@ sources:
 
 ## WPGL - витрина
 
-Страниц: 15, с автотестами: 12, тестов в их спеках: 95.
+Страниц: 16, с автотестами: 12, тестов в их спеках: 95.
 
 | Фича | Статус | Спеки | Тестов | Покрытие ✅ / руками / ❌ |
 |---|---|---|---|---|
@@ -94,6 +94,7 @@ sources:
 | [Custom Modpack Setup - «соберём модпак за тебя»](products/wpgl/custom-modpack-setup.md) | draft | - | - | 1 / 2 / 2 |
 | [Лендинги без автотестов - Launcher, SMP One-Click, KB сайта, каталог серверов игроков](products/wpgl/landings.md) | draft | - | - | 0 / 3 / 4 |
 | [Каталог Minecraft-схематик /minecraft-schematics/](products/wpgl/schematics.md) | draft | - | - | 0 / 2 / 2 |
+| [Тарифы для AI-ботов - серверные карточки и JSON-LD ProductGroup](products/wpgl/tariffs-for-bots.md) | verified | - | - | 0 / 0 / 0 |
 
 ## ADM
 

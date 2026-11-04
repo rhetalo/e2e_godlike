@@ -8,7 +8,7 @@ updated: 2026-11-04
 verified_on: 2026-11-04
 tickets: [TASK-tariff-list-400, DEV-534, DEV-579, DEV-593, DEV-594, DEV-528, DEV-547]
 flags: []
-tests: [tests/game/panel/promo.spec.ts, tests/game/panel/upgrade.ram-query.spec.ts]
+tests: [tests/game/panel/promo.spec.ts, tests/game/panel/upgrade.ram-query.spec.ts, tests/game/panel/upgrade.tier.spec.ts]
 sources:
   - agents.docs/game-panel/KNOWLEDGE_BASE.md §7c, §9d (recon 06-Jun-2026)
   - kb/tickets/TASK-tariff-list-400.md
@@ -91,7 +91,8 @@ sources:
 | `?ram=` → Recommended и конфигуратор (DEV-594) | `upgrade.ram-query.spec.ts` (UPG-RAM-001..003) | ✅ |
 | Оплата апгрейда, промокод | не покрыто (платёж) | ❌ |
 | A/B предвыбор после Boost, события страницы | ручной QA [DEV-528](../../tickets/DEV-528.md) | ⏳ blocked до раскатки флага |
-| Тир плана = тир сервера (сетка, `?ram=`, модпак, квиз) | ручной QA [DEV-547](../../tickets/DEV-547.md) | ⏳ candidate (Premium-сервер 8a112a28 на тест-аккаунте) |
+| Тир плана = тир сервера: сетка See All Plans, `?ram=`, сохранение выбора (DEV-547) | `upgrade.tier.spec.ts` (UPG-TIER-001..003) | ✅ |
+| Тир в квизе, `previous_*` в оплате, вход из клиентской зоны (DEV-547) | ручной QA [DEV-547](../../tickets/DEV-547.md) | ❌ не в e2e (биллинг, оплата) |
 
 ## История
 

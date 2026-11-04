@@ -63,6 +63,12 @@ Steam-игра, `GAME_PANEL_STEAM_SERVER_UUID`. 🟢
 ### d2f7fff5
 `extension.sources`. 🟢
 
+### 8a112a28
+Premium тест-аккаунта, `GAME_PANEL_SERVER_PREMIUM_UUID`. Имя `KsDT8Fk0_484011`, услуга 484011, Double **Premium** (359), Quarterly.
+- Только read-only проверки тира на странице апгрейда: `upgrade.tier.spec.ts` ([DEV-547](../tickets/DEV-547.md), 04-Nov-2026).
+- Раньше использовался в ручном QA [DEV-528](../tickets/DEV-528.md).
+- Трогать: 🟡, план не менять - на Premium завязан спек.
+
 ### ac8aa1e0
 Suspended-сервер, для проверок баннера suspended. 🔴
 
