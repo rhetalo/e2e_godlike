@@ -670,7 +670,8 @@ export const GAME_PANEL_DIALOG = {
 
 // Top tab strip inside the server view (route-backed).
 export const GAME_PANEL_TABS = [
-  'Overview', 'Console', 'Files', 'Versions', 'Plugins/Mods', 'Modpacks', 'Config', 'Players',
+  // 04-Nov-2026: таб «Config» переименован в «Server Properties» (роут тот же /config).
+  'Overview', 'Console', 'Files', 'Versions', 'Plugins/Mods', 'Modpacks', 'Server Properties', 'Players',
 ] as const;
 
 // Per-server left sidebar sections.
@@ -751,25 +752,30 @@ export const GAME_PANEL_FILES = {
   recycleRestoreButton: 'button:has-text("Restore")',
 } as const;
 
-// Config tab (/server/{uuid}/config). Confirmed via live DOM 04-Jun-2026 (recon).
-// Редактор server.properties: каждая строка — .server__config-switch, внутри Vuetify-инпут
-// (input.v-field__input) + лейбл-имя свойства (motd/difficulty/max-players/level-name/...).
+// Server Properties tab (/server/{uuid}/config; до 04-Nov-2026 таб звался «Config»).
+// Редизайн 04-Nov-2026 (live recon): слева группы (Gameplay/World/.../Server list/Other),
+// справа видна ТОЛЬКО активная группа → нужное свойство открываем поиском «Search all settings».
+// Строка = .property-setting, ключ свойства - <code> в заголовке; у текстовых/числовых полей
+// стабильный id `property-<key>` (у сегментов вроде difficulty инпута нет).
 // ⚠️ Save-кнопки НЕТ — форма автосейвит при изменении поля; персист проверяем через reload.
-// id инпутов динамические (input-v-NNN) — НЕ использовать; якорь — имя свойства в тексте строки.
 export const GAME_PANEL_CONFIG = {
-  row: ".server__config-switch",          // одна строка-свойство (текст начинается с имени свойства)
-  input: "input.v-field__input",          // текстовый инпут внутри строки
+  search: '.properties-search input[type="search"]', // поиск по всем свойствам
+  row: ".property-setting",                          // одна строка-свойство
+  rowKey: ".property-setting__title code",           // ключ server.properties в заголовке строки
+  input: "input",                                    // инпут внутри строки (text/number)
   // примеры ключей server.properties (для структурных проверок)
   keys: ["motd", "difficulty", "max-players", "level-name"],
 } as const;
 
-// Players tab (/server/{uuid}/players). Confirmed via live DOM 05-Jun-2026 (recon).
-// Управление игроками (whitelist/op) требует Online-сервера; в тестах делаем через
-// консоль (источник правды): whitelist add/list/remove (см. GamePanelServerPage).
-// Сам таб рендерит блок .server__players с карточками (offline тоже виден).
+// Players tab (/server/{uuid}/players). Редизайн 04-Nov-2026 (live recon): менеджер игроков -
+// whitelist-переключатель + список «запомненных» игроков с фильтрами All/Online/Whitelist/
+// Operators/Banned и действиями Whitelist/OP/Ban. Виден и offline. Карточки
+// «Server Administrators» больше нет. Мутации whitelist в тестах по-прежнему через консоль.
 export const GAME_PANEL_PLAYERS = {
-  area: ".server__players",                     // корневой блок таба Players
-  cardTitle: ".server__players-card__title",    // заголовок карточки (напр. "Server Administrators")
+  area: ".players-manager",          // корневой блок таба Players
+  whitelist: ".players-whitelist",   // блок whitelist (переключатель On/Off)
+  list: ".players-list",             // таблица игроков (шапка PLAYER/UUID/ACCESS/ACTIONS)
+  filters: ".players-filters",       // фильтры All/Online/Whitelist/Operators/Banned
 } as const;
 
 // Sharing section (/server/{uuid}/sharing). Confirmed via live DOM 05-Jun-2026 (recon).

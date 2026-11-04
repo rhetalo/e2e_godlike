@@ -1,5 +1,5 @@
 /**
- * Game panel — Config tab (Phase 3, soft mutation, self-cleaning).
+ * Game panel — Server Properties tab (до 04-Nov-2026 «Config»; Phase 3, soft mutation, self-cleaning).
  *
  * Таб Config = редактор server.properties. Save-кнопки нет → форма автосейвит при
  * изменении поля; персист проверяем через reload (повторный goto). Тест меняет только

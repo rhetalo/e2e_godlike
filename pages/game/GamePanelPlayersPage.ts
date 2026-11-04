@@ -1,9 +1,9 @@
 /**
  * GamePanelPlayersPage — таб Players сервера (/server/{uuid}/players).
  *
- * Рендерит блок `.server__players` с карточками (напр. "Server Administrators").
- * Сам таб виден и offline; управление игроками (whitelist/op) требует Online-
- * сервера и в тестах делается через консоль (см. GamePanelServerPage).
+ * С 04-Nov-2026 - менеджер игроков `.players-manager`: блок whitelist, фильтры и список
+ * игроков. Сам таб виден и offline; мутации whitelist в тестах делаются через консоль
+ * (см. GamePanelServerPage).
  *
  * Методы — действия и читатели состояния; assert'ы в спеке.
  */
@@ -26,12 +26,18 @@ export class GamePanelPlayersPage extends GamePanelBasePage {
     return this.page.locator(GAME_PANEL_PLAYERS.area).first();
   }
 
-  /** Заголовок карточки по тексту (напр. "Server Administrators"). */
-  cardTitle(name: string): Locator {
-    return this.page.locator(GAME_PANEL_PLAYERS.cardTitle).filter({ hasText: name }).first();
+  /** Блок whitelist (переключатель On/Off). */
+  get whitelist(): Locator {
+    return this.area.locator(GAME_PANEL_PLAYERS.whitelist).first();
   }
 
-  async hasCard(name: string): Promise<boolean> {
-    return this.isShownWithin(this.cardTitle(name), 5_000);
+  /** Фильтры списка игроков (All/Online/Whitelist/Operators/Banned). */
+  get filters(): Locator {
+    return this.area.locator(GAME_PANEL_PLAYERS.filters).first();
+  }
+
+  /** Таблица игроков. */
+  get list(): Locator {
+    return this.area.locator(GAME_PANEL_PLAYERS.list).first();
   }
 }

@@ -1,8 +1,8 @@
 /**
  * Game panel — Players tab (Phase 3, self-cleaning).
  *
- * - Структурный (offline-ok): таб /players рендерит .server__players + карточку
- *   "Server Administrators".
+ * - Структурный (offline-ok): таб /players рендерит менеджер игроков (.players-manager:
+ *   whitelist, фильтры, список; редизайн 04-Nov-2026).
  * - Функциональный (online): whitelist add → list → remove через консоль (источник
  *   правды; управление игроками требует Online-сервера). Notch — реальный стабильный
  *   MC-аккаунт (резолвится на online-mode сервере). Игрок ВСЕГДА убирается из
@@ -39,13 +39,20 @@ test.describe("@regression [game-panel] Players — структура таба"
     await context.close();
   });
 
-  test("TC-GP-PLR-001 | таб Players рендерит блок игроков и карточку администраторов", async () => {
-    await test.step("блок .server__players виден", async () => {
+  test("TC-GP-PLR-001 | таб Players рендерит менеджер игроков: whitelist, фильтры, список", async () => {
+    await test.step("менеджер игроков виден", async () => {
       await expect(players.area).toBeVisible();
     });
 
-    await test.step("есть карточка 'Server Administrators'", async () => {
-      expect(await players.hasCard("Server Administrators")).toBe(true);
+    await test.step("блок whitelist с переключателем", async () => {
+      await expect(players.whitelist).toBeVisible();
+      await expect(players.whitelist).toContainText(/Whitelist/i);
+    });
+
+    await test.step("фильтры и таблица игроков", async () => {
+      await expect(players.filters).toContainText(/Operators/i);
+      await expect(players.filters).toContainText(/Banned/i);
+      await expect(players.list).toContainText(/UUID/i);
     });
   });
 });

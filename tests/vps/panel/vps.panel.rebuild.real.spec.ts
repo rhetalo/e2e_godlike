@@ -28,7 +28,7 @@ test.describe("@critical VPS-панель — Rebuild: РЕАЛЬНЫЙ install 
   test("@critical TC-VPS-BUILD-001 реальный rebuild ОС → задача Build → Complete → Running", async ({
     browser,
   }) => {
-    test.setTimeout(300_000); // переустановка ОС + ожидание Complete
+    test.setTimeout(420_000); // переустановка ОС + ожидание Complete (сам Build ~1м45с, 04-Nov-2026)
 
     const { context, page, serverPage, rebuildPage, navigated } = await openRebuildPage(browser);
     test.skip(!navigated, "Страница Rebuild недоступна — сервер остановлен или модал не открылся");
@@ -51,13 +51,15 @@ test.describe("@critical VPS-панель — Rebuild: РЕАЛЬНЫЙ install 
         });
         // Экран «Installation Failed» отдаём в poll как значение → в отчёте видна причина, а не таймаут.
         // Регэксп заякорен: без ^ значение-маркер провала само матчилось на /Install/ (21-Oct-2026).
+        // Пока идёт Build, первая строка Activity пустая → ждём до конца сборки, а не 90с: 04-Nov-2026
+        // все 3 попытки Build прошли за 1м41-46с, а poll на 90с падал с "".
         await expect
           .poll(
             async () =>
               (await serverPage.isInstallFailed())
                 ? "ЭКРАН Installation Failed (build_fail)"
                 : serverPage.getLatestTaskName(),
-            { timeout: 90_000, intervals: [2_000, 3_000, 5_000] },
+            { timeout: 180_000, intervals: [2_000, 3_000, 5_000] },
           )
           .toMatch(/^(Build|Install)\b/i);
         await serverPage.waitForLatestTaskComplete(180_000);
