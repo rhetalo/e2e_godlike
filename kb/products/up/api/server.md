@@ -4,9 +4,9 @@ title: API - server (состояние и канал ошибок устано�
 type: api
 product: UP
 status: draft
-updated: 2026-10-16
+updated: 2026-11-04
 verified_on: 2026-10-16
-tickets: [DEV-452]
+tickets: [DEV-452, DEV-597]
 features: [UP/modpack-catalog, UP/server-overview]
 sources:
   - memory: dev452-modpack-backup-fail-reasons
@@ -39,6 +39,7 @@ sources:
 |---|---|---|
 | `modpack_event` | объект или `null` | идёт установка модпака. `null`, если установки нет. Структура объекта ❓ |
 | `modpack_install_error` | string или `null` | код причины остановки установки. `null`, если ошибки нет |
+| `palworld_world_import` | объект или `null` | последний импорт мира Palworld `{status, world, started_at, finished_at}`, хранится сутки; `null` у не-Palworld ✅ (04-Nov-2026, [DEV-597](../../../tickets/DEV-597.md), подробно - [palworld-world-import](palworld-world-import.md)) |
 
 После отказа 409 `no_free_backup_slots` оба поля остаются `null` ✅ (prod, 16-Oct-2026).
 

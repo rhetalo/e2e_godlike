@@ -62,6 +62,7 @@ updated: 2026-11-04
 | [DEV-593](DEV-593.md) | Безопасность API квиза апгрейда - токен владельца вместо открытого JSON API | UP, BIL, OLDP | done | PASS | covered | 2026-10-30 |
 | [DEV-594](DEV-594.md) | Округление RAM модпака до плана - ?ram= на странице апгрейда сводится к ступени сетки | UP | done | PASS | covered | 2026-11-02 |
 | [DEV-595](DEV-595.md) | Правило «длинный цикл → Premium» - один список циклов для заказа и апгрейда | BIL | in-qa | PASS | no | 2026-10-26 |
+| [DEV-597](DEV-597.md) | Palworld - импорт мира с компьютера (вкладка World) | UP, OLDP | done | PASS-with-issues | blocked | 2026-11-04 |
 | [DEV-638](DEV-638.md) | Старая панель и бэкапы новой панели - ссылка на того, кто качает, проверка диска, Activity | UP | done | PASS | covered | 2026-11-03 |
 | [DEV-641](DEV-641.md) | World Backups - искать бэкап в рамках сервера, не раскрывать существование чужого uuid | UP | done | PASS | no | 2026-11-03 |
 | [DEV-643](DEV-643.md) | Тех. долг Backup-домена - один маппинг PUT бэкапа и scope «бэкапы сервера» | UP | done | PASS | candidate | 2026-11-04 |
@@ -101,5 +102,6 @@ updated: 2026-11-04
 - **blocked**: [DEV-549](DEV-549.md) - Фікси після DEV-515 - сценарії туторіалу на заглушках, блокування кнопки кастомних модпаків та API
 - **blocked**: [DEV-566](DEV-566.md) - Каталог Minecraft-схематик /minecraft-schematics/
 - **blocked**: [DEV-576](DEV-576.md) - Checkout v2 - «Your plan» без разовой настройки модпака в месячной цене
+- **blocked**: [DEV-597](DEV-597.md) - Palworld - импорт мира с компьютера (вкладка World)
 
 Только упоминаются, карточек нет: DEV-145 (ARK settings), DEV-275, DEV-315 (конструктор модпаков), DEV-321, DEV-441, DEV-523, PROD-126, GROWTH-95.

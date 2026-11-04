@@ -101,7 +101,7 @@ Google-OAuth (`stage.panel.godlike.host/oauth2/callback`), сессия живё
 | Cancel module | Модалка отмены, A/B old/new, pause, retention-экраны | [UP/cancel-module](cancel-module.md) | [DEV-401](../../tickets/DEV-401.md) | - | ⚠️ |
 | Split Server | Main + до 3 сабов, перераспределение RAM/диска | [UP/split-server](split-server.md) | [TASK-split-server](../../tickets/TASK-split-server.md) | - | ⚠️ |
 | Free-серверы | Free-тариф: запрет смены игры (egg) | [UP/free-servers](free-servers.md) | [DEV-563](../../tickets/DEV-563.md) | - | ⚠️ |
-| Game settings | Palworld Settings (UI для `PalWorldSettings.ini`), ARK-аналог | [UP/game-settings](game-settings.md) | [TASK-palworld-settings](../../tickets/TASK-palworld-settings.md), DEV-145 (ARK, только упоминание) | - | ⚠️ Palworld, ❌ ARK |
+| Game settings | Palworld Settings (UI для `PalWorldSettings.ini`), импорт мира Palworld, ARK-аналог | [UP/game-settings](game-settings.md) | [TASK-palworld-settings](../../tickets/TASK-palworld-settings.md), [DEV-597](../../tickets/DEV-597.md), DEV-145 (ARK, только упоминание) | - | ⚠️ Palworld, ❌ ARK |
 | Модалки и оверлеи | EULA, giveaway/Trustpilot, shepherd-тур, цепочка модалок модпака | [UP/modals](modals.md) | - | косвенно (GamePanelBasePage.open) | ✅ |
 
 Автотесты: 31 спек в `tests/game/panel/`, 81 `test()` (grep 15-Oct-2026), из них

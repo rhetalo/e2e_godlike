@@ -846,3 +846,17 @@ Network браузера** → перехватываемы Playwright'ом (`pa
 1 баг — 404). Автотеста-регресса нет; селекторы НЕ заведены в `utils/selectors.ts` (модалки
 `.old-cancellation-modal` / `.cancellation-modal`, кнопки — по роли+тексту в `[role='dialog']`, клик через
 `dispatchEvent`). Полный отчёт-матрица: `test-docs/ultra.panel/cancel-module-amplitude.md`.
+
+## 12. Palworld: вкладка World - импорт мира (DEV-597, prod 30-Oct..04-Nov-2026)
+
+Подробно: `kb/tickets/DEV-597.md`, API - `kb/products/up/api/palworld-world-import.md`.
+- Маршрут `/server/{short}/palworld/world` (чип World рядом с Palworld Settings `/palworld/settings`), только Palworld + `files.write`.
+- DOM: карточка `.server__config-card` (описание `.server__config-card__subtitle-default`), прогресс/итог `.palworld-world-import-card__progress` (+ кнопка Close),
+  диалог `.v-overlay--active`, скрытый `input.palworld-world-import-dialog__hidden-input[webkitdirectory]`; кнопки по тексту
+  `Import World` → `Select World Folder` → `Import World` → подтверждение `Back` / `Replace World`.
+- Кнопки питания шапки: `Start` / `Shut Down` / `Restart` / `Kill`; под импортом disabled до `palworld_world_import.finished_at`, Kill нет.
+- Питание новой панели уходит websocket `{"event":"set state","args":["stop"]}` прямо в Wings, не через `POST /power`.
+- API на `https://panel.godlike.host/api/v2`, не на origin ultra.panel (там SPA-HTML на любой путь). Файлы: `files?dir=`, `files/contents?path=` - только с полным uuid.
+- Тексты фаз (en): stopping «Import started: stopping the server…», replacing «Replacing the world {world}…», offline «… The server was stopped, so it stays stopped.»,
+  verifying «The server has started, checking that it loads the world…», done «…has been imported and the server is running again.», offline-итог «…The server is stopped — start it when you are ready.»,
+  crashed «…but stopped right after…», not_running «…has not come back online. Check the console.», после reload «Importing the world {world}…».
