@@ -115,6 +115,36 @@ export class GamePanelUpgradePage extends GamePanelBasePage {
     await this.allPlansCard(planName).locator(GAME_PANEL_UPGRADE.allPlansTierButton, { hasText: tier }).click();
   }
 
+  // --- Список CPU конфигуратора (DEV-660). Только чтение: доплату не выбираем. ---
+
+  /** Поле CPU конфигуратора. */
+  get configuratorCpuSelect(): Locator {
+    return this.page
+      .locator(GAME_PANEL_UPGRADE.configuratorSelect)
+      .filter({
+        has: this.page.locator(GAME_PANEL_UPGRADE.configuratorSelectLabel, {
+          hasText: GAME_PANEL_UPGRADE.configuratorCpuLabelText,
+        }),
+      })
+      .first();
+  }
+
+  /** Значение закрытого поля CPU («2 vCores, included», «Max», «+ 1 vCore»). */
+  get configuratorCpuValue(): Locator {
+    return this.configuratorCpuSelect.locator(GAME_PANEL_UPGRADE.configuratorSelectValue);
+  }
+
+  /** Подписи пунктов списка CPU по порядку: открыть, прочитать, закрыть (Escape) без выбора. */
+  async configuratorCpuOptions(): Promise<string[]> {
+    await this.configuratorCpuSelect.click();
+    const items = this.page.locator(GAME_PANEL_UPGRADE.openListItem);
+    await items.first().waitFor({ state: "visible", timeout: 10_000 });
+    const labels = (await items.allInnerTexts()).map((t) => t.trim());
+    await this.page.keyboard.press("Escape");
+    await items.first().waitFor({ state: "hidden", timeout: 10_000 });
+    return labels;
+  }
+
   /** Вернуться из сетки в конфигуратор (Back). */
   async backToConfigurator(): Promise<void> {
     await this.page.locator(GAME_PANEL_UPGRADE.backButton).first().click();

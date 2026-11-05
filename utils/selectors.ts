@@ -1037,6 +1037,13 @@ export const GAME_PANEL_UPGRADE = {
   allPlansCardName: ".plan-card__name",
   allPlansTierButton: ".plan-card__toggle-btn",
   allPlansTierActive: ".plan-card__toggle-btn.v-btn--active",
+  // Поля конфигуратора и список CPU (DEV-660, live DOM 05-Nov-2026). Поле = .simple-plan-card__select (VSelect) с меткой
+  // .v-label («Ram», «CPU», «SSD»...), значение .v-select__selection-text; открытый список - .v-list-item в активном оверлее.
+  configuratorSelect: ".simple-plan-card__categories .simple-plan-card__select",
+  configuratorSelectLabel: ".v-label",
+  configuratorSelectValue: ".v-select__selection-text",
+  configuratorCpuLabelText: /^\s*CPU\s*$/,
+  openListItem: ".v-overlay--active .v-list-item",
 } as const;
 
 // Throttling / «Lag Detected» upgrade-модалка (вебхук CPU-троттлинга → предложение апгрейда).
