@@ -218,6 +218,11 @@ DEV-418. 21-Oct-2026 под [DEV-564](../tickets/DEV-564.md): Paper → Bedrock 
 ### b4089560
 DEV-418. 🟡
 
+### c8e6dbed
+`DEV-660-CPU` (было `UtWiTAi4_483404`), тест-аккаунт 388101 / WHMCS 494912, услуга 483404. Ручной QA апгрейдов. 🟡
+- 03-04 Nov-2026: Double → Quadra → Ultra → Unstoppable Budget за кредит ([DEV-528](../tickets/DEV-528.md), [DEV-547](../tickets/DEV-547.md)).
+- 05-Nov-2026: [DEV-660](../tickets/DEV-660.md) +1 vCPU (invoice 335238, €0.92, кредит вручную). Сейчас Unstoppable Budget + 1 vCPU, `cpu=400`, €27.49/мес.
+
 ### 09f8d87d
 DEV-418 и [DEV-401](../tickets/DEV-401.md). **Free, suspended** (15-Oct). 🔴
 - 02-Nov-2026: страница апгрейда открывается, [DEV-594](../tickets/DEV-594.md) read-only `?ram=1/5` (сетка с 2 GB). Не менялся.

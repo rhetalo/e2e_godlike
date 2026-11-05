@@ -4,11 +4,11 @@ title: Upgrade / Boost - смена тарифа из панели
 type: feature
 product: UP
 status: draft
-updated: 2026-11-04
-verified_on: 2026-11-04
-tickets: [TASK-tariff-list-400, DEV-534, DEV-579, DEV-593, DEV-594, DEV-528, DEV-547]
+updated: 2026-11-05
+verified_on: 2026-11-05
+tickets: [TASK-tariff-list-400, DEV-534, DEV-579, DEV-593, DEV-594, DEV-528, DEV-547, DEV-660]
 flags: []
-tests: [tests/game/panel/promo.spec.ts, tests/game/panel/upgrade.ram-query.spec.ts, tests/game/panel/upgrade.tier.spec.ts]
+tests: [tests/game/panel/promo.spec.ts, tests/game/panel/upgrade.ram-query.spec.ts, tests/game/panel/upgrade.tier.spec.ts, tests/game/panel/upgrade.cpu-labels.spec.ts]
 sources:
   - agents.docs/game-panel/KNOWLEDGE_BASE.md §7c, §9d (recon 06-Jun-2026)
   - kb/tickets/TASK-tariff-list-400.md
@@ -79,6 +79,8 @@ sources:
 ## Гочи для тестирования
 
 - **Платёжный флоу:** только структурные проверки, никогда не выбирать план и не доходить до оплаты.
+- Save Setup на странице апгрейда открывает окно подтверждения (`confirm-on-save`), платит только Confirm Upgrade. Окно можно закрыть крестиком ([DEV-660](../../tickets/DEV-660.md)).
+- Список CPU: первый пункт - ядра плана («N vCores, included», у Premium «Max»), остальные - доплаты `cpu_add` («+ N vCore(s)»). Сумма прорейтится до `nextduedate` ([DEV-660](../../tickets/DEV-660.md)).
 - CTA Free Premium (триал) не жать.
 - Если страница грузится бесконечно, сначала проверить ответ `tariffs-new/.../list` - это известный баг, а не флак.
 
@@ -93,6 +95,7 @@ sources:
 | A/B предвыбор после Boost, события страницы | ручной QA [DEV-528](../../tickets/DEV-528.md) | ⏳ blocked до раскатки флага |
 | Тир плана = тир сервера: сетка See All Plans, `?ram=`, сохранение выбора (DEV-547) | `upgrade.tier.spec.ts` (UPG-TIER-001..003) | ✅ |
 | Тир в квизе, `previous_*` в оплате, вход из клиентской зоны (DEV-547) | ручной QA [DEV-547](../../tickets/DEV-547.md) | ❌ не в e2e (биллинг, оплата) |
+| Подписи CPU: «N vCores, included» / «Max», доплаты «+ N vCore(s)», без повторов (DEV-660) | `upgrade.cpu-labels.spec.ts` (UPG-CPU-001..002) | ✅ |
 
 ## История
 
@@ -106,3 +109,4 @@ sources:
 | 03-Nov-2026 | [DEV-528](../../tickets/DEV-528.md) | A/B: после Boost предлагается следующий план, 5 событий страницы, разметка оплат. PASS с замечаниями (F1, F2), prod через allowlist |
 | 04-Nov-2026 | [DEV-528](../../tickets/DEV-528.md) | Ретест: сбой группы = `error` вместо `control`, оплата кредитом с полной разметкой (panel!1764, billing!769, new-panel!606). PASS |
 | 04-Nov-2026 | [DEV-547](../../tickets/DEV-547.md) | Тир предложенного плана = тир сервера во всех входах (сетка, `?ram=`, модпак, квиз, Lag Score), новые поля событий, `entry=client_area`, `previous_*` в оплате (new-panel!568, panel!1699, billing!740). PASS |
+| 05-Nov-2026 | [DEV-660](../../tickets/DEV-660.md) | Доплата CPU подписана как надбавка: «2 vCores, included», «+ 1 vCore» (new-panel!608). Цены и аналитика без изменений, доплата куплена и применилась. PASS |

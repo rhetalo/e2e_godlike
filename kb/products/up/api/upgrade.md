@@ -4,9 +4,9 @@ title: API - апгрейд тарифа (вариант A/B, события с�
 type: api
 product: UP
 status: verified
-updated: 2026-11-04
+updated: 2026-11-05
 verified_on: 2026-11-03
-tickets: [DEV-528]
+tickets: [DEV-528, DEV-660]
 features: [UP/upgrade]
 sources:
   - kb/tickets/DEV-528.md
@@ -69,6 +69,9 @@ sources:
 - Нативный путь: WHMCS сам создаёт счёт и гасит кредитом, `payment.status=paid` → тост, клиент остаётся в панели.
 - Есть промокод → биллинг отвечает `fallback`, панель создаёт счёт сама (`CreateInvoice` + строка Promo), затем `ApplyCredit` (без `amount`, кредит не
   списывается) и `CapturePayment` через шлюз; не оплачено → редирект на `clientarea/viewinvoice.php?id=N`, intent `failed` ✅ ([DEV-528/O2](../../../tickets/DEV-528.md#находки)).
+- Тот же ручной путь включает **доплата CPU** (опция 104 ≠ 751) без промокода: счёт «Upgrade to new product: X. Configs: [[104,744],…]», `tblupgrades` не пишется,
+  кредит не применяется, `payment_message` «Payment Attempt Failed», intent `failed` навсегда. После ручного Apply Credit опция и ядра применяются ✅ ([DEV-660](../../../tickets/DEV-660.md), 05-Nov-2026).
+- События `upgrade_cta_clicked` / `upgrade_confirm_clicked`: `final_cpu` в старом формате «1 vCores / 3.7 GHz» при любом языке UI ✅ ([DEV-660](../../../tickets/DEV-660.md)).
 
 ## Биллинг и событие `upgrade`
 - `godlike_upgrade_flow_context` (billing DB): `invoice_id`, `flow_name`, `open_id`, `ab_variant`, `preselect_applied` ✅.
