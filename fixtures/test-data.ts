@@ -185,6 +185,17 @@ export const QuickPickModpacks = [
 export type QuickPickModpack = (typeof QuickPickModpacks)[number];
 
 /**
+ * Поиск модпака в конфигураторе главной (#server-configurator, вариант A). Серверный поиск
+ * /api/v2/minecraft/modpacks?query=… Паки CurseForge с длинной историей версий - стабильны.
+ * Recon 06-Nov-2026: «skyfactory» → 16 вариантов, у SkyFactory 4 13 версий.
+ */
+export const ConfiguratorModpackSearch = {
+  query: "skyfactory",
+  pick: "SkyFactory 4",
+  noMatchQuery: "zzqqxx-no-such-pack",
+} as const;
+
+/**
  * Тестовые CurseForge manifest.json для окна «Upload custom modpack» (DEV-556, 23-Oct-2026).
  * Используются только для валидации (POST .../manifest/validate, read-only) - Proceed с ними не жмём.
  * partial: валидная запись (Fabric API 0.116.17 для 1.21.1) + запись без fileID → isValid, 1 пропуск.

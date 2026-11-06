@@ -30,6 +30,10 @@ sources:
 - **Choose your game:** ~47 карточек `button[data-game-card]` (aria-label = игра), выбранная `aria-pressed=true`, по умолчанию Minecraft.
 - **Minecraft:** «Select Modpack» (No modpack) + «Modpack Version» + quick-pick ATM 10 / BMC 4 / Prominence II / RLCraft / ATMons.
   У других игр полей модпака нет.
+- **Списки (listbox):** кнопка `aria-haspopup=listbox` + панель по `aria-controls` (`ul[role=listbox] > li[role=option]`).
+  У «Select Modpack» в панели поиск `Search modpacks…`: **серверный** `GET panel /api/v2/minecraft/modpacks?query=…&per_page=25`,
+  без подгрузки при прокрутке (максимум 25 + «No modpack»), пусто → «No modpacks found». Выбор пака тянет
+  `/api/v2/minecraft/modpacks/curseforge/<id>` и активирует «Modpack Version» с самой свежей версией (выбрана первой).
 - **Number of Players:** слайдер-ручка `role=slider` (Home/End работают), шкала зависит от игры и модпака
   (Minecraft 5-10 … 225+, с ATM10 1-2 … 50+, Terraria 8 … 48).
 - **Recommended Plan:** имя тарифа, RAM, слоты, модпак, цена со скидкой и зачёркнутая.
@@ -42,12 +46,14 @@ sources:
 | Minecraft, без модпака, старт | Double 2 GB, 5-10 Slots | productId=342 |
 | + ATM 10 | Quadra 4 GB, 1-2 Slots (End → Elder Guardian 32 GB, 50+) | productId=343, modpackId=curseforge:925200:9431424 |
 | Terraria | Palladium 2 GB, 8 Slots | productId=368 |
+| Поиск «skyfactory» → SkyFactory 4 (13 версий), версия 4.2.1 вместо 4.2.4 | Quadra 4 GB | productId=343, modpackId=curseforge:296062:3012232 (fileId меняется с версией) |
 
 ## Гочи для тестирования
 
 - Первый `button[aria-haspopup=listbox]` - выбор **игры**, не модпака; поле модпака ищем по лейблу «Select Modpack».
 - Заголовок «Recommended Plan» вне `.plan-card`.
 - Сразу после загрузки `.plan-card` пустая - ждать `.plan-card h3`.
+- В выдаче поиска встречаются дубли названий (два «SkyFactory 5», «SkyFactory One») - разные проекты каталога, не баг виджета ❓.
 
 ## Покрытие
 
@@ -58,10 +64,11 @@ sources:
 | Скидка: новая цена меньше зачёркнутой | TC-SC-003 | ✅ |
 | Quick-pick модпака → корзина с productId + modpackId | TC-SC-004 | ✅ |
 | Другая игра: без модпака, корзина без modpackId | TC-SC-005 | ✅ |
-| Выбор версии модпака, поиск модпака в listbox | не покрыто | ❌ |
+| Поиск модпака: фильтр по запросу, «No modpacks found» | TC-SC-006 | ✅ |
+| Модпак из поиска → версия по умолчанию; другая версия → другой fileId в корзине | TC-SC-007 | ✅ |
 
 ## История
 
 | Дата | Тикет | Что |
 |---|---|---|
-| 06-Nov-2026 | - | Recon, 5 автотестов `server-configurator.spec.ts` |
+| 06-Nov-2026 | - | Recon, 5 автотестов `server-configurator.spec.ts`; затем поиск модпака и выбор версии (TC-SC-006/007) |

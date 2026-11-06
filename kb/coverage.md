@@ -75,16 +75,16 @@ sources:
 
 ## WPGL - витрина
 
-Страниц: 18, с автотестами: 15, тестов в их спеках: 111.
+Страниц: 18, с автотестами: 15, тестов в их спеках: 113.
 
 | Фича | Статус | Спеки | Тестов | Покрытие ✅ / руками / ❌ |
 |---|---|---|---|---|
-| [WPGL - витрина godlike.host (WordPress)](products/wpgl/README.md) | draft | все спеки продукта (29) | 111 | 0 / 0 / 0 |
+| [WPGL - витрина godlike.host (WordPress)](products/wpgl/README.md) | draft | все спеки продукта (29) | 113 | 0 / 0 / 0 |
 | [Кастомайзер тарифа на страницах игр (Customize server)](products/wpgl/game-customizer.md) | draft | `game-slider.spec.ts` | 19 | 5 / 0 / 1 |
 | [Воронка игрового сервера - корзина, вход, Configure, чекаут WHMCS](products/wpgl/game-funnel.md) | draft | `funnel.cart.paypal.spec.ts`, `funnel.spec.ts`, `funnel.with.credit.check.spec.ts`, `login.validation.spec.ts`, `registration-flow.spec.ts` | 10 | 8 / 1 / 1 |
 | [Каталог игр - сетка с фильтрами и список лендингов](products/wpgl/games-catalog.md) | draft | `games.catalog.spec.ts` | 6 | 6 / 0 / 1 |
 | [Шапка, футер, навигация и SEO витрины](products/wpgl/header-navigation.md) | draft | `smoke.pages.spec.ts`, `storefront.breadth.spec.ts`, `valid.links.spec.ts` | 8 | 5 / 0 / 1 |
-| [Конфигуратор главной (вариант A, server-configurator)](products/wpgl/home-configurator.md) | draft | `server-configurator.spec.ts` | 5 | 5 / 0 / 1 |
+| [Конфигуратор главной (вариант A, server-configurator)](products/wpgl/home-configurator.md) | draft | `server-configurator.spec.ts` | 7 | 7 / 0 / 0 |
 | [Новый конфигуратор хостинга (hosting funnel, A/B вариант B)](products/wpgl/hosting-funnel.md) | draft | `hosting-funnel.spec.ts` | 9 | 9 / 0 / 1 |
 | [Языки и валюты витрины](products/wpgl/locale-currency.md) | draft | `locale.spec.ts` | 3 | 3 / 1 / 1 |
 | [Мобильная корзина /mobile-cart](products/wpgl/mobile-cart.md) | draft | `funnel.mobile.spec.ts` | 4 | 4 / 0 / 1 |
@@ -112,11 +112,11 @@ sources:
 
 ## BIL
 
-Страниц: 8, с автотестами: 5, тестов в их спеках: 34.
+Страниц: 8, с автотестами: 5, тестов в их спеках: 36.
 
 | Фича | Статус | Спеки | Тестов | Покрытие ✅ / руками / ❌ |
 |---|---|---|---|---|
-| [BIL - биллинг WHMCS (godlike.host/clientarea)](products/bil/README.md) | draft | все спеки продукта (10) | 31 | 0 / 0 / 0 |
+| [BIL - биллинг WHMCS (godlike.host/clientarea)](products/bil/README.md) | draft | все спеки продукта (10) | 33 | 0 / 0 / 0 |
 | [Аккаунты клиентов - регистрация, вход, соцсети](products/bil/accounts.md) | draft | `login.validation.spec.ts`, `registration-flow.spec.ts` | 3 | 2 / 1 / 2 |
 | [Add-on Custom Modpack Setup и trial конструктора модпаков](products/bil/addons-trials.md) | draft | `funnel.modpack-constructor.spec.ts` | 2 | 1 / 1 / 2 |
 | [Чекаут WHMCS - Review & Checkout и язык чекаута](products/bil/checkout.md) | draft | `funnel.seed.spec.ts`, `funnel.spec.ts`, `funnel.modded.spec.ts`, `vps.funnel.happy-path.spec.ts` | 6 | 4 / 1 / 2 |

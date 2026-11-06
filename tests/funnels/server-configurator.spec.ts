@@ -9,7 +9,7 @@
  */
 import { test, expect } from "../../fixtures/base";
 import { ServerConfiguratorPage } from "../../pages/ServerConfiguratorPage";
-import { QuickPickModpacks, Urls } from "../../fixtures/test-data";
+import { ConfiguratorModpackSearch, QuickPickModpacks, Urls } from "../../fixtures/test-data";
 import { pinHostingFunnelVariant } from "../../utils/amplitude";
 
 test.describe("Конфигуратор главной (вариант A) — #server-configurator", () => {
@@ -104,6 +104,75 @@ test.describe("Конфигуратор главной (вариант A) — #s
       expect(cart.productId).toMatch(/^\d+$/);
       expect(cart.modpackId).toBeNull();
       expect(cart.billingCycle).toBe("monthly");
+    });
+  });
+
+  test("@regression TC-SC-006 | поиск модпака: серверный поиск фильтрует список, пустой запрос → «No modpacks found»", async () => {
+    const { query, noMatchQuery } = ConfiguratorModpackSearch;
+    const panel = await cfg.openModpackList();
+
+    await test.step("список открыт: «No modpack» выбран, есть каталог модпаков", async () => {
+      await expect(cfg.options(panel).first()).toHaveText("No modpack");
+      await expect(cfg.options(panel).first()).toHaveAttribute("aria-selected", "true");
+      expect(await cfg.options(panel).count()).toBeGreaterThan(5);
+    });
+
+    await cfg.searchModpacks(panel, query);
+
+    await test.step(`поиск «${query}»: все найденные паки содержат запрос`, async () => {
+      const found = (await cfg.options(panel).allInnerTexts()).map((t) => t.trim()).filter((t) => t !== "No modpack");
+      expect(found.length).toBeGreaterThan(0);
+      for (const name of found) expect(name.toLowerCase()).toContain(query);
+    });
+
+    await cfg.searchModpacks(panel, noMatchQuery);
+
+    await test.step("несуществующий пак: только «No modpack» и текст «No modpacks found»", async () => {
+      await expect(cfg.options(panel)).toHaveCount(1);
+      await expect(panel).toContainText(/No modpacks found/i);
+    });
+  });
+
+  test("@critical TC-SC-007 | модпак из поиска → версия по умолчанию; другая версия меняет fileId в modpackId корзины", async ({ page }) => {
+    const { query, pick } = ConfiguratorModpackSearch;
+
+    const pickPack = async (): Promise<void> => {
+      const panel = await cfg.openModpackList();
+      await cfg.searchModpacks(panel, query);
+      await cfg.selectModpackFromList(panel, pick);
+    };
+
+    await pickPack();
+
+    await test.step("модпак выбран, поле версии активно и показывает версию этого пака", async () => {
+      await expect(cfg.modpackSelect).toHaveText(pick);
+      await expect(cfg.versionSelect).toBeEnabled();
+      await expect(cfg.versionSelect).toContainText(pick);
+      await expect(cfg.planCard).toContainText(pick);
+    });
+
+    const defaultCart = await cfg.hostNow();
+
+    await page.goBack({ waitUntil: "domcontentloaded" });
+    await cfg.open(Urls.home);
+    await pickPack();
+    const versions = await cfg.openVersionList();
+
+    await test.step("в списке версий выбрана первая (свежая), версий больше одной", async () => {
+      await expect(cfg.options(versions).first()).toHaveAttribute("aria-selected", "true");
+      expect(await cfg.options(versions).count()).toBeGreaterThan(1);
+    });
+
+    const olderVersion = await cfg.selectVersion(versions, 1);
+    const olderCart = await cfg.hostNow();
+
+    await test.step(`корзина «${olderVersion}»: тот же проект CurseForge, другой fileId`, async () => {
+      const [, defProject, defFile] = (defaultCart.modpackId ?? "").split(":");
+      const [, oldProject, oldFile] = (olderCart.modpackId ?? "").split(":");
+      expect(defaultCart.modpackId).toMatch(/^curseforge:\d+:\d+$/);
+      expect(olderCart.modpackId).toMatch(/^curseforge:\d+:\d+$/);
+      expect(oldProject).toBe(defProject);
+      expect(oldFile).not.toBe(defFile);
     });
   });
 });

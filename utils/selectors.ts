@@ -349,6 +349,9 @@ export const SERVER_CONFIGURATOR = {
   // модпак ищем по лейблу «Select Modpack» → родитель → listbox
   fieldLabel: "label",
   listbox: 'button[aria-haspopup="listbox"]',
+  // панель списка = элемент с id из aria-controls кнопки: [поиск (только модпаки)] + ul[role=listbox] > li[role=option]
+  listSearch: 'input[aria-label="Search modpacks"]',
+  option: '[role="option"]',
   playersSlider: '[role="slider"]',                   // div-ручка: aria-valuenow / aria-valuemax / aria-valuetext
   planCard: ".plan-card",
   planName: ".plan-card h3",

@@ -13,7 +13,7 @@
  *
  * Методы — действия и читатели состояния; assert'ы в спеке. Confirmed live recon 06-Nov-2026.
  */
-import type { Locator } from "@playwright/test";
+import { type Locator, expect } from "@playwright/test";
 import { BasePage } from "./BasePage";
 import { SERVER_CONFIGURATOR } from "../utils/selectors";
 
@@ -68,6 +68,62 @@ export class ServerConfiguratorPage extends BasePage {
 
   quickPick(name: string): Locator {
     return this.root.getByRole("button", { name, exact: true });
+  }
+
+  get versionSelect(): Locator {
+    return this.field("Modpack Version");
+  }
+
+  /** Панель выпадающего списка: id из aria-controls кнопки-listbox. */
+  private async panelOf(select: Locator): Promise<Locator> {
+    const id = await select.getAttribute("aria-controls");
+    return this.root.locator(`[id="${id}"]`);
+  }
+
+  /** Открыть список модпаков; возвращает его панель (поиск + варианты). */
+  async openModpackList(): Promise<Locator> {
+    await this.modpackSelect.click();
+    const panel = await this.panelOf(this.modpackSelect);
+    await panel.locator(SERVER_CONFIGURATOR.option).first().waitFor({ state: "visible", timeout: 15_000 });
+    return panel;
+  }
+
+  /** Варианты в открытой панели списка. */
+  options(panel: Locator): Locator {
+    return panel.locator(SERVER_CONFIGURATOR.option);
+  }
+
+  /** Ввести запрос в поиск модпаков и дождаться ответа серверного поиска. */
+  async searchModpacks(panel: Locator, query: string): Promise<void> {
+    const searched = this.page.waitForResponse(
+      (r) => /\/minecraft\/modpacks\?/.test(r.url()) && r.url().includes(`query=${encodeURIComponent(query).replace(/%20/g, "+")}`),
+      { timeout: 15_000 },
+    );
+    await panel.locator(SERVER_CONFIGURATOR.listSearch).fill(query);
+    await searched;
+  }
+
+  /** Выбрать модпак из поиска и дождаться, что подтянулась его версия (поле версии активно). */
+  async selectModpackFromList(panel: Locator, name: string): Promise<void> {
+    await this.options(panel).filter({ hasText: new RegExp(`^${name}$`) }).first().click();
+    await this.versionSelect.and(this.page.locator(":enabled")).waitFor({ state: "visible", timeout: 15_000 });
+  }
+
+  /** Открыть список версий; возвращает его панель. */
+  async openVersionList(): Promise<Locator> {
+    await this.versionSelect.click();
+    const panel = await this.panelOf(this.versionSelect);
+    await panel.locator(SERVER_CONFIGURATOR.option).first().waitFor({ state: "visible", timeout: 15_000 });
+    return panel;
+  }
+
+  /** Выбрать версию по индексу в списке; возвращает её подпись. */
+  async selectVersion(panel: Locator, index: number): Promise<string> {
+    const opt = this.options(panel).nth(index);
+    const label = (await opt.innerText()).trim();
+    await opt.click();
+    await expect(this.versionSelect).toContainText(label, { timeout: 10_000 });
+    return label;
   }
 
   /** Quick-pick модпака (ATM 10 / BMC 4 / …) и ожидание, что селект показал выбор. */
