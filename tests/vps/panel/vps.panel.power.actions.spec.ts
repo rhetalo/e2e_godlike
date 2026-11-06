@@ -204,9 +204,18 @@ test.describe("@regression VPS-питание — Activity table после оп
       expect(tasks.some((t) => t.includes("poweroff") || t.includes("power off"))).toBe(true);
     });
 
-    await test.step("каждая видимая строка имеет статус Complete", async () => {
-      const rowCount = await serverPage.activityRows.count();
-      expect(await serverPage.completeBadges.count()).toBeGreaterThanOrEqual(rowCount);
+    // Только строки этого прогона: в таблице видна и старая история (06-Nov-2026 там висел
+    // «Build FAILED» от упавшей ночной переустановки → «все видимые Complete» ломалось не по делу).
+    await test.step("операции этого прогона (до самой старой из Boot/Shutdown/Poweroff) в статусе Complete", async () => {
+      const tasks = (await serverPage.getActivityTaskNames()).map((t) => t.toLowerCase());
+      const firstIdx = (pred: (t: string) => boolean) => tasks.findIndex(pred);
+      const window =
+        Math.max(
+          firstIdx((t) => t.includes("boot")),
+          firstIdx((t) => t.includes("shutdown")),
+          firstIdx((t) => t.includes("poweroff") || t.includes("power off")),
+        ) + 1;
+      expect(await serverPage.countCompleteInFirstRows(window)).toBe(window);
     });
 
     await test.step("прогресс последней задачи = 100%", async () => {

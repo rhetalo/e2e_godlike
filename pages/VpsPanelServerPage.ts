@@ -343,6 +343,15 @@ export class VpsPanelServerPage {
     return this.page.locator("span.badge.badge-active");
   }
 
+  /** Сколько из первых `n` (самых свежих) строк Activity имеют бейдж Complete. */
+  async countCompleteInFirstRows(n: number): Promise<number> {
+    let complete = 0;
+    for (let i = 0; i < n; i++) {
+      if ((await this.activityRows.nth(i).locator("span.badge.badge-active").count()) > 0) complete++;
+    }
+    return complete;
+  }
+
   /** Returns task name strings from first column of activity table */
   async getActivityTaskNames(): Promise<string[]> {
     const count = await this.activityRows.count();
