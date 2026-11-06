@@ -50,6 +50,15 @@ const EXP_STORAGE_KEY = "amp-exp-$default_instance-u6z6Wv";
 const FIXED_DEVICE_ID = "00000000-0000-4000-8000-000000000001";
 
 /**
+ * Серверный A/B воронки хостинга (с ~05-Nov-2026, НЕ Amplitude): WordPress случайно ставит cookie
+ * `hostingFunnelVariant` = A | B и уважает уже выставленную. A = старый калькулятор `#plan-calculator`,
+ * B = новый 5-шаговый конфигуратор (модпак → игроки → размер → локация → биллинг). Без пиннинга
+ * modded-спеки падали «через раз» (waiting for #plan-calculator). Тесты варианта B - через
+ * env HOSTING_FUNNEL_VARIANT=B.
+ */
+const HOSTING_FUNNEL_VARIANT = process.env.HOSTING_FUNNEL_VARIANT ?? "A";
+
+/**
  * Зафиксированные варианты (control-набор, снят с live 03-Jun-2026).
  * Структуру сохраняем как у реального ответа vardata, иначе SDK может счесть
  * данные невалидными.
@@ -104,6 +113,13 @@ export async function pinAmplitudeExperiments(
     {
       name: "amdDeviceId",
       value: FIXED_DEVICE_ID,
+      domain: "godlike.host",
+      path: "/",
+    },
+    // серверный A/B воронки хостинга (см. HOSTING_FUNNEL_VARIANT выше)
+    {
+      name: "hostingFunnelVariant",
+      value: HOSTING_FUNNEL_VARIANT,
       domain: "godlike.host",
       path: "/",
     },
