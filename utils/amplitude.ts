@@ -85,6 +85,19 @@ const FIXED_VARDATA_BODY = JSON.stringify(FIXED_VARIANTS);
 const FIXED_EXP_LS = JSON.stringify(FIXED_VARIANTS);
 
 /**
+ * Пиннит серверный A/B воронки хостинга (cookie `hostingFunnelVariant`). Повторный вызов
+ * перезаписывает cookie → спеки нового конфигуратора зовут его с "B" поверх дефолтного "A".
+ */
+export async function pinHostingFunnelVariant(
+  context: BrowserContext,
+  variant: string,
+): Promise<void> {
+  await context.addCookies([
+    { name: "hostingFunnelVariant", value: variant, domain: "godlike.host", path: "/" },
+  ]);
+}
+
+/**
  * Пиннит A/B-эксперименты Amplitude для всех страниц контекста.
  * Вызывать СРАЗУ после browser.newContext(), до создания страниц.
  */
@@ -116,14 +129,9 @@ export async function pinAmplitudeExperiments(
       domain: "godlike.host",
       path: "/",
     },
-    // серверный A/B воронки хостинга (см. HOSTING_FUNNEL_VARIANT выше)
-    {
-      name: "hostingFunnelVariant",
-      value: HOSTING_FUNNEL_VARIANT,
-      domain: "godlike.host",
-      path: "/",
-    },
   ]);
+  // серверный A/B воронки хостинга (см. HOSTING_FUNNEL_VARIANT выше)
+  await pinHostingFunnelVariant(context, HOSTING_FUNNEL_VARIANT);
 
   // 3. СТРАХОВКА — пред-засев LS до исполнения скриптов страницы.
   await context.addInitScript(

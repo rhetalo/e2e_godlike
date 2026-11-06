@@ -298,6 +298,45 @@ export const CART_MODDED_NEW = {
   orderButton: "button.form__button--primary", // "Order Now" (⚠️ оформляет заказ — НЕ жать)
 } as const;
 
+// Новый конфигуратор хостинга «hosting funnel» (вариант B серверного A/B hostingFunnelVariant,
+// с ~05-Nov-2026) на главной (data-entry-page=home) и /modded-minecraft-server-hosting/ (modded).
+// Хост #hosting-funnel с ОТКРЫТЫМ Shadow DOM - CSS-локаторы Playwright его пробивают.
+// 5 шагов: What should we install? → Who's playing? → Server size → Server location → Billing period,
+// затем сводка «All set» и CTA HOST NOW (гость → встроенная форма Register/Login, без перехода).
+// Прогресс хранится в sessionStorage["godlike-hosting-funnel"]. Confirmed live recon 06-Nov-2026.
+export const HOSTING_FUNNEL = {
+  root: "#hosting-funnel",
+  step: "nav .f-step",                    // кнопка шага в степпере (текущий - .is-current)
+  currentStep: "nav .f-step.is-current",
+  tab: '[role="tab"]',                    // табы шага 1 (Minecraft Modpack / Minecraft / Custom Modpack / Other Games)
+  pane: ".f-pane",                        // активная панель шага
+  paneTitle: ".f-pane .f-title",
+  // кнопка перехода шага: Continue / Use Nearest Location = .f-btn.f-pane__go, но Done (Server size) - голый .f-btn
+  advance: ".f-pane .f-btn",
+  advanceText: /^(Continue|Done|Use Nearest Location)$/,
+  popularPack: ".f-pack",                 // карточка «Popular modpacks» (… GB Required)
+  playersPreset: ".f-preset",             // Me + a friend / Friend group / Community / Public server
+  playersMark: ".f-slider__mark",         // засечки слайдера игроков 1-2 … 50+
+  playersSlider: ".f-slider__input",
+  plan: ".f-plan",                        // карточка тарифа на шаге Server size (выбранная - .is-active)
+  planTag: ".f-plan__tag",                // бейдж «Recommended» (текст)
+  planBelow: '.f-plan__dot[aria-label="Below recommended"]', // пустая точка «ниже рекомендации»
+  period: ".f-period",                    // карточка периода оплаты (выбранная - .is-active)
+  periodName: ".f-period__name",
+  aside: "aside",                         // карточка «Your Server»: тариф, параметры, цена, CTA
+  asidePrice: "aside .f-price__line strong",
+  cta: "aside .f-cta",                    // FINISH STEP N TO CONTINUE → HOST NOW (.is-live)
+  smallerPlan: 'aside .f-arrow[aria-label="Smaller plan"]',
+  biggerPlan: 'aside .f-arrow[aria-label="Bigger plan"]',
+  authEmail: 'input[name="email"]',       // встроенная регистрация после HOST NOW (гость)
+  authUsername: 'input[name="username"]',
+  authPassword: 'input[name="password"]',
+  authBack: ".signup-back",               // «Back to configuration»
+} as const;
+
+/** Ключ sessionStorage, где конфигуратор хранит прогресс. */
+export const HOSTING_FUNNEL_STORAGE_KEY = "godlike-hosting-funnel";
+
 /* ===== Modpack Constructor (/custom-minecraft-modpacks-constructor/) ===== */
 // ⚠️ Web-component на Shadow DOM (build:embed) + ЛЕНИВАЯ гидрация: приложение
 // монтируется в shadowRoot хоста только после пользовательского
