@@ -337,6 +337,26 @@ export const HOSTING_FUNNEL = {
 /** Ключ sessionStorage, где конфигуратор хранит прогресс. */
 export const HOSTING_FUNNEL_STORAGE_KEY = "godlike-hosting-funnel";
 
+// Старый конфигуратор главной `#server-configurator` (вариант A A/B hostingFunnelVariant).
+// Открытый Shadow DOM, Tailwind-классы - якоримся на семантику (aria) и редкие осмысленные классы.
+// Игра → (Minecraft: модпак + quick-pick) → слайдер игроков → «Recommended Plan» → Host now →
+// /cart-main/?productId=…[&modpackId=curseforge:…]&billingCycle=monthly. Confirmed live recon 06-Nov-2026.
+export const SERVER_CONFIGURATOR = {
+  root: "#server-configurator",
+  gameCard: "button[data-game-card]",                 // aria-label = игра, выбранная - aria-pressed=true
+  selectedGame: 'button[data-game-card][aria-pressed="true"]',
+  // поле = обёртка из <label> и кнопки-listbox; первый listbox - выбор ИГРЫ («Minecraft»), поэтому
+  // модпак ищем по лейблу «Select Modpack» → родитель → listbox
+  fieldLabel: "label",
+  listbox: 'button[aria-haspopup="listbox"]',
+  playersSlider: '[role="slider"]',                   // div-ручка: aria-valuenow / aria-valuemax / aria-valuetext
+  planCard: ".plan-card",
+  planName: ".plan-card h3",
+  priceNow: ".price-display .now",
+  priceWas: ".price-display .was",
+  cta: ".cta",                                        // «Host now»
+} as const;
+
 /* ===== Modpack Constructor (/custom-minecraft-modpacks-constructor/) ===== */
 // ⚠️ Web-component на Shadow DOM (build:embed) + ЛЕНИВАЯ гидрация: приложение
 // монтируется в shadowRoot хоста только после пользовательского

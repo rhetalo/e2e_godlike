@@ -56,6 +56,7 @@ sources:
 | Тарифы для AI-ботов | серверные карточки тарифов в HTML + JSON-LD ProductGroup, `?plan=<id>` | [DEV-604](../../tickets/DEV-604.md) | `tariffs.for-bots` | ✅ [WPGL/tariffs-for-bots](tariffs-for-bots.md) |
 | Кастомайзер тарифа игры | Customize server: слайдеры Slots, RAM, Days, синхронизация Slots ↔ RAM | - | `game-slider` | ✅ [WPGL/game-customizer](game-customizer.md) |
 | Новый конфигуратор хостинга (A/B вариант B) | `#hosting-funnel` на главной и modded: 5 шагов модпак → игроки → размер → локация → период, HOST NOW → регистрация в компоненте; cookie `hostingFunnelVariant` (с ~05-Nov) | - | `hosting-funnel` | ✅ [WPGL/hosting-funnel](hosting-funnel.md) |
+| Конфигуратор главной (A/B вариант A) | `#server-configurator`: игра → модпак (Minecraft) → слайдер игроков → Recommended Plan → Host now в `/cart-main/` | - | `server-configurator` | ✅ [WPGL/home-configurator](home-configurator.md) |
 | Витрина серверов игроков | `/servers/` - 34 сервера игроков, фильтры по тегам, версиям, лоадерам, режимам (тип записи `server`) | - | нет | ⏸ отложено владельцем 15-Oct [WPGL/landings](landings.md) |
 | Каталог схематик | `/minecraft-schematics/`: подборки, фильтры версия / формат / свои группы, модалка, скачивание; пока только stage | [DEV-566](../../tickets/DEV-566.md) | нет | ⚠️ [WPGL/schematics](schematics.md) |
 | Инструменты Minecraft | Seed Map `/minecraft-seed-map/`, Circle Generator, Skin Editor `/minecraft-skin-editor/` | - | нет | ❌ |

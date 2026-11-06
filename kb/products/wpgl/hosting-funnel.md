@@ -24,7 +24,7 @@ sources:
 
 - **Главная `/`** и **`/modded-minecraft-server-hosting/`**, только вариант **B** серверного A/B.
 - Вариант задаёт cookie `hostingFunnelVariant` = `A` | `B`: WordPress ставит её случайно при первом заходе и
-  дальше уважает. **A** = старое: на главной `#server-configurator` (автотестов нет ❌), на modded `#plan-calculator`
+  дальше уважает. **A** = старое: на главной `#server-configurator` ([WPGL/home-configurator](home-configurator.md)), на modded `#plan-calculator`
   ([WPGL/modded-calculator](modded-calculator.md)). **B** = этот конфигуратор.
 - Хост `#hosting-funnel` с открытым Shadow DOM, атрибут `data-entry-page` = `home` | `modded`.
 
@@ -75,7 +75,7 @@ sources:
 | Прогресс в sessionStorage переживает reload | TC-HF-007 | ✅ |
 | Modded: 2 таба, модпак предвыбран | TC-HF-101 | ✅ |
 | Custom Modpack, Other Games до конца, Login залогиненным, корзина/чекаут | не покрыто | ❌ |
-| Старый конфигуратор главной `#server-configurator` (вариант A) | не покрыто | ❌ |
+| Старый конфигуратор главной `#server-configurator` (вариант A) | [WPGL/home-configurator](home-configurator.md) | ✅ |
 
 ## История
 
