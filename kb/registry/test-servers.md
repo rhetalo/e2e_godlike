@@ -3,7 +3,7 @@ id: KB-REG-SERVERS
 title: Тест-серверы (UP, VPS)
 type: registry
 status: draft
-updated: 2026-10-30
+updated: 2026-11-06
 verified_on: -        # с живой панелью ещё не сверяли
 sources:
   - utils/gameAuth.ts (env + фолбэки)
@@ -163,7 +163,7 @@ SMP Private, переименован в `DEV-562-MC` под [DEV-562](../ticket
 - 04-Nov-2026: переименован в `DEV-643-B` - «чужой» сервер [DEV-643](../tickets/DEV-643.md), ничего не менялось. Свободен.
 - 04-Nov-2026: [DEV-547](../tickets/DEV-547.md) - сетка/`?ram=` read-only, квиз Vanilla / 30-40 / stable: оставлен pending-оффер 6705 (Unstoppable Budget, Accept не жали), вход из клиентской зоны WHMCS. План не менялся.
 - 05-Nov-2026: [DEV-640](../tickets/DEV-640.md) (нода 427) - instance-бэкап `DEV-640-P1-instance` (6573c539) и restore из него, World Backup `DEV-640-P5-world` (95964d0b) и restore; бэкапы оставлены (слоты 2/3). Разработка гоняла по ним колбэки чужой ноды - не изменились. Имя не менялось.
-
+- 05-Nov-2026: [DEV-659](../tickets/DEV-659.md) - переносы в legacy-админке, после Rollback застрял в [DEV-688](https://antihost.atlassian.net/browse/DEV-688) (не стартует, «server is currently being transferred»). Ждёт DevOps / раскатки Wings.
 ### f8e7df56
 SkyBlock, на нём воспроизводился баг tariff-list 400. 20-Oct-2026 переименован в `DEV-484-backup-throttle` (было `JBl1Dqfw_474692`):
 квота ядра, сервер сверх лимита, окно частоты [DEV-484](../tickets/DEV-484.md); тестовые бэкапы оставлены. 🟡
@@ -177,7 +177,7 @@ SkyBlock, на нём воспроизводился баг tariff-list 400. 20-
 ### 7c5aa3cf
 `test`, сплит от [srv:1d7d34aa](#1d7d34aa), Paper 26.2, владелец 307989 в раскатке `extension-compatibility`. Стенд «ядро без модов»:
 legacy 400 и v2 409 `mods_not_supported`, кнопка Upload custom modpack disabled ([DEV-556](../tickets/DEV-556.md), [DEV-549](../tickets/DEV-549.md)). Только отказы, ничего не ставилось. 🟡
-
+- 05-Nov-2026: [DEV-659](../tickets/DEV-659.md) - переносы в legacy-админке, после Rollback застрял в [DEV-688](https://antihost.atlassian.net/browse/DEV-688) (не стартует, «server is currently being transferred»). Ждёт DevOps / раскатки Wings.
 ### 9c891502
 `DEV-484-db` (было `Gs5I5zqx_482442`), владелец - тестовый пользователь 388101, не основной аккаунт. Бэкапы баз [DEV-484](../tickets/DEV-484.md):
 базы `s779874_cjyV9C2A` (id 26530, таблица `dev484_probe`) и `s779874_Ebhns6Vr` (26531), бэкапы баз оставлены до ок владельца. 🟡
@@ -216,7 +216,7 @@ DEV-418. 21-Oct-2026 под [DEV-564](../tickets/DEV-564.md): Paper → Bedrock 
 - 03-Nov-2026 ~10:40: [DEV-594](../tickets/DEV-594.md) / BUG-max-plan-tier-pairs - 462880 Double (359) → Wither (718) → обратно, расчёт апгрейда снят (Save Setup не жали). Сумма, цикл, due, память не менялись, апгрейдов и счетов нет.
 - 04-Nov-2026 21:50: [DEV-547](../tickets/DEV-547.md) - услуга 474692 (сервер `DEV-580-B`) апгрейд из сетки See All Plans **Quadra Premium (357) → Ultra Premium (356)** за $9.03 кредитом (инвойс 334677, tblupgrades 21681). Теперь Ultra Premium 6 GB, $29.99/мес.
 - 04-Nov-2026: [DEV-547](../tickets/DEV-547.md) - до апгрейда квиз Vanilla / 20-30 / stable: оставлен pending-оффер 6704 (Ultra Premium, Accept не жали).
-
+- 05-Nov-2026: [DEV-659](../tickets/DEV-659.md) - переносы в legacy-админке, после Rollback застрял в [DEV-688](https://antihost.atlassian.net/browse/DEV-688) (не стартует, «server is currently being transferred»). Ждёт DevOps / раскатки Wings.
 ### b4089560
 DEV-418. 🟡
 
@@ -275,6 +275,11 @@ Project Zomboid, [DEV-562](../tickets/DEV-562.md), [DEV-579](../tickets/DEV-579.
 - 21-Oct-2026 переименован в `DEV-579-PZ` (было `DEV-562-PZ`). Panel memory 4096, в биллинге тариф 6 ГБ (бейдж «6 Ram»), остановлен.
 - 30-Oct-2026: «игра без квиза» для [DEV-593](../tickets/DEV-593.md) - квиза и кнопки «Go to quiz» нет, только смотрели.
 - Трогать: 🟡.
+- 05-Nov-2026: [DEV-659](../tickets/DEV-659.md) - переносы в legacy-админке, после Rollback застрял в [DEV-688](https://antihost.atlassian.net/browse/DEV-688) (не стартует, «server is currently being transferred»). Ждёт DevOps / раскатки Wings.
+### a274f542
+Hytale, `dXG3Pif5_485786` (WHMCS 485786), аккаунт QA 307989, создан 03-Nov-2026.
+- 05-Nov-2026: [DEV-659](../tickets/DEV-659.md) ретест panel!1774 - wing1001 → wing1003 → wing1000 → wing1003; на wing1003 застрял в [DEV-688](https://antihost.atlassian.net/browse/DEV-688). Портов 4 (26012-26015), основной 26014. Ждёт DevOps / раскатки Wings.
+- Трогать: 🟢.
 
 ### a493f744
 `DEV-593-trial` (было `dFDKkIj9_484820`, WHMCS 484820), аккаунт QA 307989. Создан 30-Oct-2026 через конструктор модпаков → «Start 3-hour Demo»
@@ -290,7 +295,7 @@ Bedrock, `DEV-564-BR-C` (было `tJf6lPCi_482724`, WHMCS 482724), куплен
 
 ### 1db4a8bb
 Arma, [DEV-562](../tickets/DEV-562.md). 🟡
-
+- 05-Nov-2026: [DEV-659](../tickets/DEV-659.md) - переносы в legacy-админке, после Rollback застрял в [DEV-688](https://antihost.atlassian.net/browse/DEV-688) (не стартует, «server is currently being transferred»). Ждёт DevOps / раскатки Wings.
 ### 8235fb62
 ARK, **клиентский сервер**, только смотреть. 🔴
 
