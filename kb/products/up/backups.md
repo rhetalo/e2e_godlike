@@ -4,9 +4,9 @@ title: Backups - бэкапы сервера, базы и папки
 type: feature
 product: UP
 status: draft
-updated: 2026-11-04
+updated: 2026-11-06
 verified_on: 2026-10-20        # DEV-484 r2: общая квота, расписания, бэкапы баз; остальное recon 2026-06-09
-tickets: [DEV-418, DEV-452, DEV-484, DEV-580, DEV-582, DEV-586, DEV-638, DEV-643]
+tickets: [DEV-418, DEV-452, DEV-484, DEV-580, DEV-582, DEV-586, DEV-638, DEV-640, DEV-643]
 flags: []
 tests: [tests/game/panel/backups.spec.ts, tests/game/panel/backups.server-scope.api.spec.ts, tests/game/panel/backups.throttle.spec.ts, tests/game/panel/backups.slots-full.spec.ts, tests/game/panel/role.enforcement.spec.ts, tests/game/panel/security.spec.ts]
 sources:
@@ -148,5 +148,6 @@ OBS-2 пропущенное одноразовое расписание вис�
 | 27-Oct-2026 | [DEV-582](../../tickets/DEV-582.md) | Зависшие PENDING старше 6 ч → FAILED раз в 30 мин, слот освобождается; проба фальшивых COMPLETED удалена (QA prod PASS, SQL) |
 | 27-Oct-2026 | [DEV-586](../../tickets/DEV-586.md) | Отказ в бэкапе - один тост; по окну «Backup limit reached… try again in N minutes» (QA prod PASS) |
 | 29-Oct-2026 | [DEV-580](../../tickets/DEV-580.md) | Бэкап ищется только среди бэкапов сервера из роута (v2 и старая панель), чужой uuid = несуществующий; lock/rename бэкапа старой панели без 500 (QA prod PASS 30-Oct) |
+| 05-Nov-2026 | [DEV-640](../../tickets/DEV-640.md) | Wings-колбэки `/api/remote/backups/{uuid}` (статус, restore, S3-ссылки) принимаются только от ноды сервера бэкапа, чужой uuid = 404 + лог `Backup callback refused`; бэкапы баз из колбэков убраны (QA prod PASS, негатив - разработка) |
 | 03-Nov-2026 | [DEV-638](../../tickets/DEV-638.md) | Старая панель для бэкапов новой панели: ссылка подписана на того, кто качает, проверка диска для всех типов, lock/unlock/download/delete в Activity, `ignored_files` = `[]` (QA prod PASS) |
 | 04-Nov-2026 | [DEV-643](../../tickets/DEV-643.md) | Рефакторинг без изменения поведения: один маппинг PUT (`toColumns()`) для instance/folder/database и scope `forServer` вместо 16 копий (QA prod PASS, регресс всех типов) |

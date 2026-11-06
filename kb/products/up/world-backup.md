@@ -4,9 +4,9 @@ title: World Backup - копия мира перед опасными дейст
 type: feature
 product: UP
 status: draft
-updated: 2026-11-03
+updated: 2026-11-06
 verified_on: 2026-08-14        # клиентская часть, итоговый прогон DEV-418
-tickets: [DEV-418, DEV-401, DEV-506, DEV-571, DEV-641]
+tickets: [DEV-418, DEV-401, DEV-506, DEV-571, DEV-640, DEV-641]
 flags: [world-backup]
 tests: [tests/game/panel/world-backup.spec.ts]
 sources:
@@ -107,3 +107,4 @@ sources:
 | 19..20-Oct-2026 | [DEV-571](../../tickets/DEV-571.md) | «Готово» только после ноды, Continue → abandon, права и Audit. Stage PASS |
 | 23-Oct-2026 | [DEV-571](../../tickets/DEV-571.md) | Флаг раскатан на всех, DEV-571 выкачен на прод (panel!1710 + фронт), автотест `world-backup.spec.ts` (WB-001/002) |
 | 03-Nov-2026 | [DEV-641](../../tickets/DEV-641.md) | panel!1750: retry / restore / destroy ищут копию только у сервера из роута, чужой uuid = выдуманный. Prod PASS |
+| 05-Nov-2026 | [DEV-640](../../tickets/DEV-640.md) | panel!1758: Wings-колбэк статуса и restore World Backup принимается только от ноды сервера (своя 400 на завершённый, чужая 404). Prod PASS |

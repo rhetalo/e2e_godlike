@@ -217,6 +217,22 @@ sources:
 - Как проверено: prod 03-Nov-2026, аккаунт 307989 (серверы [srv:45b14521](../../../registry/test-servers.md#45b14521) и
   [srv:546bc52e](../../../registry/test-servers.md#546bc52e)) + второй аккаунт 388101.
 
+## Wings-колбэки: бэкап только своей ноды (DEV-640)
+
+Remote API, вызывает только Wings: `Authorization: Bearer <token_id>.<token>` из `config.yml` ноды (у QA токенов нет).
+С [panel!1758](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1758) бэкап ищется среди серверов, у которых `servers.node_id` = нода токена
+(core, instance, folder, World Backup; бэкапы баз - никогда).
+
+| Метод | Путь | Своя нода | Чужая нода / выдуманный uuid / бэкап базы |
+|---|---|---|---|
+| POST | `/api/remote/backups/{uuid}` (`successful`, `checksum`, `checksum_type`, `size`) | 204; на завершённый - 400 «Cannot update the status of a backup that is already marked as completed.» ✅ | 404 `NotFoundHttpException`, бэкап не меняется ✅ |
+| POST | `/api/remote/backups/{uuid}/restore` (`successful`) | 204, `servers.status` = NULL ✅ | 404, статус сервера не тронут ✅ |
+| GET | `/api/remote/backups/{uuid}?size=N` (S3-ссылки) | на завершённый - 409 ✅ | 404, `upload_id` не меняется ✅ |
+
+Каждый 404 пишет в лог панели `Backup callback refused: no backup with this uuid on the calling node` (`node_id`, `backup_uuid`).
+**Как проверено.** Prod 05-Nov-2026: позитив QA (ultra.panel, ноды 427 и 412), негатив и лог - разработка с токенами нод 427/412 на
+[srv:45b14521](../../../registry/test-servers.md#45b14521), QA сверил БД. S3 на проде не используется (`disk = wings`). Подробно - [DEV-640](../../../tickets/DEV-640.md).
+
 ## Расписания (scheduled backups)
 
 Планировщик - команда `gl:handle-scheduled-backups`, запускается раз в минуту 📖.
@@ -254,6 +270,7 @@ sources:
 | 2026-10-29 | [DEV-580](../../../tickets/DEV-580.md) | [panel!1723](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1723): поиск бэкапа по uuid только в рамках сервера из роута (v2 и v1), чужой uuid = несуществующий; v1 lock бэкапа новой панели и v2 PUT core без 500 |
 | 2026-11-03 | [DEV-638](../../../tickets/DEV-638.md) | [panel!1757](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1757): v1 download бэкапа новой панели подписан на запросившего, проверка диска для всех типов, Activity lock/unlock/download/delete, `ignored_files` `[]` |
 | 2026-11-03 | [DEV-641](../../../tickets/DEV-641.md) | [panel!1750](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1750): world-бэкапы retry/restore/destroy ищут по серверу и uuid, чужой uuid = несуществующий (400 вместо 404 «does not belong») |
+| 2026-11-05 | [DEV-640](../../../tickets/DEV-640.md) | [panel!1758](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1758): Wings-колбэки `/api/remote/backups/{uuid}` только от ноды сервера, чужой uuid = 404 + лог; бэкапы баз из колбэков убраны |
 | 2026-11-04 | [DEV-643](../../../tickets/DEV-643.md) | [panel!1739](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1739): один маппинг PUT для instance/folder/database (`toColumns()`), scope `forServer` на 4 моделях; поведение не менялось |
 | 2026-10-27 | [DEV-582](../../../tickets/DEV-582.md) | `panel!1713`: зависшие PENDING (старше `backups.prune_age` 360 мин) → FAILED командой `gl:backups:fail-stale-pending` раз в 30 мин; бэкфил `status` |
 
