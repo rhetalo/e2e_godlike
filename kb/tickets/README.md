@@ -73,6 +73,7 @@ updated: 2026-11-09
 | [DEV-643](DEV-643.md) | Тех. долг Backup-домена - один маппинг PUT бэкапа и scope «бэкапы сервера» | UP | done | PASS | candidate | 2026-11-04 |
 | [DEV-659](DEV-659.md) | Del from the old node может удалить живой сервер | ADM | done |  | no |  |
 | [DEV-660](DEV-660.md) | Доплата за CPU в конфигураторе апгрейда подписана как надбавка («+ 1 vCore», «2 vCores, included») | UP | done | PASS | covered | 2026-11-05 |
+| [DEV-661](DEV-661.md) | После Rollback сервер не запускается, ошибки шагов отката не обрабатываются | ADM | done |  | no |  |
 | [DEV-667](DEV-667.md) | Роль участника сервера - единственный источник прав (v1, v2 бэкапы, Wings, инвайты, split) | UP | done | PASS | candidate | 2026-11-09 |
 | [TASK-missing-mod-deps](TASK-missing-mod-deps.md) | Окно Missing mod dependencies (автодозагрузка зависимостей) | UP | done | PASS-with-issues | - | 2026-09-29 |
 | [TASK-palworld-settings](TASK-palworld-settings.md) | Palworld Settings: UI-редактор PalWorldSettings.ini | UP | partial | PASS-with-issues | blocked | 2026-08-20 |

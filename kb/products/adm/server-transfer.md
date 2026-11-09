@@ -4,14 +4,15 @@ title: Сервер в админке - Transfer (перенос на другу
 type: feature
 product: ADM
 status: draft
-updated: 2026-11-06
+updated: 2026-11-09
 verified_on: 2026-10-27        # DEV-583: только просмотр модалки, без переносов
-tickets: [DEV-583, DEV-659]
+tickets: [DEV-583, DEV-659, DEV-661]
 flags: []
 tests: []                      # автотестов нет и не будет без ок владельца
 sources:
   - kb/tickets/DEV-583.md
   - kb/tickets/DEV-659.md
+  - kb/tickets/DEV-661.md
   - test-docs/panel/DEV-583/DEV-583-qa.html
   - memory: feedback-legacy-admin-ask-first, dev583-transfer-sorting
 ---
@@ -66,6 +67,7 @@ sources:
 ## Покрытие
 
 - **Спеков на админку нет.**
+- Ручной QA [DEV-661](../../tickets/DEV-661.md) 09-Nov-2026, stage: Rollback, A→B→A, рестарт и стоп Wings, sync на чужой ноде - PASS.
 - Ручной QA [DEV-659](../../tickets/DEV-659.md) 05-Nov-2026, prod: Del / Rollback после A→B, A→B→A, A→B→C на своих серверах, PASS.
 - Ручной QA [DEV-583](../../tickets/DEV-583.md) 27-Oct-2026, prod: шаги MR 1-6 PASS + сверка с БД, поиск, второй сервер.
 
@@ -73,5 +75,6 @@ sources:
 
 | Дата | Тикет | Что |
 |---|---|---|
+| 09-Nov-2026 | [DEV-661](../../tickets/DEV-661.md) | Rollback и возврат на ноду со своей копией больше не требуют рестарта Wings: панель шлёт sync при Rollback, ошибка шага не даёт 500 и не обрывает остальные шаги ([panel!1768](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1768) + [wing-panel!14](https://git.godlike.ovh/panel/wing-panel-godlike-host/-/merge_requests/14)); stage PASS 6/6, на прод Wings ещё не раскатан |
 | 05-Nov-2026 | [DEV-659](../../tickets/DEV-659.md) | «Del from the old node» не удаляет живой сервер после A→B→A, освобождает только свои порты, confirm у Del/Rollback ([panel!1765](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1765)); панель PASS на проде, найден баг Wings [DEV-688](https://antihost.atlassian.net/browse/DEV-688) - сервер не стартует после возврата на ноду со своей копией. [panel!1774](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1774): повторный Del пишет «nothing to delete». Закрыт 06-Nov |
 | 27-Oct-2026 | [DEV-583](../../tickets/DEV-583.md) | Локация сервера первой, сортировка Load / CPU / Mem / Disk / Name по реальным метрикам, бейдж возраста ([panel!1702](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1702)); PASS, 3 OBS |
