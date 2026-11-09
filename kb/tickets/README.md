@@ -2,7 +2,7 @@
 id: KB-TICKETS
 title: Тикеты и задачи
 type: index
-updated: 2026-11-06
+updated: 2026-11-09
 ---
 
 # Тикеты и задачи
@@ -72,6 +72,7 @@ updated: 2026-11-06
 | [DEV-643](DEV-643.md) | Тех. долг Backup-домена - один маппинг PUT бэкапа и scope «бэкапы сервера» | UP | done | PASS | candidate | 2026-11-04 |
 | [DEV-659](DEV-659.md) | Del from the old node может удалить живой сервер | ADM | done |  | no |  |
 | [DEV-660](DEV-660.md) | Доплата за CPU в конфигураторе апгрейда подписана как надбавка («+ 1 vCore», «2 vCores, included») | UP | done | PASS | covered | 2026-11-05 |
+| [DEV-667](DEV-667.md) | Роль участника сервера - единственный источник прав (v1, v2 бэкапы, Wings, инвайты, split) | UP | done | PASS | candidate | 2026-11-09 |
 | [TASK-missing-mod-deps](TASK-missing-mod-deps.md) | Окно Missing mod dependencies (автодозагрузка зависимостей) | UP | done | PASS-with-issues | - | 2026-09-29 |
 | [TASK-palworld-settings](TASK-palworld-settings.md) | Palworld Settings: UI-редактор PalWorldSettings.ini | UP | partial | PASS-with-issues | blocked | 2026-08-20 |
 | [TASK-split-server](TASK-split-server.md) | Split Server: управление ресурсами split-серверов в новой панели | UP | done | PASS | - | 2026-09-10 |
@@ -102,6 +103,7 @@ updated: 2026-11-06
 - **candidate**: [DEV-564](DEV-564.md) - Bedrock NetherNet - UDP-порты под каждый слот вместо transport nethernet
 - **candidate**: [DEV-579](DEV-579.md) - Project Zomboid - лимит -Xmx в ProjectZomboid64.json следует за тарифом
 - **candidate**: [DEV-643](DEV-643.md) - Тех. долг Backup-домена - один маппинг PUT бэкапа и scope «бэкапы сервера»
+- **candidate**: [DEV-667](DEV-667.md) - Роль участника сервера - единственный источник прав (v1, v2 бэкапы, Wings, инвайты, split)
 - **blocked**: [DEV-480](DEV-480.md) - Пошук файлів на стороні Wings - нативний обхід на ноді за флагом wings-native-file-search
 - **blocked**: [DEV-528](DEV-528.md) - A/B - после Boost конфигуратор апгрейда предлагает следующий план, события страницы апгрейда и разметка оплат
 - **blocked**: [DEV-546](DEV-546.md) - Блок «Boost your server» на чекауте v2 (только UI и QA-превью под флагом)
