@@ -111,7 +111,10 @@ test.describe("Hosting funnel (вариант B) — главная", () => {
     });
   });
 
-  test("@regression TC-HF-005 | период оплаты: длиннее период → ниже цена за месяц", async () => {
+  // 09-Nov-2026: ночной прогон (VPS в DE, EUR) попал на флэш-сейл «-75% на месяц»: Monthly €8 при
+  // продлении €31.99 → «Yearly дешевле Monthly» упало (12.66 < 8). Акция бьёт только Monthly первой
+  // покупки, поэтому длину периода сравниваем по Quarterly→Yearly и по цене продления.
+  test("@regression TC-HF-005 | период оплаты: длиннее период → ниже цена за месяц (устойчиво к флэш-сейлу на Monthly)", async () => {
     await funnel.pickFirstPopularPack();
     for (let i = 0; i < 4; i++) await funnel.advance(); // → Billing period
 
@@ -120,12 +123,29 @@ test.describe("Hosting funnel (вариант B) — главная", () => {
       await expect(funnel.period("Monthly")).toHaveClass(/is-active/);
     });
 
-    const monthly = await funnel.readAsidePrice();
+    const periods = await funnel.readPeriods();
+    const byName = (n: string) => periods.find((p) => p.name === n)!;
+    test.info().annotations.push({
+      type: "periods",
+      description: `flash=${await funnel.isFlashSaleActive()} ${periods.map((p) => `${p.name}:${p.price}/${p.renew}`).join(" ")}`,
+    });
+
+    await test.step("первая покупка: Quarterly > 6 months > Yearly за месяц", async () => {
+      expect(periods.map((p) => p.name)).toEqual(["Monthly", "Quarterly", "6 months", "Yearly"]);
+      expect(byName("Quarterly").price).toBeGreaterThan(byName("6 months").price);
+      expect(byName("6 months").price).toBeGreaterThan(byName("Yearly").price);
+    });
+
+    await test.step("продление: Monthly > Quarterly > 6 months > Yearly за месяц", async () => {
+      const renew = periods.map((p) => p.renew);
+      for (let i = 1; i < renew.length; i++) expect(renew[i]).toBeLessThan(renew[i - 1]);
+    });
+
     await funnel.period("Yearly").click();
 
-    await test.step("Yearly выбран, цена в карточке за месяц меньше Monthly", async () => {
+    await test.step("Yearly выбран, цена в карточке справа = цена карточки Yearly", async () => {
       await expect(funnel.period("Yearly")).toHaveClass(/is-active/);
-      await expect.poll(() => funnel.readAsidePrice()).toBeLessThan(monthly);
+      await expect.poll(() => funnel.readAsidePrice()).toBe(byName("Yearly").price);
     });
   });
 

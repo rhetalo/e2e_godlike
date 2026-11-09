@@ -61,6 +61,10 @@ sources:
 - Кнопка шага 3 **Done** - голый `.f-btn` без `.f-pane__go` (у Continue / Use Nearest Location он есть).
 - «Below recommended» - пустой `span.f-plan__dot` с aria-label, текстом не ищется.
 - HOST NOW дальше формы регистрации не проходим: аккаунты и заказы на проде не создаём.
+- **Флэш-сейл бьёт только Monthly первой покупки.** Ночной прогон 09-Nov-2026 (VPS в Германии, EUR) получил
+  Monthly €8 = продление €31.99 × 25% («Save 75%»), а Yearly €12.66 - Monthly стал дешевле Yearly. Видимость акции
+  задаёт сервер (`data-is-flash-sale-active`, окно `data-flash-sale-start/end`), в UA-сессии и у владельца её не было.
+  Поэтому длину периода сравниваем по Quarterly → 6 months → Yearly и по цене продления (TC-HF-005).
 
 ## Покрытие
 
@@ -70,7 +74,7 @@ sources:
 | Табы Minecraft / Other Games | TC-HF-002 | ✅ |
 | Полный путь до сводки, HOST NOW активен | TC-HF-003, TC-HF-102 (modded) | ✅ |
 | Рекомендация растёт с игроками, Below recommended | TC-HF-004 | ✅ |
-| Период: Yearly дешевле Monthly за месяц | TC-HF-005 | ✅ |
+| Период: Quarterly > 6 months > Yearly за месяц, продление убывает, правая карточка = цена периода | TC-HF-005 | ✅ |
 | HOST NOW → регистрация, Back to configuration | TC-HF-006, TC-HF-102 | ✅ |
 | Прогресс в sessionStorage переживает reload | TC-HF-007 | ✅ |
 | Modded: 2 таба, модпак предвыбран | TC-HF-101 | ✅ |
@@ -83,3 +87,4 @@ sources:
 |---|---|---|
 | ~05-Nov-2026 | - | A/B выкачен без анонса QA; старые modded-тесты падали «через раз» (`#plan-calculator` нет в B) |
 | 06-Nov-2026 | - | Пиннинг A для старых тестов (0d2b534), recon B, 9 автотестов `hosting-funnel.spec.ts` |
+| 09-Nov-2026 | - | TC-HF-005 упал на флэш-сейле «-75% на Monthly» (DE/EUR): проверка переписана без Monthly первой покупки |

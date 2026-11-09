@@ -323,6 +323,9 @@ export const HOSTING_FUNNEL = {
   planBelow: '.f-plan__dot[aria-label="Below recommended"]', // пустая точка «ниже рекомендации»
   period: ".f-period",                    // карточка периода оплаты (выбранная - .is-active)
   periodName: ".f-period__name",
+  periodWrap: ".f-period-wrap",           // карточка периода + строка «Renews at … per month» под ней
+  periodPrice: ".f-period__price b",      // цена первой покупки за месяц (на неё действуют акции)
+  periodRenew: ".f-period__renew",        // цена продления за месяц (акции первой покупки не влияют)
   aside: "aside",                         // карточка «Your Server»: тариф, параметры, цена, CTA
   asidePrice: "aside .f-price__line strong",
   cta: "aside .f-cta",                    // FINISH STEP N TO CONTINUE → HOST NOW (.is-live)

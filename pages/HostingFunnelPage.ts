@@ -130,6 +130,30 @@ export class HostingFunnelPage extends BasePage {
     return this.page.locator(HOSTING_FUNNEL.period);
   }
 
+  /**
+   * Цены всех периодов в порядке на экране: цена первой покупки за месяц и цена продления за месяц.
+   * ⚠️ Флэш-сейл (data-is-flash-sale-active) бьёт только Monthly первой покупки (09-Nov-2026: €8 при
+   * продлении €31.99 → «Monthly дешевле Yearly»), поэтому сравнения длины периода - без Monthly-первой-покупки.
+   */
+  async readPeriods(): Promise<{ name: string; price: number; renew: number }[]> {
+    const wraps = this.page.locator(HOSTING_FUNNEL.periodWrap);
+    const out: { name: string; price: number; renew: number }[] = [];
+    for (let i = 0; i < (await wraps.count()); i++) {
+      const w = wraps.nth(i);
+      out.push({
+        name: (await w.locator(HOSTING_FUNNEL.periodName).innerText()).trim(),
+        price: parsePrice(await w.locator(HOSTING_FUNNEL.periodPrice).innerText()),
+        renew: parsePrice(await w.locator(HOSTING_FUNNEL.periodRenew).innerText()),
+      });
+    }
+    return out;
+  }
+
+  /** Активен ли флэш-сейл на хосте конфигуратора (атрибут от сервера). */
+  async isFlashSaleActive(): Promise<boolean> {
+    return (await this.root.getAttribute("data-is-flash-sale-active")) === "true";
+  }
+
   period(name: string): Locator {
     return this.periods.filter({ has: this.page.locator(HOSTING_FUNNEL.periodName, { hasText: name }) }).first();
   }
