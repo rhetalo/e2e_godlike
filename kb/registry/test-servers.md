@@ -120,7 +120,7 @@ Java-сервер (id 771938).
 - 22-Oct-2026 переименован в `DEV-557-scan` (было `DEV-558-Fabric`) под [DEV-557](../tickets/DEV-557.md): сейчас egg PC-Paper, offline; создана `/mods` с `Cobblemon-fabric-1.8.1+1.21.1.jar` (131 МиБ, через files/pull с Modrinth CDN) и `dev557-control-95mib.jar` (синтетика) - ждут суточного обхода mod-scan-service. В тот же день переведён на Fabric 1.21.1 (без вайпа) и через Plugins/Mods поставлен Cobblemon 1.8.2 (133 МиБ). Обход 22-Oct: контроль разобран, оба Cobblemon без вердикта (FAIL). 23-Oct задача закрыта (сервис переписан Сергеем, проверяет сам); 3 тестовых jar в `/mods` оставлены по решению владельца - стенд для проверки Сергея (хеши в артефакте DEV-557).
 - 03-Nov-2026 [DEV-528](../tickets/DEV-528.md): control (Boost на текущем плане) и окно отмены `?canceled=true` → Change Plan до шага причины; отмены нет (tblcancelrequests 0, Active).
 - Трогать: 🟡.
-
+- 06-Nov-2026: переименован в `DEV-661-rollback` ([DEV-661](https://antihost.atlassian.net/browse/DEV-661)): wing1004 → wing1003 → wing1000, Rollback на wing1003; не стартует («being transferred»), копия на wing1004. Ждёт раскатки Wings !14 / рестарта.
 ### 8c2a6bd7
 Моды: [DEV-405](../tickets/DEV-405.md), [DEV-500](../tickets/DEV-500.md), [DEV-532](../tickets/DEV-532.md).
 - Сейчас на нём BMC4 (425 папок, 5003 файла).
@@ -173,7 +173,7 @@ SkyBlock, на нём воспроизводился баг tariff-list 400. 20-
 - 30-Oct-2026: переименован в `DEV-580-B` ([DEV-580](../tickets/DEV-580.md)): удалены 2 XSS-бэкапа DEV-484 и тестовый folder, остался `DEV-586-prod-T1-first` (1/3). БД на сервере не создаётся (DEV-580/OBS-4).
 - 30-Oct-2026: [DEV-593](../tickets/DEV-593.md) Q1 - квиз (Quadra Premium) пройден до вопроса про игроков, варианты «5-10»/«10-20» скрыты; оффер не создавался.
 - 05-Nov-2026: [DEV-640](../tickets/DEV-640.md) (нода 412, «чужая» для негатива разработки) - folder-бэкап `DEV-640-P2-folder` (1858e943, папка `config`) оставлен.
-
+- 06-Nov-2026: переименован в `DEV-661-aba` ([DEV-661](https://antihost.atlassian.net/browse/DEV-661)): wing1001 → wing1000 → wing1001; не стартует («being transferred»), копия на wing1000. Ждёт раскатки Wings !14 / рестарта.
 ### 7c5aa3cf
 `test`, сплит от [srv:1d7d34aa](#1d7d34aa), Paper 26.2, владелец 307989 в раскатке `extension-compatibility`. Стенд «ядро без модов»:
 legacy 400 и v2 409 `mods_not_supported`, кнопка Upload custom modpack disabled ([DEV-556](../tickets/DEV-556.md), [DEV-549](../tickets/DEV-549.md)). Только отказы, ничего не ставилось. 🟡
@@ -341,6 +341,15 @@ Palworld (stage). 🟡
 
 ### 62c8289b
 NeoForge `neoforge_test` (stage), проверка unix_args. 🟡
+
+### 8668fbbe
+Paper `DEV-584-paper` (stage.wing02), сервер владельца. 🟡
+- 09-Nov-2026: QA [DEV-633](../tickets/DEV-633.md) - файловый API 404/400, CRUD в новой панели. Папка `DEV-633-test` и файл
+  `DEV-633-big-6mb.txt` в корзине (очистится за 24 ч), остальное не трогали. Не переименовывался.
+
+### ada6d05b
+Bedrock `bedrock_571` (stage.wing01), сервер владельца. 🟡
+- 09-Nov-2026: QA [DEV-633](../tickets/DEV-633.md) - только GET файлового API (вторая нода).
 
 ## VPS (VirtFusion)
 

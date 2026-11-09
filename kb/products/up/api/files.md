@@ -4,22 +4,23 @@ title: API - files (потоковый поиск файлов сервера)
 type: api
 product: UP
 status: draft
-updated: 2026-11-04
-verified_on: 2026-11-04
-tickets: [DEV-476, DEV-480, DEV-598]
+updated: 2026-11-09
+verified_on: 2026-11-09
+tickets: [DEV-476, DEV-480, DEV-598, DEV-633]
 features: [UP/files]
 sources:
   - test-docs/ultra.panel/DEV-476/DEV-476-jira-comment.md
   - test-docs/ultra.panel/DEV-480/DEV-480-report.html
   - test-docs/ultra.panel/DEV-476/DEV-476_QA_report.pdf
   - memory: dev476-file-search-perf
+  - test-docs/ultra.panel/DEV-633/DEV-633-results-2026-11-09.md
 ---
 
 # API - files
 
 > **В двух словах.** Поиск по файлам сервера отдаёт результат потоком (`text/event-stream`): совпадения приходят по мере
 > обхода, в конце кадр `end` со статусом. У поиска жёсткие лимиты по длине запроса, числу совпадений, времени и числу
-> параллельных поисков. Чтение, запись и переименование описаны на примере `PalWorldSettings.ini`; остальные эндпоинты
+> параллельных поисков. Чтение, запись и переименование описаны на примере `PalWorldSettings.ini`, коды ошибок чтения и скачивания - в «Ошибки файлов»; остальные эндпоинты
 > файлового менеджера пока не описаны ❓.
 
 Знаки: ✅ живьём, 🧪 подмена ответа в браузере, 📖 из тикета, ❓ нет в источниках. Легенда: [README](README.md#легенда).
@@ -110,6 +111,24 @@ sources:
 ⚠️ В UI запрос уходит **только по Enter** (ввод текста поиск не запускает) и ищет от текущей папки (`?dir=` страницы).
 В таблице результатов у строки под именем - папка совпадения (`.server__file-manager__file-list__file-path`).
 
+## Ошибки файлов (DEV-633)
+
+Что отвечают чтение и скачивание, когда файла нет ✅ ([DEV-633](../../../tickets/DEV-633.md), stage 09-Nov-2026, Wings с фиксом;
+на проде до релиза вместо 404 - 500).
+
+| Случай | v1 `/api/client/servers/{id}/files/...` | v2 `/api/v2/servers/{uuid}/files/...` |
+|---|---|---|
+| `contents` несуществующего файла, файла в несуществующей папке, `file.txt/***`, `../../../etc/passwd` | 404 «The requested resources was not found on the system» | 400 с тем же текстом |
+| `contents` существующего | 200, тело = текст файла | 200 `{"success":true,"data":"..."}` |
+| `contents` файла больше `max_edit_size` (6 MiB) | 400 `FileSizeTooLargeException` «too large to view in the file editor» | 400 с тем же текстом |
+| `contents` на **папку** | 502 «error while communicating... (code: 200)» ⚠️ было и до фикса (DEV-633/OBS-1) | 400 с тем же текстом |
+| `contents`, пустой `file=` | 422 «The file field is required.» | - |
+| `list?directory=` / `files?dir=` несуществующей папки | 200 `{"object":"list","data":[]}` ⚠️ (DEV-633/OBS-2) | 400 not found |
+| `download` | 200 + signed URL без проверки файла; сама ссылка на Wings: 404 если файла нет, 200 если есть | ❓ |
+
+- Короткий uuid подходит v1 (`8668fbbe`), v2 файлам нужен полный ✅.
+- Upload: `GET .../files/upload` → signed URL на Wings, `POST` multipart `files` + `&directory=`; **ссылка одноразовая** - повторный POST 404 ✅.
+
 ## Как проверено
 - 20-Oct-2026, prod, [srv:8c2a6bd7](../../../registry/test-servers.md#8c2a6bd7) (BMC4: 425 папок, 5003 файла) - QA [DEV-476](../../../tickets/DEV-476.md).
 - Выдача сверена с полным деревом сервера: 11 из 11 выборок 1:1, корзина в выдачу не попадает.
@@ -124,3 +143,4 @@ sources:
 | 14-Sep-2026 | [DEV-476](../../../tickets/DEV-476.md) | panel!1597 + new-panel!519: поиск стал потоковым, добавлены лимиты и защита от параллели |
 | 28-Oct-2026 | [DEV-480](../../../tickets/DEV-480.md) | panel!1696 + wings!11: нативный поиск на ноде за флагом, `engine` / `fallback_reason` в `end` |
 | 04-Nov-2026 | [DEV-598](../../../tickets/DEV-598.md) | описаны contents / PUT / move на примере `PalWorldSettings.ini` (API не менялся) |
+| 09-Nov-2026 | [DEV-633](../../../tickets/DEV-633.md) | Wings: несуществующий файл 404 вместо 500 (stage), таблица ошибок v1/v2 |

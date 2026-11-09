@@ -48,7 +48,8 @@ sources:
 
 ### wings-native-file-search
 - **Что:** поиск файлов на самой ноде вместо обхода из панели ([DEV-480](../tickets/DEV-480.md)). Нода без нового Wings - откат на обход.
-- **Состояние (29-Oct-2026):** режим **Staff** - 8 пользователей с «Feature Flags Enabled», в том числе [acc:admin](test-accounts.md#admin)
+- **Состояние (09-Nov-2026):** включён **глобально** (`features.scope = __laravel_null`, value true); тест-аккаунт автотестов на wing4500 и wing6 получает `engine: native`.
+- **Было (29-Oct-2026):** режим **Staff** - 8 пользователей с «Feature Flags Enabled», в том числе [acc:admin](test-accounts.md#admin)
   и 388101. Считается по владельцу сервера. Новые ноды: wing1000, 1001, 1002, 1004. Раскатка на Everyone - после апрува QA.
 - **Где переключать:** `panel.godlike.host/admin/feature-flags/wings-native-file-search` (Off / Staff / Everyone + per-user overrides), без деплоя.
 - **Как увидеть:** кадр `end` ответа `files/search` - поля `engine` и `fallback_reason`.

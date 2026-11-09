@@ -26,7 +26,7 @@ updated: 2026-11-09
 | [DEV-472](DEV-472.md) | Автодетект версии Java и попап ошибки Java | UP | done | PASS | - | 2026-10-08 |
 | [DEV-476](DEV-476.md) | Поиск файлов /files/search - потоковый, с лимитами, без долгих PHP-FPM запросов | UP | done | PASS | covered | 2026-10-20 |
 | [DEV-477](DEV-477.md) | Лимиты ресурсов нод (Unlimited / Percentage / Fixed) вместо overallocation | ADM, INFRA | n/a | - | - | - |
-| [DEV-480](DEV-480.md) | Пошук файлів на стороні Wings - нативний обхід на ноді за флагом wings-native-file-search | UP | done | PASS | blocked | 2026-10-29 |
+| [DEV-480](DEV-480.md) | Пошук файлів на стороні Wings - нативний обхід на ноді за флагом wings-native-file-search | UP | done | PASS | candidate | 2026-10-29 |
 | [DEV-484](DEV-484.md) | Единый лимит бэкапов - вывести pre-install бэкап из-под троттлинга и свести счётчики | UP | done | PASS | covered | 2026-10-20 |
 | [DEV-485](DEV-485.md) | Фоновая проверка Java при старте сервера (гейт java-start-gate) | UP | done | PASS-with-issues | - | 2026-10-09 |
 | [DEV-486](DEV-486.md) | Старый Version Changer ломался на образах yolks-javaNN-libxrender | OLDP | done | PASS | - | 2026-09-25 |
@@ -66,6 +66,7 @@ updated: 2026-11-09
 | [DEV-597](DEV-597.md) | Palworld - импорт мира с компьютера (вкладка World) | UP, OLDP | done | PASS-with-issues | blocked | 2026-11-04 |
 | [DEV-598](DEV-598.md) | Palworld Settings - блок «Popular settings» вверху вкладки | UP | done | PASS | blocked | 2026-11-04 |
 | [DEV-604](DEV-604.md) | Тарифы на страницах игр в HTML для AI-ботов и JSON-LD ProductGroup | WPGL | done | PASS | covered | 2026-11-04 |
+| [DEV-633](DEV-633.md) | Wings отдаёт 404 вместо 500 на несуществующий файл | UP | done | PASS | blocked | 2026-11-09 |
 | [DEV-638](DEV-638.md) | Старая панель и бэкапы новой панели - ссылка на того, кто качает, проверка диска, Activity | UP | done | PASS | covered | 2026-11-03 |
 | [DEV-640](DEV-640.md) | Wings-колбэки /api/remote/backups/{uuid} - бэкап должен принадлежать ноде | UP | done | PASS | no | 2026-11-05 |
 | [DEV-641](DEV-641.md) | World Backups - искать бэкап в рамках сервера, не раскрывать существование чужого uuid | UP | done | PASS | no | 2026-11-03 |
@@ -98,13 +99,13 @@ updated: 2026-11-09
 
 > Собирается из `regression:` карточек. Порядок и детали - в разделе «Регресс» каждой карточки.
 
+- **candidate**: [DEV-480](DEV-480.md) - Пошук файлів на стороні Wings - нативний обхід на ноді за флагом wings-native-file-search
 - **candidate**: [DEV-559](DEV-559.md) - Определять клиентские моды Forge/NeoForge в mod-scan-service
 - **candidate**: [DEV-563](DEV-563.md) - Запретить Free-серверам изменять тип сервера (Ultra Panel и PlayFreeHost)
 - **candidate**: [DEV-564](DEV-564.md) - Bedrock NetherNet - UDP-порты под каждый слот вместо transport nethernet
 - **candidate**: [DEV-579](DEV-579.md) - Project Zomboid - лимит -Xmx в ProjectZomboid64.json следует за тарифом
 - **candidate**: [DEV-643](DEV-643.md) - Тех. долг Backup-домена - один маппинг PUT бэкапа и scope «бэкапы сервера»
 - **candidate**: [DEV-667](DEV-667.md) - Роль участника сервера - единственный источник прав (v1, v2 бэкапы, Wings, инвайты, split)
-- **blocked**: [DEV-480](DEV-480.md) - Пошук файлів на стороні Wings - нативний обхід на ноді за флагом wings-native-file-search
 - **blocked**: [DEV-528](DEV-528.md) - A/B - после Boost конфигуратор апгрейда предлагает следующий план, события страницы апгрейда и разметка оплат
 - **blocked**: [DEV-546](DEV-546.md) - Блок «Boost your server» на чекауте v2 (только UI и QA-превью под флагом)
 - **blocked**: [DEV-549](DEV-549.md) - Фікси після DEV-515 - сценарії туторіалу на заглушках, блокування кнопки кастомних модпаків та API
@@ -112,6 +113,7 @@ updated: 2026-11-09
 - **blocked**: [DEV-576](DEV-576.md) - Checkout v2 - «Your plan» без разовой настройки модпака в месячной цене
 - **blocked**: [DEV-597](DEV-597.md) - Palworld - импорт мира с компьютера (вкладка World)
 - **blocked**: [DEV-598](DEV-598.md) - Palworld Settings - блок «Popular settings» вверху вкладки
+- **blocked**: [DEV-633](DEV-633.md) - Wings отдаёт 404 вместо 500 на несуществующий файл
 - **blocked**: [TASK-palworld-settings](TASK-palworld-settings.md) - Palworld Settings: UI-редактор PalWorldSettings.ini
 
 Только упоминаются, карточек нет: DEV-145 (ARK settings), DEV-275, DEV-315 (конструктор модпаков), DEV-321, DEV-441, DEV-523, PROD-126, GROWTH-95.

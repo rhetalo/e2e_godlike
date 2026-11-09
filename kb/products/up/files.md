@@ -4,9 +4,9 @@ title: Files - файловый менеджер, Recycle Bin, SFTP
 type: feature
 product: UP
 status: draft
-updated: 2026-10-29
+updated: 2026-11-09
 verified_on: 2026-10-23        # окно манифеста DEV-556; апселл - 18-Oct; остальное - 09-Jun
-tickets: [DEV-418, DEV-459, DEV-492, DEV-549, DEV-476, DEV-556, DEV-480]
+tickets: [DEV-418, DEV-459, DEV-492, DEV-549, DEV-476, DEV-556, DEV-480, DEV-633]
 flags: [world-backup, wings-native-file-search]
 tests:
   - tests/game/panel/files.spec.ts
@@ -71,7 +71,11 @@ sources:
 5. **На ядрах без модпаков** (Paper-подобные, Vanilla; только у владельца с флагом `extension-compatibility`) кнопка
    Upload custom modpack контурная, disabled, с тултипом «Custom modpacks cannot be uploaded on this core…»; клик ничего
    не открывает, апселла тоже нет ([DEV-549](../../tickets/DEV-549.md)).
-6. **Тур первого захода в Files** не стартует, пока идёт туториал модов, и тогда не помечается показанным
+6. **Несуществующий файл или папка** ([DEV-633](../../tickets/DEV-633.md), stage 09-Nov): ссылка `?file=<нет такого>` -
+   тост «Unable to open file», запрос к API не уходит (панель сверяется со списком). `?dir=/no-such-dir` - API 400, но UI
+   показывает «This folder is empty» (DEV-633/U2). Файл больше лимита редактора - API 400, UI молчит (DEV-633/U1).
+   Коды - [API files](api/files.md#ошибки-файлов-dev-633).
+7. **Тур первого захода в Files** не стартует, пока идёт туториал модов, и тогда не помечается показанным
    (`localStorage godlike-file-tour-shown`). Если уйти из Files с открытым туром FM, он остаётся на другой странице
    ([DEV-549/O1](../../tickets/DEV-549.md#находки)).
 
@@ -102,6 +106,7 @@ sources:
 | Окно World Backup при удалении `world` | только ручной QA [DEV-418](../../tickets/DEV-418.md) | ❌ авто нет |
 | Поиск файлов: стрим до complete, путь в таблице, 422 | `files.search.spec.ts` (TC-GP-FSRCH-001, 002), [DEV-476](../../tickets/DEV-476.md) | ✅ |
 | Поиск: обрезка на 500, 429 параллели и throttle | только ручной QA [DEV-476](../../tickets/DEV-476.md) (нужен большой модпак на сервере тест-аккаунта) | ❌ авто нет |
+| Несуществующий файл → 404 (не 500), contents/download | только ручной QA [DEV-633](../../tickets/DEV-633.md) на stage; авто после релиза Wings | ⏸️ blocked |
 | Поиск на ноде (`engine: native`), откат на старых нодах | только ручной QA [DEV-480](../../tickets/DEV-480.md); авто после раскатки флага на всех | ⏸️ blocked |
 
 ## История
@@ -117,3 +122,4 @@ sources:
 | 23-Oct-2026 | [DEV-556](../../tickets/DEV-556.md) | [new-panel!563](https://git.godlike.ovh/panel/godlike-new-panel/-/merge_requests/563) + [panel!1690](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1690): ошибки манифеста и пропущенные записи в окне. PASS, TC-GP-CF-002 |
 | 29-Oct-2026 | [DEV-480](../../tickets/DEV-480.md) | Поиск на стороне Wings за флагом `wings-native-file-search` (panel!1696 + wings!11): BMC4 0,35 с вместо 5,4 с, выдача 1:1, откат на старых нодах. PASS |
 | 20-Oct-2026 | [DEV-476](../../tickets/DEV-476.md) | Поиск файлов потоковый (panel!1597 + new-panel!519): BMC4 за 5,8 с вместо 125 с, лимиты 2 символа / 500 совпадений / 2 поиска, [API files](api/files.md). PASS |
+| 09-Nov-2026 | [DEV-633](../../tickets/DEV-633.md) | Wings: несуществующий файл 404 вместо 500 (contents, download). Stage PASS, ждёт релиза; UX-замечания U1/U2 вынесены |
