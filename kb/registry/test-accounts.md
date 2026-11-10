@@ -26,6 +26,7 @@ sources:
 - **Не VIP** (`groupid = 0`): на нём проверяются правила подарка Premium при заказе.
 - **03-Nov-2026 [DEV-528](../tickets/DEV-528.md)** (ок владельца): апгрейды за кредит - c8e6dbed Double → Quadra Budget (invoice 333958, €4.54), a200b181 Double → Ultra Budget (invoice 333959, €10.16, промо). Кредит 922.16 → 907.46. В QA-allowlist как treatment.
 - **05-Nov-2026 DEV-660** (ок владельца): c8e6dbed (переименован в `DEV-660-CPU`, было `UtWiTAi4_483404`, Unstoppable Budget) +1 vCPU, invoice 335238 €0.92. Кредит сам не списался (доплата CPU = ручной путь DEV-657), погашен вручную Apply Credit; кредит 886.49 → 885.57. Сервер `cpu` 300 → 400.
+- **10-Nov-2026 DEV-657** (ок владельца): c8e6dbed (`DEV-660-CPU`) + 1 vCore → + 2 vCores, invoice 338256 €0.68, кредит списан панелью автоматически (фикс panel!1779). `cpu` 400 → 500, кредит 815.66 → 814.98.
 
 ### admin
 

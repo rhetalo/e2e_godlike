@@ -4,9 +4,9 @@ title: Upgrade / Boost - смена тарифа из панели
 type: feature
 product: UP
 status: draft
-updated: 2026-11-05
-verified_on: 2026-11-05
-tickets: [TASK-tariff-list-400, DEV-534, DEV-579, DEV-593, DEV-594, DEV-528, DEV-547, DEV-660]
+updated: 2026-11-10
+verified_on: 2026-11-10
+tickets: [TASK-tariff-list-400, DEV-534, DEV-579, DEV-593, DEV-594, DEV-528, DEV-547, DEV-660, DEV-657]
 flags: []
 tests: [tests/game/panel/promo.spec.ts, tests/game/panel/upgrade.ram-query.spec.ts, tests/game/panel/upgrade.tier.spec.ts, tests/game/panel/upgrade.cpu-labels.spec.ts]
 sources:
@@ -51,8 +51,8 @@ sources:
 - Флаг `off / 50 / all` + QA-allowlist по client id ([flag](../../registry/flags.md#upgrade-next-plan-ab)). Вариант ждёт до 5 с, потом экран A с `variant=error` в событиях (с 04-Nov).
 - Входы различаются в событиях и оплате: `boost_my_server`, `backups`, `cancellation`, `free_to_paid`, `modpack_requirement`, `premium_banner`,
   `upgrade_quiz`, `lagscore`... Поля - [API - апгрейд](api/upgrade.md).
-- Оплата: нативный апгрейд WHMCS (кредит списывается при создании счёта) или, если есть промокод, ручной счёт панели (кредит сам не списывается,
-  редирект на счёт) - [DEV-528/O2](../../tickets/DEV-528.md#находки).
+- Оплата: нативный апгрейд WHMCS (кредит списывается при создании счёта) или, если есть промокод, ручной счёт панели (промокод, доплата CPU). С 09-Nov ручной счёт гасится кредитом автоматически, если кредита хватает на весь счёт,
+  иначе редирект на счёт - [DEV-657](../../tickets/DEV-657.md) (было [DEV-528/O2](../../tickets/DEV-528.md#находки)).
 
 ## Правила и граничные случаи
 
@@ -110,3 +110,4 @@ sources:
 | 04-Nov-2026 | [DEV-528](../../tickets/DEV-528.md) | Ретест: сбой группы = `error` вместо `control`, оплата кредитом с полной разметкой (panel!1764, billing!769, new-panel!606). PASS |
 | 04-Nov-2026 | [DEV-547](../../tickets/DEV-547.md) | Тир предложенного плана = тир сервера во всех входах (сетка, `?ram=`, модпак, квиз, Lag Score), новые поля событий, `entry=client_area`, `previous_*` в оплате (new-panel!568, panel!1699, billing!740). PASS |
 | 05-Nov-2026 | [DEV-660](../../tickets/DEV-660.md) | Доплата CPU подписана как надбавка: «2 vCores, included», «+ 1 vCore» (new-panel!608). Цены и аналитика без изменений, доплата куплена и применилась. PASS |
+| 10-Nov-2026 | [DEV-657](../../tickets/DEV-657.md) | Ручной путь оплаты (промо, доплата CPU) гасится кредитом автоматически, intent `paid`, без редиректа (panel!1779). PASS |

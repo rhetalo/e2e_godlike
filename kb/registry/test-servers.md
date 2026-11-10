@@ -223,7 +223,8 @@ DEV-418. 🟡
 ### c8e6dbed
 `DEV-660-CPU` (было `UtWiTAi4_483404`), тест-аккаунт 388101 / WHMCS 494912, услуга 483404. Ручной QA апгрейдов. 🟡
 - 03-04 Nov-2026: Double → Quadra → Ultra → Unstoppable Budget за кредит ([DEV-528](../tickets/DEV-528.md), [DEV-547](../tickets/DEV-547.md)).
-- 05-Nov-2026: [DEV-660](../tickets/DEV-660.md) +1 vCPU (invoice 335238, €0.92, кредит вручную). Сейчас Unstoppable Budget + 1 vCPU, `cpu=400`, €27.49/мес.
+- 05-Nov-2026: [DEV-660](../tickets/DEV-660.md) +1 vCPU (invoice 335238, €0.92, кредит вручную). 
+- 10-Nov-2026: [DEV-657](../tickets/DEV-657.md) +1 vCore (invoice 338256, €0.68, кредит списан автоматически). Сейчас Unstoppable Budget + 2 vCPU, `cpu=500`.
 
 ### 09f8d87d
 DEV-418 и [DEV-401](../tickets/DEV-401.md). **Free, suspended** (15-Oct). 🔴
