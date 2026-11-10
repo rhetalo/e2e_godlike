@@ -221,8 +221,22 @@ sources:
 - Subject событий для бэкапов новой панели - только сервер из роута; у core-бэкапа ещё и сам бэкап.
 - Диск не `wings` / `s3` → 400 «…unknown disk driver type and cannot be downloaded.» для всех 4 типов (на проде воспроизвести нечем, юнит-тест).
 - `ignored_files` непустой - массив по запятой, пустой или отсутствующий - `[]` (до фикса `[""]`).
-- В v2 download и delete бэкапов в журнал не пишутся и роль не проверяют (баг [DEV-667](https://antihost.atlassian.net/browse/DEV-667), детали в [DEV-638 «Связи»](../../../tickets/DEV-638.md#связи)).
+- С [DEV-667](../../../tickets/DEV-667.md) v2 download и delete требуют `backups.manage`, с [DEV-696](../../../tickets/DEV-696.md) пишутся в журнал ([ниже](#журнал-v2-download-и-delete-dev-696)).
 - Автотест: `tests/game/panel/backups.server-scope.api.spec.ts` (TC-GP-BKP-SCOPE-003), только GET.
+
+## Журнал: v2 download и delete (DEV-696)
+
+С [DEV-696](../../../tickets/DEV-696.md) (panel!1792, 10-Nov-2026) v2 пишет те же события, что и v1. ✅ prod 10-Nov-2026, все три типа.
+
+| Роут v2 | Ответ | Activity |
+|---|---|---|
+| `GET …/backups/{instances\|folders\|databases}/{uuid}/download` | 200 `signed_url` | `server:backup.download` `{name}`, пишется при выдаче ссылки, каждый клик = запись |
+| `DELETE …/backups/{instances\|folders\|databases}/{uuid}` | 200 `{"success":true}` | `server:backup.delete` `{name, failed}` |
+| 403 (нет `backups.manage`, locked), 400 (чужой / выдуманный uuid) | как раньше | не пишется |
+
+- Актор - пользователь запроса, субъект - сервер; у core-бэкапа ещё `backup`. На free-серверах журнал не пишется.
+- В ответе v1 `GET /api/client/servers/{server}/activity` у v2-записей `is_api: false`, у v1 по токену - `true`.
+- Автотест: `tests/game/panel/backups.server-scope.api.spec.ts` (TC-GP-BKP-SCOPE-004), только GET.
 
 ## World Backups: поиск в рамках сервера (DEV-641)
 

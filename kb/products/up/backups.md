@@ -6,7 +6,7 @@ product: UP
 status: draft
 updated: 2026-11-10
 verified_on: 2026-10-20        # DEV-484 r2: общая квота, расписания, бэкапы баз; остальное recon 2026-06-09
-tickets: [DEV-418, DEV-452, DEV-484, DEV-580, DEV-582, DEV-586, DEV-637, DEV-638, DEV-640, DEV-643]
+tickets: [DEV-418, DEV-452, DEV-484, DEV-580, DEV-582, DEV-586, DEV-637, DEV-638, DEV-640, DEV-643, DEV-696]
 flags: []
 tests: [tests/game/panel/backups.spec.ts, tests/game/panel/backups.server-scope.api.spec.ts, tests/game/panel/backups.throttle.spec.ts, tests/game/panel/backups.slots-full.spec.ts, tests/game/panel/role.enforcement.spec.ts, tests/game/panel/security.spec.ts]
 sources:
@@ -134,6 +134,7 @@ OBS-2 пропущенное одноразовое расписание вис�
 | Окно частоты: `throttled` + `retry_after`, 429 с единым текстом, `error_code` + `Retry-After`, ровно один тост с минутами ([DEV-586](../../tickets/DEV-586.md)), строки нет | `backups.throttle.spec.ts` (TC-GP-BKP-005), mut-сервер fd965a60 | ✅ мутация |
 | Бэкап чужого сервера по uuid = «не найдено» (IDOR, [DEV-580](../../tickets/DEV-580.md)): v2 download свой роут 200 / чужой 400 как выдуманный | `backups.server-scope.api.spec.ts` (TC-GP-BKP-SCOPE-001/002), read-only | ✅ read-only |
 | Старая панель: ссылка на бэкап новой панели подписана на того, кто качает ([DEV-638](../../tickets/DEV-638.md)): invitee v1 download → JWT `user_id` invitee | `backups.server-scope.api.spec.ts` (TC-GP-BKP-SCOPE-003), read-only | ✅ read-only |
+| Журнал: v2 download участника виден владельцу в Activity ([DEV-696](../../tickets/DEV-696.md)) | `backups.server-scope.api.spec.ts` (TC-GP-BKP-SCOPE-004), только GET | ✅ read-only |
 | Заглушка «Slots Limit Reached» (free = 0): Create неактивна, Upgrade, счётчик/футер, удаление доступно | `backups.slots-full.spec.ts` (TC-GP-BKP-006), read-only на 9c891502 (3/3) | ✅ read-only |
 
 ## История
@@ -152,4 +153,5 @@ OBS-2 пропущенное одноразовое расписание вис�
 | 05-Nov-2026 | [DEV-640](../../tickets/DEV-640.md) | Wings-колбэки `/api/remote/backups/{uuid}` (статус, restore, S3-ссылки) принимаются только от ноды сервера бэкапа, чужой uuid = 404 + лог `Backup callback refused`; бэкапы баз из колбэков убраны (QA prod PASS, негатив - разработка) |
 | 03-Nov-2026 | [DEV-638](../../tickets/DEV-638.md) | Старая панель для бэкапов новой панели: ссылка подписана на того, кто качает, проверка диска для всех типов, lock/unlock/download/delete в Activity, `ignored_files` = `[]` (QA prod PASS) |
 | 05-Nov-2026 | [DEV-637](../../tickets/DEV-637.md) | Restore бэкапа базы: понятные ошибки 409/503/400 на en/ru/uk одним тостом вместо адреса ноды и текста MySQL, пустой дамп = FAILED, чистка битых `verify-dumps`; доработка 09-Nov: папка = «отсутствует», «применён частично», suspended не советует удалять (QA prod PASS, чистка сверена 10-Nov) |
+| 10-Nov-2026 | [DEV-696](../../tickets/DEV-696.md) | v2 download и delete бэкапа (3 типа) пишутся в журнал активности, как v1; отказы 400/403 не пишутся (QA prod PASS) |
 | 04-Nov-2026 | [DEV-643](../../tickets/DEV-643.md) | Рефакторинг без изменения поведения: один маппинг PUT (`toColumns()`) для instance/folder/database и scope `forServer` вместо 16 копий (QA prod PASS, регресс всех типов) |
