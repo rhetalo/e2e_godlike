@@ -4,9 +4,9 @@ title: Backups - бэкапы сервера, базы и папки
 type: feature
 product: UP
 status: draft
-updated: 2026-11-06
+updated: 2026-11-10
 verified_on: 2026-10-20        # DEV-484 r2: общая квота, расписания, бэкапы баз; остальное recon 2026-06-09
-tickets: [DEV-418, DEV-452, DEV-484, DEV-580, DEV-582, DEV-586, DEV-638, DEV-640, DEV-643]
+tickets: [DEV-418, DEV-452, DEV-484, DEV-580, DEV-582, DEV-586, DEV-637, DEV-638, DEV-640, DEV-643]
 flags: []
 tests: [tests/game/panel/backups.spec.ts, tests/game/panel/backups.server-scope.api.spec.ts, tests/game/panel/backups.throttle.spec.ts, tests/game/panel/backups.slots-full.spec.ts, tests/game/panel/role.enforcement.spec.ts, tests/game/panel/security.spec.ts]
 sources:
@@ -129,6 +129,7 @@ OBS-2 пропущенное одноразовое расписание вис�
 | XSS в имени бэкапа | `security.spec.ts` (SEC-002) | ✅ |
 | Общая квота, `meta.quota`, расписания, бэкапы баз (DEV-484) | руками, prod 20-Oct-2026 ([артефакт](https://claude.ai/artifact/537r7XRR8NiYidKCqNWy5C)), автотеста нет | руками |
 | Restore, Rename, Lock, Database / Folder, Ignored Files, создание расписания | не покрыто; PUT всех полей по 3 типам - руками prod 04-Nov-2026 ([DEV-643](../../tickets/DEV-643.md)), кандидат в автотест | ❌ |
+| Ошибки restore бэкапа базы: 409 missing/empty/unreadable, 400 connection/apply/частично, 200, один тост, RU/UA/DE | руками prod 05/09-Nov-2026 ([DEV-637](../../tickets/DEV-637.md)), кандидат в API-автотест на mut-сервере | руками |
 | Общая квота `meta.quota`: контракт и счётчик used/limit | `backups.spec.ts` (TC-GP-BKP-004), [DEV-484](../../tickets/DEV-484.md) | ✅ read-only |
 | Окно частоты: `throttled` + `retry_after`, 429 с единым текстом, `error_code` + `Retry-After`, ровно один тост с минутами ([DEV-586](../../tickets/DEV-586.md)), строки нет | `backups.throttle.spec.ts` (TC-GP-BKP-005), mut-сервер fd965a60 | ✅ мутация |
 | Бэкап чужого сервера по uuid = «не найдено» (IDOR, [DEV-580](../../tickets/DEV-580.md)): v2 download свой роут 200 / чужой 400 как выдуманный | `backups.server-scope.api.spec.ts` (TC-GP-BKP-SCOPE-001/002), read-only | ✅ read-only |
@@ -150,4 +151,5 @@ OBS-2 пропущенное одноразовое расписание вис�
 | 29-Oct-2026 | [DEV-580](../../tickets/DEV-580.md) | Бэкап ищется только среди бэкапов сервера из роута (v2 и старая панель), чужой uuid = несуществующий; lock/rename бэкапа старой панели без 500 (QA prod PASS 30-Oct) |
 | 05-Nov-2026 | [DEV-640](../../tickets/DEV-640.md) | Wings-колбэки `/api/remote/backups/{uuid}` (статус, restore, S3-ссылки) принимаются только от ноды сервера бэкапа, чужой uuid = 404 + лог `Backup callback refused`; бэкапы баз из колбэков убраны (QA prod PASS, негатив - разработка) |
 | 03-Nov-2026 | [DEV-638](../../tickets/DEV-638.md) | Старая панель для бэкапов новой панели: ссылка подписана на того, кто качает, проверка диска для всех типов, lock/unlock/download/delete в Activity, `ignored_files` = `[]` (QA prod PASS) |
+| 05-Nov-2026 | [DEV-637](../../tickets/DEV-637.md) | Restore бэкапа базы: понятные ошибки 409/503/400 на en/ru/uk одним тостом вместо адреса ноды и текста MySQL, пустой дамп = FAILED, чистка битых `verify-dumps`; доработка 09-Nov: папка = «отсутствует», «применён частично», suspended не советует удалять (QA prod PASS, чистка сверена 10-Nov) |
 | 04-Nov-2026 | [DEV-643](../../tickets/DEV-643.md) | Рефакторинг без изменения поведения: один маппинг PUT (`toColumns()`) для instance/folder/database и scope `forServer` вместо 16 копий (QA prod PASS, регресс всех типов) |

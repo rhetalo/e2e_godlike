@@ -328,6 +328,7 @@ Paper, плагины в [DEV-500](../tickets/DEV-500.md). 🟡
 - 30-Oct-2026: переименован в `DEV-580-C` (было `K6eCbHz9_426586`), [DEV-580](../tickets/DEV-580.md): бэкап базы `db_fix` (битый, Wings 500) удалён с ок владельца, база `s724329_тест` на месте; слоты 2/3.
 - 03-Nov-2026: [DEV-638](../tickets/DEV-638.md) read-only по сути - lock/unlock и download folder-бэкапа `aff8065b`, вернулся unlocked.
 - 04-Nov-2026: переименован в `DEV-643-A`, [DEV-643](../tickets/DEV-643.md) - PUT-матрица на instance `b99d9784` и folder `aff8065b`, откачено (остались `schedule_date`/`next_run_date` 2026-12-04 при schedule=false). Базы: `s724329_тест` (wing902) пустая, `s724329_test111` (wing24, создал владелец) пустая, `s724329_dev643` (wing15, создана при обходе [DEV-677](https://antihost.atlassian.net/browse/DEV-677), rotate-password) пустая. Слоты 2/3.
+- 05/09-Nov-2026: переименован в `DEV-637-db`, [DEV-637](../tickets/DEV-637.md) - restore базы `s724329_dev643` (в ней таблица `dev637_t`, 3 строки; пароль ротирован). Оставлен бэкап базы `DEV-637-r2-ok` (id 42, uuid `aef8f537`, рабочий) - слоты 3/3; сирота дампа `8ad32382….sql` для [DEV-685](https://antihost.atlassian.net/browse/DEV-685). 09-Nov кратко был suspended (R5), возвращён.
 
 ## stage
 

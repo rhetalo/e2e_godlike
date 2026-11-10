@@ -176,9 +176,34 @@ sources:
 - v1 `POST …/lock` бэкапа новой панели → 200 с `is_locked` ✅ (до фикса 500). v1 несуществующий uuid → 404 ✅ (до фикса 500).
 - Uuid бэкапа одного типа на роуте другого типа своего сервера → 400 ✅.
 - `PUT backups/instances|databases` отвечает `{"success":true}` без данных, `PUT backups/folders` - объектом бэкапа ✅ (не менялось).
-- `POST backups/databases/{uuid}/restore` при ошибке Wings → 400 с сырым `file_get_contents(https://wing…:8080/download/file?token=…)` ✅
-  ([DEV-580/OBS-3](../../../tickets/DEV-580.md#находки)).
+- До [DEV-637](../../../tickets/DEV-637.md) `POST backups/databases/{uuid}/restore` при ошибке Wings отдавал 400 с сырым `file_get_contents(https://wing…:8080/download/file?token=…)`
+  ([DEV-580/OBS-3](../../../tickets/DEV-580.md#находки)); теперь - коды и тексты ниже.
 - Автотест: `tests/game/panel/backups.server-scope.api.spec.ts` (TC-GP-BKP-SCOPE-001/002), только GET.
+
+## POST backups/databases/{uuid}/restore (DEV-637)
+
+С [DEV-637](../../../tickets/DEV-637.md) (panel!1749 + new-panel!596, 05-Nov-2026; доработка panel!1789, 09-Nov-2026) restore читает дамп
+через files API Wings (`/var/lib/pterodactyl/backups/<uuid>.sql` в томе сервера), тело ошибки - `{"message": "..."}` на языке `?locale=`
+(`en`, `ru`, `ua`/`uk`; остальные -> en). Фронт показывает `message` одним тостом.
+
+| Код | Причина | Текст (EN, начало «Could not restore the database: ») | Как проверено |
+|---|---|---|---|
+| 200 | дамп применён | `{"success":true}`, тост «Backup restore has been initiated» | ✅ prod 09-Nov-2026 |
+| 409 | нет файла или на его месте папка (`dump_missing`) | the backup file is missing. Delete this backup and create a new one. | ✅ |
+| 409 | файл пуст, 0 байт или пробелы (`dump_empty`) | the backup file is empty. Delete this backup and create a new one. | ✅ |
+| 409 | не читается / ничего не доказано / сервер suspended или в переходном состоянии (`dump_unreadable`) | the backup file could not be read. Please try again later or contact support. | ✅ suspended через API |
+| 503 | нода не ответила ни на чтение, ни на листинг `/` (`node_unavailable`) | the server is temporarily unavailable… | ⏸️ ноду на проде не останавливали |
+| 400 | MySQL не пускает (`connection_failed`) | the database server is unavailable. Please try again later. | ✅ (`ALTER USER` в phpMyAdmin) |
+| 400 | ошибка в первом запросе дампа (`apply_failed`), база не изменена | the backup could not be applied. Please contact support if this repeats. | ✅ |
+| 400 | ошибка в N-м запросе, часть уже применена (DDL коммитится неявно) | the backup was applied only partially, some tables may have been changed or deleted. Please contact support. | ✅ |
+| 400 | чужой или выдуманный `{uuid}` | `No query results for model [Godlike\Domain\Backup\Models\BackupDatabase].` ([DEV-580](#поиск-бэкапа-в-рамках-сервера-dev-580)) | ✅ |
+
+- В телах и тостах нет адреса ноды, токена, IP и текста MySQL ✅. Номер упавшего запроса и errno - только в лог 📖.
+- Ответ 0,9-1,5 с во всех кейсах, листинг ноды с таймаутом 10 с 📖 ✅.
+- Suspended-сервер: UI показывает заглушку «Your server has been suspended», restore доступен только через API v2.
+- Чистка битых бэкапов: `php artisan gl:backups:databases:verify-dumps [--include-suspended] [--delete]` (запускает разработчик/DevOps);
+  suspended по умолчанию пропускаются, `unreachable` не удаляется. Удаляет только строку БД, файл на ноде остаётся ([DEV-685](https://antihost.atlassian.net/browse/DEV-685)).
+- `backup_databases.size` - целые КБ: рабочий дамп 270 байт = `size 0`, по `size` битые не найти.
 
 ## Старая панель: ссылка и журнал для бэкапов новой панели (DEV-638)
 
@@ -271,6 +296,7 @@ Remote API, вызывает только Wings: `Authorization: Bearer <token_i
 | 2026-11-03 | [DEV-638](../../../tickets/DEV-638.md) | [panel!1757](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1757): v1 download бэкапа новой панели подписан на запросившего, проверка диска для всех типов, Activity lock/unlock/download/delete, `ignored_files` `[]` |
 | 2026-11-03 | [DEV-641](../../../tickets/DEV-641.md) | [panel!1750](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1750): world-бэкапы retry/restore/destroy ищут по серверу и uuid, чужой uuid = несуществующий (400 вместо 404 «does not belong») |
 | 2026-11-05 | [DEV-640](../../../tickets/DEV-640.md) | [panel!1758](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1758): Wings-колбэки `/api/remote/backups/{uuid}` только от ноды сервера, чужой uuid = 404 + лог; бэкапы баз из колбэков убраны |
+| 2026-11-05 | [DEV-637](../../../tickets/DEV-637.md) | [panel!1749](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1749) + [new-panel!596](https://git.godlike.ovh/panel/godlike-new-panel/-/merge_requests/596): restore базы через files API, коды 409/503/400 с текстом en/ru/uk, один тост, пустой дамп = FAILED, `verify-dumps`; [panel!1789](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1789) (09-Nov): листинг ноды перед 503, «применён частично», suspended = unreadable |
 | 2026-11-04 | [DEV-643](../../../tickets/DEV-643.md) | [panel!1739](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1739): один маппинг PUT для instance/folder/database (`toColumns()`), scope `forServer` на 4 моделях; поведение не менялось |
 | 2026-10-27 | [DEV-582](../../../tickets/DEV-582.md) | `panel!1713`: зависшие PENDING (старше `backups.prune_age` 360 мин) → FAILED командой `gl:backups:fail-stale-pending` раз в 30 мин; бэкфил `status` |
 

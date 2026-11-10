@@ -68,6 +68,7 @@ updated: 2026-11-10
 | [DEV-600](DEV-600.md) | Очистка UTM из адресной строки с сохранением атрибуции | WPGL | done | PASS | blocked | 2026-11-10 |
 | [DEV-604](DEV-604.md) | Тарифы на страницах игр в HTML для AI-ботов и JSON-LD ProductGroup | WPGL | done | PASS | covered | 2026-11-04 |
 | [DEV-633](DEV-633.md) | Wings отдаёт 404 вместо 500 на несуществующий файл | UP | done | PASS | blocked | 2026-11-09 |
+| [DEV-637](DEV-637.md) | Бэкап базы данных - понятные ошибки restore, пустой дамп и чистка битых бэкапов | UP | done | PASS | candidate | 2026-11-10 |
 | [DEV-638](DEV-638.md) | Старая панель и бэкапы новой панели - ссылка на того, кто качает, проверка диска, Activity | UP | done | PASS | covered | 2026-11-03 |
 | [DEV-640](DEV-640.md) | Wings-колбэки /api/remote/backups/{uuid} - бэкап должен принадлежать ноде | UP | done | PASS | no | 2026-11-05 |
 | [DEV-641](DEV-641.md) | World Backups - искать бэкап в рамках сервера, не раскрывать существование чужого uuid | UP | done | PASS | no | 2026-11-03 |
@@ -106,6 +107,7 @@ updated: 2026-11-10
 - **candidate**: [DEV-563](DEV-563.md) - Запретить Free-серверам изменять тип сервера (Ultra Panel и PlayFreeHost)
 - **candidate**: [DEV-564](DEV-564.md) - Bedrock NetherNet - UDP-порты под каждый слот вместо transport nethernet
 - **candidate**: [DEV-579](DEV-579.md) - Project Zomboid - лимит -Xmx в ProjectZomboid64.json следует за тарифом
+- **candidate**: [DEV-637](DEV-637.md) - Бэкап базы данных - понятные ошибки restore, пустой дамп и чистка битых бэкапов
 - **candidate**: [DEV-643](DEV-643.md) - Тех. долг Backup-домена - один маппинг PUT бэкапа и scope «бэкапы сервера»
 - **candidate**: [DEV-667](DEV-667.md) - Роль участника сервера - единственный источник прав (v1, v2 бэкапы, Wings, инвайты, split)
 - **blocked**: [DEV-528](DEV-528.md) - A/B - после Boost конфигуратор апгрейда предлагает следующий план, события страницы апгрейда и разметка оплат
