@@ -72,6 +72,7 @@ updated: 2026-11-10
 | [DEV-638](DEV-638.md) | Старая панель и бэкапы новой панели - ссылка на того, кто качает, проверка диска, Activity | UP | done | PASS | covered | 2026-11-03 |
 | [DEV-640](DEV-640.md) | Wings-колбэки /api/remote/backups/{uuid} - бэкап должен принадлежать ноде | UP | done | PASS | no | 2026-11-05 |
 | [DEV-641](DEV-641.md) | World Backups - искать бэкап в рамках сервера, не раскрывать существование чужого uuid | UP | done | PASS | no | 2026-11-03 |
+| [DEV-642](DEV-642.md) | Тесты панели: Mockery ParseError на expects('setServer->...') для методов с типом static | UP | done | PASS | no | 2026-11-10 |
 | [DEV-643](DEV-643.md) | Тех. долг Backup-домена - один маппинг PUT бэкапа и scope «бэкапы сервера» | UP | done | PASS | candidate | 2026-11-04 |
 | [DEV-657](DEV-657.md) | Апгрейд с промокодом не списывал кредит с баланса и уводил клиента на страницу счёта | UP, BIL | done | PASS | no | 2026-11-10 |
 | [DEV-659](DEV-659.md) | Del from the old node может удалить живой сервер | ADM | done |  | no |  |
