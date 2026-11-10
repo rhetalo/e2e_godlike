@@ -16,8 +16,14 @@
  * TC-GP-BKP-SCOPE-003 (DEV-638, panel!1757): старая панель подписывала ссылку на бэкап новой
  * панели на владельца сервера, а не на того, кто качает. Invitee (участник test_e2e, не владелец)
  * берёт ссылку через v1 → в JWT из `?token=` его `user_id`, не владельца. Тоже только GET.
+ *
+ * TC-GP-BKP-SCOPE-004 (DEV-696, panel!1792): v2 download бэкапа не писался в журнал активности.
+ * Invitee (Co-owner, есть `backups.manage`) берёт ссылку через v2 → владелец в журнале сервера (v1 activity)
+ * видит `server:backup.download` с invitee и именем бэкапа. Сервер платный: на free журнал не пишется.
+ * Побочный эффект - одна запись в журнале test_e2e за прогон, как у v1 download в TC-003.
  */
-import { test, expect, request as apiRequest, type APIRequestContext } from "@playwright/test";
+import { request as apiRequest, type APIRequestContext } from "@playwright/test";
+import { test, expect } from "../../../fixtures/diagnostics";
 import {
   loginAndSaveGameSession,
   loginInviteeAndSaveSession,
@@ -33,7 +39,7 @@ const FAKE_BACKUP_UUID = "5a0c0de0-dead-4bee-8f00-000000000580";
 // type из GET /backups → сегмент роута v2
 const ROUTE_BY_TYPE: Record<string, string> = { database: "databases", folder: "folders", instance: "instances" };
 
-type BackupRow = { uuid: string; type: string; status: string };
+type BackupRow = { uuid: string; name: string; type: string; status: string };
 
 const DIRECTIONS = [
   { label: "бэкап базы (DEV-484-db) через роут test_e2e", owner: GAME_SERVER_FULL_SLOTS_UUID, other: GAME_SERVER_UUID, type: "database" },
@@ -91,7 +97,7 @@ function downloadTokenClaims(url: string): { user_id?: number; user_uuid?: strin
   return JSON.parse(Buffer.from(token.split(".")[1] ?? "", "base64url").toString("utf8"));
 }
 
-test.describe("@regression @critical [game-panel] v1 backups: ссылка подписана на того, кто качает", () => {
+test.describe("@regression @critical [game-panel] бэкапы участника: подпись ссылки и журнал активности", () => {
   let api: APIRequestContext;
   let ownerToken: string;
   let inviteeToken: string;
@@ -134,6 +140,52 @@ test.describe("@regression @critical [game-panel] v1 backups: ссылка по�
         const claims = downloadTokenClaims(url);
         expect(claims.backup_uuid).toBe(backup!.uuid);
         expect(claims.user_id, "до DEV-638 здесь был id владельца").toBe(inviteeId);
+      });
+    },
+  );
+
+  test(
+    "TC-GP-BKP-SCOPE-004 | v2 download участника виден владельцу в журнале активности",
+    { annotation: { type: "issue", description: "DEV-696" } },
+    async () => {
+      const list = (await (await getServerV2(api, ownerToken, GAME_SERVER_UUID, "backups")).json()) as { data: BackupRow[] };
+      const backup = list.data.find((b) => b.type === "instance" && b.status === "COMPLETED");
+      test.skip(!backup, `на сервере ${GAME_SERVER_UUID.slice(0, 8)} нет COMPLETED-бэкапа типа instance`);
+
+      const inviteeEmail = ((await (await getClientV1(api, inviteeToken, "account")).json()) as { attributes: { email: string } })
+        .attributes.email;
+      const startedAt = Date.now() - 5_000; // запас на расхождение часов
+
+      await test.step("v2 download от участника: 200 signed_url", async () => {
+        const res = await getServerV2(api, inviteeToken, GAME_SERVER_UUID, `backups/instances/${backup!.uuid}/download`);
+        expect(res.status()).toBe(200);
+        expect(((await res.json()) as { object?: string }).object).toBe("signed_url");
+      });
+
+      await test.step("журнал сервера у владельца: свежая запись download от участника с именем бэкапа", async () => {
+        type ActivityRow = {
+          attributes: {
+            event: string;
+            is_api: boolean;
+            timestamp: string;
+            properties: { name?: string };
+            relationships?: { actor?: { attributes?: { email?: string } } };
+          };
+        };
+        const findEntry = async () => {
+          const res = await getClientV1(api, ownerToken, `servers/${GAME_SERVER_UUID}/activity?sort=-timestamp&per_page=10&include=actor`);
+          const rows = ((await res.json()) as { data: ActivityRow[] }).data;
+          return rows.filter(
+            (r) =>
+              r.attributes.event === "server:backup.download" &&
+              r.attributes.is_api === false && // v2 из панели; v1 по токену из TC-003 пишется с is_api: true
+              Date.parse(r.attributes.timestamp) >= startedAt &&
+              r.attributes.properties.name === backup!.name &&
+              r.attributes.relationships?.actor?.attributes?.email === inviteeEmail,
+          ).length;
+        };
+        // ровно 1: 0 - регресс DEV-696, 2+ - дубль записи
+        await expect.poll(findEntry, { message: "до DEV-696 v2 download в журнал не писался" }).toBe(1);
       });
     },
   );
