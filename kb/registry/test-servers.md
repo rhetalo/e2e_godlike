@@ -3,7 +3,7 @@ id: KB-REG-SERVERS
 title: Тест-серверы (UP, VPS)
 type: registry
 status: draft
-updated: 2026-11-09
+updated: 2026-11-10
 verified_on: -        # с живой панелью ещё не сверяли
 sources:
   - utils/gameAuth.ts (env + фолбэки)
@@ -224,7 +224,12 @@ DEV-418. 🟡
 `DEV-660-CPU` (было `UtWiTAi4_483404`), тест-аккаунт 388101 / WHMCS 494912, услуга 483404. Ручной QA апгрейдов. 🟡
 - 03-04 Nov-2026: Double → Quadra → Ultra → Unstoppable Budget за кредит ([DEV-528](../tickets/DEV-528.md), [DEV-547](../tickets/DEV-547.md)).
 - 05-Nov-2026: [DEV-660](../tickets/DEV-660.md) +1 vCPU (invoice 335238, €0.92, кредит вручную). 
-- 10-Nov-2026: [DEV-657](../tickets/DEV-657.md) +1 vCore (invoice 338256, €0.68, кредит списан автоматически). Сейчас Unstoppable Budget + 2 vCPU, `cpu=500`.
+- 10-Nov-2026: [DEV-657](../tickets/DEV-657.md) +1 vCore (invoice 338256, €0.68, кредит списан автоматически).
+- 10-Nov-2026: [DEV-656](../tickets/DEV-656.md) Unstoppable → Rampage → Immortal → Mythic за кредит (338264, 338265, 338266); неоплаченный 338268 на Legendary (€1.67, отмена на владельце). Сейчас **Mythic Budget** 14 GB + 2 vCPU.
+
+### 33ef831c
+`ckyLy0Ei_487263`, тест-аккаунт 388101 / WHMCS 494912, услуга 487263. Был **Free**, дал владелец под [DEV-656](../tickets/DEV-656.md). 🟡
+- 10-Nov-2026: Free → Quadra Budget за €3.25 кредитом (338269, скидка для Free €12.99 → €3.25). Сейчас платный Quadra Budget.
 
 ### 09f8d87d
 DEV-418 и [DEV-401](../tickets/DEV-401.md). **Free, suspended** (15-Oct). 🔴

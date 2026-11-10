@@ -6,7 +6,7 @@ product: UP
 status: draft
 updated: 2026-11-10
 verified_on: 2026-11-10
-tickets: [TASK-tariff-list-400, DEV-534, DEV-579, DEV-593, DEV-594, DEV-528, DEV-547, DEV-660, DEV-657]
+tickets: [TASK-tariff-list-400, DEV-534, DEV-579, DEV-593, DEV-594, DEV-528, DEV-547, DEV-660, DEV-657, DEV-656]
 flags: []
 tests: [tests/game/panel/promo.spec.ts, tests/game/panel/upgrade.ram-query.spec.ts, tests/game/panel/upgrade.tier.spec.ts, tests/game/panel/upgrade.cpu-labels.spec.ts]
 sources:
@@ -53,6 +53,10 @@ sources:
   `upgrade_quiz`, `lagscore`... Поля - [API - апгрейд](api/upgrade.md).
 - Оплата: нативный апгрейд WHMCS (кредит списывается при создании счёта) или, если есть промокод, ручной счёт панели (промокод, доплата CPU). С 09-Nov ручной счёт гасится кредитом автоматически, если кредита хватает на весь счёт,
   иначе редирект на счёт - [DEV-657](../../tickets/DEV-657.md) (было [DEV-528/O2](../../tickets/DEV-528.md#находки)).
+- После оплаты (с 10-Nov, [DEV-656](../../tickets/DEV-656.md)): пока идёт оплата, окно подтверждения держит «текущий → выбранный» и заблокированные Confirm / Cancel / крестик.
+  `paid` → тост «Upgrade completed successfully.», окно закрывается после рефетча тарифов, карточки перемонтируются на новом плане (в конфигураторе «Nothing To Save»,
+  сетка начинается с купленного). Рефетч упал → `reload`. Не оплачено → редирект на счёт, кнопки заблокированы до ухода страницы.
+  Нативный путь при нехватке кредита: WHMCS частично списывает кредит при создании счёта, остаток - к оплате.
 
 ## Правила и граничные случаи
 
@@ -92,6 +96,7 @@ sources:
 | Окно Free Premium | `promo.spec.ts` (PREM-001) | ✅ |
 | `?ram=` → Recommended и конфигуратор (DEV-594) | `upgrade.ram-query.spec.ts` (UPG-RAM-001..003) | ✅ |
 | Оплата апгрейда, промокод | не покрыто (платёж) | ❌ |
+| Окно подтверждения после `paid` / редиректа / 429, Free → платный (DEV-656) | ручной QA [DEV-656](../../tickets/DEV-656.md) | ❌ не в e2e (оплата) |
 | A/B предвыбор после Boost, события страницы | ручной QA [DEV-528](../../tickets/DEV-528.md) | ⏳ blocked до раскатки флага |
 | Тир плана = тир сервера: сетка See All Plans, `?ram=`, сохранение выбора (DEV-547) | `upgrade.tier.spec.ts` (UPG-TIER-001..003) | ✅ |
 | Тир в квизе, `previous_*` в оплате, вход из клиентской зоны (DEV-547) | ручной QA [DEV-547](../../tickets/DEV-547.md) | ❌ не в e2e (биллинг, оплата) |
@@ -111,3 +116,4 @@ sources:
 | 04-Nov-2026 | [DEV-547](../../tickets/DEV-547.md) | Тир предложенного плана = тир сервера во всех входах (сетка, `?ram=`, модпак, квиз, Lag Score), новые поля событий, `entry=client_area`, `previous_*` в оплате (new-panel!568, panel!1699, billing!740). PASS |
 | 05-Nov-2026 | [DEV-660](../../tickets/DEV-660.md) | Доплата CPU подписана как надбавка: «2 vCores, included», «+ 1 vCore» (new-panel!608). Цены и аналитика без изменений, доплата куплена и применилась. PASS |
 | 10-Nov-2026 | [DEV-657](../../tickets/DEV-657.md) | Ручной путь оплаты (промо, доплата CPU) гасится кредитом автоматически, intent `paid`, без редиректа (panel!1779). PASS |
+| 10-Nov-2026 | [DEV-656](../../tickets/DEV-656.md) | Окно подтверждения закрывается после оплаты в конфигураторе и See All Plans, без «Quadra → Quadra»; 429, редирект, сбой сети и Free-сервер (new-panel!610). PASS, шаг Boost вне линейки не проверен |

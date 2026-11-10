@@ -4,7 +4,7 @@ title: API - апгрейд тарифа (вариант A/B, события с�
 type: api
 product: UP
 status: verified
-updated: 2026-11-05
+updated: 2026-11-10
 verified_on: 2026-11-03
 tickets: [DEV-528, DEV-660]
 features: [UP/upgrade]
@@ -67,6 +67,10 @@ sources:
 ### POST /upgrades/{uuid}/pay
 - 200: `{"data":{"status":"paid","invoice_id":N,"payment":{"status","invoice_status","message"}}}` ✅.
 - Нативный путь: WHMCS сам создаёт счёт и гасит кредитом, `payment.status=paid` → тост, клиент остаётся в панели.
+  Кредита меньше суммы: WHMCS списывает его частично при создании счёта («Credit Automatically Applied at Invoice Creation»), `pay` → редирект на
+  `viewinvoice.php?id=N`, intent `failed` «Payment Attempt Failed» ✅ (338268, 10-Nov-2026, [DEV-656](../../../tickets/DEV-656.md)).
+- Ответ `pay` идёт ~16 с (нативный путь, prod 10-Nov). После `paid` FE ждёт рефетча `billing/{id}/current`, `tariffs-new/{id}/list`, `servers/{id}` и только потом закрывает окно;
+  `list` упал → `window.location.reload()` ✅ ([DEV-656](../../../tickets/DEV-656.md)). 429 → окно остаётся, intent от `POST /upgrades` висит `pending` до `expires_at`.
 - Есть промокод → биллинг отвечает `fallback`, панель создаёт счёт сама (`CreateInvoice` + строка Promo), затем кредит и `CapturePayment` через шлюз; не оплачено → редирект на `clientarea/viewinvoice.php?id=N`, intent `failed` ✅ ([DEV-528/O2](../../../tickets/DEV-528.md#находки)).
 - С 09-Nov-2026 ([DEV-657](../../../tickets/DEV-657.md), panel!1779): кредит клиента >= остатка счёта → `ApplyCredit(invoiceid, amount=balance)`, счёт Paid за секунды, intent `paid`, клиент в панели;
   кредита меньше → ApplyCredit не шлётся, кредит остаётся на балансе, остаток в `CapturePayment`. До фикса `ApplyCredit` шёл без `amount` и ничего не применял ✅ (prod 10-Nov-2026).
