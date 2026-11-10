@@ -4,9 +4,9 @@ title: ADM - админка панели (panel.godlike.host/admin)
 type: product-overview
 product: ADM
 status: draft
-updated: 2026-10-27
+updated: 2026-11-10
 verified_on: 2026-10-12        # DEV-513 (смена образа из админки)
-tickets: [DEV-477, DEV-513, DEV-532, DEV-486, DEV-579, DEV-418, DEV-583]
+tickets: [DEV-477, DEV-513, DEV-532, DEV-486, DEV-579, DEV-418, DEV-583, DEV-678]
 flags: [GODLIKE_NODE_RESOURCE_LIMITS_ENABLED, is-listed, world-backup]
 tests: []                      # автотестов нет и не будет без ок владельца
 sources:
@@ -32,6 +32,7 @@ sources:
 | Prepared Servers / Pool Policies | `/admin/prepared-servers`: пул готовых серверов с модпаком, политики, Fill now / Reinstall / Rebuild, failed-строки | [ADM/prepared-servers](prepared-servers.md) |
 | Каталог модпаков v2 | `/admin/modpacks-v2/view/{id}`: чекбокс «Client catalog» (`is_listed`), колонка Listed / Hidden, `PATCH .../listing`; пулы `/pools/new` | [ADM/modpack-catalog](modpack-catalog.md) |
 | Ноды | лимиты disk / RAM: режимы Unlimited / Percentage / Fixed вместо overallocation (env [flag:GODLIKE_NODE_RESOURCE_LIMITS_ENABLED](../../registry/flags.md#godlike_node_resource_limits_enabled)). Отдельной страницы нет: QA не участвовал, фактов мало | [DEV-477](../../tickets/DEV-477.md) |
+| SFTP Mod Uploads | `/admin/sftp-mod-uploads`: клиенты, загружавшие `.jar` в `mods/` по SFTP (из `activity_logs`, только просмотр) | [ADM/sftp-mod-uploads](sftp-mod-uploads.md) |
 | Фичефлаги | тумблеры Laravel Pennant, после включения нужен `php artisan pennant:purge <flag>` (DevOps) | [реестр флагов](../../registry/flags.md), [DEV-418](../../tickets/DEV-418.md) |
 
 ## Правила
