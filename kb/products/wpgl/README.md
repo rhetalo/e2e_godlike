@@ -73,6 +73,7 @@ sources:
 | Custom Modpack Setup | `/custom-modpack-setup/`, Lite / Pro, 4 входа | [DEV-458](../../tickets/DEV-458.md), [DEV-459](../../tickets/DEV-459.md) | нет | ✅ [WPGL/custom-modpack-setup](custom-modpack-setup.md) |
 | Лендинги | Launcher `/launcher/` (черновик), SMP One-Click `/minecraft-smp/` (6 сборок), Modpack Program ❓ | - | нет | ⚠️ [WPGL/landings](landings.md) |
 | PlayFreeHost | отдельный WP-сайт playfreehost.com - свой обзор [PFH](../pfh/README.md) | [DEV-563](../../tickets/DEV-563.md) | нет | ✅ |
+| Очистка UTM из адреса | скрипт `godlike-utm-capture` чистит utm из адреса, кампания в cookie / dataLayer для GA4, Amplitude, RedTrack, биллинга; режим `selected` на одну reddit-кампанию (с 04-Nov) | [DEV-600](../../tickets/DEV-600.md) | нет | ✅ [WPGL/utm-clean-url](utm-clean-url.md) |
 | Промо | MONTHLY75/50, MODPACK50, VANILLA20 / COMMUNITY40, flash-sale, попап Free Server Gift | [DEV-400](../../tickets/DEV-400.md), [DEV-455](../../tickets/DEV-455.md) | `games.*.promo`, воронки | ✅ [WPGL/promo](promo.md) |
 
 ## Шапка и меню (live 15-Oct)

@@ -2,7 +2,7 @@
 id: KB-TICKETS
 title: Тикеты и задачи
 type: index
-updated: 2026-11-09
+updated: 2026-11-10
 ---
 
 # Тикеты и задачи
@@ -65,6 +65,7 @@ updated: 2026-11-09
 | [DEV-595](DEV-595.md) | Правило «длинный цикл → Premium» - один список циклов для заказа и апгрейда | BIL | in-qa | PASS | no | 2026-10-26 |
 | [DEV-597](DEV-597.md) | Palworld - импорт мира с компьютера (вкладка World) | UP, OLDP | done | PASS-with-issues | blocked | 2026-11-04 |
 | [DEV-598](DEV-598.md) | Palworld Settings - блок «Popular settings» вверху вкладки | UP | done | PASS | blocked | 2026-11-04 |
+| [DEV-600](DEV-600.md) | Очистка UTM из адресной строки с сохранением атрибуции | WPGL | done | PASS | blocked | 2026-11-10 |
 | [DEV-604](DEV-604.md) | Тарифы на страницах игр в HTML для AI-ботов и JSON-LD ProductGroup | WPGL | done | PASS | covered | 2026-11-04 |
 | [DEV-633](DEV-633.md) | Wings отдаёт 404 вместо 500 на несуществующий файл | UP | done | PASS | blocked | 2026-11-09 |
 | [DEV-638](DEV-638.md) | Старая панель и бэкапы новой панели - ссылка на того, кто качает, проверка диска, Activity | UP | done | PASS | covered | 2026-11-03 |
@@ -114,6 +115,7 @@ updated: 2026-11-09
 - **blocked**: [DEV-576](DEV-576.md) - Checkout v2 - «Your plan» без разовой настройки модпака в месячной цене
 - **blocked**: [DEV-597](DEV-597.md) - Palworld - импорт мира с компьютера (вкладка World)
 - **blocked**: [DEV-598](DEV-598.md) - Palworld Settings - блок «Popular settings» вверху вкладки
+- **blocked**: [DEV-600](DEV-600.md) - Очистка UTM из адресной строки с сохранением атрибуции
 - **blocked**: [DEV-633](DEV-633.md) - Wings отдаёт 404 вместо 500 на несуществующий файл
 - **blocked**: [TASK-palworld-settings](TASK-palworld-settings.md) - Palworld Settings: UI-редактор PalWorldSettings.ini
 

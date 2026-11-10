@@ -3,7 +3,7 @@ id: KB-REG-INTEGRATIONS
 title: Внешние интеграции
 type: registry
 status: draft
-updated: 2026-10-28
+updated: 2026-11-10
 sources:
   - kb/_meta/inventory-2026-10-15.md §2
   - agents.docs/godlike-mcp-usage.md, agents.docs/game-panel/KNOWLEDGE_BASE.md
@@ -29,7 +29,7 @@ sources:
 | Yoast | WPGL | SEO-мета, schema | - |
 | WP Rocket + Cloudflare | WPGL | Кеш | Cloudflare чистится руками. Устаревшая страница после правки - это ожидаемо |
 | CookieYes | WPGL | Cookie-баннер | Перекрывает клики. Закрывается в `fixtures/base.ts` |
-| GTM, redtrack, FB pixel, ipapi | WPGL | Трекинг, гео | - |
+| GTM, redtrack, FB pixel, ipapi | WPGL | Трекинг, гео; GTM-M9WVHNPF (с v191 берёт адрес из `original_page_location`, [DEV-600](../tickets/DEV-600.md)) | CookieYes ставит GTM по `geoInfoReady`, страна из ipapi.co: при 429 (VPN, общий IP) баннера нет. GA4 Realtime тестовые визиты не показывает - смотреть стандартный отчёт |
 | Trustpilot | UP | Giveaway-модалка | Её scrim даёт флоки power-тестов |
 | Chatwoot | UP | Чат поддержки | - |
 | Discord, Slack | UP / CI | Сообщество, отчёты автотестов | - |

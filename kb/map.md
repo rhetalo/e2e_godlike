@@ -115,6 +115,7 @@ mindmap
   - 📄 [Custom Modpack Setup](products/wpgl/custom-modpack-setup.md) - 🎫 [DEV-458](tickets/DEV-458.md), [DEV-459](tickets/DEV-459.md)
   - 📄 [VPS-воронка](products/vps/purchase-funnel.md)
 - 📄 [Промо: MONTHLY75, MODPACK50, flash-sale, Free Server Gift](products/wpgl/promo.md) - 🎫 [DEV-455](tickets/DEV-455.md)
+- 📄 [Очистка UTM из адреса, атрибуция GA4 / Amplitude / RedTrack](products/wpgl/utm-clean-url.md) - 🎫 [DEV-600](tickets/DEV-600.md)
 - 📄 [Лендинги без автотестов: Launcher, SMP, KB сайта, /servers/](products/wpgl/landings.md)
 - 📄 [Гочи витрины](products/wpgl/README.md#гочи-для-тестирования)
 - Инструменты WP: [MCP godlike-wp](registry/mcp-tools.md#серверы)
