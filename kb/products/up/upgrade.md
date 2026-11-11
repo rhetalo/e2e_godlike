@@ -58,6 +58,27 @@ sources:
   сетка начинается с купленного). Рефетч упал → `reload`. Не оплачено → редирект на счёт, кнопки заблокированы до ухода страницы.
   Нативный путь при нехватке кредита: WHMCS частично списывает кредит при создании счёта, остаток - к оплате.
 
+## Откат апгрейда - Discard changes (24 ч)
+
+- После оплаченного апгрейда над конфигуратором плашка «**Upgrade applied!** You can discard changes within 24h», таймер `ЧЧ:ММ:СС` и кнопка
+  **Discard changes**. Клиент откатывает апгрейд сам.
+- Под капотом: panel `UpgradeDiscardController` → WHMCS `product_features.php?action=upgrade_discard` (`serviceId`). По доку DEV-662 окно
+  30 мин - 24 ч и только **ручные** строки (`godlike_product_upgrades`: промо, опции, Free → платный); нативный апгрейд (`tblupgrades`) так не откатить ❓ (живьём не проверено).
+- Проверено 11-Nov ([DEV-662](../../tickets/DEV-662.md)): **один клик, без окна подтверждения** → услуга сразу на прежнем pid, плашка Free и PRO-метки вернулись;
+  в биллинге `is_reverted = 1`, деньги - **кредитом** «Contr offer» (не на карту).
+- `upgrade_intents` откат **не трогает**: попытка остаётся `paid`. Отсюда: в отчётах по попыткам откаченный апгрейд выглядит оплаченным, а пара «откат + повторная покупка»
+  похожа на двойную оплату (460775, 481954 в разборе DEV-662). Сверять с `godlike_product_upgrades.is_reverted`.
+- ⚠️ Из-за этого после Discard **тот же план нельзя купить до 6 ч** (гейт DEV-662 видит откаченную оплату): 409 «This server is already on the selected plan.»,
+  хотя сервер на прежнем плане. Другие опции/план проходят. Подтверждено 11-Nov (F1 DEV-662), в MR - известное ограничение.
+
+## Защита от повторной покупки (с 10-Nov, [DEV-662](../../tickets/DEV-662.md))
+
+- `POST /upgrades` и `/pay` отвечают 409 `nothing_to_upgrade`, если **последняя оплаченная** попытка сервиса за 6 ч купила то же (план + цикл + опции; промокод не важен).
+  Ответ create: «This service was upgraded to the selected plan a moment ago.» + `intent_uuid` оплаченной; фронт показывает тост «This server is already on the selected plan.»
+- `/pay` на уже купленный план закрывает попытку `failed / nothing_to_upgrade` (раньше вечный `pending`); `duplicate_of:<uuid>` - только если WHMCS ещё на старом плане.
+- Часовая команда `gl:upgrade-intents:expire-stale-pending`: просроченные `pending` → `expired / pending_ttl`.
+- Мусор в отчётах по `upgrade_intents`: `failed` с `nothing_to_upgrade` / `duplicate_of:%`, `expired` с `pending_ttl`.
+
 ## Правила и граничные случаи
 
 1. **Баг Critical (09-Oct):** `tariffs-new/.../list` ~19 с → 400 TypeError `TariffListService::filterProducts`, в ответе
@@ -86,6 +107,7 @@ sources:
 - Save Setup на странице апгрейда открывает окно подтверждения (`confirm-on-save`), платит только Confirm Upgrade. Окно можно закрыть крестиком ([DEV-660](../../tickets/DEV-660.md)).
 - Список CPU: первый пункт - ядра плана («N vCores, included», у Premium «Max»), остальные - доплаты `cpu_add` («+ N vCore(s)»). Сумма прорейтится до `nextduedate` ([DEV-660](../../tickets/DEV-660.md)).
 - CTA Free Premium (триал) не жать.
+- Discard changes откатывает платный апгрейд сразу, без подтверждения - не задевать на чужих/общих серверах.
 - Если страница грузится бесконечно, сначала проверить ответ `tariffs-new/.../list` - это известный баг, а не флак.
 
 ## Покрытие
@@ -117,3 +139,4 @@ sources:
 | 05-Nov-2026 | [DEV-660](../../tickets/DEV-660.md) | Доплата CPU подписана как надбавка: «2 vCores, included», «+ 1 vCore» (new-panel!608). Цены и аналитика без изменений, доплата куплена и применилась. PASS |
 | 10-Nov-2026 | [DEV-657](../../tickets/DEV-657.md) | Ручной путь оплаты (промо, доплата CPU) гасится кредитом автоматически, intent `paid`, без редиректа (panel!1779). PASS |
 | 10-Nov-2026 | [DEV-656](../../tickets/DEV-656.md) | Окно подтверждения закрывается после оплаты в конфигураторе и See All Plans, без «Quadra → Quadra»; 429, редирект, сбой сети и Free-сервер (new-panel!610). PASS, шаг Boost вне линейки не проверен |
+| 11-Nov-2026 | [DEV-662](../../tickets/DEV-662.md) | Гейт от повторной покупки того же плана 6 ч, чистка вечных `pending` (panel!1778). PASS с замечанием F1: после Discard тот же план заблокирован до 6 ч. Discard описан |
