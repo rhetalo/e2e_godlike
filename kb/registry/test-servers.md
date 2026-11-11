@@ -344,6 +344,7 @@ Paper, плагины в [DEV-500](../tickets/DEV-500.md). 🟡
 - 04-Nov-2026: переименован в `DEV-643-A`, [DEV-643](../tickets/DEV-643.md) - PUT-матрица на instance `b99d9784` и folder `aff8065b`, откачено (остались `schedule_date`/`next_run_date` 2026-12-04 при schedule=false). Базы: `s724329_тест` (wing902) пустая, `s724329_test111` (wing24, создал владелец) пустая, `s724329_dev643` (wing15, создана при обходе [DEV-677](https://antihost.atlassian.net/browse/DEV-677), rotate-password) пустая. Слоты 2/3.
 - 05/09-Nov-2026: переименован в `DEV-637-db`, [DEV-637](../tickets/DEV-637.md) - restore базы `s724329_dev643` (в ней таблица `dev637_t`, 3 строки; пароль ротирован). Оставлен бэкап базы `DEV-637-r2-ok` (id 42, uuid `aef8f537`, рабочий) - слоты 3/3; сирота дампа `8ad32382….sql` для [DEV-685](https://antihost.atlassian.net/browse/DEV-685). 09-Nov кратко был suspended (R5), возвращён.
 - 10-Nov-2026: [DEV-696](../tickets/DEV-696.md) - бэкап базы `DEV-637-r2-ok` удалён (освобождён слот), `DEV-696-db-lock` создан и удалён. Слоты 2/3.
+- 11-Nov-2026: [DEV-672](../tickets/DEV-672.md) - Transfer wing129→wing141 + Rollback, базы на месте. После Rollback застрял в [DEV-688](https://antihost.atlassian.net/browse/DEV-688) (не стартует, «server is currently being transferred»; Kill не лечит). Поставлен Paper 1.21.11 #132 (jar не было), в `plugins/` LuckPerms 5.5.71 (конфиг без пароля) и пустая `CoreProtect`. Ждёт рестарта Wings на wing129 / раскатки wing-panel!14.
 
 ## stage
 

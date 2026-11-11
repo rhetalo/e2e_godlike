@@ -4,15 +4,16 @@ title: Сервер в админке - Transfer (перенос на другу
 type: feature
 product: ADM
 status: draft
-updated: 2026-11-09
+updated: 2026-11-11
 verified_on: 2026-10-27        # DEV-583: только просмотр модалки, без переносов
-tickets: [DEV-583, DEV-659, DEV-661]
+tickets: [DEV-583, DEV-659, DEV-661, DEV-672]
 flags: []
 tests: []                      # автотестов нет и не будет без ок владельца
 sources:
   - kb/tickets/DEV-583.md
   - kb/tickets/DEV-659.md
   - kb/tickets/DEV-661.md
+  - kb/tickets/DEV-672.md
   - test-docs/panel/DEV-583/DEV-583-qa.html
   - memory: feedback-legacy-admin-ask-first, dev583-transfer-sorting
 ---
@@ -27,6 +28,7 @@ sources:
 
 | Что | Путь / селектор | Источник |
 |---|---|---|
+| 11-Nov-2026 | [DEV-672](../../tickets/DEV-672.md) | Шаг «Transfer databases» убран из колбека Wings, admin Confirm, Rollback и `ServerTransferWorkflow` ([panel!1795](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1795)): базы остаются на месте; prod PASS. DEV-688 на проде всё ещё воспроизводится (wing129) |
 | Страница | `/admin/servers/view/{id}/manage-transfer` (`{id}` - числовой ID сервера) | [DEV-583](../../tickets/DEV-583.md) |
 | Кнопка «Transfer Server» | только открывает модалку `#transferServerModal` (`data-toggle="modal"`, без формы) | DEV-583 |
 | Поиск | `#nodeSearch` (по имени ноды) | DEV-583 |
@@ -47,6 +49,7 @@ sources:
 
 ## Правила и граничные случаи
 
+- Базы сервера при переносе (legacy, workflow) и Rollback не переносятся: остаются на DB host, где созданы, с теми же именем и доступами ([DEV-672](../../tickets/DEV-672.md), с 11-Nov-2026).
 - Группы: локация сервера первая (бейдж «Current location»), остальные по `localeCompare` имени.
 - Внутри группы: выбранная метрика, при равенстве - Load, потом имя. Null в конце в обоих направлениях.
 - Бейдж метрики красный при >90%.
@@ -67,6 +70,7 @@ sources:
 ## Покрытие
 
 - **Спеков на админку нет.**
+- Ручной QA [DEV-672](../../tickets/DEV-672.md) 11-Nov-2026, prod: Transfer + Rollback своего `83d391c4`, базы на месте; подключение после Rollback не проверено (DEV-688).
 - Ручной QA [DEV-661](../../tickets/DEV-661.md) 09-Nov-2026, stage: Rollback, A→B→A, рестарт и стоп Wings, sync на чужой ноде - PASS.
 - Ручной QA [DEV-659](../../tickets/DEV-659.md) 05-Nov-2026, prod: Del / Rollback после A→B, A→B→A, A→B→C на своих серверах, PASS.
 - Ручной QA [DEV-583](../../tickets/DEV-583.md) 27-Oct-2026, prod: шаги MR 1-6 PASS + сверка с БД, поиск, второй сервер.
