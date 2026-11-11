@@ -4,9 +4,9 @@ title: API - апгрейд тарифа (вариант A/B, события с�
 type: api
 product: UP
 status: verified
-updated: 2026-11-10
+updated: 2026-11-11
 verified_on: 2026-11-03
-tickets: [DEV-528, DEV-660]
+tickets: [DEV-528, DEV-660, DEV-662]
 features: [UP/upgrade]
 sources:
   - kb/tickets/DEV-528.md
@@ -63,6 +63,10 @@ sources:
 - 201: `{"data":{"uuid","price","old_price","is_discounted","expires_at"}}` ✅.
 - Невалидные `open_id`, `ab_variant`, `preselect_applied` → 422, intent не создаётся ✅.
 - Пишет строку в `upgrade_intents` (panel DB) с полями разметки ✅.
+- С 10-Nov-2026 ([DEV-662](../../../tickets/DEV-662.md), panel!1778): последняя оплаченная попытка сервиса за 6 ч купила то же (план + цикл + опции, промокод не важен) →
+  **409** `{"message":"This service was upgraded to the selected plan a moment ago.","reason":"nothing_to_upgrade","intent_uuid":"<оплаченной>"}`, строка не создаётся ✅ (prod 11-Nov).
+- Тот же `Idempotency-Key` после отказа `nothing_to_upgrade` → снова 409 `nothing_to_upgrade` «This service is already on the selected plan.», не `idempotency_key_exhausted` ✅.
+- Текущий тариф с текущими опциями (без апгрейда за 6 ч) → 201, `price: 0` ✅; под админ-видом на чужой услуге - 404 «not available».
 
 ### POST /upgrades/{uuid}/pay
 - 200: `{"data":{"status":"paid","invoice_id":N,"payment":{"status","invoice_status","message"}}}` ✅.
@@ -76,6 +80,8 @@ sources:
   кредита меньше → ApplyCredit не шлётся, кредит остаётся на балансе, остаток в `CapturePayment`. До фикса `ApplyCredit` шёл без `amount` и ничего не применял ✅ (prod 10-Nov-2026).
 - Тот же ручной путь включает **доплата CPU** (опция 104 ≠ 751) без промокода: счёт «Upgrade to new product: X. Configs: [[104,744],…]», `tblupgrades` не пишется,
   до DEV-657 кредит не применялся, `payment_message` «Payment Attempt Failed», intent `failed` навсегда; после ручного Apply Credit опция и ядра применяются ✅ ([DEV-660](../../../tickets/DEV-660.md), 05-Nov-2026). С 10-Nov гасится кредитом автоматически ([DEV-657](../../../tickets/DEV-657.md), счёт 338256).
+- С 10-Nov-2026 ([DEV-662](../../../tickets/DEV-662.md)): `pay` на тот же план (`isNoop`) → 409 `nothing_to_upgrade` «This upgrade is not available for this service», попытка `failed / nothing_to_upgrade`, счёта нет ✅;
+  повтор недавно оплаченной покупки (WHMCS ещё на старом плане) → 409, попытка `failed / duplicate_of:<uuid>`. Просроченные `pending` раз в час → `expired / pending_ttl`.
 - События `upgrade_cta_clicked` / `upgrade_confirm_clicked`: `final_cpu` в старом формате «1 vCores / 3.7 GHz» при любом языке UI ✅ ([DEV-660](../../../tickets/DEV-660.md)).
 
 ## Биллинг и событие `upgrade`

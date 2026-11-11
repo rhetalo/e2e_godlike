@@ -4,9 +4,9 @@ title: Upgrade / Boost - смена тарифа из панели
 type: feature
 product: UP
 status: draft
-updated: 2026-11-10
-verified_on: 2026-11-10
-tickets: [TASK-tariff-list-400, DEV-534, DEV-579, DEV-593, DEV-594, DEV-528, DEV-547, DEV-660, DEV-657, DEV-656]
+updated: 2026-11-11
+verified_on: 2026-11-11
+tickets: [TASK-tariff-list-400, DEV-534, DEV-579, DEV-593, DEV-594, DEV-528, DEV-547, DEV-660, DEV-657, DEV-656, DEV-662]
 flags: []
 tests: [tests/game/panel/promo.spec.ts, tests/game/panel/upgrade.ram-query.spec.ts, tests/game/panel/upgrade.tier.spec.ts, tests/game/panel/upgrade.cpu-labels.spec.ts]
 sources:
