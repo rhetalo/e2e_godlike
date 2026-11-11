@@ -2,7 +2,7 @@
 id: KB-TICKETS
 title: Тикеты и задачи
 type: index
-updated: 2026-11-10
+updated: 2026-11-11
 ---
 
 # Тикеты и задачи
@@ -82,6 +82,7 @@ updated: 2026-11-10
 | [DEV-667](DEV-667.md) | Роль участника сервера - единственный источник прав (v1, v2 бэкапы, Wings, инвайты, split) | UP | done | PASS | candidate | 2026-11-09 |
 | [DEV-678](DEV-678.md) | Детект ручной загрузки модов через SFTP на Minecraft-серверах (отчёт в админке) | ADM, UP | done | PASS | no | 2026-11-10 |
 | [DEV-696](DEV-696.md) | Скачивание и удаление бэкапа через новую панель (v2) пишутся в журнал активности | UP | done | PASS | covered | 2026-11-10 |
+| [DEV-702](DEV-702.md) | Unit-тест LinkUserToServerActionTest падает с TypeError: сервер в тесте создаётся без id | UP | done | PASS | no | 2026-11-11 |
 | [TASK-missing-mod-deps](TASK-missing-mod-deps.md) | Окно Missing mod dependencies (автодозагрузка зависимостей) | UP | done | PASS-with-issues | - | 2026-09-29 |
 | [TASK-palworld-settings](TASK-palworld-settings.md) | Palworld Settings: UI-редактор PalWorldSettings.ini | UP | partial | PASS-with-issues | blocked | 2026-08-20 |
 | [TASK-split-server](TASK-split-server.md) | Split Server: управление ресурсами split-серверов в новой панели | UP | done | PASS | - | 2026-09-10 |
