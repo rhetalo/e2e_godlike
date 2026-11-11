@@ -81,11 +81,12 @@ export const GAME_SERVER_RENAME_NAME =
 export const GAME_SERVER_MUT_JAVA_UUID =
   process.env.GAME_PANEL_SERVER_MUT_JAVA_UUID ?? "fd965a60-155b-41b9-95fc-6da029943abd";
 /**
- * Premium-сервер тест-аккаунта (Double Premium 359, услуга 484011) - только read-only проверки тира на странице
- * апгрейда (DEV-547). Пару ему даёт канонический GAME_SERVER_UUID (Double Budget 342).
+ * Premium-сервер тест-аккаунта (Double Premium 359, услуга 484011, имя `upgrade_test`) - только read-only
+ * проверки тира на странице апгрейда (DEV-547, DEV-660). Пару ему даёт канонический GAME_SERVER_UUID (Double Budget 342).
+ * 11-Nov-2026: прежний сервер 8a112a28 снесли Terminate 10-Nov, услугу пересоздали → новый UUID.
  */
 export const GAME_SERVER_PREMIUM_UUID =
-  process.env.GAME_PANEL_SERVER_PREMIUM_UUID ?? "8a112a28-2f36-4e78-b5b0-c7284bbbf6d5";
+  process.env.GAME_PANEL_SERVER_PREMIUM_UUID ?? "1ed67de7-4af2-4ab3-bcdf-9038f54d88e4";
 /** Сервер закрытой DEV-484 со слотами бэкапов 3/3 (бэкапы баз) - только read-only проверка заглушки «Slots Limit Reached». */
 export const GAME_SERVER_FULL_SLOTS_UUID =
   process.env.GAME_PANEL_SERVER_FULL_SLOTS_UUID ?? "9c891502-143b-432b-9202-1de48408078f";

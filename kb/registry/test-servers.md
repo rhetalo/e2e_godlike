@@ -63,11 +63,17 @@ Steam-игра, `GAME_PANEL_STEAM_SERVER_UUID`. 🟢
 ### d2f7fff5
 `extension.sources`. 🟢
 
+### 1ed67de7
+Premium тест-аккаунта, `GAME_PANEL_SERVER_PREMIUM_UUID`. Имя `upgrade_test`, услуга 484011, Double **Premium** (359), Quarterly.
+Создан 11-Nov-2026 владельцем вместо [8a112a28](#8a112a28) (та же услуга после Terminate → новый сервер).
+- Только read-only проверки тира и подписей CPU на странице апгрейда: `upgrade.tier.spec.ts` ([DEV-547](../tickets/DEV-547.md)),
+  `upgrade.cpu-labels.spec.ts` ([DEV-660](../tickets/DEV-660.md)).
+- Трогать: 🟡, план и тир не менять, услугу не терминировать - на Premium завязаны спеки (без него TC-GP-UPG-TIER-001 и
+  TC-GP-UPG-CPU-002 падают на `.server__upgrade`).
+
 ### 8a112a28
-Premium тест-аккаунта, `GAME_PANEL_SERVER_PREMIUM_UUID`. Имя `KsDT8Fk0_484011`, услуга 484011, Double **Premium** (359), Quarterly.
-- Только read-only проверки тира на странице апгрейда: `upgrade.tier.spec.ts` ([DEV-547](../tickets/DEV-547.md), 04-Nov-2026).
-- Раньше использовался в ручном QA [DEV-528](../tickets/DEV-528.md).
-- Трогать: 🟡, план не менять - на Premium завязан спек.
+Удалён: 10-Nov-2026 услугу 484011 терминировали (Module Terminate), сервер заменён на [1ed67de7](#1ed67de7). Был Premium
+тест-аккаунта (`KsDT8Fk0_484011`), использовался в `upgrade.tier.spec.ts` и ручном QA [DEV-528](../tickets/DEV-528.md). Нигде не использовать. 🔴
 
 ### ac8aa1e0
 Suspended-сервер, для проверок баннера suspended. 🔴
