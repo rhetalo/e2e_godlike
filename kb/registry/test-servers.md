@@ -127,6 +127,7 @@ Java-сервер (id 771938).
 - 03-Nov-2026 [DEV-528](../tickets/DEV-528.md): control (Boost на текущем плане) и окно отмены `?canceled=true` → Change Plan до шага причины; отмены нет (tblcancelrequests 0, Active).
 - Трогать: 🟡.
 - 06-Nov-2026: переименован в `DEV-661-rollback` ([DEV-661](../tickets/DEV-661.md)): wing1004 → wing1003 → wing1000, Rollback на wing1003; не стартует («being transferred»), копия на wing1004. Ждёт раскатки Wings !14 / рестарта.
+- 11-Nov-2026: переименован в `DEV-587-reinstall` ([DEV-587](../tickets/DEV-587.md)): Reinstall без Delete files (200), Restore из instance-бэкапа DEV-484 от 20-Oct (204). Свободен.
 ### 8c2a6bd7
 Моды: [DEV-405](../tickets/DEV-405.md), [DEV-500](../tickets/DEV-500.md), [DEV-532](../tickets/DEV-532.md).
 - Сейчас на нём BMC4 (425 папок, 5003 файла).
@@ -147,6 +148,7 @@ SMP.
 - 04-Nov-2026: [DEV-547](../tickets/DEV-547.md) read-only - сетка See All Plans, `?ram=`, диалог модпака BMC4 (POST установки заблокирован `page.route`, модпак не ставился). Не менялся.
 - Трогать: 🟡.
 
+- 11-Nov-2026: переименован в `DEV-587-modpacks` ([DEV-587](../tickets/DEV-587.md)): Reinstall без Delete files, `server_modpacks` 1 → 0; `POST /tasks/run` (`say DEV-587`, offline). Offline.
 ### 0cf8346f
 [DEV-506](../tickets/DEV-506.md), [DEV-529](../tickets/DEV-529.md).
 - Чужой владелец, флага нет.
@@ -171,6 +173,7 @@ SMP Private, переименован в `DEV-562-MC` под [DEV-562](../ticket
 - 04-Nov-2026: [DEV-547](../tickets/DEV-547.md) - сетка/`?ram=` read-only, квиз Vanilla / 30-40 / stable: оставлен pending-оффер 6705 (Unstoppable Budget, Accept не жали), вход из клиентской зоны WHMCS. План не менялся.
 - 05-Nov-2026: [DEV-640](../tickets/DEV-640.md) (нода 427) - instance-бэкап `DEV-640-P1-instance` (6573c539) и restore из него, World Backup `DEV-640-P5-world` (95964d0b) и restore; бэкапы оставлены (слоты 2/3). Разработка гоняла по ним колбэки чужой ноды - не изменились. Имя не менялось.
 - 05-Nov-2026: [DEV-659](../tickets/DEV-659.md) - переносы в legacy-админке, после Rollback застрял в [DEV-688](https://antihost.atlassian.net/browse/DEV-688) (не стартует, «server is currently being transferred»). Ждёт DevOps / раскатки Wings.
+- 11-Nov-2026: переименован в `DEV-587-overrides` ([DEV-587](../tickets/DEV-587.md)): Reinstall **с Delete files** (World Backup не создавался) - файлы сервера стёрты, overrides 2 → 0. Свободен.
 ### f8e7df56
 SkyBlock, на нём воспроизводился баг tariff-list 400. 20-Oct-2026 переименован в `DEV-484-backup-throttle` (было `JBl1Dqfw_474692`):
 квота ядра, сервер сверх лимита, окно частоты [DEV-484](../tickets/DEV-484.md); тестовые бэкапы оставлены. 🟡
@@ -181,6 +184,7 @@ SkyBlock, на нём воспроизводился баг tariff-list 400. 20-
 - 30-Oct-2026: [DEV-593](../tickets/DEV-593.md) Q1 - квиз (Quadra Premium) пройден до вопроса про игроков, варианты «5-10»/«10-20» скрыты; оффер не создавался.
 - 05-Nov-2026: [DEV-640](../tickets/DEV-640.md) (нода 412, «чужая» для негатива разработки) - folder-бэкап `DEV-640-P2-folder` (1858e943, папка `config`) оставлен.
 - 06-Nov-2026: переименован в `DEV-661-aba` ([DEV-661](../tickets/DEV-661.md)): wing1001 → wing1000 → wing1001; не стартует («being transferred»), копия на wing1000. Ждёт раскатки Wings !14 / рестарта.
+- 11-Nov-2026: переименован в `DEV-587-restore-folder` ([DEV-587](../tickets/DEV-587.md)): Restore из `DEV-640-P2-folder` (204). Бэкап оставлен.
 ### 7c5aa3cf
 `test`, сплит от [srv:1d7d34aa](#1d7d34aa), Paper 26.2, владелец 307989 в раскатке `extension-compatibility`. Стенд «ядро без модов»:
 legacy 400 и v2 409 `mods_not_supported`, кнопка Upload custom modpack disabled ([DEV-556](../tickets/DEV-556.md), [DEV-549](../tickets/DEV-549.md)). Только отказы, ничего не ставилось. 🟡

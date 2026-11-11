@@ -4,9 +4,9 @@ title: Backups - бэкапы сервера, базы и папки
 type: feature
 product: UP
 status: draft
-updated: 2026-11-10
+updated: 2026-11-11
 verified_on: 2026-10-20        # DEV-484 r2: общая квота, расписания, бэкапы баз; остальное recon 2026-06-09
-tickets: [DEV-418, DEV-452, DEV-484, DEV-580, DEV-582, DEV-586, DEV-637, DEV-638, DEV-640, DEV-643, DEV-696]
+tickets: [DEV-418, DEV-452, DEV-484, DEV-580, DEV-582, DEV-586, DEV-637, DEV-638, DEV-640, DEV-643, DEV-696, DEV-587]
 flags: []
 tests: [tests/game/panel/backups.spec.ts, tests/game/panel/backups.server-scope.api.spec.ts, tests/game/panel/backups.throttle.spec.ts, tests/game/panel/backups.slots-full.spec.ts, tests/game/panel/role.enforcement.spec.ts, tests/game/panel/security.spec.ts]
 sources:
@@ -155,3 +155,4 @@ OBS-2 пропущенное одноразовое расписание вис�
 | 05-Nov-2026 | [DEV-637](../../tickets/DEV-637.md) | Restore бэкапа базы: понятные ошибки 409/503/400 на en/ru/uk одним тостом вместо адреса ноды и текста MySQL, пустой дамп = FAILED, чистка битых `verify-dumps`; доработка 09-Nov: папка = «отсутствует», «применён частично», suspended не советует удалять (QA prod PASS, чистка сверена 10-Nov) |
 | 10-Nov-2026 | [DEV-696](../../tickets/DEV-696.md) | v2 download и delete бэкапа (3 типа) пишутся в журнал активности, как v1; отказы 400/403 не пишутся (QA prod PASS) |
 | 04-Nov-2026 | [DEV-643](../../tickets/DEV-643.md) | Рефакторинг без изменения поведения: один маппинг PUT (`toColumns()`) для instance/folder/database и scope `forServer` вместо 16 копий (QA prod PASS, регресс всех типов) |
+| 11-Nov-2026 | [DEV-587](../../tickets/DEV-587.md) | [panel!1806](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1806): Restore instance/folder без письма (204), зависший сервис писем не роняет Restore. PASS |

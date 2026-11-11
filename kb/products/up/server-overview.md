@@ -4,9 +4,9 @@ title: Overview сервера - Server Information и Edit Server
 type: feature
 product: UP
 status: draft
-updated: 2026-10-15
+updated: 2026-11-11
 verified_on: 2026-10-15        # DEV-562 и DEV-563
-tickets: [DEV-562, DEV-563]
+tickets: [DEV-562, DEV-563, DEV-587]
 flags: []
 tests:
   - tests/game/panel/server.overview.spec.ts
@@ -63,7 +63,8 @@ sources:
 3. **Переводов Steam Port нет:** в RU английский fallback ([DEV-562/F3](../../tickets/DEV-562.md#находки)).
 4. **360 px:** кнопка копирования Domain/IP уходит за край карточки ([DEV-562/F1](../../tickets/DEV-562.md#находки)), Steam Port помещается.
 5. **Reinstall Server = деструктив** (переустановка, затирание). С галочкой удаления файлов открывает окно
-   [World Backup](world-backup.md).
+   [World Backup](world-backup.md). Ответ `POST /reinstall` больше не зависит от сервиса писем, сбросы модпаков и
+   отключённых модов идут до письма ([DEV-587](../../tickets/DEV-587.md)).
 6. **Имя сервера дрейфует** при реинсталле (авто-имя вида `Fcz3VN5n_439772`), UUID стабилен; суффикс `_NNNNNN` = ID услуги WHMCS.
 
 ## Гочи для тестирования
@@ -92,3 +93,4 @@ sources:
 | ~25-Jun-2026 | - | Domain/IP показывает `allocation.ip` вместо `ip_alias` |
 | 15-Oct-2026 | [DEV-562](../../tickets/DEV-562.md) | Steam Port для Project Zomboid |
 | 15-Oct-2026 | [DEV-563](../../tickets/DEV-563.md) | У free-серверов в Edit Server только имя |
+| 11-Nov-2026 | [DEV-587](../../tickets/DEV-587.md) | [panel!1806](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1806): письма выключены флагом, сбросы Reinstall до письма. PASS |

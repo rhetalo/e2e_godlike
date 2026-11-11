@@ -4,9 +4,9 @@ title: API - server (состояние и канал ошибок устано�
 type: api
 product: UP
 status: draft
-updated: 2026-11-04
+updated: 2026-11-11
 verified_on: 2026-10-16
-tickets: [DEV-452, DEV-597]
+tickets: [DEV-452, DEV-597, DEV-587]
 features: [UP/modpack-catalog, UP/server-overview]
 sources:
   - memory: dev452-modpack-backup-fail-reasons
@@ -28,6 +28,9 @@ sources:
 |---|---|---|
 | GET | `/servers/{uuid}` | состояние сервера, в том числе поля установки модпака |
 | DELETE | `/servers/{uuid}/install-error` | подтвердить (очистить) `modpack_install_error` ❓ точный путь |
+| POST | `/servers/{uuid}/reinstall` | переустановка; тело `{reallocate: bool}` (Delete files) - см. [ниже](#post-serversuuidreinstall) |
+| POST | `/servers/{uuid}/tasks/run` | разовый запуск задачи - см. [ниже](#post-serversuuidtasksrun) |
+| POST | `/servers/{uuid}/version` | смена версии игры, **сломан** - см. [ниже](#post-serversuuidversion) |
 
 Путь DELETE в источниках записан как `.../install-error`. Полный путь (с префиксом `minecraft/modpacks/` или без) ❓.
 
@@ -89,3 +92,23 @@ sources:
 **Как проверено.** Prod, 16-Oct-2026, 🧪: мок `GET /servers/{uuid}` через `page.route` с каждым из 8 кодов. На каждый код - ровно один тост с
 текстом из MR и один DELETE; на неизвестный - ни того, ни другого. Живьём не воспроизводилось: нода, демон и таймауты безопасно не вызвать.
 Бэкенд-ветки покрыты юнит-тестами MR `panel!1581` 📖.
+
+## POST /servers/{uuid}/reinstall
+
+Тело `{"reallocate": true|false}` (галочка Delete files). Ответ 200 `SuccessResponse`. После переустановки: сброс `server_modpacks`
+всегда, `server_client_only_mod_overrides` только при `reallocate`; с [DEV-587](../../../tickets/DEV-587.md) сбросы идут до письма, письмо
+выключено флагом `NOTIFICATION_SENDING_ENABLED` (по умолчанию `false`). До фикса зависший `notifications-center` давал 400 через 30 с
+(`cURL error 28 ... fetch-ids-by-emails`). ✅ prod 11-Nov-2026: 200 за 356 мс, сбросы 1 → 0 и 2 → 0.
+
+## POST /servers/{uuid}/tasks/run
+
+Тело `{action: command|power|backup, payload: string, options?: array, time_offset?: int>=0}`. Ответ 200 `{"success":true,"data":null}`,
+ошибка 400 `{error}` (например сервер с непустым `status`: suspended / reinstalling). С `time_offset` задача ставится в очередь с задержкой
+(до DEV-587 только эта ветка слала письмо). ✅ prod 11-Nov-2026: `command`, `time_offset: 5` на offline-сервере, 200 за 241 мс.
+
+## POST /servers/{uuid}/version
+
+Тело `{server_id: <uuid>, version: string(1..20)}`, меняет переменную `MINECRAFT_VERSION` / `VANILLA_VERSION` / `MC_VERSION`.
+**Сломан примерно с мая-июня 2025** ([DEV-587/OBS-2](../../../tickets/DEV-587.md#находки)): без `server_id` - 400 TypeError из `HasServer`,
+с uuid - 400 «Failed update server game version» (DTO ждёт `server_id` как `int`). Функция `updateServerGameVersion` в new-panel
+(`src/api/quiz.ts`) не импортируется, из UI не вызывается. ✅ prod 11-Nov-2026.

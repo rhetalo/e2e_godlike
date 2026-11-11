@@ -4,9 +4,9 @@ title: Tasks - задачи и расписание (команда, power-де�
 type: feature
 product: UP
 status: draft
-updated: 2026-10-15
+updated: 2026-11-11
 verified_on: 2026-10-09        # гейт Java на расписании (DEV-485); UI - recon 05..06-Jun
-tickets: [DEV-485]
+tickets: [DEV-485, DEV-587]
 flags: [java-start-gate]
 tests: [tests/game/panel/tasks.spec.ts]
 sources:
@@ -55,3 +55,4 @@ sources:
 |---|---|---|
 | 05..06-Jun-2026 | - | Recon Tasks и окна Configure, KB §5g, §7e |
 | 07-Oct-2026 | [DEV-485](../../tickets/DEV-485.md) | Старт по расписанию под гейтом Java |
+| 11-Nov-2026 | [DEV-587](../../tickets/DEV-587.md) | [panel!1806](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1806): задача с `time_offset` больше не шлёт письмо, `POST /tasks/run` 200. PASS |

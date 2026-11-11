@@ -4,9 +4,9 @@ title: Client-only моды - скрытие в каталоге и отключ
 type: feature
 product: UP
 status: draft
-updated: 2026-10-29
+updated: 2026-11-11
 verified_on: 2026-10-29        # Forge/NeoForge/legacy - DEV-559
-tickets: [DEV-500, DEV-492, DEV-558, DEV-557, DEV-556, DEV-559]
+tickets: [DEV-500, DEV-492, DEV-558, DEV-557, DEV-556, DEV-559, DEV-587]
 flags: [MOD_SCAN_BACKFILL, mod-scan-side-detection-enforce]
 tests: [tests/game/panel/client-only-mods.spec.ts]
 sources:
@@ -74,7 +74,8 @@ sources:
    файловый менеджер/SFTP, записи не сбрасывает (неотличим от ручного включения). Исправляет
    [DEV-492/F5](../../tickets/DEV-492.md#находки). С panel!1697 сброс идёт после фактического удаления: Reinstall только
    с «Delete files» (`reallocate`), модпак `delete`/`backup` - в джобе после `deleteFiles` (упавший бэкап память не
-   трогает), плюс смена игры. Ретест 21-Oct PASS.
+   трогает), плюс смена игры. Ретест 21-Oct PASS. С [panel!1806](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1806) ([DEV-587](../../tickets/DEV-587.md)) сброс в Reinstall идёт до письма: зависший
+   сервис писем его больше не отменяет.
 3. **jar больше 100 МБ без вердикта** (Cobblemon 131 МБ) - [DEV-492/F2](../../tickets/DEV-492.md#находки).
 4. **Окно «Some mods were disabled»** ([DEV-556](../../tickets/DEV-556.md), закрывает [DEV-492/F3](../../tickets/DEV-492.md#находки)):
    «Got It» пишет в `localStorage` ключ `client-only-notice-dismissed:<uuid>` = `revision` и на бэкенд ничего не шлёт.
@@ -127,6 +128,7 @@ sources:
 | 23-Oct-2026 | [DEV-556](../../tickets/DEV-556.md) | [panel!1701](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1701) + [new-panel!571](https://git.godlike.ovh/panel/godlike-new-panel/-/merge_requests/571): в окне список модов, Got It до роста `revision`. PASS |
 | 22..23-Oct-2026 | [DEV-557](../../tickets/DEV-557.md) | Jar больше 100 МБ (Cobblemon) без вердикта: mod-scan-service!7 на проде не действует, FAIL; сервис переписан (!8-!11), перепроверяет DevOps |
 | 29-Oct-2026 | [DEV-559](../../tickets/DEV-559.md) | Forge/NeoForge клиентские моды отключаются ([mod-scan-service!14](https://git.godlike.ovh/panel/mod-scan-service/-/merge_requests/14), parser v9, флаг `mod-scan-side-detection-enforce`). PASS, K1 Sodium + гард на обсуждении |
+| 11-Nov-2026 | [DEV-587](../../tickets/DEV-587.md) | [panel!1806](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1806): сбросы Reinstall до письма; overrides 2 → 0 на проде. PASS |
 
 Связано: пост-инсталл скан как отдельная фича (`UP/post-install-mod-scan`) пока описан здесь; окно
 «Missing mod dependencies» - [TASK-missing-mod-deps](../../tickets/TASK-missing-mod-deps.md).
