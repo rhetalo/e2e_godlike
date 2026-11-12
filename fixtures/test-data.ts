@@ -80,6 +80,11 @@ export const TariffsForBots = {
     { path: "/rust-server-hosting/", game: "Rust Server Hosting" },
     // wp!783: раньше имя собиралось из адреса («Altv Server Hosting»).
     { path: "/altv-server-hosting/", game: "GTA 5 Alt:V Server Hosting" },
+    // DEV-628: новая игра 12-Nov-2026.
+    { path: "/windrose-server-hosting/", game: "Windrose Server Hosting" },
+    // DEV-647/F3: имя группы собирается из адреса («Runescape Dragonwilds Server Hosting»), как у alt:V до wp!783.
+    // Вернуть строку после фикса:
+    // { path: "/runescape-dragonwilds-server-hosting/", game: "RuneScape: Dragonwilds Server Hosting" },
   ],
 } as const;
 
