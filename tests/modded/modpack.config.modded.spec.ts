@@ -67,17 +67,17 @@ test.describe("Modded: конфигурация модпака", () => {
     });
   });
 
-  test("@regression кнопки Install в сетке несут data-product-id и data-modpack-id", async () => {
-    const buttons = modded.installButtons();
-    const count = await buttons.count();
+  // 12-Nov-2026: Install в сетке больше не кнопка с data-product-id/data-modpack-id (сразу в корзину), а ссылка
+  // на страницу модпака /modpacks/<slug>/#configure с конфигуратором #hosting-funnel.
+  test("@regression Install в сетке ведёт на страницу своего модпака (#configure) и подписан его названием", async () => {
+    const cards = modded.modpackCards();
+    const count = await cards.count();
     expect(count).toBeGreaterThan(0);
 
-    // Проверяем все кнопки (до 50) — каждая несёт валидные data-*.
-    const sample = Math.min(count, 50);
-    for (let i = 0; i < sample; i++) {
-      const meta = await modded.readInstallMeta(buttons.nth(i));
-      expect(meta.productId, `install[${i}].data-product-id`).toMatch(/^\d+$/);
-      expect(meta.modpackId, `install[${i}].data-modpack-id`).toBeTruthy();
+    for (let i = 0; i < Math.min(count, 50); i++) {
+      const link = await modded.readInstallLink(cards.nth(i));
+      expect(link.href, `install[${i}] href`).toMatch(/^https:\/\/godlike\.host\/modpacks\/[^/]+\/#configure$/);
+      expect(link.label, `install[${i}] aria-label`).toBe(`Get server with ${link.title}`);
     }
   });
 });

@@ -32,7 +32,8 @@ test.describe("@smoke страницы godlike.host загружаются", () 
       await expect(page).toHaveURL(/modded-minecraft-server-hosting/);
       await expect(modded.calculator.sliderThumb()).toBeVisible();
       await expect(modded.calculatorCheckoutLink()).toHaveAttribute("data-cart-url", /productId=\d+/);
-      expect(await modded.installButtons().count()).toBeGreaterThanOrEqual(1);
+      expect(await modded.modpackCards().count()).toBeGreaterThanOrEqual(1);
+      await expect(modded.installButtons().first()).toHaveAttribute("href", /\/modpacks\/[^/]+\/#configure$/);
     });
   });
 

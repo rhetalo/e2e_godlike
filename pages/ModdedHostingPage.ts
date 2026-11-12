@@ -15,8 +15,10 @@
  *     button.plan-calculator__checkout__button[data-cart-url]  ← "Host Now" → /cart-modded-new/?… (06-Aug: был <a href>, стал <button data-cart-url>)
  *     .plan-calculator__pricing__price__value(--old)      ← цена (классы сохранены)
  *
- *   button.modpacks-body__install                         ← grid install buttons (LIGHT DOM, не менялись)
- *     [data-product-id], [data-modpack-id], [data-promo]
+ *   .modpacks-body__item                                  ← карточка сетки (LIGHT DOM): a.__item-link + a.__install
+ *   a.modpacks-body__install                              ← 12-Nov-2026: ССЫЛКА на страницу модпака
+ *     href=/modpacks/<slug>/#configure, aria-label="Get server with <название>" (раньше
+ *     button[data-product-id][data-modpack-id] вёл сразу в корзину). На #configure - #hosting-funnel.
  *
  * Quick-pick pills are: "ATM 10", "BMC 4", "Prominence II", "RLCraft", "ATMons".
  */
@@ -136,7 +138,22 @@ export class ModdedHostingPage extends BasePage {
   // ─── modpack grid ──────────────────────────────────────────────────────────
 
   installButtons(): Locator {
-    return this.page.locator("button.modpacks-body__install");
+    return this.page.locator("a.modpacks-body__install");
+  }
+
+  /** Карточки сетки модпаков. */
+  modpackCards(): Locator {
+    return this.page.locator(".modpacks-body__item");
+  }
+
+  /** Install-ссылка карточки: href, aria-label и заголовок карточки (с 12-Nov-2026). */
+  async readInstallLink(card: Locator): Promise<{ href: string | null; label: string | null; title: string }> {
+    const link = card.locator("a.modpacks-body__install");
+    return {
+      href: await link.getAttribute("href"),
+      label: await link.getAttribute("aria-label"),
+      title: (await card.locator(".modpacks-body__item-title").innerText()).trim(),
+    };
   }
 
   installButtonByIndex(index: number): Locator {

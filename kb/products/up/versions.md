@@ -89,6 +89,11 @@ sources:
 | Install, Wipe, детект после старта, Java после смены | только ручной QA ([DEV-506](../../tickets/DEV-506.md), [DEV-529](../../tickets/DEV-529.md), [DEV-512](../../tickets/DEV-512.md)) | ❌ авто нет |
 | Сабюзер с правом Versions | не проверялся | ❌ |
 
+> ⚠️ **Редизайн 12-Nov-2026.** Вместо сетки семейств и drill-down `?type=` - карточка «Currently running <тип>» (чипы Minecraft / Build)
+> и «Change version» с тремя пикерами-диалогами: Server type (группы Vanilla / Mods / Plugins / Hybrid / Proxy, метки Installed / Caution /
+> Deprecated), Minecraft version (линии с бейджем Java, Latest / Installed), Build (Latest, даты, «Show N more»). Кнопка «Install <тип> <версия>».
+> Старый адрес `/server/{uuid}/versions` отдаёт **белую страницу** (даже без меню) - только `/minecraft/versions`. Описание выше частично устарело.
+
 ## История
 
 | Дата | Тикет | Что |
@@ -98,3 +103,4 @@ sources:
 | 02..07-Oct-2026 | [DEV-512](../../tickets/DEV-512.md) | Смена версии сохраняет libxrender |
 | 05-Oct-2026 | [DEV-506](../../tickets/DEV-506.md) | Arclight 1.21.1 / 1.20.1 больше не откатывается на 1.21 / 1.20 |
 | 06..08-Oct-2026 | [DEV-529](../../tickets/DEV-529.md) | Arclight остаётся Arclight после старта, Mohist держит билд |
+| 12-Nov-2026 | - | Редизайн без анонса: «Currently running» + «Change version» с пикерами; старый `/versions` = белая страница; TC-GP-VER-001..004 переписаны (a392dd1) |
