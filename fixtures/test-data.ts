@@ -48,6 +48,12 @@ export const Urls = {
   upsellQuizApi: "/clientarea/index.php?m=upsell_quiz&format=json",
 } as const;
 
+/**
+ * Origin, которого нет в APP_CORS_ALLOWED_ORIGINS панели: preflight с ним не должен получать
+ * CORS-заголовки (DEV-673). Домен .example зарезервирован (RFC 2606), реальным быть не может.
+ */
+export const CORS_FOREIGN_ORIGIN = process.env.CORS_FOREIGN_ORIGIN ?? "https://evil.example";
+
 /** Квиз Minecraft Vanilla в биллинге (mod_upsell_quiz_quizes.id, live 30-Oct-2026). */
 export const UPSELL_QUIZ_MC_VANILLA_ID = process.env.UPSELL_QUIZ_MC_VANILLA_ID ?? "9";
 
