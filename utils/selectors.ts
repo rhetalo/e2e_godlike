@@ -972,25 +972,30 @@ export const GAME_PANEL_BACKUPS = {
   errorToast: ".panel-notification.error", // тост ошибки панели (на 429 - «Request failed with status code 429», live 23-Oct-2026)
 } as const;
 
-// Versions (/server/{uuid}/minecraft/versions). Confirmed via live DOM 06-Jun-2026 (MCP recon).
-// Шапка "Currently running ..." (.server__version) + сетка семейств server-software
-// (.server__versions-type: Vanilla/Paper/NeoForge/Fabric/...). Клик по семейству → ?type=NAME
-// со списком версий (Go Back + тогл Show Snapshot Versions). ⚠️ install = деструктивный rebuild —
-// в тестах до установки НЕ доходим, только структура + drill-down.
+// Versions (/server/{uuid}/minecraft/versions). Редизайн 12-Nov-2026 (live recon): вместо сетки семейств и
+// drill-down ?type= - две карточки. «Currently running <тип>» (current-loader-card: чипы Minecraft / Build / Plugins|Mods)
+// и «Change version» с тремя пикерами (Server type / Minecraft version / Build), галкой бэкапа и кнопкой Install.
+// Пикер открывает v-dialog .version-picker-dialog. ⚠️ Install = деструктивный rebuild - НЕ жмём.
+// ⚠️ Старый адрес /server/{uuid}/versions теперь отдаёт белую страницу (12-Nov-2026), только /minecraft/versions.
 export const GAME_PANEL_VERSIONS = {
-  root: ".server__versions",                       // сетка семейств
-  installedBlock: ".server__version",              // карточка "Currently running ..."
-  installedTitle: ".server__version-title",        // заголовок установленной версии
-  familyCard: ".server__versions-type",            // карточка семейства (клик → список версий)
-  familyTitle: ".server__versions-type__title",    // имя семейства (Vanilla/Paper/NeoForge/...)
-  goBack: 'text="Go Back"',                         // в drill-down списке версий (вернуться к семействам)
-  snapshotToggle: 'text="Show Snapshot Versions"',  // тогл snapshot-сборок в drill-down
-  // Карточки версий в drill-down ?type=NAME (live-recon 16-Oct-2026, Vanilla): `.server__builds-build`
-  // с __title («26.3») и __type (RELEASE / SNAPSHOT). По умолчанию только RELEASE (97), тогл
-  // Show Snapshot Versions - клиентский фильтр, добавляет SNAPSHOT (852). Клик по карточке → билд → install: НЕ жать.
-  versionCard: ".server__builds-build",
-  versionTitle: ".server__builds-build__title",
-  versionType: ".server__builds-build__type",
+  currentCard: ".current-loader-card",              // «Currently running Paper» + чипы
+  currentTitle: ".current-loader-card__title",
+  currentChip: ".current-loader-card__chip",        // «Minecraft 1.21.11», «Build #69», «Plugins»
+  changeCard: ".change-version-card",               // «Change version»
+  picker: ".version-picker-field",                  // 3 шт.: Server type, Minecraft version, Build (по порядку)
+  pickerTitle: ".version-picker-field__title",
+  installButton: ".change-version-card__install",   // «Install Paper 1.21.11» - НЕ жать
+  dialog: ".version-picker-dialog",                 // диалог любого пикера
+  dialogTitle: ".version-picker-dialog__title",     // Choose a server type / a Minecraft version / a build
+  typeGroupTitle: ".type-picker__group-title",      // VANILLA / MODS / PLUGINS
+  typeOption: ".type-picker__option",               // Vanilla / Fabric / … (активный - --active)
+  typeOptionName: ".type-picker__option-name",
+  versionLine: ".mc-version-picker__line",          // «Minecraft 1.21 / Java 21»
+  javaBadge: ".java-badge",
+  tile: ".version-tile",                            // плитка версии или билда (активная - --active)
+  installedTag: ".version-tag--installed",
+  latestTag: ".version-tag--latest",
+  buildMore: ".build-picker__more",                 // «Show 15 more (77 older)»
 } as const;
 
 // Plugins/Mods (/server/{uuid}/extensions) + Modpacks (/server/{uuid}/modpacks).
