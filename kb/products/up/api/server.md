@@ -4,7 +4,7 @@ title: API - server (состояние и канал ошибок устано�
 type: api
 product: UP
 status: draft
-updated: 2026-11-11
+updated: 2026-11-12
 verified_on: 2026-10-16
 tickets: [DEV-452, DEV-597, DEV-587]
 features: [UP/modpack-catalog, UP/server-overview]
@@ -30,7 +30,7 @@ sources:
 | DELETE | `/servers/{uuid}/install-error` | подтвердить (очистить) `modpack_install_error` ❓ точный путь |
 | POST | `/servers/{uuid}/reinstall` | переустановка; тело `{reallocate: bool}` (Delete files) - см. [ниже](#post-serversuuidreinstall) |
 | POST | `/servers/{uuid}/tasks/run` | разовый запуск задачи - см. [ниже](#post-serversuuidtasksrun) |
-| POST | `/servers/{uuid}/version` | смена версии игры, **сломан** - см. [ниже](#post-serversuuidversion) |
+| ~~POST~~ | ~~`/servers/{uuid}/version`~~ | **удалён** 12-Nov-2026 (panel!1811) - см. [ниже](#post-serversuuidversion-удалён) |
 
 Путь DELETE в источниках записан как `.../install-error`. Полный путь (с префиксом `minecraft/modpacks/` или без) ❓.
 
@@ -106,9 +106,12 @@ sources:
 ошибка 400 `{error}` (например сервер с непустым `status`: suspended / reinstalling). С `time_offset` задача ставится в очередь с задержкой
 (до DEV-587 только эта ветка слала письмо). ✅ prod 11-Nov-2026: `command`, `time_offset: 5` на offline-сервере, 200 за 241 мс.
 
-## POST /servers/{uuid}/version
+## POST /servers/{uuid}/version (удалён)
 
-Тело `{server_id: <uuid>, version: string(1..20)}`, меняет переменную `MINECRAFT_VERSION` / `VANILLA_VERSION` / `MC_VERSION`.
-**Сломан примерно с мая-июня 2025** ([DEV-587/OBS-2](../../../tickets/DEV-587.md#находки)): без `server_id` - 400 TypeError из `HasServer`,
-с uuid - 400 «Failed update server game version» (DTO ждёт `server_id` как `int`). Функция `updateServerGameVersion` в new-panel
-(`src/api/quiz.ts`) не импортируется, из UI не вызывается. ✅ prod 11-Nov-2026.
+**Удалён 12-Nov-2026** ([panel!1811](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1811) + фронт
+[new-panel!639](https://git.godlike.ovh/panel/godlike-new-panel/-/merge_requests/639), по [DEV-587/OBS-2](../../../tickets/DEV-587.md#находки)):
+маршрут, метод `ServerController::updateServerGameVersion`, request, action, DTO, ключ перевода `api_v2.errors.server.game_version.update_failed`;
+во фронте `updateServerGameVersion` и `UPDATE_SERVER_GAME_VERSION`. Право `change_version` осталось (установка Java/Bedrock, отказ от World Backup).
+✅ prod 12-Nov-2026: 400 «The route ... could not be found» (панель на любой неизвестный маршрут отдаёт 400, не 404).
+
+История: был сломан с мая-июня 2025 - rules ждали `server_id` uuid-строкой, DTO `int` → 400 TypeError; письмо в нём (август 2025) не уходило ни разу.
