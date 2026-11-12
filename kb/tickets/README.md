@@ -2,7 +2,7 @@
 id: KB-TICKETS
 title: Тикеты и задачи
 type: index
-updated: 2026-11-11
+updated: 2026-11-12
 ---
 
 # Тикеты и задачи
@@ -68,6 +68,7 @@ updated: 2026-11-11
 | [DEV-598](DEV-598.md) | Palworld Settings - блок «Popular settings» вверху вкладки | UP | done | PASS | blocked | 2026-11-04 |
 | [DEV-600](DEV-600.md) | Очистка UTM из адресной строки с сохранением атрибуции | WPGL | done | PASS | blocked | 2026-11-10 |
 | [DEV-604](DEV-604.md) | Тарифы на страницах игр в HTML для AI-ботов и JSON-LD ProductGroup | WPGL | done | PASS | covered | 2026-11-04 |
+| [DEV-630](DEV-630.md) | Windrose в игровой панели (egg, переменные, конфиг, порты, power, файлы, reinstall) | UP | done | PASS-with-issues | blocked | 2026-11-12 |
 | [DEV-633](DEV-633.md) | Wings отдаёт 404 вместо 500 на несуществующий файл | UP | done | PASS | blocked | 2026-11-09 |
 | [DEV-637](DEV-637.md) | Бэкап базы данных - понятные ошибки restore, пустой дамп и чистка битых бэкапов | UP | done | PASS | candidate | 2026-11-10 |
 | [DEV-638](DEV-638.md) | Старая панель и бэкапы новой панели - ссылка на того, кто качает, проверка диска, Activity | UP | done | PASS | covered | 2026-11-03 |
@@ -129,6 +130,7 @@ updated: 2026-11-11
 - **blocked**: [DEV-597](DEV-597.md) - Palworld - импорт мира с компьютера (вкладка World)
 - **blocked**: [DEV-598](DEV-598.md) - Palworld Settings - блок «Popular settings» вверху вкладки
 - **blocked**: [DEV-600](DEV-600.md) - Очистка UTM из адресной строки с сохранением атрибуции
+- **blocked**: [DEV-630](DEV-630.md) - Windrose в игровой панели (egg, переменные, конфиг, порты, power, файлы, reinstall)
 - **blocked**: [DEV-633](DEV-633.md) - Wings отдаёт 404 вместо 500 на несуществующий файл
 - **blocked**: [TASK-palworld-settings](TASK-palworld-settings.md) - Palworld Settings: UI-редактор PalWorldSettings.ini
 

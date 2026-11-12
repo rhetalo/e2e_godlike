@@ -1,23 +1,24 @@
 ---
 id: UP/game-settings
-title: Game settings - настройки не-Minecraft игр (Palworld, ARK)
+title: Game settings - настройки не-Minecraft игр (Palworld, ARK, Windrose)
 type: feature
 product: UP
 status: draft
-updated: 2026-11-04
-verified_on: 2026-11-04        # Palworld Settings на проде (DEV-598)
-tickets: [TASK-palworld-settings, DEV-597, DEV-598]
+updated: 2026-11-12
+verified_on: 2026-11-12        # Windrose на проде (DEV-630)
+tickets: [TASK-palworld-settings, DEV-597, DEV-598, DEV-630]
 flags: []
 tests: []                      # автотестов нет
 sources:
   - kb/tickets/TASK-palworld-settings.md
   - kb/tickets/DEV-597.md
   - kb/tickets/DEV-598.md
+  - kb/tickets/DEV-630.md
   - test-docs/ultra.panel/palworld-settings-REPORT.md
   - memory: palworld-settings-qa
 ---
 
-# Game settings - настройки не-Minecraft игр (Palworld, ARK)
+# Game settings - настройки не-Minecraft игр (Palworld, ARK, Windrose)
 
 > **В двух словах.** Для Palworld в панели есть вкладка с настройками игры: вместо ручной правки файла
 > `PalWorldSettings.ini` - блок «Popular settings» (12 самых нужных) и 8 карточек по категориям. Проверено на проде
@@ -79,6 +80,7 @@ sources:
 - **Автотестов нет.** Ручной QA блоков A-F и H: [palworld-settings-REPORT.md](../../../test-docs/ultra.panel/palworld-settings-REPORT.md).
 - Импорт мира: автотестов нет, `regression: blocked` (нет Palworld-стенда на тест-аккаунте), ручной QA [DEV-597](../../tickets/DEV-597.md).
 - Блок «Popular settings»: автотестов нет, `regression: blocked` (нет Palworld-стенда), ручной QA [DEV-598](../../tickets/DEV-598.md) 22/22 на проде, включая сабюзера только на чтение.
+- Windrose (переменные запуска, инвайт-код, конфиг `R5/ServerDescription.json`): автотестов нет, `regression: blocked` (нет Windrose-стенда), ручной QA [DEV-630](../../tickets/DEV-630.md) на проде 10/12-Nov.
 
 ## История
 
@@ -87,3 +89,4 @@ sources:
 | 20-Aug-2026 | [TASK-palworld-settings](../../tickets/TASK-palworld-settings.md) | Palworld Settings на stage, PASS A-F, H |
 | 04-Nov-2026 | [DEV-597](../../tickets/DEV-597.md) | Импорт мира (вкладка World), prod, 4 раунда, PASS-with-issues |
 | 04-Nov-2026 | [DEV-598](../../tickets/DEV-598.md) | Блок «Popular settings» (12 настроек сверху), prod, PASS 22/22 |
+| 12-Nov-2026 | [DEV-630](../../tickets/DEV-630.md) | Windrose в панели: egg 2104, переменные, инвайт-код на Overview, prod, PASS с 2 Low |
