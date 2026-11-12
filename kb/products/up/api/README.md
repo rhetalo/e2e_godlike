@@ -39,6 +39,7 @@ sources:
 | Страница | Ресурс | Эндпоинты | Тикеты |
 |---|---|---|---|
 | [modpacks](modpacks.md) | установка модпака и список установленных | `POST .../minecraft/modpacks`, `GET .../minecraft/modpacks/installed` | [DEV-452](../../../tickets/DEV-452.md), [DEV-484](../../../tickets/DEV-484.md) |
+| [setup-onboarding](setup-onboarding.md) | онбординг первого запуска: состояние, показ, события, Force в админке | `GET .../setup-onboarding`, `POST .../shown`, `POST .../events`, `PUT /admin/setup-onboarding/{uuid}` | [DEV-651](../../../tickets/DEV-651.md) |
 | [server](server.md) | состояние сервера и канал ошибок установки | `GET /servers/{uuid}`, `DELETE .../install-error` | [DEV-452](../../../tickets/DEV-452.md) |
 | [backups](backups.md) | бэкапы, общая квота `meta.quota`, лимит частоты, бэкапы баз, расписания | `GET .../backups`, `POST .../backups/instances`, `POST`/`PUT .../backups/databases` | [DEV-452](../../../tickets/DEV-452.md), [DEV-484](../../../tickets/DEV-484.md) |
 | [files](files.md) | потоковый поиск файлов, лимиты и 429 | `GET .../files/search`, `GET .../files?dir=` | [DEV-476](../../../tickets/DEV-476.md), [DEV-480](../../../tickets/DEV-480.md) |

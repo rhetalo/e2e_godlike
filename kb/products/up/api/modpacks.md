@@ -4,9 +4,9 @@ title: API - modpacks (установка и список установленн
 type: api
 product: UP
 status: draft
-updated: 2026-10-16
+updated: 2026-11-12
 verified_on: 2026-10-16
-tickets: [DEV-452, DEV-484, DEV-515]
+tickets: [DEV-452, DEV-484, DEV-515, DEV-651]
 features: [UP/modpack-catalog, UP/backups]
 sources:
   - memory: dev452-modpack-backup-fail-reasons, dev484-backup-throttle
@@ -53,6 +53,7 @@ sources:
 | `version_id` | string | ❓ | id версии сборки |
 | `variant_slug` | string | ❓ | вариант сборки (например оптимизированный), точный формат ❓ |
 | `install_mode` | string | да (по DEV-515) | `delete` (удалить файлы), `backup` («Create Backup and Install»), `overwrite` («Install Over») |
+| `setup_onboarding` | bool | нет | `true` из попапа первого запуска: обход 409 `modpacks_not_supported` по ядру (panel!1799), без активного онбординга не работает ✅ [DEV-651](../../../tickets/DEV-651.md) |
 | `world_folder` | string | да (по DEV-515) | папка мира, которую панель подставляет в диалоге; поле World Folder в UI |
 
 Пример без секретов (значения `provider`, `modpack_id`, `version_id` условные ❓):

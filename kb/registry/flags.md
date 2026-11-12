@@ -3,7 +3,7 @@ id: KB-REG-FLAGS
 title: Фичефлаги и эксперименты
 type: registry
 status: draft
-updated: 2026-11-04
+updated: 2026-11-12
 verified_on: -
 sources:
   - memory: dev485-java-start-gate, dev515-mods-loader-gating, cf-modrinth-source-swap, prod-134-world-backup, cancel-retention-dev401, mc-extensions-refactor-epic, dev492-post-install-mod-scan, dev477-node-resource-limits
@@ -70,6 +70,10 @@ sources:
 
 ### inactivity-chat
 ❓ Назначение не описано, владелец тоже не знает (15-Oct). Спросить у разработки. Включён.
+
+### first-launch-onboarding
+Попап первого запуска [DEV-651](../tickets/DEV-651.md). 12-Nov включён у 4 пользователей (в т.ч. QA 307989 и тест-аккаунт 388101), глобально off.
+Дополнительно отсечка `FIRST_LAUNCH_ONBOARDING_MIN_CREATED_AT` (default 2026-11-16); до неё - только Force-enable в админке сервера.
 
 ### extensions-onboarding
 ❓ Назначение не описано, владелец тоже не знает (15-Oct). Спросить у разработки. Включён.

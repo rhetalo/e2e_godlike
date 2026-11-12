@@ -4,10 +4,10 @@ title: Overview сервера - Server Information и Edit Server
 type: feature
 product: UP
 status: draft
-updated: 2026-11-11
+updated: 2026-11-12
 verified_on: 2026-10-15        # DEV-562 и DEV-563
-tickets: [DEV-562, DEV-563, DEV-587]
-flags: []
+tickets: [DEV-562, DEV-563, DEV-587, DEV-651]
+flags: [first-launch-onboarding]
 tests:
   - tests/game/panel/server.overview.spec.ts
   - tests/game/panel/edit.server.spec.ts
@@ -94,3 +94,4 @@ sources:
 | 15-Oct-2026 | [DEV-562](../../tickets/DEV-562.md) | Steam Port для Project Zomboid |
 | 15-Oct-2026 | [DEV-563](../../tickets/DEV-563.md) | У free-серверов в Edit Server только имя |
 | 11-Nov-2026 | [DEV-587](../../tickets/DEV-587.md) | [panel!1806](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1806): письма выключены флагом, сбросы Reinstall до письма. PASS |
+| 12-Nov-2026 | [DEV-651](../../tickets/DEV-651.md) | Кнопка «Set up server» и попап первого запуска (Force-enable, QA с замечаниями) |

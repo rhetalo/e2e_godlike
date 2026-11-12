@@ -4,10 +4,10 @@ title: Модпаки - каталог, видимость и установка
 type: feature
 product: UP
 status: draft
-updated: 2026-11-03
+updated: 2026-11-12
 verified_on: 2026-10-21        # последняя живая сверка - DEV-452 ретест
-tickets: [DEV-532, DEV-405, DEV-472, DEV-492, DEV-459, DEV-452, DEV-484, DEV-594]
-flags: [is-listed, modpack-catalog-v2, extension-compatibility, VITE_MANAGED_MODPACK_URL]
+tickets: [DEV-532, DEV-405, DEV-472, DEV-492, DEV-459, DEV-452, DEV-484, DEV-594, DEV-651]
+flags: [first-launch-onboarding, is-listed, modpack-catalog-v2, extension-compatibility, VITE_MANAGED_MODPACK_URL]
 tests: [tests/game/panel/extensions.spec.ts, tests/game/panel/extension.sources.spec.ts]
 sources:
   - kb/tickets/DEV-532.md, DEV-405.md, DEV-472.md, DEV-492.md, DEV-459.md, DEV-515.md
@@ -138,3 +138,4 @@ sources:
 | 09-Sep-2026 | [DEV-452](../../tickets/DEV-452.md) | Префлайт лимита и слотов, 8 причин отказа, диалог и тосты (QA 16-Oct-2026) |
 | 16-Sep-2026 | [DEV-484](../../tickets/DEV-484.md) | Пре-инсталл бэкап вне лимита частоты |
 | 02-Nov-2026 | [DEV-594](../../tickets/DEV-594.md) | RAM-диалог: ceil GB, «Upgrade RAM» → план из сетки (QA prod PASS) |
+| 12-Nov-2026 | [DEV-651](../../tickets/DEV-651.md) | Попап первого запуска: каталог `ram_aware`/`max_ram_mb`, установка с `setup_onboarding` (F5 у разработчика) |
