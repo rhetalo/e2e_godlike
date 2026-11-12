@@ -4,9 +4,9 @@ title: Тарифы и апгрейд со стороны биллинга - tar
 type: feature
 product: BIL
 status: draft
-updated: 2026-10-26
+updated: 2026-11-12
 verified_on: 2026-10-26        # правило подарка Premium (DEV-595) проверено оплатами на проде
-tickets: [TASK-tariff-list-400, DEV-595]
+tickets: [TASK-tariff-list-400, DEV-595, DEV-648, DEV-629]
 flags: []
 tests: []                      # своих спеков нет; структура Upgrade - TC-GP-UPG-001 в UP
 sources:
@@ -70,3 +70,5 @@ sources:
 |---|---|---|
 | 09-Oct-2026 | [TASK-tariff-list-400](../../tickets/TASK-tariff-list-400.md) | Список тарифов для апгрейда падает с 400 |
 | 26-Oct-2026 | [DEV-595](../../tickets/DEV-595.md) | Один список циклов подарка Premium для заказа и апгрейда; PASS на проде |
+| 12-Nov-2026 | [DEV-648](../../tickets/DEV-648.md) | Тарифы Dragonwilds (MCP billing!774): покупка, апгрейд, suspend, cancel PASS; список апгрейда без младших тарифов и RAM из атрибутов - исправлено 12-Nov |
+| 12-Nov-2026 | [DEV-629](../../tickets/DEV-629.md) | Тарифы Windrose: данные PASS, W1 слоты |

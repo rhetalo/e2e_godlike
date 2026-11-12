@@ -4,9 +4,9 @@ title: Лендинги без автотестов - Launcher, SMP One-Click, K
 type: feature
 product: WPGL
 status: draft
-updated: 2026-10-18
+updated: 2026-11-12
 verified_on: 2026-09-24        # SMP - финальный прогон 24-Sep; Launcher - 22-Sep; KB сайта - stage 31-Aug
-tickets: []
+tickets: [DEV-647, DEV-628]
 flags: []
 tests: []                      # автотестов нет ни на одну из страниц
 sources:
@@ -50,6 +50,8 @@ sources:
 |---|---|---|
 | Launcher: кнопки Download, структура секций | только ручной QA 22-Sep | ❌ авто нет |
 | SMP One-Click: CTA → `cart-modded-new`, попап команд, `lp import` | только ручной QA 24-Sep | ❌ авто нет |
+| Windrose: карточки тарифов + ProductGroup глазами бота | `tariffs.for-bots.spec.ts` (TC-TARIFFS-BOT-001) | ✅ |
+| Dragonwilds: то же | строка в `TariffsForBots.pages` закомментирована до фикса DEV-647/F3 | ⏳ blocked |
 | KB сайта: структура статей, CTA в панель | только ручной QA 31-Aug (stage) | ❌ авто нет |
 | Каталог серверов игроков `/servers/` | не разведано ❓ | ❌ |
 
@@ -59,4 +61,6 @@ sources:
 |---|---|---|
 | 31-Aug-2026 | - | Аудит редизайна KB сайта на stage |
 | 22-Sep-2026 | - | QA лендинга Launcher |
+| 12-Nov-2026 | [DEV-647](../../tickets/DEV-647.md) | Страница RuneScape: Dragonwilds, PASS c F1 (слоты), F3 (имя ProductGroup) |
+| 12-Nov-2026 | [DEV-628](../../tickets/DEV-628.md) | Страница Windrose, PASS c W1 (слоты) |
 | 24-Sep-2026 | - | SMP One-Click: попап ✅, `lp import` починен, Amplitude не доходит |

@@ -4,9 +4,9 @@ title: Тарифы для AI-ботов - серверные карточки �
 type: feature
 product: WPGL
 status: verified
-updated: 2026-11-04
+updated: 2026-11-12
 verified_on: 2026-11-04        # prod, wp!750/751/755/783
-tickets: [DEV-604]
+tickets: [DEV-604, DEV-628, DEV-647]
 flags: [flash-sale]
 tests: [tests/general/tariffs.for-bots.spec.ts]
 sources:
@@ -62,8 +62,9 @@ sources:
 - Тип акции берётся из `crb_flash_sale_type_<lang>`; на 04-Nov все 8 активных языков `evergreen`.
 
 ## Покрытие
-`tests/general/tariffs.for-bots.spec.ts`: TC-TARIFFS-BOT-001 (8 страниц глазами бота: карточки + ProductGroup = карточки), TC-TARIFFS-BOT-002 (`?plan=` у посетителя). Не покрыто: акция (по IP), локали, Rich Results. Подробно - [DEV-604](../../tickets/DEV-604.md#регресс).
+`tests/general/tariffs.for-bots.spec.ts`: TC-TARIFFS-BOT-001 (9 страниц глазами бота, с 12-Nov + Windrose; Dragonwilds ждёт фикса [DEV-647](../../tickets/DEV-647.md) F3: карточки + ProductGroup = карточки), TC-TARIFFS-BOT-002 (`?plan=` у посетителя). Не покрыто: акция (по IP), локали, Rich Results. Подробно - [DEV-604](../../tickets/DEV-604.md#регресс).
 
 ## История
 - 28-Oct-2026 [DEV-604](../../tickets/DEV-604.md) wp!750 - серверные карточки; 29-Oct wp!751 - кнопка корзины через onclick.
 - 03-Nov-2026 wp!755 - ProductGroup, `?plan=`; 04-Nov wp!783 - подписи игр, без даты у персональной акции.
+- 12-Nov-2026 [DEV-628](../../tickets/DEV-628.md) Windrose в спеке; [DEV-647](../../tickets/DEV-647.md)/F3 - у Dragonwilds имя ProductGroup из адреса.

@@ -68,6 +68,8 @@ updated: 2026-11-12
 | [DEV-598](DEV-598.md) | Palworld Settings - блок «Popular settings» вверху вкладки | UP | done | PASS | blocked | 2026-11-04 |
 | [DEV-600](DEV-600.md) | Очистка UTM из адресной строки с сохранением атрибуции | WPGL | done | PASS | blocked | 2026-11-10 |
 | [DEV-604](DEV-604.md) | Тарифы на страницах игр в HTML для AI-ботов и JSON-LD ProductGroup | WPGL | done | PASS | covered | 2026-11-04 |
+| [DEV-628](DEV-628.md) | Страница Windrose на godlike.host | WPGL | done | PASS-with-issues | covered | 2026-11-12 |
+| [DEV-629](DEV-629.md) | Тарифы Windrose в WHMCS | BIL | done | PASS-with-issues | no | 2026-11-12 |
 | [DEV-630](DEV-630.md) | Windrose в игровой панели (egg, переменные, конфиг, порты, power, файлы, reinstall) | UP | done | PASS-with-issues | blocked | 2026-11-12 |
 | [DEV-633](DEV-633.md) | Wings отдаёт 404 вместо 500 на несуществующий файл | UP | done | PASS | blocked | 2026-11-09 |
 | [DEV-637](DEV-637.md) | Бэкап базы данных - понятные ошибки restore, пустой дамп и чистка битых бэкапов | UP | done | PASS | candidate | 2026-11-10 |
@@ -76,6 +78,9 @@ updated: 2026-11-12
 | [DEV-641](DEV-641.md) | World Backups - искать бэкап в рамках сервера, не раскрывать существование чужого uuid | UP | done | PASS | no | 2026-11-03 |
 | [DEV-642](DEV-642.md) | Тесты панели: Mockery ParseError на expects('setServer->...') для методов с типом static | UP | done | PASS | no | 2026-11-10 |
 | [DEV-643](DEV-643.md) | Тех. долг Backup-домена - один маппинг PUT бэкапа и scope «бэкапы сервера» | UP | done | PASS | candidate | 2026-11-04 |
+| [DEV-647](DEV-647.md) | Страница RuneScape: Dragonwilds на godlike.host | WPGL | done | PASS-with-issues | blocked | 2026-11-12 |
+| [DEV-648](DEV-648.md) | Тарифы RuneScape: Dragonwilds в WHMCS и авто-создание сервера | BIL, UP | done | PASS-with-issues | no | 2026-11-12 |
+| [DEV-651](DEV-651.md) | Онбординг первого запуска (попап Modpacks / Java / Bedrock) | UP | done | PASS-with-issues | blocked | 2026-11-12 |
 | [DEV-656](DEV-656.md) | После оплаты апгрейда окно подтверждения не закрывалось и предлагало оплатить ещё раз | UP | done | PASS | no | 2026-11-10 |
 | [DEV-657](DEV-657.md) | Апгрейд с промокодом не списывал кредит с баланса и уводил клиента на страницу счёта | UP, BIL | done | PASS | no | 2026-11-10 |
 | [DEV-659](DEV-659.md) | Del from the old node может удалить живой сервер | ADM | done |  | no |  |
@@ -132,6 +137,8 @@ updated: 2026-11-12
 - **blocked**: [DEV-600](DEV-600.md) - Очистка UTM из адресной строки с сохранением атрибуции
 - **blocked**: [DEV-630](DEV-630.md) - Windrose в игровой панели (egg, переменные, конфиг, порты, power, файлы, reinstall)
 - **blocked**: [DEV-633](DEV-633.md) - Wings отдаёт 404 вместо 500 на несуществующий файл
+- **blocked**: [DEV-647](DEV-647.md) - Страница RuneScape: Dragonwilds на godlike.host
+- **blocked**: [DEV-651](DEV-651.md) - Онбординг первого запуска (попап Modpacks / Java / Bedrock)
 - **blocked**: [TASK-palworld-settings](TASK-palworld-settings.md) - Palworld Settings: UI-редактор PalWorldSettings.ini
 
 Только упоминаются, карточек нет: DEV-145 (ARK settings), DEV-275, DEV-315 (конструктор модпаков), DEV-321, DEV-441, DEV-523, PROD-126, GROWTH-95.

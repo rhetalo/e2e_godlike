@@ -148,6 +148,7 @@ SMP.
 - 04-Nov-2026: [DEV-547](../tickets/DEV-547.md) read-only - сетка See All Plans, `?ram=`, диалог модпака BMC4 (POST установки заблокирован `page.route`, модпак не ставился). Не менялся.
 - Трогать: 🟡.
 
+- 12-Nov-2026: [DEV-651](../tickets/DEV-651.md) - Force-enable онбординга (включён), через попап Paper 26.3 → Fabulously Optimized (Fabric 26.3). Offline.
 - 11-Nov-2026: переименован в `DEV-587-modpacks` ([DEV-587](../tickets/DEV-587.md)): Reinstall без Delete files, `server_modpacks` 1 → 0; `POST /tasks/run` (`say DEV-587`, offline). Offline.
 ### 0cf8346f
 [DEV-506](../tickets/DEV-506.md), [DEV-529](../tickets/DEV-529.md).
@@ -279,6 +280,17 @@ Cancel Amplitude (события отмены). 🟡
 
 ## Не-MC и free
 
+### d3230606
+Minecraft, `Tq2bizRY_487578` (WHMCS 487578, legacy id 784943), тест-аккаунт, тариф Double. [DEV-651](../tickets/DEV-651.md) 12-Nov-2026.
+- Force-enable онбординга включён. RAM поднят в legacy-админке 2048 → 4096 MB.
+- Сейчас Bedrock 1.21.124, online, configured.
+- Трогать: 🟢.
+
+### 424c14b8
+Minecraft, тест-аккаунт, тариф Double. [DEV-651](../tickets/DEV-651.md) 12-Nov-2026.
+- RAM 2048 → 4096 MB, онбординг Force. Сейчас Fabric 26.3 (Fabulously Optimized), offline.
+- Трогать: 🟢.
+
 ### 6b9ec05d
 Palworld, `DEV-597-world-import` (было `6Bd6yYqS_484791`), id 782213, нода wing1004, аккаунт QA 307989. Под [DEV-597](../tickets/DEV-597.md) (импорт мира), 30-Oct..04-Nov-2026.
 - Мир `SaveGames/0/7092F224...`; наборы для импорта в `test-docs/ultra.panel/DEV-597/worlds/` (D1 эталон, D9 битый, D11/D12 маркеры).
@@ -395,3 +407,7 @@ Bedrock `bedrock_571` (stage.wing01), сервер владельца. 🟡
 Windrose, Deckhand, клиент 494912 (hosting 487268, заказ #2718396591, €25.99 кредитом 10-Nov-2026), нода 412. Имя `DEV-630-windrose`. 🟡
 - 10-Nov-2026: куплен под [DEV-630](../tickets/DEV-630.md). Переменные менялись: Server Name `QA "quoted" \ name`, инвайт `DEV630custom`, Max Players 6, Region пустой. После проверки битого JSON текущий мир новый (617D…), старый 51484BED… на диске.
 - 12-Nov-2026: ретест DEV-630. Online. Владелец решил оставить (не удалять); свободен под задачи по Windrose.
+
+### f2670499
+RuneScape: Dragonwilds, Budget Adventurer (апгрейд с Wanderer 12-Nov), клиент 494912 (hosting 487601, заказ #9167374805, €13.99 + апгрейд €5.60 кредитом 12-Nov-2026). Имя `hUc5N2uE_487601` (не переименован). 🟡
+- 12-Nov-2026: куплен под ретест [DEV-648](../tickets/DEV-648.md). Владелец решил оставить; свободен под задачи по Dragonwilds.
