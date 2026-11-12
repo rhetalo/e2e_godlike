@@ -4,7 +4,7 @@ title: Upgrade / Boost - смена тарифа из панели
 type: feature
 product: UP
 status: draft
-updated: 2026-11-11
+updated: 2026-11-12
 verified_on: 2026-11-11
 tickets: [TASK-tariff-list-400, DEV-534, DEV-579, DEV-593, DEV-594, DEV-528, DEV-547, DEV-660, DEV-657, DEV-656, DEV-662]
 flags: []
@@ -68,8 +68,9 @@ sources:
   в биллинге `is_reverted = 1`, деньги - **кредитом** «Contr offer» (не на карту).
 - `upgrade_intents` откат **не трогает**: попытка остаётся `paid`. Отсюда: в отчётах по попыткам откаченный апгрейд выглядит оплаченным, а пара «откат + повторная покупка»
   похожа на двойную оплату (460775, 481954 в разборе DEV-662). Сверять с `godlike_product_upgrades.is_reverted`.
-- ⚠️ Из-за этого после Discard **тот же план нельзя купить до 6 ч** (гейт DEV-662 видит откаченную оплату): 409 «This server is already on the selected plan.»,
-  хотя сервер на прежнем плане. Другие опции/план проходят. Подтверждено 11-Nov (F1 DEV-662), в MR - известное ограничение.
+- С 12-Nov ([panel!1820](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1820), F1 DEV-662) Discard переводит оплаченную попытку откаченного счёта в `reverted`,
+  поэтому **тот же план можно купить сразу после отката** ✅ (ретест 12-Nov). До фикса - 409 «already on the selected plan» до 6 ч.
+- Первые 30 мин кнопки нет: `GET /api/v2/plan/{uuid}/discard` → `data: null`, POST в это время - 200 без эффекта ✅.
 
 ## Защита от повторной покупки (с 10-Nov, [DEV-662](../../tickets/DEV-662.md))
 
@@ -140,3 +141,4 @@ sources:
 | 10-Nov-2026 | [DEV-657](../../tickets/DEV-657.md) | Ручной путь оплаты (промо, доплата CPU) гасится кредитом автоматически, intent `paid`, без редиректа (panel!1779). PASS |
 | 10-Nov-2026 | [DEV-656](../../tickets/DEV-656.md) | Окно подтверждения закрывается после оплаты в конфигураторе и See All Plans, без «Quadra → Quadra»; 429, редирект, сбой сети и Free-сервер (new-panel!610). PASS, шаг Boost вне линейки не проверен |
 | 11-Nov-2026 | [DEV-662](../../tickets/DEV-662.md) | Гейт от повторной покупки того же плана 6 ч, чистка вечных `pending` (panel!1778). PASS с замечанием F1: после Discard тот же план заблокирован до 6 ч. Discard описан |
+| 12-Nov-2026 | [DEV-662](../../tickets/DEV-662.md) | Фикс F1 (panel!1820): Discard ставит попытке `reverted`, повторная покупка того же плана сразу после отката проходит. Ретест PASS |

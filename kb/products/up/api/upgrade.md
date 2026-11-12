@@ -4,7 +4,7 @@ title: API - апгрейд тарифа (вариант A/B, события с�
 type: api
 product: UP
 status: verified
-updated: 2026-11-11
+updated: 2026-11-12
 verified_on: 2026-11-03
 tickets: [DEV-528, DEV-660, DEV-662]
 features: [UP/upgrade]
@@ -30,6 +30,7 @@ sources:
 | POST | `/servers/{uuid}/upgrade-page/events` | событие страницы апгрейда (fire-and-forget) | ✅ |
 | POST | `/upgrades` | котировка: создаёт intent, возвращает `uuid`, цену, срок | ✅ |
 | POST | `/upgrades/{uuid}/pay` | оплата intent | ✅ |
+| GET / POST | `/plan/{uuid}/discard` | откатываемый счёт (`data` или `null`) / откат последнего апгрейда (Discard changes) | ✅ 12-Nov |
 | GET | `/tariffs-new/{service_id}/list`, `/billing/{service_id}/current` | тарифы и текущий план | ✅ (см. [UP/upgrade](../upgrade.md)) |
 
 ### GET /experiments/upgrade-next-plan
@@ -83,6 +84,12 @@ sources:
 - С 10-Nov-2026 ([DEV-662](../../../tickets/DEV-662.md)): `pay` на тот же план (`isNoop`) → 409 `nothing_to_upgrade` «This upgrade is not available for this service», попытка `failed / nothing_to_upgrade`, счёта нет ✅;
   повтор недавно оплаченной покупки (WHMCS ещё на старом плане) → 409, попытка `failed / duplicate_of:<uuid>`. Просроченные `pending` раз в час → `expired / pending_ttl`.
 - События `upgrade_cta_clicked` / `upgrade_confirm_clicked`: `final_cpu` в старом формате «1 vCores / 3.7 GHz» при любом языке UI ✅ ([DEV-660](../../../tickets/DEV-660.md)).
+
+### GET / POST /plan/{uuid}/discard (Discard changes)
+- GET: `{"success":true,"data":null}`, пока откатывать нечего (первые 30 мин после апгрейда или нет ручного апгрейда) ✅. POST: всегда 200 `{"success":true}`, в это время без эффекта ✅.
+- С 12-Nov-2026 ([panel!1820](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1820), F1 [DEV-662](../../../tickets/DEV-662.md)): POST после реального отката переводит оплаченную попытку этого счёта в `reverted` →
+  гейт её не видит, тот же план покупается сразу (prod 12-Nov: 6055 → `reverted`, повтор 6056 `paid`) ✅. Откаты до деплоя остались `paid`.
+- Подробно о Discard: [UP/upgrade](../upgrade.md).
 
 ## Биллинг и событие `upgrade`
 - `godlike_upgrade_flow_context` (billing DB): `invoice_id`, `flow_name`, `open_id`, `ab_variant`, `preselect_applied` ✅.
