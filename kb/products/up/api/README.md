@@ -47,6 +47,7 @@ sources:
 | [upgrade-quiz](upgrade-quiz.md) | токен квиза апгрейда и JSON API биллинга `upsell_quiz` (коды отказов, CORS, журнал) | `GET .../upgrade-quiz/token`, `m=upsell_quiz&resource=..&action=..` | [DEV-593](../../../tickets/DEV-593.md) |
 | [upgrade](upgrade.md) | апгрейд тарифа: вариант A/B, события страницы, котировка и оплата, разметка в биллинге | `GET /experiments/upgrade-next-plan`, `POST .../upgrade-page/events`, `POST /upgrades`, `POST /upgrades/{uuid}/pay` | [DEV-528](../../../tickets/DEV-528.md) |
 | [palworld-world-import](palworld-world-import.md) | импорт мира Palworld: состояние миров, загрузка, запуск, итог, гейт питания под локом | `GET`/`POST .../palworld/world-import`, `POST .../world-import/upload`, `POST .../power` (409) | [DEV-597](../../../tickets/DEV-597.md) |
+| [cors](cors.md) | CORS панели: кэш preflight `Access-Control-Max-Age`, разрешённые origin | `OPTIONS /api/v2/*`, `OPTIONS /api/client/*` | [DEV-673](../../../tickets/DEV-673.md) |
 | [minecraft-version](minecraft-version.md) | ядро сервера и `extension_capabilities` | `GET .../minecraft/version` | [DEV-515](../../../tickets/DEV-515.md), [DEV-549](../../../tickets/DEV-549.md) |
 
 Уже описанные в других местах куски API (пока не вынесены сюда):

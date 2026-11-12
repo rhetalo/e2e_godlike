@@ -60,7 +60,7 @@ updated: 2026-11-12
 | [DEV-582](DEV-582.md) | Зависшие PENDING бэкапы новой панели переводить в FAILED по возрасту, убрать reconcile-пробу, бэкфил status | UP | done | PASS | no | 2026-10-27 |
 | [DEV-583](DEV-583.md) | Трансфер в админке - локация сервера первой, ноды по реальной нагрузке | ADM | done | PASS | no | 2026-10-27 |
 | [DEV-586](DEV-586.md) | При отказе по лимиту частоты два тоста ошибки и не видно, когда повторить | UP | done | PASS | covered | 2026-10-27 |
-| [DEV-587](DEV-587.md) | Reinstall и Restore падали из-за заброшенного сервиса писем | UP | done | PASS | no | 2026-11-11 |
+| [DEV-587](DEV-587.md) | Reinstall и Restore падали из-за заброшенного сервиса писем | UP | done | PASS | no | 2026-11-12 |
 | [DEV-593](DEV-593.md) | Безопасность API квиза апгрейда - токен владельца вместо открытого JSON API | UP, BIL, OLDP | done | PASS | covered | 2026-10-30 |
 | [DEV-594](DEV-594.md) | Округление RAM модпака до плана - ?ram= на странице апгрейда сводится к ступени сетки | UP | done | PASS | covered | 2026-11-02 |
 | [DEV-595](DEV-595.md) | Правило «длинный цикл → Premium» - один список циклов для заказа и апгрейда | BIL | in-qa | PASS | no | 2026-10-26 |
@@ -89,7 +89,7 @@ updated: 2026-11-12
 | [DEV-662](DEV-662.md) | После оплаты апгрейда тут же создавалась вторая попытка на тот же план, иногда она тоже оплачивалась | UP | partial | PASS | no | 2026-11-11 |
 | [DEV-667](DEV-667.md) | Роль участника сервера - единственный источник прав (v1, v2 бэкапы, Wings, инвайты, split) | UP | done | PASS | candidate | 2026-11-09 |
 | [DEV-672](DEV-672.md) | Базы данных сервера не переносятся при Transfer и Rollback | ADM | partial | PASS | no | 2026-11-11 |
-| [DEV-673](DEV-673.md) | Кэш CORS preflight в панели (Access-Control-Max-Age) | UP | in-qa | PASS | candidate | 2026-11-11 |
+| [DEV-673](DEV-673.md) | Кэш CORS preflight в панели (Access-Control-Max-Age) | UP | done | PASS | covered | 2026-11-11 |
 | [DEV-678](DEV-678.md) | Детект ручной загрузки модов через SFTP на Minecraft-серверах (отчёт в админке) | ADM, UP | done | PASS | no | 2026-11-10 |
 | [DEV-696](DEV-696.md) | Скачивание и удаление бэкапа через новую панель (v2) пишутся в журнал активности | UP | done | PASS | covered | 2026-11-10 |
 | [DEV-702](DEV-702.md) | Unit-тест LinkUserToServerActionTest падает с TypeError: сервер в тесте создаётся без id | UP | done | PASS | no | 2026-11-11 |
@@ -126,7 +126,6 @@ updated: 2026-11-12
 - **candidate**: [DEV-637](DEV-637.md) - Бэкап базы данных - понятные ошибки restore, пустой дамп и чистка битых бэкапов
 - **candidate**: [DEV-643](DEV-643.md) - Тех. долг Backup-домена - один маппинг PUT бэкапа и scope «бэкапы сервера»
 - **candidate**: [DEV-667](DEV-667.md) - Роль участника сервера - единственный источник прав (v1, v2 бэкапы, Wings, инвайты, split)
-- **candidate**: [DEV-673](DEV-673.md) - Кэш CORS preflight в панели (Access-Control-Max-Age)
 - **blocked**: [DEV-528](DEV-528.md) - A/B - после Boost конфигуратор апгрейда предлагает следующий план, события страницы апгрейда и разметка оплат
 - **blocked**: [DEV-546](DEV-546.md) - Блок «Boost your server» на чекауте v2 (только UI и QA-превью под флагом)
 - **blocked**: [DEV-549](DEV-549.md) - Фікси після DEV-515 - сценарії туторіалу на заглушках, блокування кнопки кастомних модпаків та API
