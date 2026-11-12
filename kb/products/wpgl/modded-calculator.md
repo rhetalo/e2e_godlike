@@ -57,7 +57,7 @@ sources:
 
 > ⚠️ **12-Nov-2026: Install в сетке модпаков** больше не `button[data-product-id][data-modpack-id]` (сразу в корзину), а ссылка
 > `a.modpacks-body__install` → `/modpacks/<slug>/#configure` (aria-label «Get server with <пак>»). На странице пака блок `.mpp2-calc`
-> с конфигуратором [WPGL/hosting-funnel](hosting-funnel.md) (без A/B). ❓ На 4 проверенных паках конфигуратор предвыбирает ATM10, а не пак страницы.
+> с конфигуратором [WPGL/hosting-funnel](hosting-funnel.md) (без A/B). Баг [DEV-716](https://antihost.atlassian.net/browse/DEV-716): на всех 12 страницах паков конфигуратор предвыбирает ATM10, а не пак страницы. `funnel.modded` красный до решения.
 
 ## История
 
@@ -65,4 +65,4 @@ sources:
 |---|---|---|
 | 05-Aug-2026 | - | Калькулятор мигрировал на Inc 6-виджет (Shadow DOM, нативный слайдер) |
 | 08-Oct-2026 | [DEV-532](../../tickets/DEV-532.md) | Скрытие дублей модпаков через `is_listed` |
-| 12-Nov-2026 | - | Install в сетке стал ссылкой на `/modpacks/<slug>/#configure` (там `#hosting-funnel`), data-product-id/modpack-id убраны; на странице любого пака конфигуратор предвыбирает ATM10 ❓ |
+| 12-Nov-2026 | - | Install в сетке стал ссылкой на `/modpacks/<slug>/#configure` (там `#hosting-funnel`), data-product-id/modpack-id убраны; на странице любого пака конфигуратор предвыбирает ATM10 - DEV-716 |
