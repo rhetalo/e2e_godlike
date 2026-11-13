@@ -3,7 +3,7 @@ id: KB-COVERAGE
 title: Матрица покрытия - фичи KB и автотесты
 type: index
 status: draft
-updated: 2026-11-12
+updated: 2026-11-13
 verified_on: null              # генерируется из KB и tests/, с продуктом не сверяется
 sources:
   - kb/products/**/*.md (шапка tests:, раздел «Покрытие»)
@@ -21,11 +21,11 @@ sources:
 
 ## UP - игровая панель
 
-Страниц: 30, с автотестами: 23, тестов в их спеках: 107.
+Страниц: 30, с автотестами: 23, тестов в их спеках: 109.
 
 | Фича | Статус | Спеки | Тестов | Покрытие ✅ / руками / ❌ |
 |---|---|---|---|---|
-| [UP - игровая панель ultra.panel + API v2](products/up/README.md) | draft | все спеки продукта (40) | 107 | 0 / 0 / 0 |
+| [UP - игровая панель ultra.panel + API v2](products/up/README.md) | draft | все спеки продукта (41) | 109 | 0 / 0 / 0 |
 | [Backups - бэкапы сервера, базы и папки](products/up/backups.md) | draft | `backups.server-scope.api.spec.ts`, `backups.slots-full.spec.ts`, `backups.spec.ts`, `backups.throttle.spec.ts`, `role.enforcement.spec.ts`, `security.spec.ts` | 16 | 11 / 3 / 1 |
 | [Client-only моды - скрытие в каталоге и отключение на сервере](products/up/client-only-mods.md) | draft | `client-only-mods.spec.ts` | 2 | 0 / 0 / 0 |
 | [Config - server.properties и блок Docker/Java](products/up/config.md) | draft | `config.spec.ts`, `security.spec.ts` | 6 | 3 / 1 / 2 |
@@ -75,11 +75,11 @@ sources:
 
 ## WPGL - витрина
 
-Страниц: 19, с автотестами: 15, тестов в их спеках: 113.
+Страниц: 19, с автотестами: 15, тестов в их спеках: 114.
 
 | Фича | Статус | Спеки | Тестов | Покрытие ✅ / руками / ❌ |
 |---|---|---|---|---|
-| [WPGL - витрина godlike.host (WordPress)](products/wpgl/README.md) | draft | все спеки продукта (29) | 113 | 0 / 0 / 0 |
+| [WPGL - витрина godlike.host (WordPress)](products/wpgl/README.md) | draft | все спеки продукта (29) | 114 | 0 / 0 / 0 |
 | [Кастомайзер тарифа на страницах игр (Customize server)](products/wpgl/game-customizer.md) | draft | `game-slider.spec.ts` | 19 | 5 / 0 / 1 |
 | [Воронка игрового сервера - корзина, вход, Configure, чекаут WHMCS](products/wpgl/game-funnel.md) | draft | `funnel.cart.paypal.spec.ts`, `funnel.spec.ts`, `funnel.with.credit.check.spec.ts`, `login.validation.spec.ts`, `registration-flow.spec.ts` | 10 | 8 / 1 / 1 |
 | [Каталог игр - сетка с фильтрами и список лендингов](products/wpgl/games-catalog.md) | draft | `games.catalog.spec.ts` | 6 | 6 / 0 / 1 |
@@ -92,7 +92,7 @@ sources:
 | [Воронка modded - cart-modded-new и страницы модпаков](products/wpgl/modded-funnel.md) | draft | `cart.modded-new.spec.ts`, `funnel.modded.spec.ts` | 6 | 4 / 1 / 1 |
 | [Конструктор модпаков и 3-часовой trial](products/wpgl/modpack-constructor.md) | draft | `funnel.modpack-constructor.spec.ts`, `modpack.constructor.spec.ts` | 5 | 5 / 0 / 1 |
 | [Промо витрины - MONTHLY75, дефолтные коды, MODPACK50, flash-sale, Free Server Gift](products/wpgl/promo.md) | draft | `funnel.mobile.spec.ts`, `games.invalid.promo.spec.ts`, `games.valid.promo.spec.ts` | 6 | 3 / 1 / 2 |
-| [Сиды Minecraft - Seed finder, калькулятор сида, cart-seed](products/wpgl/seeds.md) | draft | `funnel.seed.spec.ts`, `smoke.pages.spec.ts`, `seed-list.finder.spec.ts`, `slider.seed.spec.ts` | 19 | 6 / 0 / 1 |
+| [Сиды Minecraft - Seed finder, калькулятор сида, cart-seed](products/wpgl/seeds.md) | draft | `funnel.seed.spec.ts`, `smoke.pages.spec.ts`, `seed-list.finder.spec.ts`, `slider.seed.spec.ts` | 20 | 7 / 0 / 1 |
 | [Тарифы для AI-ботов - серверные карточки и JSON-LD ProductGroup](products/wpgl/tariffs-for-bots.md) | verified | `tariffs.for-bots.spec.ts` | 2 | 0 / 0 / 0 |
 | [Custom Modpack Setup - «соберём модпак за тебя»](products/wpgl/custom-modpack-setup.md) | draft | - | - | 1 / 2 / 2 |
 | [Лендинги без автотестов - Launcher, SMP One-Click, KB сайта, каталог серверов игроков](products/wpgl/landings.md) | draft | - | - | 1 / 3 / 4 |

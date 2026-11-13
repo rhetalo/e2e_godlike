@@ -2,7 +2,7 @@
 id: KB-TICKETS
 title: Тикеты и задачи
 type: index
-updated: 2026-11-12
+updated: 2026-11-13
 ---
 
 # Тикеты и задачи
@@ -88,6 +88,7 @@ updated: 2026-11-12
 | [DEV-661](DEV-661.md) | После Rollback сервер не запускается, ошибки шагов отката не обрабатываются | ADM | done |  | no |  |
 | [DEV-662](DEV-662.md) | После оплаты апгрейда тут же создавалась вторая попытка на тот же план, иногда она тоже оплачивалась | UP | done | PASS | no | 2026-11-12 |
 | [DEV-667](DEV-667.md) | Роль участника сервера - единственный источник прав (v1, v2 бэкапы, Wings, инвайты, split) | UP | done | PASS | candidate | 2026-11-09 |
+| [DEV-670](DEV-670.md) | /minecraft-seeds/ отдавал HTML 8 с - кэш данных Seed finder и каталог отдельным JSON | WPGL | done | PASS | covered | 2026-11-13 |
 | [DEV-672](DEV-672.md) | Базы данных сервера не переносятся при Transfer и Rollback | ADM | partial | PASS | no | 2026-11-11 |
 | [DEV-673](DEV-673.md) | Кэш CORS preflight в панели (Access-Control-Max-Age) | UP | done | PASS | covered | 2026-11-11 |
 | [DEV-678](DEV-678.md) | Детект ручной загрузки модов через SFTP на Minecraft-серверах (отчёт в админке) | ADM, UP | done | PASS | no | 2026-11-10 |
