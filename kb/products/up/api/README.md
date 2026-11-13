@@ -4,7 +4,7 @@ title: UP API v2 - как устроена API-документация
 type: api-index
 product: UP
 status: draft
-updated: 2026-10-16
+updated: 2026-11-13
 verified_on: 2026-10-16
 sources:
   - memory: dev452-modpack-backup-fail-reasons, dev484-backup-throttle
@@ -49,6 +49,7 @@ sources:
 | [palworld-world-import](palworld-world-import.md) | импорт мира Palworld: состояние миров, загрузка, запуск, итог, гейт питания под локом | `GET`/`POST .../palworld/world-import`, `POST .../world-import/upload`, `POST .../power` (409) | [DEV-597](../../../tickets/DEV-597.md) |
 | [cors](cors.md) | CORS панели: кэш preflight `Access-Control-Max-Age`, разрешённые origin | `OPTIONS /api/v2/*`, `OPTIONS /api/client/*` | [DEV-673](../../../tickets/DEV-673.md) |
 | [minecraft-version](minecraft-version.md) | ядро сервера и `extension_capabilities` | `GET .../minecraft/version` | [DEV-515](../../../tickets/DEV-515.md), [DEV-549](../../../tickets/DEV-549.md) |
+| [subdomains](subdomains.md) | субдомены: список доменов для сервера, таблица `domains`, удаление при смене egg | `GET .../subdomains` | [DEV-699](../../../tickets/DEV-699.md) |
 
 Уже описанные в других местах куски API (пока не вынесены сюда):
 `GET /features` - [флаги](../../../registry/flags.md);

@@ -128,6 +128,7 @@ Java-сервер (id 771938).
 - Трогать: 🟡.
 - 06-Nov-2026: переименован в `DEV-661-rollback` ([DEV-661](../tickets/DEV-661.md)): wing1004 → wing1003 → wing1000, Rollback на wing1003; не стартует («being transferred»), копия на wing1004. Ждёт раскатки Wings !14 / рестарта.
 - 11-Nov-2026: переименован в `DEV-587-reinstall` ([DEV-587](../tickets/DEV-587.md)): Reinstall без Delete files (200), Restore из instance-бэкапа DEV-484 от 20-Oct (204). Свободен.
+- 13-Nov-2026 [DEV-707](../tickets/DEV-707.md): апгрейд со страницы Quadra 357 → **Ultra 356** Monthly ($4.97, Discard не берёт) - остался на 356. Оффер троттлинга сожжён до 16-Nov.
 ### 8c2a6bd7
 Моды: [DEV-405](../tickets/DEV-405.md), [DEV-500](../tickets/DEV-500.md), [DEV-532](../tickets/DEV-532.md).
 - Сейчас на нём BMC4 (425 папок, 5003 файла).

@@ -4,9 +4,9 @@ title: Port & Domains - поддомен и порты сервера
 type: feature
 product: UP
 status: draft
-updated: 2026-10-23
-verified_on: 2026-06-19        # connection-info recon; раздел - 05..06-Jun
-tickets: [DEV-562, DEV-564]
+updated: 2026-11-13
+verified_on: 2026-11-13        # DEV-699 видимость блока Subdomain по играм
+tickets: [DEV-562, DEV-564, DEV-699]
 flags: []
 tests: [tests/game/panel/network.spec.ts, tests/game/panel/network.connection-info.spec.ts]
 sources:
@@ -30,6 +30,7 @@ sources:
 
 ## Как работает (под капотом)
 
+- **Блок Subdomain** показывается только Minecraft (`nest_id = 1`) и Hytale (`egg_id = 2068`), остальным скрыт, порты на всю ширину ([DEV-699](../../tickets/DEV-699.md)). Список доменов - `GET .../subdomains` по `egg_id` из таблицы `domains` ([API](api/subdomains.md)): egg забыт в `domains` → блок есть, список пуст.
 - Порты - это аллокации Pterodactyl. Именованные аллокации: `/api/v2/servers/{fullUuid}/allocations` (`SERVER_PORT`,
   `ALLOCATED_UDP_PORT`, `QUERY_PORT`, `RCON_PORT`), у каждой `ip` + `ip_alias`. Только полный uuid. KB §9f.
 - Адрес на Overview: `allocation.ip` + порт; Steam query-порт - из аллокации с именем `QUERY_PORT`; Steam Port PZ - из переменной
@@ -39,7 +40,8 @@ sources:
 
 1. **Имя аллокации не стандартизовано** между яйцами (Unturned = `ALLOCATED_GAME_PORT_2`), поэтому `query_port` бывает пустым.
 2. Провижинг-баг «порты не прописались» (7DTD) - другой слой, не путать с отображением. KB §9f.
-3. Как работает Update Subdomain (DNS, задержка) - ❓ не разведано.
+3. Как работает Update Subdomain (DNS, задержка) - ❓ не разведано. Тип записи - SRV `_minecraft` или CNAME при протоколе `none` ([API](api/subdomains.md)).
+4. Смена egg на тот, которого нет в домене, удаляет субдомен (по коду, ❓ вживую).
 
 ## Гочи для тестирования
 
@@ -53,6 +55,7 @@ sources:
 | Блок Subdomain, карточки портов, окно Add Port, кнопки Copy | `network.spec.ts` (NET-001..004) | ✅ структурно |
 | Адрес = реальный IP аллокации | `network.connection-info.spec.ts` (NET-010) | ✅ |
 | Смена поддомена, добавление порта | не покрыто (мутация) | ❌ |
+| Не-Minecraft игра: блока Subdomain нет, одна колонка | только ручной QA [DEV-699](../../tickets/DEV-699.md), регресс-кандидат (нужен не-MC сервер автотестов) | ❌ авто нет |
 | Bedrock: блок UDP-портов, замок, защита от удаления | только ручной QA [DEV-564](../../tickets/DEV-564.md), регресс-кандидат (нужен Bedrock-стенд) | ❌ авто нет |
 
 ## История
@@ -63,3 +66,4 @@ sources:
 | ~25-Jun-2026 | - | Адрес на Overview = `allocation.ip`, а не FQDN ноды |
 | 15-Oct-2026 | [DEV-562](../../tickets/DEV-562.md) | Steam Port PZ проверяет, что порт - allocation этого сервера |
 | 21-Oct-2026 | [DEV-564](../../tickets/DEV-564.md) | Bedrock: блок UDP-портов `NETHERNET_UDP` под слоты, замок, защита от удаления (400). PASS с замечаниями (F1 High) |
+| 13-Nov-2026 | [DEV-699](../../tickets/DEV-699.md) | Блок Subdomain только Minecraft + Hytale; FTB/Quilt добавлены в домены (L2), NeoForge → SRV. PASS |

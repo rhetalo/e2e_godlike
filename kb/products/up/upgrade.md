@@ -4,7 +4,7 @@ title: Upgrade / Boost - смена тарифа из панели
 type: feature
 product: UP
 status: draft
-updated: 2026-11-12
+updated: 2026-11-13
 verified_on: 2026-11-11
 tickets: [TASK-tariff-list-400, DEV-534, DEV-579, DEV-593, DEV-594, DEV-528, DEV-547, DEV-660, DEV-657, DEV-656, DEV-662]
 flags: []
@@ -71,6 +71,8 @@ sources:
 - С 12-Nov ([panel!1820](https://git.godlike.ovh/panel/panel-godlike-host/-/merge_requests/1820), F1 DEV-662) Discard переводит оплаченную попытку откаченного счёта в `reverted`,
   поэтому **тот же план можно купить сразу после отката** ✅ (ретест 12-Nov). До фикса - 409 «already on the selected plan» до 6 ч.
 - Первые 30 мин кнопки нет: `GET /api/v2/plan/{uuid}/discard` → `data: null`, POST в это время - 200 без эффекта ✅.
+
+- 13-Nov-2026 ([DEV-707](../../tickets/DEV-707.md)): Discard работает и для оплаты из окна троттлинга, и для смены цикла со страницы апгрейда; две строки подряд откатываются двумя Discard (сначала последняя). Апгрейд плана со страницы **в том же цикле** строки в `godlike_product_upgrades` не создал (нативный путь) - Discard его не берёт (`data: null`), ca326e28. ❓ правило выбора пути.
 
 ## Защита от повторной покупки (с 10-Nov, [DEV-662](../../tickets/DEV-662.md))
 
@@ -142,3 +144,4 @@ sources:
 | 10-Nov-2026 | [DEV-656](../../tickets/DEV-656.md) | Окно подтверждения закрывается после оплаты в конфигураторе и See All Plans, без «Quadra → Quadra»; 429, редирект, сбой сети и Free-сервер (new-panel!610). PASS, шаг Boost вне линейки не проверен |
 | 11-Nov-2026 | [DEV-662](../../tickets/DEV-662.md) | Гейт от повторной покупки того же плана 6 ч, чистка вечных `pending` (panel!1778). PASS с замечанием F1: после Discard тот же план заблокирован до 6 ч. Discard описан |
 | 12-Nov-2026 | [DEV-662](../../tickets/DEV-662.md) | Фикс F1 (panel!1820): Discard ставит попытке `reverted`, повторная покупка того же плана сразу после отката проходит. Ретест PASS |
+| 13-Nov-2026 | [DEV-707](../../tickets/DEV-707.md) | Гейт повторной покупки узнаёт оплату из троттлинга в немесячном цикле (409); Discard и троттлинг-строки |

@@ -93,7 +93,9 @@ updated: 2026-11-13
 | [DEV-673](DEV-673.md) | Кэш CORS preflight в панели (Access-Control-Max-Age) | UP | done | PASS | covered | 2026-11-11 |
 | [DEV-678](DEV-678.md) | Детект ручной загрузки модов через SFTP на Minecraft-серверах (отчёт в админке) | ADM, UP | done | PASS | no | 2026-11-10 |
 | [DEV-696](DEV-696.md) | Скачивание и удаление бэкапа через новую панель (v2) пишутся в журнал активности | UP | done | PASS | covered | 2026-11-10 |
+| [DEV-699](DEV-699.md) | Скрыть субдомены для игр, которые их не поддерживают | UP | done | PASS-with-issues | candidate | 2026-11-13 |
 | [DEV-702](DEV-702.md) | Unit-тест LinkUserToServerActionTest падает с TypeError: сервер в тесте создаётся без id | UP | done | PASS | no | 2026-11-11 |
+| [DEV-707](DEV-707.md) | Троттлинг-апгрейд считает немесячную услугу как Monthly (цикл WHMCS не нормализуется) | UP | done | PASS | no | 2026-11-13 |
 | [TASK-missing-mod-deps](TASK-missing-mod-deps.md) | Окно Missing mod dependencies (автодозагрузка зависимостей) | UP | done | PASS-with-issues | - | 2026-09-29 |
 | [TASK-palworld-settings](TASK-palworld-settings.md) | Palworld Settings: UI-редактор PalWorldSettings.ini | UP | partial | PASS-with-issues | blocked | 2026-08-20 |
 | [TASK-split-server](TASK-split-server.md) | Split Server: управление ресурсами split-серверов в новой панели | UP | done | PASS | - | 2026-09-10 |
@@ -127,6 +129,7 @@ updated: 2026-11-13
 - **candidate**: [DEV-637](DEV-637.md) - Бэкап базы данных - понятные ошибки restore, пустой дамп и чистка битых бэкапов
 - **candidate**: [DEV-643](DEV-643.md) - Тех. долг Backup-домена - один маппинг PUT бэкапа и scope «бэкапы сервера»
 - **candidate**: [DEV-667](DEV-667.md) - Роль участника сервера - единственный источник прав (v1, v2 бэкапы, Wings, инвайты, split)
+- **candidate**: [DEV-699](DEV-699.md) - Скрыть субдомены для игр, которые их не поддерживают
 - **blocked**: [DEV-528](DEV-528.md) - A/B - после Boost конфигуратор апгрейда предлагает следующий план, события страницы апгрейда и разметка оплат
 - **blocked**: [DEV-546](DEV-546.md) - Блок «Boost your server» на чекауте v2 (только UI и QA-превью под флагом)
 - **blocked**: [DEV-549](DEV-549.md) - Фікси після DEV-515 - сценарії туторіалу на заглушках, блокування кнопки кастомних модпаків та API
