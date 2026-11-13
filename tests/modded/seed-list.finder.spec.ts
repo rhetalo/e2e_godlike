@@ -11,6 +11,7 @@
  *   - карточки: название → /minecraft-seeds/<slug>/, значение сида, «Open seed» = та же ссылка;
  *   - счётчик по mc-версии = число сидов этой версии в JSON-каталоге (оракул; с DEV-670
  *     каталог не в HTML, а в GET /wp-json/godlike/v1/seed-finder?v=…);
+ *   - контракт DEV-670: в HTML только initial + catalogUrl, каталог 200 + public max-age;
  *   - модпак-версия ATM10 даёт непустую выдачу;
  *   - редакция Java/Bedrock: подпись фильтра, выдача ⊆ «All», empty-state ⇔ 0;
  *   - тег фильтра: выдача сужается, у каждой карточки есть этот тег, «Clear» сбрасывает;
@@ -74,6 +75,36 @@ test.describe("Seed finder (/minecraft-seeds/)", () => {
       await expect(finder.cards().first()).toBeVisible();
     });
   });
+
+  test(
+    "в HTML только первый экран, каталог отдаётся отдельным кэшируемым JSON",
+    { tag: "@critical", annotation: { type: "issue", description: "DEV-670" } },
+    async () => {
+      const finder = seedList.finder;
+      const cfg = await finder.readInlineConfig();
+
+      await test.step("инлайн-конфиг: нет полного seeds[], есть initial и catalogUrl", async () => {
+        expect(cfg, "нет window.GodlikeNewSeedCalculator").not.toBeNull();
+        expect.soft(cfg!.hasFullSeeds, "полный каталог снова вшит в HTML (регресс DEV-670)").toBe(false);
+        expect.soft(cfg!.catalogUrl).toMatch(/\/wp-json\/godlike\/v1\/seed-finder\?v=\w+/);
+        expect.soft(cfg!.initialSeeds).toBeGreaterThan(0);
+        expect.soft(cfg!.initialVersion).toMatch(/^mc:/);
+      });
+
+      await test.step("каталог: 200, public max-age > 0, сидов не меньше, чем в initial", async () => {
+        const meta = await finder.fetchCatalogMeta();
+        expect(meta.status).toBe(200);
+        expect.soft(meta.cacheControl).toMatch(/public/);
+        expect.soft(Number(meta.cacheControl.match(/max-age=(\d+)/)?.[1] ?? 0)).toBeGreaterThan(0);
+        expect.soft(meta.count).toBeGreaterThanOrEqual(cfg!.initialTotal);
+      });
+
+      await test.step("initial.total = сиды версии по умолчанию в каталоге", async () => {
+        const expected = await finder.catalogCountForMcVersion(cfg!.initialVersion.slice("mc:".length));
+        expect(cfg!.initialTotal).toBe(expected);
+      });
+    },
+  );
 
   test("@regression редакция Java/Bedrock сужает выдачу, empty-state ⇔ 0", async () => {
     const finder = seedList.finder;

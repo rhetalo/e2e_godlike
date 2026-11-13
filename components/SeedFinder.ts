@@ -181,6 +181,51 @@ export class SeedFinder {
   }
 
   /**
+   * DEV-670: что лежит в инлайн-конфиге страницы. С 13-Nov-2026 полного seeds[] там нет,
+   * только первый экран (initial) и ссылка на JSON-каталог. null = конфига на странице нет.
+   */
+  async readInlineConfig(): Promise<{
+    hasFullSeeds: boolean;
+    catalogUrl: string;
+    initialVersion: string;
+    initialTotal: number;
+    initialSeeds: number;
+  } | null> {
+    return this.page.evaluate(() => {
+      const cfg = (window as unknown as {
+        GodlikeNewSeedCalculator?: {
+          seeds?: unknown[];
+          catalogUrl?: string;
+          initial?: { version?: string; total?: number; seeds?: unknown[] };
+        };
+      }).GodlikeNewSeedCalculator;
+      if (!cfg) return null;
+      return {
+        hasFullSeeds: Array.isArray(cfg.seeds),
+        catalogUrl: cfg.catalogUrl ?? "",
+        initialVersion: cfg.initial?.version ?? "",
+        initialTotal: Number(cfg.initial?.total ?? -1),
+        initialSeeds: cfg.initial?.seeds?.length ?? 0,
+      };
+    });
+  }
+
+  /** DEV-670: GET catalogUrl из браузера страницы - статус, Cache-Control, число сидов. */
+  async fetchCatalogMeta(): Promise<{ status: number; cacheControl: string; count: number }> {
+    return this.page.evaluate(async () => {
+      const cfg = (window as unknown as { GodlikeNewSeedCalculator?: { catalogUrl?: string } })
+        .GodlikeNewSeedCalculator;
+      const res = await fetch(cfg?.catalogUrl ?? "");
+      const body = res.ok ? ((await res.json()) as { seeds?: unknown[] }) : {};
+      return {
+        status: res.status,
+        cacheControl: res.headers.get("cache-control") ?? "",
+        count: Array.isArray(body.seeds) ? body.seeds.length : -1,
+      };
+    });
+  }
+
+  /**
    * Оракул: сколько сидов каталога подходит под mc-версию (без других фильтров). Сверяем
    * UI-счётчик с данными, а не с захардкоженным числом — контент меняется.
    * DEV-670: каталог берём тем же GET catalogUrl, что и сам finder (тот же ?v= → кэш браузера).
