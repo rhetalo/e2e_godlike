@@ -9,7 +9,8 @@
  *
  * Покрываем:
  *   - карточки: название → /minecraft-seeds/<slug>/, значение сида, «Open seed» = та же ссылка;
- *   - счётчик по mc-версии = число сидов этой версии в инлайн-конфиге страницы (оракул);
+ *   - счётчик по mc-версии = число сидов этой версии в JSON-каталоге (оракул; с DEV-670
+ *     каталог не в HTML, а в GET /wp-json/godlike/v1/seed-finder?v=…);
  *   - модпак-версия ATM10 даёт непустую выдачу;
  *   - редакция Java/Bedrock: подпись фильтра, выдача ⊆ «All», empty-state ⇔ 0;
  *   - тег фильтра: выдача сужается, у каждой карточки есть этот тег, «Clear» сбрасывает;
@@ -58,10 +59,10 @@ test.describe("Seed finder (/minecraft-seeds/)", () => {
 
     // крайние версии списка: самая старая и самая новая
     for (const value of [mcValues[0], mcValues[mcValues.length - 1]]) {
-      await test.step(`${value}: счётчик = сиды этой версии в конфиге`, async () => {
+      await test.step(`${value}: счётчик = сиды этой версии в каталоге`, async () => {
         await finder.selectVersion(value);
-        const expected = await finder.configCountForMcVersion(value.slice("mc:".length));
-        expect(expected, "нет window.GodlikeNewSeedCalculator").toBeGreaterThanOrEqual(0);
+        const expected = await finder.catalogCountForMcVersion(value.slice("mc:".length));
+        expect(expected, "нет catalogUrl или каталог /wp-json/godlike/v1/seed-finder не отдался").toBeGreaterThanOrEqual(0);
         await expect.poll(() => finder.readCount()).toBe(expected);
       });
     }

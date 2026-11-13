@@ -263,6 +263,9 @@ export const SEEDS = {
 // Воронка /cart-seed осталась только на одиночной странице сида (funnel.seed.spec.ts).
 export const SEED_FINDER = {
   root: ".godlike-new-seed-calculator",
+  // DEV-670: каталог грузится отдельным JSON (/wp-json/godlike/v1/seed-finder); корень помечен
+  // data-sc-catalog="loading|ready|error". До "ready" работает только первый экран.
+  catalogReady: '[data-sc-catalog="ready"]',
   gameVersionSelect: "#glike-sc-game-version", // <select>: mc:1.18… + mp:curseforge:… (ATM10)
   editionSegment: ".godlike-new-seed-calculator__segment", // кнопки [data-edition=""|"Java"|"Bedrock"], aria-pressed
   filterTag: ".godlike-new-seed-calculator__filter-tag", // [data-filter-slug], aria-pressed

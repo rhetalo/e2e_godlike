@@ -6,8 +6,11 @@
  * Воронка /cart-seed теперь только на одиночной странице сида (SeedPage).
  *
  * Как устроен:
- *   - инлайн-конфиг window.GodlikeNewSeedCalculator: seeds[] (versions[], platform, filters[]),
- *     versions[] (mc:* / mp:*), filterGroups[];
+ *   - инлайн-конфиг window.GodlikeNewSeedCalculator: versions[] (mc:* / mp:*), filterGroups[],
+ *     initial (первые 3 карточки) и catalogUrl. С DEV-670 (13-Nov-2026) массива seeds[] в HTML
+ *     НЕТ: каталог (seeds[]: versions[], platform, filters[], modpackId/modpackKey) приходит
+ *     отдельным GET catalogUrl (/wp-json/godlike/v1/seed-finder?v=…), корень получает
+ *     data-sc-catalog="ready";
  *   - фильтры: версия (<select>), редакция (All/Java/Bedrock), теги (Biome/Geography/Structure);
  *   - результат: счётчик «Matching seeds N» + карточки (по 3, «Show more» добавляет пачку).
  *
@@ -75,6 +78,8 @@ export class SeedFinder {
     await this.page.mouse.move(400, 400);
     await this.page.mouse.move(650, 480);
     await this.cards().first().waitFor({ state: "visible", timeout: timeoutMs });
+    // DEV-670: без каталога работает только первый экран — фильтры/Show more ждут "ready".
+    await this.page.locator(`${SEL.root}${SEL.catalogReady}`).waitFor({ state: "attached", timeout: timeoutMs });
   }
 
   // ─── фильтры ──────────────────────────────────────────────────────────────
@@ -176,15 +181,24 @@ export class SeedFinder {
   }
 
   /**
-   * Оракул: сколько сидов из инлайн-конфига страницы подходит под mc-версию (без других
-   * фильтров). Сверяем UI-счётчик с данными, а не с захардкоженным числом — контент меняется.
+   * Оракул: сколько сидов каталога подходит под mc-версию (без других фильтров). Сверяем
+   * UI-счётчик с данными, а не с захардкоженным числом — контент меняется.
+   * DEV-670: каталог берём тем же GET catalogUrl, что и сам finder (тот же ?v= → кэш браузера).
+   * Логика как в seed-finder.js: модпак-сиды (modpackKey) в mc-версиях не считаются.
+   * -1 = на странице нет конфига/catalogUrl или каталог не отдался.
    */
-  async configCountForMcVersion(mcVersion: string): Promise<number> {
-    return this.page.evaluate((v) => {
+  async catalogCountForMcVersion(mcVersion: string): Promise<number> {
+    return this.page.evaluate(async (v) => {
       const cfg = (window as unknown as {
-        GodlikeNewSeedCalculator?: { seeds: { versions: string[] }[] };
+        GodlikeNewSeedCalculator?: { catalogUrl?: string };
       }).GodlikeNewSeedCalculator;
-      return cfg ? cfg.seeds.filter((s) => s.versions.includes(v)).length : -1;
+      if (!cfg?.catalogUrl) return -1;
+      const res = await fetch(cfg.catalogUrl);
+      if (!res.ok) return -1;
+      const { seeds } = (await res.json()) as {
+        seeds: { versions?: string[]; modpackKey?: string }[];
+      };
+      return seeds.filter((s) => !s.modpackKey && (s.versions ?? []).includes(v)).length;
     }, mcVersion);
   }
 }
